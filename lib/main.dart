@@ -1,21 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/zup_app.dart';
 
-void main() {
-  runApp(const MainApp());
+Future<void> main() async {
+  await setupInjections();
+  if (kIsWeb) usePathUrlStrategy();
+
+  runApp(const ZupApp());
   SemanticsBinding.instance.ensureSemantics();
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(child: Column()),
-      ),
-    );
-  }
 }
