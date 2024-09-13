@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:zup_app/theme/theme.dart';
-import 'package:zup_app/theme/zup_colors.dart';
+import 'package:zup_ui_kit/zup_colors.dart';
 
 abstract class ZupTextButtonTheme {
   static TextButtonThemeData get lightTheme => TextButtonThemeData(
