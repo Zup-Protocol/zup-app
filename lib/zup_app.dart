@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:routefly/routefly.dart';
+import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/routes.g.dart';
 import 'package:zup_app/theme/theme.dart';
@@ -11,6 +12,9 @@ class ZupApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        Web3KitLocalizations.delegate,
+      ],
       routerConfig: Routefly.routerConfig(
         routes: routes,
         initialPath: ZupNavigatorPaths.initial.routeName,

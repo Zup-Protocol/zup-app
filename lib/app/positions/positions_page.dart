@@ -5,11 +5,9 @@ class PositionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
-        child: Container(
-          child: const Text("My positions Screen"),
-        ),
+        child: Text("dale"),
       ),
     );
   }
