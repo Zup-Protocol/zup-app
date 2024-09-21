@@ -12,9 +12,7 @@ class ZupApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        Web3KitLocalizations.delegate,
-      ],
+      localizationsDelegates: const [Web3KitLocalizations.delegate],
       routerConfig: Routefly.routerConfig(
         routes: routes,
         initialPath: ZupNavigatorPaths.initial.routeName,
