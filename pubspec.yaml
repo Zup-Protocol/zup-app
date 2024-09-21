@@ -5,13 +5,59 @@ environment:
   sdk: ^3.5.2
 
 dependencies:
+  build_runner: ^2.4.12
   flutter:
     sdk: flutter
+  flutter_gen_runner: ^5.7.0
+  flutter_svg: ^2.0.10+1
+  routefly: ^2.0.2
+  flutter_web_plugins:
+    sdk: flutter
+  get_it: ^7.7.0
+  web3kit:
+    path: ../web3kit
+  zup_ui_kit:
+    path: ../zup_ui_kit
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
 
+flutter_gen:
+  output: lib/gen/
+  line_length: 200
+  integrations:
+    flutter_svg: true
+  assets:
+    enabled: true
+  colors:
+    enabled: false
+
 flutter:
   uses-material-design: true
+  generate: true
+  assets:
+    - assets/images/
+    - assets/icons/
+  fonts:
+    - family: "SF Pro Rounded"
+      fonts:
+        - asset: assets/fonts/SF-Pro-Rounded-Heavy.otf
+          weight: 900
+        - asset: assets/fonts/SF-Pro-Rounded-Black.otf
+          weight: 800
+        - asset: assets/fonts/SF-Pro-Rounded-Bold.otf
+          weight: 700
+        - asset: assets/fonts/SF-Pro-Rounded-Semibold.otf
+          weight: 600
+        - asset: assets/fonts/SF-Pro-Rounded-Medium.otf
+          weight: 500
+        - asset: assets/fonts/SF-Pro-Rounded-Regular.otf
+          weight: 400
+        - asset: assets/fonts/SF-Pro-Rounded-Light.otf
+          weight: 300
+        - asset: assets/fonts/SF-Pro-Rounded-Thin.otf
+          weight: 200
+        - asset: assets/fonts/SF-Pro-Rounded-Ultralight.otf
+          weight: 100

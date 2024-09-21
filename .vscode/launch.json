@@ -2,13 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "zup-app",
+            "name": "Zup App (Web)",
             "request": "launch",
             "type": "dart",
             "deviceId": "chrome",
-            "toolArgs": [
-                "--wasm"
-            ],
+            "program": "./lib/main.dart",
+        },
+        {
+            "name": "Zup App (MacOs)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "macos",
+            "program": "./lib/main.dart",
         },
     ]
 }

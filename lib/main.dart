@@ -1,21 +1,20 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/zup_app.dart';
 
-void main() {
-  runApp(const MainApp());
-  SemanticsBinding.instance.ensureSemantics();
-}
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Web3Kit.initialize();
+  await setupInjections();
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  if (kIsWeb) usePathUrlStrategy();
 
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(child: Column()),
-      ),
-    );
-  }
+  runApp(const ZupApp());
+
+  if (kIsWeb) SemanticsBinding.instance.ensureSemantics();
+  await Wallet.shared.connectCachedWallet();
 }
