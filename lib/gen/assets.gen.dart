@@ -15,8 +15,8 @@ import 'package:vector_graphics/vector_graphics.dart' as _vg;
 class $AssetsIconsGen {
   const $AssetsIconsGen();
 
-  /// File path: assets/icons/cable.connector.horizontal.svg
-  SvgGenImage get cableConnectorHorizontal => const SvgGenImage('assets/icons/cable.connector.horizontal.svg');
+  /// File path: assets/icons/all.svg
+  SvgGenImage get all => const SvgGenImage('assets/icons/all.svg');
 
   /// File path: assets/icons/plus.diamond.svg
   SvgGenImage get plusDiamond => const SvgGenImage('assets/icons/plus.diamond.svg');
@@ -28,7 +28,7 @@ class $AssetsIconsGen {
   SvgGenImage get zupLogo => const SvgGenImage('assets/icons/zup_logo.svg');
 
   /// List of all assets
-  List<SvgGenImage> get values => [cableConnectorHorizontal, plusDiamond, waterWaves, zupLogo];
+  List<SvgGenImage> get values => [all, plusDiamond, waterWaves, zupLogo];
 }
 
 class $AssetsImagesGen {
@@ -41,11 +41,28 @@ class $AssetsImagesGen {
   List<AssetGenImage> get values => [zupLogotype];
 }
 
+class $AssetsLogosGen {
+  const $AssetsLogosGen();
+
+  /// File path: assets/logos/arbitrum.svg
+  SvgGenImage get arbitrum => const SvgGenImage('assets/logos/arbitrum.svg');
+
+  /// File path: assets/logos/base.svg
+  SvgGenImage get base => const SvgGenImage('assets/logos/base.svg');
+
+  /// File path: assets/logos/ethereum.svg
+  SvgGenImage get ethereum => const SvgGenImage('assets/logos/ethereum.svg');
+
+  /// List of all assets
+  List<SvgGenImage> get values => [arbitrum, base, ethereum];
+}
+
 class Assets {
   Assets._();
 
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsLogosGen logos = $AssetsLogosGen();
 }
 
 class AssetGenImage {

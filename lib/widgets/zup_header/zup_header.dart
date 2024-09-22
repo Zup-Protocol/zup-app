@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/extensions/route_verifier_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
@@ -61,16 +62,18 @@ class _ZupHeaderState extends State<ZupHeader> {
             selected: navigator.currentRoute.isNewPosition,
             onPressed: () => navigator.navigateToNewPosition()),
         const Spacer(),
+        NetworkSwitcher(
+          networks: List.generate(
+            Networks.values.length,
+            (index) => NetworkSwitcherItem(
+              title: Networks.values[index].name,
+              icon: Networks.values[index].icon,
+              chainInfo: Networks.values[index].networkInfo,
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
         const ConnectButton()
-        // ZupButton(
-        //   title: "Connect Wallet",
-        //   icon: Assets.icons.cableConnectorHorizontal.svg(),
-        //   onPressed: () async {
-        //     Ethers().connectWallet();
-        //     // print("Metamask ${Wallets().isMetamaskInstalled()}");
-        //     // print("Rabby ${Wallets().isRabbyInstalled()}");
-        //   },
-        // ),
       ],
     );
   }
