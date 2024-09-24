@@ -1,5 +1,4 @@
 name: zup_app
-publish_to: "none"
 
 environment:
   sdk: ^3.5.2
@@ -18,11 +17,18 @@ dependencies:
     path: ../web3kit
   zup_ui_kit:
     path: ../zup_ui_kit
+  freezed_annotation: ^2.4.4
+  flutter_bloc: ^8.1.6
+  collection: ^1.18.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  freezed: ^2.5.7
+  golden_toolkit: ^0.15.0
+  mocktail_image_network: ^1.2.0
+  mocktail: ^1.0.4
 
 flutter_gen:
   output: lib/gen/

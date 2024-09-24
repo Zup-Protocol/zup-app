@@ -2,21 +2,11 @@
 
 import 'package:routefly/routefly.dart';
 
-import 'app/add/add_page.dart' as a0;
-import 'app/app_layout.dart' as a2;
-import 'app/positions/positions_page.dart' as a1;
+import 'app/app_layout.dart' as a1;
+import 'app/create/create_page.dart' as a2;
+import 'app/positions/positions_page.dart' as a0;
 
 List<RouteEntity> get routes => [
-      RouteEntity(
-        key: '/add',
-        parent: '/',
-        uri: Uri.parse('/add'),
-        routeBuilder: (ctx, settings) => Routefly.defaultRouteBuilder(
-          ctx,
-          settings,
-          const a0.AddPage(),
-        ),
-      ),
       RouteEntity(
         key: '/positions',
         parent: '/',
@@ -24,7 +14,7 @@ List<RouteEntity> get routes => [
         routeBuilder: (ctx, settings) => Routefly.defaultRouteBuilder(
           ctx,
           settings,
-          const a1.PositionsPage(),
+          const a0.PositionsPage(),
         ),
       ),
       RouteEntity(
@@ -33,13 +23,23 @@ List<RouteEntity> get routes => [
         routeBuilder: (ctx, settings) => Routefly.defaultRouteBuilder(
           ctx,
           settings,
-          const a2.AppPage(),
+          const a1.AppPage(),
+        ),
+      ),
+      RouteEntity(
+        key: '/create',
+        parent: '/',
+        uri: Uri.parse('/create'),
+        routeBuilder: (ctx, settings) => Routefly.defaultRouteBuilder(
+          ctx,
+          settings,
+          const a2.CreatePage(),
         ),
       ),
     ];
 
 const routePaths = (
   path: '/',
-  add: '/add',
   positions: '/positions',
+  create: '/create',
 );
