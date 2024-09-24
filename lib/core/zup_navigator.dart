@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:routefly/routefly.dart';
-import 'package:zup_app/routes.g.dart';
-
-enum ZupNavigatorPaths { initial, myPositions, newPosition }
-
-extension ZupNavigatorPathsExtension on ZupNavigatorPaths {
-  String get routeName => [routePaths.positions, routePaths.positions, routePaths.add][index];
-}
+import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 
 class ZupNavigator {
   Listenable get listenable => Routefly.listenable;
   String get currentRoute => Routefly.currentUri.path;
 
-  void navigateToMyPositions() => Routefly.navigate(ZupNavigatorPaths.myPositions.routeName);
+  Future<void> navigateToMyPositions() async => await Routefly.navigate(ZupNavigatorPaths.myPositions.path);
 
-  void navigateToNewPosition() => Routefly.navigate(ZupNavigatorPaths.newPosition.routeName);
+  Future<void> navigateToNewPosition() async => await Routefly.navigate(ZupNavigatorPaths.newPosition.path);
 
-  void navigateToInitial() => Routefly.navigate(ZupNavigatorPaths.initial.routeName);
+  Future<void> navigateToInitial() async => await Routefly.navigate(ZupNavigatorPaths.initial.path);
 }

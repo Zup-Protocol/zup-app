@@ -159,7 +159,7 @@ packages:
     source: hosted
     version: "4.10.0"
   collection:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: collection
       sha256: ee67cb0715911d28db6bf4af1026078bd6f0128b07a5f66fb2ed94ec6783c09a
@@ -260,7 +260,7 @@ packages:
     source: hosted
     version: "4.5.0"
   flutter_bloc:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_bloc
       sha256: b594505eac31a0518bdcb4b5b79573b8d9117b193cc80cc12e17d639b10aa27a
@@ -323,7 +323,7 @@ packages:
     source: sdk
     version: "0.0.0"
   freezed:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: freezed
       sha256: "44c19278dd9d89292cf46e97dc0c1e52ce03275f40a97c5a348e802a924bf40e"
@@ -331,7 +331,7 @@ packages:
     source: hosted
     version: "2.5.7"
   freezed_annotation:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: freezed_annotation
       sha256: c2e2d632dd9b8a2b7751117abcfc2b4888ecfe181bd9fca7170d9ef02e595fe2
@@ -362,6 +362,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  golden_toolkit:
+    dependency: "direct dev"
+    description:
+      name: golden_toolkit
+      sha256: "8f74adab33154fe7b731395782797021f97d2edc52f7bfb85ff4f1b5c4a215f0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.15.0"
   graphs:
     dependency: transitive
     description:
@@ -522,6 +530,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
+  mocktail:
+    dependency: "direct dev"
+    description:
+      name: mocktail
+      sha256: "890df3f9688106f25755f26b1c60589a92b3ab91a22b8b224947ad041bf172d8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
+  mocktail_image_network:
+    dependency: "direct dev"
+    description:
+      name: mocktail_image_network
+      sha256: a1fccbba780343517cfc552e0af2b3834d8bdb8f9f55a746c4d495ed1a8d50d6
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   nested:
     dependency: transitive
     description:
