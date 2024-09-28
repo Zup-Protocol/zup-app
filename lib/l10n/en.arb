@@ -1,0 +1,64 @@
+{
+    "@@locale": "en",
+    "connectYourWallet": "Connect your wallet",
+    "connectMyWallet": "Connect My Wallet",
+    "positionsPageNotConnectedDescription": "Wallet not connected. Please connect your\nwallet to view your positions",
+    "positionsPageNoPositionsTitle": "You don’t have any positions yet",
+    "positionsPageNoPositionsDescription": "Hm… It looks like you don’t have any positions yet.\nWant to create one?",
+    "newPosition": "New Position",
+    "createNewPosition": "Create new position",
+    "positionCardMin": "Min: ",
+    "positionCardMax": "Max: ",
+    "positionCardLiquidity": "Liquidity: ",
+    "positionCardUnclaimedFees": "Unclaimed fees: ",
+    "positionCardViewMore": "View more",
+    "positionsPageNoPositionsInNetwork": "No positions in {network}",
+    "positionsPageShowHideClosedPositions": "{isHidden, select, true {Show} false {Hide} other {Show/Hide}} closed positions",
+    "@positionsPageShowHideClosedPositions": {
+        "description": "Dynamically shows 'Hide' or 'Show' based on the isHidden boolean.",
+        "placeholders": {
+            "isHidden": {
+                "type": "String",
+                "example": "true"
+            }
+        }
+    },
+    "@positionsPageNoPositionsInNetwork": {
+        "placeholders": {
+            "network": {
+                "type": "String"
+            }
+        }
+    },
+    "positionsPageNoPositionsInNetworkDescription": "It looks like you don’t have any positions in {network} yet.\nGo ahead and create one to get started!",
+    "@positionsPageNoPositionsInNetworkDescription": {
+        "placeholders": {
+            "network": {
+                "type": "String"
+            }
+        }
+    },
+    "positionCardTokenPerToken": "{token0Qtd} {token0Symbol} per {token1Symbol}",
+    "@positionCardTokenPerToken": {
+        "placeholders": {
+            "token0Qtd": {
+                "type": "String"
+            },
+            "token0Symbol": {
+                "type": "String"
+            },
+            "token1Symbol": {
+                "type": "String"
+            }
+        }
+    },
+    "positionsPageMyPositions": "My Positions",
+    "positionsPageCantFindAPosition": "Can’t find a position? Try switching the app’s network to \"All Networks\" or reload the page",
+    "somethingWhenWrong": "Something went wrong",
+    "positionsPageErrorStateDescription": "An error occurred while loading your positions.\nPlease try again. If the issue persists, feel free to contact us",
+    "positionStatusInRange": "In Range",
+    "positionStatusOutOfRange": "Out of Range",
+    "positionStatusClosed": "Closed",
+    "unknown": "Unknown",
+    "letsGiveItAnotherGo": "Let’s give it another go, because why not?"
+}

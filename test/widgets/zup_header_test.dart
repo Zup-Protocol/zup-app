@@ -43,7 +43,7 @@ void main() {
 
   tearDown(() => GetIt.I.reset());
 
-  Future<DeviceBuilder> goldenBuilder() async => await goldenDeviceBuilder(const ZupHeader());
+  Future<DeviceBuilder> goldenBuilder() async => await goldenDeviceBuilder(const ZupHeader(height: 80));
 
   zGoldenTest("Zup Header Default", goldenFileName: "zup_header", (tester) async {
     await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -144,20 +144,6 @@ void main() {
     await tester.pumpAndSettle();
 
     verify(() => appCubit.updateAppNetwork(Networks.arbitrum)).called(1);
-  });
-
-  zGoldenTest(
-      "When selecting a network in the network switcher and the chain info is null, it should not update network in the the app cubit",
-      (tester) async {
-    await tester.pumpDeviceBuilder(await goldenBuilder());
-
-    await tester.tap(find.byType(NetworkSwitcher));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text(Networks.all.label));
-    await tester.pumpAndSettle();
-
-    verifyNever(() => appCubit.updateAppNetwork(Networks.all));
   });
 
   zGoldenTest(

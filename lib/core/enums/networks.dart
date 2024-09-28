@@ -5,6 +5,8 @@ import 'package:zup_app/gen/assets.gen.dart';
 enum Networks { all, ethereum, base, arbitrum }
 
 extension NetworksExtension on Networks {
+  bool get isAll => this == Networks.all;
+
   String get label => ["All Networks", "Ethereum", "Base", "Arbitrum One"][index];
 
   Widget get icon => [

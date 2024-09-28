@@ -1,10 +1,12 @@
 import "dart:typed_data";
 
 import "package:flutter/material.dart";
+import "package:flutter_localizations/flutter_localizations.dart";
 import "package:flutter_test/flutter_test.dart";
 import "package:freezed_annotation/freezed_annotation.dart";
 import "package:golden_toolkit/golden_toolkit.dart";
 import "package:web3kit/web3kit.dart";
+import "package:zup_app/l10n/gen/app_localizations.dart";
 import "package:zup_app/theme/theme.dart";
 
 import "mocks.dart";
@@ -17,16 +19,26 @@ class GoldenConfig {
     await loadAppFonts();
 
     return MaterialApp(
-      localizationsDelegates: const [Web3KitLocalizations.delegate],
-      home: child,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        Web3KitLocalizations.delegate,
+      ],
+      home: Scaffold(body: child),
       theme: ZupTheme.lightTheme,
     );
   }
 
   static Widget Function(Widget) localizationsWrapper() {
     return (child) => MaterialApp(
-          localizationsDelegates: const [Web3KitLocalizations.delegate],
-          home: child,
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            Web3KitLocalizations.delegate,
+          ],
+          home: Scaffold(body: child),
         );
   }
 }

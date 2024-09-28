@@ -140,4 +140,12 @@ void main() {
 
     expect(sut.state, const AppState.standard());
   });
+
+  test("When changing the network, it should add an event to the network stream", () {
+    const network = Networks.base;
+
+    expectLater(sut.selectedNetworkStream, emits(network));
+
+    sut.updateAppNetwork(network);
+  });
 }

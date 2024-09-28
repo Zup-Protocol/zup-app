@@ -57,6 +57,14 @@ void main() {
     );
   });
 
+  test("When calling `isAll` it should return true if the network is All", () {
+    expect(Networks.all.isAll, true);
+  });
+
+  test("When calling `isAll` it should return false if the network is not All", () {
+    expect(Networks.arbitrum.isAll, false);
+  });
+
   zGoldenTest("All networks icon should match", goldenFileName: "all_networks_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.all.icon, largeDevice: false));
   });

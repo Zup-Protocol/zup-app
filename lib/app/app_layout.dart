@@ -10,17 +10,33 @@ class AppPage extends StatefulWidget {
 }
 
 class _AppPageState extends State<AppPage> {
+  final double appBarHeight = 85;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(20).copyWith(bottom: 0),
-        child: const Column(
-          children: [
-            ZupHeader(),
-            Expanded(child: RouterOutlet()),
-          ],
+    return SelectionArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: ScrollbarTheme(
+          data: const ScrollbarThemeData(mainAxisMargin: 10, crossAxisMargin: 3),
+          child: CustomScrollView(
+            physics: const ClampingScrollPhysics(),
+            scrollBehavior: const MaterialScrollBehavior(),
+            slivers: [
+              SliverAppBar(
+                clipBehavior: Clip.none,
+                forceMaterialTransparency: true,
+                pinned: true,
+                titleSpacing: 0,
+                title: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: ZupHeader(height: appBarHeight),
+                ),
+                toolbarHeight: appBarHeight,
+              ),
+              const SliverToBoxAdapter(child: RouterOutlet()),
+            ],
+          ),
         ),
       ),
     );
