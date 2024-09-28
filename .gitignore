@@ -12,6 +12,10 @@ migrate_working_dir/
 test/**/failures/
 coverage/
 
+# Generated code
+lib/**/**.g.dart
+lib/**/**.freezed.dart
+
 # IntelliJ related
 *.iml
 *.ipr
@@ -46,3 +50,4 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+

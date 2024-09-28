@@ -18,8 +18,47 @@ class $AssetsIconsGen {
   /// File path: assets/icons/all.svg
   SvgGenImage get all => const SvgGenImage('assets/icons/all.svg');
 
+  /// File path: assets/icons/arrow.2.squarepath.svg
+  SvgGenImage get arrow2Squarepath => const SvgGenImage('assets/icons/arrow.2.squarepath.svg');
+
+  /// File path: assets/icons/arrow.clockwise.svg
+  SvgGenImage get arrowClockwise => const SvgGenImage('assets/icons/arrow.clockwise.svg');
+
+  /// File path: assets/icons/arrow.up.right.svg
+  SvgGenImage get arrowUpRight => const SvgGenImage('assets/icons/arrow.up.right.svg');
+
+  /// File path: assets/icons/cable.connector.horizontal.svg
+  SvgGenImage get cableConnectorHorizontal => const SvgGenImage('assets/icons/cable.connector.horizontal.svg');
+
+  /// File path: assets/icons/network.slash.svg
+  SvgGenImage get networkSlash => const SvgGenImage('assets/icons/network.slash.svg');
+
   /// File path: assets/icons/plus.diamond.svg
   SvgGenImage get plusDiamond => const SvgGenImage('assets/icons/plus.diamond.svg');
+
+  /// File path: assets/icons/plus.svg
+  SvgGenImage get plus => const SvgGenImage('assets/icons/plus.svg');
+
+  /// File path: assets/icons/questionmark.svg
+  SvgGenImage get questionmark => const SvgGenImage('assets/icons/questionmark.svg');
+
+  /// File path: assets/icons/rectangle.connected.to.line.below.svg
+  SvgGenImage get rectangleConnectedToLineBelow => const SvgGenImage('assets/icons/rectangle.connected.to.line.below.svg');
+
+  /// File path: assets/icons/slash.circle.svg
+  SvgGenImage get slashCircle => const SvgGenImage('assets/icons/slash.circle.svg');
+
+  /// File path: assets/icons/square.and.line.vertical.and.square.filled.svg
+  SvgGenImage get squareAndLineVerticalAndSquareFilled => const SvgGenImage('assets/icons/square.and.line.vertical.and.square.filled.svg');
+
+  /// File path: assets/icons/switch.2.svg
+  SvgGenImage get switch2 => const SvgGenImage('assets/icons/switch.2.svg');
+
+  /// File path: assets/icons/tray.svg
+  SvgGenImage get tray => const SvgGenImage('assets/icons/tray.svg');
+
+  /// File path: assets/icons/wallet.bifold.svg
+  SvgGenImage get walletBifold => const SvgGenImage('assets/icons/wallet.bifold.svg');
 
   /// File path: assets/icons/water.waves.svg
   SvgGenImage get waterWaves => const SvgGenImage('assets/icons/water.waves.svg');
@@ -28,7 +67,25 @@ class $AssetsIconsGen {
   SvgGenImage get zupLogo => const SvgGenImage('assets/icons/zup_logo.svg');
 
   /// List of all assets
-  List<SvgGenImage> get values => [all, plusDiamond, waterWaves, zupLogo];
+  List<SvgGenImage> get values => [
+        all,
+        arrow2Squarepath,
+        arrowClockwise,
+        arrowUpRight,
+        cableConnectorHorizontal,
+        networkSlash,
+        plusDiamond,
+        plus,
+        questionmark,
+        rectangleConnectedToLineBelow,
+        slashCircle,
+        squareAndLineVerticalAndSquareFilled,
+        switch2,
+        tray,
+        walletBifold,
+        waterWaves,
+        zupLogo
+      ];
 }
 
 class $AssetsImagesGen {

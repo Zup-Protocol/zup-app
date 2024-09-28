@@ -10,8 +10,6 @@ class CreatePage extends StatefulWidget {
 class _CreatePageState extends State<CreatePage> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.amber,
-    );
+    return const Center(child: Text("Create"));
   }
 }
