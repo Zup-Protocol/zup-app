@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:zup_ui_kit/zup_colors.dart';
 
-class ZupHeaderTabButton extends StatefulWidget {
-  const ZupHeaderTabButton({
+class AppHeaderTabButton extends StatefulWidget {
+  const AppHeaderTabButton({
     super.key,
     required this.title,
     this.selected = true,
@@ -16,10 +16,10 @@ class ZupHeaderTabButton extends StatefulWidget {
   final Function() onPressed;
 
   @override
-  State<ZupHeaderTabButton> createState() => _ZupHeaderTabButtonState();
+  State<AppHeaderTabButton> createState() => _AppHeaderTabButtonState();
 }
 
-class _ZupHeaderTabButtonState extends State<ZupHeaderTabButton> {
+class _AppHeaderTabButtonState extends State<AppHeaderTabButton> {
   bool isHovering = false;
 
   TextStyle? get _textStyle {

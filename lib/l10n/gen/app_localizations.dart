@@ -99,6 +99,54 @@ abstract class S {
   /// **'Connect your wallet'**
   String get connectYourWallet;
 
+  /// No description provided for @tokenSelectorModalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a token'**
+  String get tokenSelectorModalTitle;
+
+  /// No description provided for @tokenSelectorModalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a token from our list or search by symbol or address to build your ideal liquidity pool!'**
+  String get tokenSelectorModalDescription;
+
+  /// No description provided for @tokenSelectorModalSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search token or paste address'**
+  String get tokenSelectorModalSearchTitle;
+
+  /// No description provided for @tokenSelectorModalErrorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'We hit a snag loading your token list. Give it another go, and if it keeps happening, feel free to reach us'**
+  String get tokenSelectorModalErrorDescription;
+
+  /// No description provided for @tokenSelectorModalSearchErrorDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'We hit a snag while searching for a token matching {searchedTerm}. Give it another go, and if it keeps happening, feel free to reach us'**
+  String tokenSelectorModalSearchErrorDescription(String searchedTerm);
+
+  /// No description provided for @noResultsFor.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for'**
+  String get noResultsFor;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search results'**
+  String get searchResults;
+
+  /// No description provided for @popularTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Popular Tokens'**
+  String get popularTokens;
+
   /// No description provided for @connectMyWallet.
   ///
   /// In en, this message translates to:
@@ -238,11 +286,53 @@ abstract class S {
   /// **'Unknown'**
   String get unknown;
 
+  /// No description provided for @selectToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Token'**
+  String get selectToken;
+
+  /// No description provided for @tokenA.
+  ///
+  /// In en, this message translates to:
+  /// **'Token A'**
+  String get tokenA;
+
+  /// No description provided for @tokenB.
+  ///
+  /// In en, this message translates to:
+  /// **'Token B'**
+  String get tokenB;
+
+  /// No description provided for @createPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Position'**
+  String get createPageTitle;
+
+  /// No description provided for @createPageShowMeTheMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Show me the money!'**
+  String get createPageShowMeTheMoney;
+
+  /// No description provided for @createPageDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to dive in? First, pick the dynamic duo of tokens you want to team up in the pool. Just choose your pair right below and you’re set to make some magic!'**
+  String get createPageDescription;
+
   /// No description provided for @letsGiveItAnotherGo.
   ///
   /// In en, this message translates to:
   /// **'Let’s give it another go, because why not?'**
   String get letsGiveItAnotherGo;
+
+  /// No description provided for @letsGiveItAnotherShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Let’s give it another shot'**
+  String get letsGiveItAnotherShot;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

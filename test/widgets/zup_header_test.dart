@@ -9,7 +9,7 @@ import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/zup_navigator.dart';
-import 'package:zup_app/widgets/zup_header/zup_header.dart';
+import 'package:zup_app/widgets/app_header/app_header.dart';
 
 import '../golden_config.dart';
 import '../mocks.dart';
@@ -43,7 +43,7 @@ void main() {
 
   tearDown(() => GetIt.I.reset());
 
-  Future<DeviceBuilder> goldenBuilder() async => await goldenDeviceBuilder(const ZupHeader(height: 80));
+  Future<DeviceBuilder> goldenBuilder() async => await goldenDeviceBuilder(const AppHeader(height: 80));
 
   zGoldenTest("Zup Header Default", goldenFileName: "zup_header", (tester) async {
     await tester.pumpDeviceBuilder(await goldenBuilder());

@@ -1,6 +1,21 @@
 {
     "@@locale": "en",
     "connectYourWallet": "Connect your wallet",
+    "tokenSelectorModalTitle": "Select a token",
+    "tokenSelectorModalDescription": "Pick a token from our list or search by symbol or address to build your ideal liquidity pool!",
+    "tokenSelectorModalSearchTitle": "Search token or paste address",
+    "tokenSelectorModalErrorDescription": "We hit a snag loading your token list. Give it another go, and if it keeps happening, feel free to reach us",
+    "tokenSelectorModalSearchErrorDescription": "We hit a snag while searching for a token matching {searchedTerm}. Give it another go, and if it keeps happening, feel free to reach us",
+    "noResultsFor": "No results for",
+    "searchResults": "Search results",
+    "popularTokens": "Popular Tokens",
+    "@tokenSelectorModalSearchErrorDescription": {
+        "placeholders": {
+            "searchedTerm": {
+                "type": "String"
+            }
+        }
+    },
     "connectMyWallet": "Connect My Wallet",
     "positionsPageNotConnectedDescription": "Wallet not connected. Please connect your\nwallet to view your positions",
     "positionsPageNoPositionsTitle": "You don’t have any positions yet",
@@ -60,5 +75,12 @@
     "positionStatusOutOfRange": "Out of Range",
     "positionStatusClosed": "Closed",
     "unknown": "Unknown",
-    "letsGiveItAnotherGo": "Let’s give it another go, because why not?"
+    "selectToken": "Select Token",
+    "tokenA": "Token A",
+    "tokenB": "Token B",
+    "createPageTitle": "New Position",
+    "createPageShowMeTheMoney": "Show me the money!",
+    "createPageDescription": "Ready to dive in? First, pick the dynamic duo of tokens you want to team up in the pool. Just choose your pair right below and you’re set to make some magic!",
+    "letsGiveItAnotherGo": "Let’s give it another go, because why not?",
+    "letsGiveItAnotherShot": "Let’s give it another shot"
 }

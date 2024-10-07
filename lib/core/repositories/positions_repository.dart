@@ -44,37 +44,37 @@ class PositionsRepository {
         ),
         status: PositionStatus.outOfRange,
       ),
-      PositionDto.fixture().copyWith(
-        network: Networks.arbitrum,
-        protocol: ProtocolDto.fixture().copyWith(
-          name: "Uniswap",
-          logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/app.uniswap.org.png",
-        ),
-        token0: TokenDto.fixture().copyWith(
-          symbol: "UNI",
-          logoUrl:
-              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0/logo.png",
-        ),
-        token1: TokenDto.fixture().copyWith(
-          symbol: "WBTC",
-          logoUrl:
-              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f/logo.png",
-        ),
-        status: PositionStatus.closed,
-      ),
-      PositionDto.fixture().copyWith(
-        protocol: ProtocolDto.fixture().copyWith(
-          name: "SushiSwap",
-          logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/app.sushi.com.png",
-        ),
-        token0: TokenDto.empty().copyWith(symbol: "cbBTC"),
-        token1: TokenDto.fixture().copyWith(
-          symbol: "cREAL",
-          logoUrl:
-              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/celo/assets/0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787/logo.png",
-        ),
-        status: PositionStatus.unknown,
-      ),
+      //   PositionDto.fixture().copyWith(
+      //     network: Networks.arbitrum,
+      //     protocol: ProtocolDto.fixture().copyWith(
+      //       name: "Uniswap",
+      //       logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/app.uniswap.org.png",
+      //     ),
+      //     token0: TokenDto.fixture().copyWith(
+      //       symbol: "UNI",
+      //       logoUrl:
+      //           "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0/logo.png",
+      //     ),
+      //     token1: TokenDto.fixture().copyWith(
+      //       symbol: "WBTC",
+      //       logoUrl:
+      //           "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f/logo.png",
+      //     ),
+      //     status: PositionStatus.closed,
+      //   ),
+      //   PositionDto.fixture().copyWith(
+      //     protocol: ProtocolDto.fixture().copyWith(
+      //       name: "SushiSwap",
+      //       logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/app.sushi.com.png",
+      //     ),
+      //     token0: TokenDto.empty().copyWith(symbol: "cbBTC"),
+      //     token1: TokenDto.fixture().copyWith(
+      //       symbol: "cREAL",
+      //       logoUrl:
+      //           "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/celo/assets/0xe8537a3d056DA446677B9E9d6c5dB704EaAb4787/logo.png",
+      //     ),
+      //     status: PositionStatus.unknown,
+      //   ),
     ];
   }
 }
