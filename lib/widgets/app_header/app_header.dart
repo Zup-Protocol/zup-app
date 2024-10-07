@@ -8,18 +8,18 @@ import 'package:zup_app/core/extensions/route_verifier_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
-import 'package:zup_app/widgets/zup_header/zup_header_tab_button.dart';
+import 'package:zup_app/widgets/app_header/app_header_tab_button.dart';
 
-class ZupHeader extends StatefulWidget {
-  const ZupHeader({super.key, required this.height});
+class AppHeader extends StatefulWidget {
+  const AppHeader({super.key, required this.height});
 
   final double height;
 
   @override
-  State<ZupHeader> createState() => _ZupHeaderState();
+  State<AppHeader> createState() => _AppHeaderState();
 }
 
-class _ZupHeaderState extends State<ZupHeader> {
+class _AppHeaderState extends State<AppHeader> {
   final ZupNavigator navigator = inject<ZupNavigator>();
   final appCubit = inject<AppCubit>();
 
@@ -63,11 +63,11 @@ class _ZupHeaderState extends State<ZupHeader> {
                 child: GestureDetector(
                   key: const Key("logo-button"),
                   onTap: () => navigator.navigateToInitial(),
-                  child: Assets.icons.zupLogo.svg(height: 60),
+                  child: Assets.logos.zup.svg(height: 60),
                 ),
               ),
               const SizedBox(width: 16),
-              ZupHeaderTabButton(
+              AppHeaderTabButton(
                 key: const Key("my-positions-button"),
                 title: "My Positions",
                 icon: Assets.icons.waterWaves.svg(),
@@ -75,7 +75,7 @@ class _ZupHeaderState extends State<ZupHeader> {
                 onPressed: () => navigator.navigateToMyPositions(),
               ),
               const SizedBox(width: 10),
-              ZupHeaderTabButton(
+              AppHeaderTabButton(
                 key: const Key("new-position-button"),
                 title: "New Position",
                 icon: Assets.icons.plusDiamond.svg(),

@@ -5,6 +5,14 @@ import 'package:zup_ui_kit/zup_colors.dart';
 class ZupSkeletonizer extends StatelessWidget {
   const ZupSkeletonizer({super.key, required this.child, this.enabled = true});
 
+  final effect = const SoldColorEffect(color: ZupColors.gray6);
+
+  Widget sliver() => SliverSkeletonizer(
+        effect: effect,
+        enabled: enabled,
+        child: child,
+      );
+
   final Widget child;
   final bool enabled;
 
@@ -12,7 +20,7 @@ class ZupSkeletonizer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Skeletonizer(
       enabled: enabled,
-      effect: const SoldColorEffect(color: ZupColors.gray6),
+      effect: effect,
       child: child,
     );
   }

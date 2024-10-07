@@ -9,8 +9,11 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
+import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/zup_navigator.dart';
+import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 
 class AppCubitMock extends Mock implements AppCubit {}
@@ -32,6 +35,12 @@ class ImageProviderMock extends Mock implements ImageProvider {}
 class ZupCachedImageMock extends Mock implements ZupCachedImage {}
 
 class SharedPreferencesWithCacheMock extends Mock implements SharedPreferencesWithCache {}
+
+class TokensRepositoryMock extends Mock implements TokensRepository {}
+
+class TokenSelectorModalCubitMock extends Mock implements TokenSelectorModalCubit {}
+
+class DebouncerMock extends Mock implements Debouncer {}
 
 class UrlLauncherPlatformCustomMock extends UrlLauncherPlatform {
   static String? lastLaunchedUrl;

@@ -12,6 +12,7 @@ import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
+import 'package:zup_app/widgets/zup_page_title.dart';
 import 'package:zup_app/widgets/zup_skeletonizer.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
@@ -46,12 +47,11 @@ class _PositionsPageState extends State<PositionsPage> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
+                        ZupPageTitle(
                           state.maybeWhen(
                             orElse: () => S.of(context).positionsPageMyPositions,
                             positions: (positions) => "${S.of(context).positionsPageMyPositions} (${positions.length})",
                           ),
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
                         ),
                         const Spacer(),
                         state.maybeWhen(

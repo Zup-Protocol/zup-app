@@ -18,22 +18,22 @@ class PositionDto with _$PositionDto {
     @Default(null) Networks? network,
     @Default(PositionStatus.unknown) @JsonKey(unknownEnumValue: PositionStatus.unknown) PositionStatus status,
     @Default(null) ProtocolDto? protocol,
-    @Default("") String minRange,
-    @Default("") String maxRange,
-    @Default("0") String liquidity,
-    @Default("0") @JsonKey(name: 'unclaimed_fees') String unclaimedFees,
+    @Default(0) num minRange,
+    @Default(0) num maxRange,
+    @Default(0) @JsonKey(name: "liquidity") num liquidityUSD,
+    @Default(0) @JsonKey(name: 'unclaimed_fees') num unclaimedFeesUSD,
   }) = _PositionDto;
 
   factory PositionDto.fromJson(Map<String, dynamic> json) => _$PositionDtoFromJson(json);
 
   factory PositionDto.fixture() => PositionDto(
-        liquidity: "123,543.43",
-        minRange: "0.4",
-        maxRange: "123,413.43",
+        liquidityUSD: 123543.43,
+        minRange: 0.4,
+        maxRange: 123413.43,
         status: PositionStatus.inRange,
         token0: TokenDto.fixture(),
         token1: TokenDto.fixture(),
         protocol: ProtocolDto.fixture(),
-        unclaimedFees: "1,543.43",
+        unclaimedFeesUSD: 1543.43,
       );
 }

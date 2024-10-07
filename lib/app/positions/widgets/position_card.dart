@@ -5,6 +5,7 @@ import 'package:zup_app/app/positions/widgets/position_token.dart';
 import 'package:zup_app/core/dtos/position_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/position_status.dart';
+import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
@@ -117,7 +118,7 @@ class _PositionCardState extends State<PositionCard> {
                         TextSpan(text: S.of(context).positionCardMin, style: const TextStyle(color: ZupColors.gray)),
                         TextSpan(
                             text: S.of(context).positionCardTokenPerToken(
-                                  widget.position.minRange,
+                                  widget.position.minRange.formatCurrency(isUSD: false),
                                   widget.position.token0?.symbol ?? "",
                                   widget.position.token1?.symbol ?? "",
                                 ),
@@ -137,7 +138,7 @@ class _PositionCardState extends State<PositionCard> {
                         TextSpan(text: S.of(context).positionCardMax, style: const TextStyle(color: ZupColors.gray)),
                         TextSpan(
                             text: S.of(context).positionCardTokenPerToken(
-                                  widget.position.maxRange,
+                                  widget.position.maxRange.formatCurrency(isUSD: false),
                                   widget.position.token0?.symbol ?? "",
                                   widget.position.token1?.symbol ?? "",
                                 ),
@@ -155,7 +156,7 @@ class _PositionCardState extends State<PositionCard> {
                           style: const TextStyle(color: ZupColors.gray),
                         ),
                         TextSpan(
-                          text: "\$${widget.position.liquidity}",
+                          text: widget.position.liquidityUSD.formatCurrency(isUSD: true),
                           style: const TextStyle(color: ZupColors.black),
                         ),
                         const WidgetSpan(child: SizedBox(width: 20)),
@@ -164,7 +165,7 @@ class _PositionCardState extends State<PositionCard> {
                           style: const TextStyle(color: ZupColors.gray),
                         ),
                         TextSpan(
-                          text: "\$${widget.position.unclaimedFees}",
+                          text: widget.position.unclaimedFeesUSD.formatCurrency(isUSD: true),
                           style: const TextStyle(color: ZupColors.black),
                         ),
                       ],

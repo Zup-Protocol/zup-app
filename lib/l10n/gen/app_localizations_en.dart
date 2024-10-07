@@ -12,6 +12,34 @@ class SEn extends S {
   String get connectYourWallet => 'Connect your wallet';
 
   @override
+  String get tokenSelectorModalTitle => 'Select a token';
+
+  @override
+  String get tokenSelectorModalDescription =>
+      'Pick a token from our list or search by symbol or address to build your ideal liquidity pool!';
+
+  @override
+  String get tokenSelectorModalSearchTitle => 'Search token or paste address';
+
+  @override
+  String get tokenSelectorModalErrorDescription =>
+      'We hit a snag loading your token list. Give it another go, and if it keeps happening, feel free to reach us';
+
+  @override
+  String tokenSelectorModalSearchErrorDescription(String searchedTerm) {
+    return 'We hit a snag while searching for a token matching $searchedTerm. Give it another go, and if it keeps happening, feel free to reach us';
+  }
+
+  @override
+  String get noResultsFor => 'No results for';
+
+  @override
+  String get searchResults => 'Search results';
+
+  @override
+  String get popularTokens => 'Popular Tokens';
+
+  @override
   String get connectMyWallet => 'Connect My Wallet';
 
   @override
@@ -103,6 +131,28 @@ class SEn extends S {
   String get unknown => 'Unknown';
 
   @override
+  String get selectToken => 'Select Token';
+
+  @override
+  String get tokenA => 'Token A';
+
+  @override
+  String get tokenB => 'Token B';
+
+  @override
+  String get createPageTitle => 'New Position';
+
+  @override
+  String get createPageShowMeTheMoney => 'Show me the money!';
+
+  @override
+  String get createPageDescription =>
+      'Ready to dive in? First, pick the dynamic duo of tokens you want to team up in the pool. Just choose your pair right below and you’re set to make some magic!';
+
+  @override
   String get letsGiveItAnotherGo =>
       'Let’s give it another go, because why not?';
+
+  @override
+  String get letsGiveItAnotherShot => 'Let’s give it another shot';
 }

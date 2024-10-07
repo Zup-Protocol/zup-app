@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 
 enum Networks { all, ethereum, base, arbitrum }
@@ -38,6 +39,38 @@ extension NetworksExtension on Networks {
           blockExplorerUrls: const ["https://arbiscan.io"],
           nativeCurrency: NativeCurrencies.eth.currencyInfo,
           rpcUrls: const ["https://arb1.arbitrum.io/rpc"],
+        ),
+      ][index];
+
+  String? get wrappedNativeTokenAddress => [
+        null,
+        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "0x4200000000000000000000000000000000000006",
+        "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+      ][index];
+
+  TokenDto? get defaultToken => [
+        null,
+        TokenDto(
+          address: wrappedNativeTokenAddress ?? "0x",
+          name: "Wrapped Ether",
+          symbol: "WETH",
+          logoUrl:
+              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/$wrappedNativeTokenAddress/logo.png",
+        ),
+        TokenDto(
+          address: wrappedNativeTokenAddress ?? "0x",
+          name: "Wrapped Ether",
+          symbol: "WETH",
+          logoUrl:
+              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/$wrappedNativeTokenAddress/logo.png",
+        ),
+        TokenDto(
+          address: wrappedNativeTokenAddress ?? "0x",
+          name: "Wrapped Ether",
+          symbol: "WETH",
+          logoUrl:
+              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/$wrappedNativeTokenAddress/logo.png",
         ),
       ][index];
 }

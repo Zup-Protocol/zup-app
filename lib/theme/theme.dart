@@ -10,6 +10,7 @@ abstract class ZupTheme {
         primaryColor: ZupColors.brand,
         scaffoldBackgroundColor: Colors.transparent,
         textButtonTheme: ZupTextButtonTheme.lightTheme,
+        textSelectionTheme: const TextSelectionThemeData(selectionColor: ZupColors.brand5),
         textTheme: const TextTheme(
           titleSmall: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: ZupColors.black),
           bodySmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: ZupColors.black),

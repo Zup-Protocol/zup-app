@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:routefly/routefly.dart';
-import 'package:zup_app/widgets/zup_header/zup_header.dart';
+import 'package:zup_app/widgets/app_header/app_header.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({super.key});
@@ -30,7 +30,7 @@ class _AppPageState extends State<AppPage> {
                 titleSpacing: 0,
                 title: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: ZupHeader(height: appBarHeight),
+                  child: AppHeader(height: appBarHeight),
                 ),
                 toolbarHeight: appBarHeight,
               ),
