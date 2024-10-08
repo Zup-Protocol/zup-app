@@ -1122,9 +1122,11 @@ packages:
   web3kit:
     dependency: "direct main"
     description:
-      path: "../web3kit"
-      relative: true
-    source: path
+      path: "."
+      ref: main
+      resolved-ref: "9a5d62818c571c6ea9c3717057dfd9d35be6759d"
+      url: "https://github.com/Zup-Protocol/web3kit.git"
+    source: git
     version: "0.0.1"
   web_socket:
     dependency: transitive
@@ -1169,9 +1171,11 @@ packages:
   zup_ui_kit:
     dependency: "direct main"
     description:
-      path: "../zup_ui_kit"
-      relative: true
-    source: path
+      path: "."
+      ref: main
+      resolved-ref: bf3b2fac5c0e060be254711901887e95e3314ccb
+      url: "https://github.com/Zup-Protocol/zup-ui-kit.git"
+    source: git
     version: "0.0.1"
 sdks:
   dart: ">=3.5.2 <4.0.0"
