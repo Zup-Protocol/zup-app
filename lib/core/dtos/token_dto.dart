@@ -11,8 +11,9 @@ class TokenDto with _$TokenDto {
     @Default("") String name,
     @Default("") String address,
     @Default("") @JsonKey(name: 'logo_url') String logoUrl,
-    @Default(0) @JsonKey(name: 'user_token_balance') num userTokenBalance,
-    @Default(0) @JsonKey(name: 'user_usd_balance') num userUsdBalance,
+    @Default(0) int decimals,
+    @Deprecated("should be removed") @Default(0) @JsonKey(name: 'user_token_balance') num usertoken1alance,
+    @Deprecated("should be removed") @Default(0) @JsonKey(name: 'user_usd_balance') num userUsdBalance,
   }) = _TokenDto;
 
   factory TokenDto.fromJson(Map<String, dynamic> json) => _$TokenDtoFromJson(json);

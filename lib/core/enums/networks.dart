@@ -24,21 +24,21 @@ extension NetworksExtension on Networks {
           chainName: label,
           blockExplorerUrls: const ["https://etherscan.io"],
           nativeCurrency: NativeCurrencies.eth.currencyInfo,
-          rpcUrls: const ["https://eth.llamarpc.com"],
+          rpcUrls: [rpcUrl ?? ""],
         ),
         ChainInfo(
           hexChainId: "0x2105",
           chainName: label,
           blockExplorerUrls: const ["https://basescan.org/"],
           nativeCurrency: NativeCurrencies.eth.currencyInfo,
-          rpcUrls: const ["https://mainnet.base.org"],
+          rpcUrls: [rpcUrl ?? ""],
         ),
         ChainInfo(
           hexChainId: "0xa4b1",
           chainName: label,
           blockExplorerUrls: const ["https://arbiscan.io"],
           nativeCurrency: NativeCurrencies.eth.currencyInfo,
-          rpcUrls: const ["https://arb1.arbitrum.io/rpc"],
+          rpcUrls: [rpcUrl ?? ""],
         ),
       ][index];
 
@@ -72,5 +72,12 @@ extension NetworksExtension on Networks {
           logoUrl:
               "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/$wrappedNativeTokenAddress/logo.png",
         ),
+      ][index];
+
+  String? get rpcUrl => [
+        null,
+        "https://eth.llamarpc.com",
+        "https://mainnet.base.org",
+        "https://arb1.arbitrum.io/rpc",
       ][index];
 }

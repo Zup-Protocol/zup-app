@@ -10,6 +10,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart' as _svg;
+import 'package:lottie/lottie.dart' as _lottie;
 import 'package:vector_graphics/vector_graphics.dart' as _vg;
 
 class $AssetsIconsGen {
@@ -24,6 +25,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/arrow.clockwise.svg
   SvgGenImage get arrowClockwise => const SvgGenImage('assets/icons/arrow.clockwise.svg');
 
+  /// File path: assets/icons/arrow.left.svg
+  SvgGenImage get arrowLeft => const SvgGenImage('assets/icons/arrow.left.svg');
+
   /// File path: assets/icons/arrow.up.right.svg
   SvgGenImage get arrowUpRight => const SvgGenImage('assets/icons/arrow.up.right.svg');
 
@@ -36,11 +40,29 @@ class $AssetsIconsGen {
   /// File path: assets/icons/chevron.down.svg
   SvgGenImage get chevronDown => const SvgGenImage('assets/icons/chevron.down.svg');
 
+  /// File path: assets/icons/chevron.right.svg
+  SvgGenImage get chevronRight => const SvgGenImage('assets/icons/chevron.right.svg');
+
+  /// File path: assets/icons/circle.dotted.svg
+  SvgGenImage get circleDotted => const SvgGenImage('assets/icons/circle.dotted.svg');
+
+  /// File path: assets/icons/exclamationmark.triangle.svg
+  SvgGenImage get exclamationmarkTriangle => const SvgGenImage('assets/icons/exclamationmark.triangle.svg');
+
+  /// File path: assets/icons/info.circle.svg
+  SvgGenImage get infoCircle => const SvgGenImage('assets/icons/info.circle.svg');
+
   /// File path: assets/icons/magnifyingglass.svg
   SvgGenImage get magnifyingglass => const SvgGenImage('assets/icons/magnifyingglass.svg');
 
+  /// File path: assets/icons/minus.svg
+  SvgGenImage get minus => const SvgGenImage('assets/icons/minus.svg');
+
   /// File path: assets/icons/network.slash.svg
   SvgGenImage get networkSlash => const SvgGenImage('assets/icons/network.slash.svg');
+
+  /// File path: assets/icons/paperplane.fill.svg
+  SvgGenImage get paperplaneFill => const SvgGenImage('assets/icons/paperplane.fill.svg');
 
   /// File path: assets/icons/plus.diamond.svg
   SvgGenImage get plusDiamond => const SvgGenImage('assets/icons/plus.diamond.svg');
@@ -89,12 +111,19 @@ class $AssetsIconsGen {
         all,
         arrow2Squarepath,
         arrowClockwise,
+        arrowLeft,
         arrowUpRight,
         basketFill,
         cableConnectorHorizontal,
         chevronDown,
+        chevronRight,
+        circleDotted,
+        exclamationmarkTriangle,
+        infoCircle,
         magnifyingglass,
+        minus,
         networkSlash,
+        paperplaneFill,
         plusDiamond,
         plus,
         questionmark,
@@ -141,12 +170,35 @@ class $AssetsLogosGen {
   List<SvgGenImage> get values => [arbitrum, base, ethereum, zup];
 }
 
+class $AssetsLottiesGen {
+  const $AssetsLottiesGen();
+
+  /// File path: assets/lotties/click.json
+  LottieGenImage get click => const LottieGenImage('assets/lotties/click.json');
+
+  /// File path: assets/lotties/ghost.json
+  LottieGenImage get ghost => const LottieGenImage('assets/lotties/ghost.json');
+
+  /// File path: assets/lotties/matching.json
+  LottieGenImage get matching => const LottieGenImage('assets/lotties/matching.json');
+
+  /// File path: assets/lotties/radar.json
+  LottieGenImage get radar => const LottieGenImage('assets/lotties/radar.json');
+
+  /// File path: assets/lotties/seaching.json
+  LottieGenImage get seaching => const LottieGenImage('assets/lotties/seaching.json');
+
+  /// List of all assets
+  List<LottieGenImage> get values => [click, ghost, matching, radar, seaching];
+}
+
 class Assets {
   Assets._();
 
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
   static const $AssetsLogosGen logos = $AssetsLogosGen();
+  static const $AssetsLottiesGen lotties = $AssetsLottiesGen();
 }
 
 class AssetGenImage {
@@ -298,6 +350,73 @@ class SvgGenImage {
       colorFilter: colorFilter ?? (color == null ? null : ColorFilter.mode(color, colorBlendMode)),
       clipBehavior: clipBehavior,
       cacheColorFilter: cacheColorFilter,
+    );
+  }
+
+  String get path => _assetName;
+
+  String get keyName => _assetName;
+}
+
+class LottieGenImage {
+  const LottieGenImage(
+    this._assetName, {
+    this.flavors = const {},
+  });
+
+  final String _assetName;
+  final Set<String> flavors;
+
+  _lottie.LottieBuilder lottie({
+    Animation<double>? controller,
+    bool? animate,
+    _lottie.FrameRate? frameRate,
+    bool? repeat,
+    bool? reverse,
+    _lottie.LottieDelegates? delegates,
+    _lottie.LottieOptions? options,
+    void Function(_lottie.LottieComposition)? onLoaded,
+    _lottie.LottieImageProviderFactory? imageProviderFactory,
+    Key? key,
+    AssetBundle? bundle,
+    Widget Function(
+      BuildContext,
+      Widget,
+      _lottie.LottieComposition?,
+    )? frameBuilder,
+    ImageErrorWidgetBuilder? errorBuilder,
+    double? width,
+    double? height,
+    BoxFit? fit,
+    AlignmentGeometry? alignment,
+    String? package,
+    bool? addRepaintBoundary,
+    FilterQuality? filterQuality,
+    void Function(String)? onWarning,
+  }) {
+    return _lottie.Lottie.asset(
+      _assetName,
+      controller: controller,
+      animate: animate,
+      frameRate: frameRate,
+      repeat: repeat,
+      reverse: reverse,
+      delegates: delegates,
+      options: options,
+      onLoaded: onLoaded,
+      imageProviderFactory: imageProviderFactory,
+      key: key,
+      bundle: bundle,
+      frameBuilder: frameBuilder,
+      errorBuilder: errorBuilder,
+      width: width,
+      height: height,
+      fit: fit,
+      alignment: alignment,
+      package: package,
+      addRepaintBoundary: addRepaintBoundary,
+      filterQuality: filterQuality,
+      onWarning: onWarning,
     );
   }
 

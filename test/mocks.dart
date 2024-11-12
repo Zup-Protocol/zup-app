@@ -7,14 +7,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
+import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/zup_navigator.dart';
+import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/zup_singleton_cache.dart';
 
 class AppCubitMock extends Mock implements AppCubit {}
 
@@ -41,6 +45,18 @@ class TokensRepositoryMock extends Mock implements TokensRepository {}
 class TokenSelectorModalCubitMock extends Mock implements TokenSelectorModalCubit {}
 
 class DebouncerMock extends Mock implements Debouncer {}
+
+class YieldRepositoryMock extends Mock implements YieldRepository {}
+
+class ZupSingletonCacheMock extends Mock implements ZupSingletonCache {}
+
+class UniswapV3PoolMock extends Mock implements UniswapV3Pool {}
+
+class UniswapV3PoolImplMock extends Mock implements UniswapV3PoolImpl {}
+
+class $AssetsLottiesGenMock extends Mock implements $AssetsLottiesGen {}
+
+class BuildContextMock extends Mock implements BuildContext {}
 
 class UrlLauncherPlatformCustomMock extends UrlLauncherPlatform {
   static String? lastLaunchedUrl;

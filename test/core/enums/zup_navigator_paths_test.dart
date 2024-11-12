@@ -16,8 +16,15 @@ void main() {
 
     expect(
       ZupNavigatorPaths.newPosition.path,
-      routePaths.create,
+      routePaths.create.path,
       reason: "New position path does not match routefly path",
+    );
+  });
+
+  test("The route params name for deposit page, should be `token0` and `token1`", () {
+    expect(
+      ZupNavigatorPaths.deposit.routeParamsName,
+      (param0: "token0", param1: "token1"),
     );
   });
 }

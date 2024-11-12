@@ -33,7 +33,7 @@ class TokenListDto with _$TokenListDto {
           TokenDto.fixture(),
         ],
         userTokens: [
-          TokenDto.fixture().copyWith(userUsdBalance: 134432.32, userTokenBalance: 432.32),
+          TokenDto.fixture().copyWith(userUsdBalance: 134432.32, usertoken1alance: 432.32),
         ],
         popularTokens: [
           TokenDto.fixture(),

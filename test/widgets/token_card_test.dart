@@ -5,9 +5,9 @@ import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/widgets/token_card.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/zup_core.dart';
 
 import '../golden_config.dart';
-import '../helpers.dart';
 import '../mocks.dart';
 
 void main() {
@@ -55,21 +55,5 @@ void main() {
     await tester.tap(find.byType(TokenCard));
 
     expect(called, true);
-  });
-
-  zGoldenTest("When the user has token balance, it should be displayed",
-      goldenFileName: "token_card_with_token_balance", (tester) async {
-    await tester.pumpDeviceBuilder(
-      await goldenBuilder(asset: TokenDto.fixture().copyWith(userTokenBalance: 100.32)),
-    );
-  });
-
-  zGoldenTest("When the user has usdc token balance, it should be displayed",
-      goldenFileName: "token_card_with_usd_balance", (tester) async {
-    await tester.pumpDeviceBuilder(
-      await goldenBuilder(
-        asset: TokenDto.fixture().copyWith(userTokenBalance: 100.32, userUsdBalance: 43782.3254256),
-      ),
-    );
   });
 }

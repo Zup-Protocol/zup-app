@@ -2,8 +2,8 @@ import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:zup_app/app/positions/widgets/position_token.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/widgets/position_token.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 
 import '../../../golden_config.dart';
@@ -20,7 +20,7 @@ void main() {
   tearDown(() => inject.reset());
 
   Future<DeviceBuilder> goldenBuilder({String tokenSymbol = "SYM", String tokenUrl = "url.com"}) =>
-      goldenDeviceBuilder(Center(child: PositionToken(tokenSymbol: tokenSymbol, tokenUrl: tokenUrl)),
+      goldenDeviceBuilder(Center(child: PositionToken(tokenSymbol: tokenSymbol, tokenLogoUrl: tokenUrl)),
           largeDevice: false);
 
   zGoldenTest(

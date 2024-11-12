@@ -5,6 +5,7 @@ import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/create_page.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 
 import '../../golden_config.dart';
@@ -18,6 +19,7 @@ void main() {
 
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<AppCubit>(() => appCubit);
+    inject.registerFactory<ZupNavigator>(() => ZupNavigatorMock());
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.arbitrum);
   });

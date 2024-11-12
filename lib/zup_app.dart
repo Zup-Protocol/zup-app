@@ -23,12 +23,14 @@ class ZupApp extends StatelessWidget {
       routerConfig: Routefly.routerConfig(
         routes: routes,
         initialPath: ZupNavigatorPaths.initial.path,
-        routeBuilder: (_, settings, child) => PageRouteBuilder(
-          settings: settings,
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
-          pageBuilder: (_, __, ___) => child,
-        ),
+        routeBuilder: (_, settings, child) {
+          return PageRouteBuilder(
+            settings: settings,
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+            pageBuilder: (_, __, ___) => child,
+          );
+        },
       ),
       theme: ZupTheme.lightTheme,
     );
