@@ -107,7 +107,12 @@ class _PositionsPageState extends State<PositionsPage> {
                       noPositions: () => buildNoPositionsState(),
                       noPositionsInNetwork: () => buildNoPositionsInNetworkState(),
                       positions: (positions) => buildPositionsState(positions),
-                    )
+                    ),
+                    // TODO: Implement Pagination
+                    // Align(
+                    //   alignment: Alignment.centerRight,
+                    //   child: ZupTextButton(onPressed: () {}, icon: const Icon(Icons.arrow_right), label: "Next Page"),
+                    // )
                   ],
                 ),
               ),
@@ -169,17 +174,17 @@ class _PositionsPageState extends State<PositionsPage> {
       );
 
   Widget buildPositionsState(List<PositionDto> positions) => Column(
+        mainAxisSize: MainAxisSize.max,
         children: [
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: positions.length,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            itemBuilder: (context, index) => Padding(
+          const SizedBox(height: 12),
+          ...List.generate(
+            positions.length,
+            (index) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: PositionCard(key: Key("position-card-$index"), position: positions[index]),
             ),
           ),
+          const SizedBox(height: 16),
           if (appCubit.selectedNetwork != Networks.all)
             Text(
               S.of(context).positionsPageCantFindAPosition,
@@ -188,6 +193,7 @@ class _PositionsPageState extends State<PositionsPage> {
                 color: ZupColors.gray,
               ),
             ),
+          const SizedBox(height: 100),
         ],
       );
 

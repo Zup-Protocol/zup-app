@@ -93,6 +93,198 @@ abstract class S {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
+  /// No description provided for @depositPageDepositSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get depositPageDepositSectionTitle;
+
+  /// No description provided for @depositPageDepositSectionTokenNotNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokenSymbol} is not necessary for your selected range'**
+  String depositPageDepositSectionTokenNotNeeded(String tokenSymbol);
+
+  /// No description provided for @depositPageMinRangeOutOfRangeWarningText.
+  ///
+  /// In en, this message translates to:
+  /// **'You will not earn fees until the market price move up into your range'**
+  String get depositPageMinRangeOutOfRangeWarningText;
+
+  /// No description provided for @depositPageMaxRangeOutOfRangeWarningText.
+  ///
+  /// In en, this message translates to:
+  /// **'You will not earn fees until the market price move down into your range'**
+  String get depositPageMaxRangeOutOfRangeWarningText;
+
+  /// No description provided for @depositPageInvalidRangeErrorText.
+  ///
+  /// In en, this message translates to:
+  /// **'Max range should be greater than min range'**
+  String get depositPageInvalidRangeErrorText;
+
+  /// No description provided for @rangeSelectorMinRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Min Range'**
+  String get rangeSelectorMinRange;
+
+  /// No description provided for @rangeSelectorMaxRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Range'**
+  String get rangeSelectorMaxRange;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @depositPageLoadingStep1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching Tokens...'**
+  String get depositPageLoadingStep1Title;
+
+  /// No description provided for @depositPageLoadingStep1Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairing Token A and Token B to kick off the search for top yields!'**
+  String get depositPageLoadingStep1Description;
+
+  /// No description provided for @depositPageLoadingStep2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning the Pools...'**
+  String get depositPageLoadingStep2Title;
+
+  /// No description provided for @depositPageLoadingStep2Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching through the sea of pools for the best yields, hang tight!'**
+  String get depositPageLoadingStep2Description;
+
+  /// No description provided for @depositPageLoadingStep3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching the Best yields for you...'**
+  String get depositPageLoadingStep3Title;
+
+  /// No description provided for @depositPageLoadingStep3Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it! Just adding a touch of sparkle to your perfect match!'**
+  String get depositPageLoadingStep3Description;
+
+  /// No description provided for @depositPageErrorStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Oops! Something went wrong!'**
+  String get depositPageErrorStateTitle;
+
+  /// No description provided for @depositPageErrorStateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'We ran into a issue while trying to find the best pool. Give it another shot, and if it keeps happening, don’t hesitate to reach out to us!'**
+  String get depositPageErrorStateDescription;
+
+  /// No description provided for @depositPageEmptyStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Pools Found'**
+  String get depositPageEmptyStateTitle;
+
+  /// No description provided for @depositPageEmptyStateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Seems like that there are no pools on our supported protocols matching your selected tokens. Would you like to try another combination?'**
+  String get depositPageEmptyStateDescription;
+
+  /// No description provided for @depositPageEmptyStateHelpButtonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another combination'**
+  String get depositPageEmptyStateHelpButtonTitle;
+
+  /// No description provided for @depositPageBackButtonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Pair'**
+  String get depositPageBackButtonTitle;
+
+  /// No description provided for @depositPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add liquidity'**
+  String get depositPageTitle;
+
+  /// No description provided for @depositPageTimeFrameTooltipMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a time-frame that matches your goal with this pool: a quick win (Short term), a balanced approach (Medium term), or a long haul (Long term).'**
+  String get depositPageTimeFrameTooltipMessage;
+
+  /// No description provided for @depositPageTimeFrameTooltipHelperButtonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **' Learn more'**
+  String get depositPageTimeFrameTooltipHelperButtonTitle;
+
+  /// No description provided for @depositPageTimeFrameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferred time frame'**
+  String get depositPageTimeFrameTitle;
+
+  /// No description provided for @depositPageNoYieldSelectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a yield to deposit'**
+  String get depositPageNoYieldSelectedTitle;
+
+  /// No description provided for @depositPageNoYieldSelectedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick any yield card above and dive into depositing your liquidity!'**
+  String get depositPageNoYieldSelectedDescription;
+
+  /// No description provided for @depositPageRangeSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Range'**
+  String get depositPageRangeSectionTitle;
+
+  /// No description provided for @depositPageRangeSectionFullRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Range'**
+  String get depositPageRangeSectionFullRange;
+
+  /// No description provided for @depositPageInvalidTokenAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount for {tokenSymbol}'**
+  String depositPageInvalidTokenAmount(String tokenSymbol);
+
+  /// No description provided for @depositPageInsufficientTokenBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient {tokenSymbol} balance'**
+  String depositPageInsufficientTokenBalance(String tokenSymbol);
+
+  /// No description provided for @depositPagePleaseEnterAmountForToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an amount for {tokenSymbol}'**
+  String depositPagePleaseEnterAmountForToken(String tokenSymbol);
+
+  /// No description provided for @depositPageDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get depositPageDeposit;
+
   /// No description provided for @connectYourWallet.
   ///
   /// In en, this message translates to:
@@ -152,6 +344,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Connect My Wallet'**
   String get connectMyWallet;
+
+  /// No description provided for @connectWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Wallet'**
+  String get connectWallet;
 
   /// No description provided for @positionsPageNotConnectedDescription.
   ///
@@ -292,17 +490,17 @@ abstract class S {
   /// **'Select Token'**
   String get selectToken;
 
-  /// No description provided for @tokenA.
+  /// No description provided for @token0.
   ///
   /// In en, this message translates to:
   /// **'Token A'**
-  String get tokenA;
+  String get token0;
 
-  /// No description provided for @tokenB.
+  /// No description provided for @token1.
   ///
   /// In en, this message translates to:
   /// **'Token B'**
-  String get tokenB;
+  String get token1;
 
   /// No description provided for @createPageTitle.
   ///

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zup_app/app/create/stages/create_page_select_tokens_stage.dart';
+import 'package:zup_app/app/create/create_page_select_tokens_stage.dart';
 
 class CreatePage extends StatelessWidget {
   const CreatePage({super.key});

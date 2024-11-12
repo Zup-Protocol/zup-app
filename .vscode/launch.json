@@ -2,11 +2,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Zup App (Web)",
+            "name": "Zup App (Web) (Release)",
             "request": "launch",
             "type": "dart",
             "deviceId": "chrome",
             "program": "./lib/main.dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "Zup App (Web) (Debug)",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "chrome",
+            "program": "./lib/main.dart",
+            "flutterMode": "debug"
         },
         {
             "name": "Zup App (MacOs)",

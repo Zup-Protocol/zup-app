@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zup_app/app/positions/widgets/position_token.dart';
 import 'package:zup_app/core/dtos/position_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/position_status.dart';
@@ -9,6 +8,7 @@ import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
+import 'package:zup_app/widgets/position_token.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
@@ -82,11 +82,11 @@ class _PositionCardState extends State<PositionCard> {
                     children: [
                       PositionToken(
                           tokenSymbol: widget.position.token0?.symbol ?? "",
-                          tokenUrl: widget.position.token0?.logoUrl ?? ""),
+                          tokenLogoUrl: widget.position.token0?.logoUrl ?? ""),
                       const SizedBox(width: 15),
                       PositionToken(
                           tokenSymbol: widget.position.token1?.symbol ?? "",
-                          tokenUrl: widget.position.token1?.logoUrl ?? ""),
+                          tokenLogoUrl: widget.position.token1?.logoUrl ?? ""),
                       const SizedBox(width: 20),
                       if (widget.position.network != null) ...[
                         Skeleton.ignore(
@@ -95,6 +95,7 @@ class _PositionCardState extends State<PositionCard> {
                             color: ZupColors.gray,
                             icon: widget.position.network?.icon,
                             iconSize: 22,
+                            applyColorToIcon: false,
                             iconSpacing: 5,
                           ),
                         ),

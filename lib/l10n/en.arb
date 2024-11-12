@@ -1,5 +1,65 @@
 {
     "@@locale": "en",
+    "depositPageDepositSectionTitle": "Deposit",
+    "depositPageDepositSectionTokenNotNeeded": "{tokenSymbol} is not necessary for your selected range",
+    "@depositPageDepositSectionTokenNotNeeded": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "depositPageMinRangeOutOfRangeWarningText": "You will not earn fees until the market price move up into your range",
+    "depositPageMaxRangeOutOfRangeWarningText": "You will not earn fees until the market price move down into your range",
+    "depositPageInvalidRangeErrorText": "Max range should be greater than min range",
+    "rangeSelectorMinRange": "Min Range",
+    "rangeSelectorMaxRange": "Max Range",
+    "loading": "Loading...",
+    "depositPageLoadingStep1Title": "Matching Tokens...",
+    "depositPageLoadingStep1Description": "Pairing Token A and Token B to kick off the search for top yields!",
+    "depositPageLoadingStep2Title": "Scanning the Pools...",
+    "depositPageLoadingStep2Description": "Searching through the sea of pools for the best yields, hang tight!",
+    "depositPageLoadingStep3Title": "Fetching the Best yields for you...",
+    "depositPageLoadingStep3Description": "Got it! Just adding a touch of sparkle to your perfect match!",
+    "depositPageErrorStateTitle": "Oops! Something went wrong!",
+    "depositPageErrorStateDescription": "We ran into a issue while trying to find the best pool. Give it another shot, and if it keeps happening, don’t hesitate to reach out to us!",
+    "depositPageEmptyStateTitle": "No Pools Found",
+    "depositPageEmptyStateDescription": "Seems like that there are no pools on our supported protocols matching your selected tokens. Would you like to try another combination?",
+    "depositPageEmptyStateHelpButtonTitle": "Try another combination",
+    "depositPageBackButtonTitle": "Select Pair",
+    "depositPageTitle": "Add liquidity",
+    "depositPageTimeFrameTooltipMessage": "Select a time-frame that matches your goal with this pool: a quick win (Short term), a balanced approach (Medium term), or a long haul (Long term).",
+    "depositPageTimeFrameTooltipHelperButtonTitle": " Learn more",
+    "depositPageTimeFrameTitle": "Preferred time frame",
+    "depositPageNoYieldSelectedTitle": "Pick a yield to deposit",
+    "depositPageNoYieldSelectedDescription": "Pick any yield card above and dive into depositing your liquidity!",
+    "depositPageRangeSectionTitle": "Select Range",
+    "depositPageRangeSectionFullRange": "Full Range",
+    "depositPageInvalidTokenAmount": "Enter a valid amount for {tokenSymbol}",
+    "@depositPageInvalidTokenAmount": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "depositPageInsufficientTokenBalance": "Insufficient {tokenSymbol} balance",
+    "@depositPageInsufficientTokenBalance": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "depositPagePleaseEnterAmountForToken": "Please enter an amount for {tokenSymbol}",
+    "@depositPagePleaseEnterAmountForToken": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "depositPageDeposit": "Deposit",
     "connectYourWallet": "Connect your wallet",
     "tokenSelectorModalTitle": "Select a token",
     "tokenSelectorModalDescription": "Pick a token from our list or search by symbol or address to build your ideal liquidity pool!",
@@ -17,6 +77,7 @@
         }
     },
     "connectMyWallet": "Connect My Wallet",
+    "connectWallet": "Connect Wallet",
     "positionsPageNotConnectedDescription": "Wallet not connected. Please connect your\nwallet to view your positions",
     "positionsPageNoPositionsTitle": "You don’t have any positions yet",
     "positionsPageNoPositionsDescription": "Hm… It looks like you don’t have any positions yet.\nWant to create one?",
@@ -76,8 +137,8 @@
     "positionStatusClosed": "Closed",
     "unknown": "Unknown",
     "selectToken": "Select Token",
-    "tokenA": "Token A",
-    "tokenB": "Token B",
+    "token0": "Token A",
+    "token1": "Token B",
     "createPageTitle": "New Position",
     "createPageShowMeTheMoney": "Show me the money!",
     "createPageDescription": "Ready to dive in? First, pick the dynamic duo of tokens you want to team up in the pool. Just choose your pair right below and you’re set to make some magic!",

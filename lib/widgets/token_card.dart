@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
-import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
@@ -70,14 +69,6 @@ class _TokenCardState extends State<TokenCard> {
                             color: isHovering ? ZupColors.brand : ZupColors.black,
                           ),
                         ),
-                        if (widget.asset.userTokenBalance != 0) ...[
-                          const SizedBox(width: 10),
-                          const Spacer(),
-                          Text(
-                            widget.asset.userTokenBalance.formatCurrency(isUSD: false),
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
-                        ]
                       ],
                     ),
                     Row(
@@ -86,13 +77,6 @@ class _TokenCardState extends State<TokenCard> {
                           widget.asset.name,
                           style: const TextStyle(fontSize: 14, color: ZupColors.gray),
                         ),
-                        if (widget.asset.userUsdBalance != 0) ...[
-                          const Spacer(),
-                          Text(
-                            widget.asset.userUsdBalance.formatCurrency(isUSD: true),
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: ZupColors.gray),
-                          ),
-                        ]
                       ],
                     ),
                   ],

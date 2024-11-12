@@ -30,6 +30,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  archive:
+    dependency: transitive
+    description:
+      name: archive
+      sha256: cb6a278ef2dbb298455e1a713bda08524a175630ec643a242c399c932a0a1f7d
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.6.1"
   args:
     dependency: transitive
     description:
@@ -98,10 +106,10 @@ packages:
     dependency: "direct main"
     description:
       name: build_runner
-      sha256: dd09dd4e2b078992f42aac7f1a622f01882a8492fef08486b27ddde929c19f04
+      sha256: "028819cfb90051c6b5440c7e574d1896f8037e3c96cf17aaeb054c9311cfbf4d"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.12"
+    version: "2.4.13"
   build_runner_core:
     dependency: transitive
     description:
@@ -167,7 +175,7 @@ packages:
     source: hosted
     version: "2.0.3"
   clock:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: clock
       sha256: cb6d7f03e1de671e34607e909a7213e31d7752be4fb66a86d29fe1eb14bfb5cf
@@ -238,6 +246,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  decimal:
+    dependency: "direct main"
+    description:
+      name: decimal
+      sha256: "4140a688f9e443e2f4de3a1162387bf25e1ac6d51e24c9da263f245210f41440"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
   dio:
     dependency: "direct main"
     description:
@@ -255,7 +271,7 @@ packages:
     source: hosted
     version: "2.0.0"
   equatable:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: equatable
       sha256: c2b87cb7756efdf69892005af546c56c0b5037f54d2a88269b4f347a505e3ca2
@@ -300,7 +316,7 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_animate:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_animate
       sha256: "7c8a6594a9252dad30cc2ef16e33270b6248c4dedc3b3d06c86c4f3f4dc05ae5"
@@ -339,6 +355,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.7.0"
+  flutter_inset_box_shadow:
+    dependency: "direct main"
+    description:
+      name: flutter_inset_box_shadow
+      sha256: "0b1930ed5f4ad84b11b41dda907fbc5d4c12929a4c51455c626e5937b47ffb93"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.8"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -554,6 +578,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  lottie:
+    dependency: "direct main"
+    description:
+      name: lottie
+      sha256: "6a24ade5d3d918c306bb1c21a6b9a04aab0489d51a2582522eea820b4093b62b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.2"
   macros:
     dependency: transitive
     description:
@@ -762,14 +794,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.8"
+  rational:
+    dependency: transitive
+    description:
+      name: rational
+      sha256: cb808fb6f1a839e6fc5f7d8cb3b0a10e1db48b3be102de73938c627f0b636336
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.3"
   routefly:
     dependency: "direct main"
     description:
       name: routefly
-      sha256: "5fb052aac074fafad62c2da25efcc4084b0b4f63ac89483d5b873da0be0ff2b7"
+      sha256: becf6ae1d99644ab896f1d27ad7ac12b4215a14f85e66ef98fc6993ea81a0092
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.4"
   rxdart:
     dependency: transitive
     description:
@@ -1124,7 +1164,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "9a5d62818c571c6ea9c3717057dfd9d35be6759d"
+      resolved-ref: "089a154d4f0e5378e74bdc50a108676d0840ee27"
       url: "https://github.com/Zup-Protocol/web3kit.git"
     source: git
     version: "0.0.1"
@@ -1168,12 +1208,21 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  zup_core:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: "0a02cb0c93803f6a6b9a093b07e9fac029a5aa60"
+      url: "https://github.com/Zup-Protocol/zup-core.git"
+    source: git
+    version: "0.0.1"
   zup_ui_kit:
     dependency: "direct main"
     description:
       path: "."
       ref: main
-      resolved-ref: bf3b2fac5c0e060be254711901887e95e3314ccb
+      resolved-ref: "38d4e7231324e24efe7579ac7c8980c1e5c67e3d"
       url: "https://github.com/Zup-Protocol/zup-ui-kit.git"
     source: git
     version: "0.0.1"

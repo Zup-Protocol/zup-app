@@ -3,7 +3,8 @@
 import 'package:routefly/routefly.dart';
 
 import 'app/app_layout.dart' as a1;
-import 'app/create/create_page.dart' as a2;
+import 'app/create/create_page.dart' as a3;
+import 'app/create/deposit/deposit_page.dart' as a2;
 import 'app/positions/positions_page.dart' as a0;
 
 List<RouteEntity> get routes => [
@@ -27,13 +28,19 @@ List<RouteEntity> get routes => [
         ),
       ),
       RouteEntity(
+        key: '/create/deposit',
+        parent: '/',
+        uri: Uri.parse('/create/deposit'),
+        routeBuilder: a2.routeBuilder,
+      ),
+      RouteEntity(
         key: '/create',
         parent: '/',
         uri: Uri.parse('/create'),
         routeBuilder: (ctx, settings) => Routefly.defaultRouteBuilder(
           ctx,
           settings,
-          const a2.CreatePage(),
+          const a3.CreatePage(),
         ),
       ),
     ];
@@ -41,5 +48,8 @@ List<RouteEntity> get routes => [
 const routePaths = (
   path: '/',
   positions: '/positions',
-  create: '/create',
+  create: (
+    path: '/create',
+    deposit: '/create/deposit',
+  ),
 );

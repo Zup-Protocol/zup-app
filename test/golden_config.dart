@@ -25,7 +25,15 @@ class GoldenConfig {
         GlobalWidgetsLocalizations.delegate,
         Web3KitLocalizations.delegate,
       ],
-      home: Scaffold(body: child),
+      home: Scaffold(
+        backgroundColor: Colors.white,
+        body: CustomScrollView(slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: child,
+          )
+        ]),
+      ),
       theme: ZupTheme.lightTheme,
     );
   }

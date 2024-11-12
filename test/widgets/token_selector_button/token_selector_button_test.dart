@@ -14,9 +14,9 @@ import 'package:zup_app/widgets/token_selector_button/token_selector_button.dart
 import 'package:zup_app/widgets/token_selector_button/token_selector_button_controller.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/zup_core.dart';
 
 import '../../golden_config.dart';
-import '../../helpers.dart';
 import '../../mocks.dart';
 
 void main() {

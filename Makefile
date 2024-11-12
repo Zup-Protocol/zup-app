@@ -12,6 +12,9 @@ gen-l10n:
 gen-routes:
 	@dart run routefly
 
+update-goldens:
+	@flutter test --update-goldens
+
 test:
 	@flutter test --coverage --test-randomize-ordering-seed=random && genhtml coverage/lcov.info -o coverage/html && make open-coverage
 

@@ -9,6 +9,121 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get depositPageDepositSectionTitle => 'Deposit';
+
+  @override
+  String depositPageDepositSectionTokenNotNeeded(String tokenSymbol) {
+    return '$tokenSymbol is not necessary for your selected range';
+  }
+
+  @override
+  String get depositPageMinRangeOutOfRangeWarningText =>
+      'You will not earn fees until the market price move up into your range';
+
+  @override
+  String get depositPageMaxRangeOutOfRangeWarningText =>
+      'You will not earn fees until the market price move down into your range';
+
+  @override
+  String get depositPageInvalidRangeErrorText =>
+      'Max range should be greater than min range';
+
+  @override
+  String get rangeSelectorMinRange => 'Min Range';
+
+  @override
+  String get rangeSelectorMaxRange => 'Max Range';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get depositPageLoadingStep1Title => 'Matching Tokens...';
+
+  @override
+  String get depositPageLoadingStep1Description =>
+      'Pairing Token A and Token B to kick off the search for top yields!';
+
+  @override
+  String get depositPageLoadingStep2Title => 'Scanning the Pools...';
+
+  @override
+  String get depositPageLoadingStep2Description =>
+      'Searching through the sea of pools for the best yields, hang tight!';
+
+  @override
+  String get depositPageLoadingStep3Title =>
+      'Fetching the Best yields for you...';
+
+  @override
+  String get depositPageLoadingStep3Description =>
+      'Got it! Just adding a touch of sparkle to your perfect match!';
+
+  @override
+  String get depositPageErrorStateTitle => 'Oops! Something went wrong!';
+
+  @override
+  String get depositPageErrorStateDescription =>
+      'We ran into a issue while trying to find the best pool. Give it another shot, and if it keeps happening, don’t hesitate to reach out to us!';
+
+  @override
+  String get depositPageEmptyStateTitle => 'No Pools Found';
+
+  @override
+  String get depositPageEmptyStateDescription =>
+      'Seems like that there are no pools on our supported protocols matching your selected tokens. Would you like to try another combination?';
+
+  @override
+  String get depositPageEmptyStateHelpButtonTitle => 'Try another combination';
+
+  @override
+  String get depositPageBackButtonTitle => 'Select Pair';
+
+  @override
+  String get depositPageTitle => 'Add liquidity';
+
+  @override
+  String get depositPageTimeFrameTooltipMessage =>
+      'Select a time-frame that matches your goal with this pool: a quick win (Short term), a balanced approach (Medium term), or a long haul (Long term).';
+
+  @override
+  String get depositPageTimeFrameTooltipHelperButtonTitle => ' Learn more';
+
+  @override
+  String get depositPageTimeFrameTitle => 'Preferred time frame';
+
+  @override
+  String get depositPageNoYieldSelectedTitle => 'Pick a yield to deposit';
+
+  @override
+  String get depositPageNoYieldSelectedDescription =>
+      'Pick any yield card above and dive into depositing your liquidity!';
+
+  @override
+  String get depositPageRangeSectionTitle => 'Select Range';
+
+  @override
+  String get depositPageRangeSectionFullRange => 'Full Range';
+
+  @override
+  String depositPageInvalidTokenAmount(String tokenSymbol) {
+    return 'Enter a valid amount for $tokenSymbol';
+  }
+
+  @override
+  String depositPageInsufficientTokenBalance(String tokenSymbol) {
+    return 'Insufficient $tokenSymbol balance';
+  }
+
+  @override
+  String depositPagePleaseEnterAmountForToken(String tokenSymbol) {
+    return 'Please enter an amount for $tokenSymbol';
+  }
+
+  @override
+  String get depositPageDeposit => 'Deposit';
+
+  @override
   String get connectYourWallet => 'Connect your wallet';
 
   @override
@@ -41,6 +156,9 @@ class SEn extends S {
 
   @override
   String get connectMyWallet => 'Connect My Wallet';
+
+  @override
+  String get connectWallet => 'Connect Wallet';
 
   @override
   String get positionsPageNotConnectedDescription =>
@@ -134,10 +252,10 @@ class SEn extends S {
   String get selectToken => 'Select Token';
 
   @override
-  String get tokenA => 'Token A';
+  String get token0 => 'Token A';
 
   @override
-  String get tokenB => 'Token B';
+  String get token1 => 'Token B';
 
   @override
   String get createPageTitle => 'New Position';
