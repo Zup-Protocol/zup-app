@@ -23,7 +23,7 @@ class _AppPageState extends State<AppPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: ScrollbarTheme(
-          data: const ScrollbarThemeData(mainAxisMargin: 10, crossAxisMargin: 3),
+          data: const ScrollbarThemeData(mainAxisMargin: 10, crossAxisMargin: 3, thickness: WidgetStatePropertyAll(5)),
           child: CustomScrollView(
             controller: appScrollController,
             shrinkWrap: true,
@@ -35,7 +35,7 @@ class _AppPageState extends State<AppPage> {
                 pinned: true,
                 titleSpacing: 0,
                 title: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  padding: const EdgeInsets.only(left: 30, right: 15),
                   child: AppHeader(height: appBarHeight),
                 ),
                 toolbarHeight: appBarHeight,

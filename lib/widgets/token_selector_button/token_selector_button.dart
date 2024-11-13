@@ -61,7 +61,10 @@ class _TokenSelectorButtonState extends State<TokenSelectorButton> {
                 child: Row(
                   children: [
                     if (selectedToken == null)
-                      Assets.logos.zup.svg(height: 30)
+                      Assets.icons.boltCircleFill.svg(
+                        height: 16,
+                        colorFilter: const ColorFilter.mode(ZupColors.brand, BlendMode.srcIn),
+                      )
                     else
                       zupCachedImage.build(
                         radius: 50,

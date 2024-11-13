@@ -63,10 +63,10 @@ class _AppHeaderState extends State<AppHeader> {
                 child: GestureDetector(
                   key: const Key("logo-button"),
                   onTap: () => navigator.navigateToInitial(),
-                  child: Assets.logos.zup.svg(height: 60),
+                  child: Assets.logos.zup.svg(height: 30),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 26),
               AppHeaderTabButton(
                 key: const Key("my-positions-button"),
                 title: "My Positions",

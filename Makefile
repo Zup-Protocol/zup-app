@@ -13,7 +13,7 @@ gen-routes:
 	@dart run routefly
 
 gen-abis:
-	@dart run web3kit:generate_abisx
+	@dart run web3kit:generate_abis
 
 update-goldens:
 	@flutter test --update-goldens
