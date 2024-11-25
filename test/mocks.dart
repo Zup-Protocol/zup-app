@@ -9,6 +9,7 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
+import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
@@ -57,6 +58,8 @@ class UniswapV3PoolImplMock extends Mock implements UniswapV3PoolImpl {}
 class $AssetsLottiesGenMock extends Mock implements $AssetsLottiesGen {}
 
 class BuildContextMock extends Mock implements BuildContext {}
+
+class DepositCubitMock extends Mock implements DepositCubit {}
 
 class UrlLauncherPlatformCustomMock extends UrlLauncherPlatform {
   static String? lastLaunchedUrl;

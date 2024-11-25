@@ -1,28 +1,15 @@
-import 'dart:math' as math;
+import 'dart:math';
 
 mixin V3PoolConversorsMixin {
-  BigInt priceToTick({required int token0Decimals, required int token1Decimals, required double value}) {
-    final priceWithDecimals = value * math.pow(10, token0Decimals);
-    final quoteReserveRatio = (1 * math.pow(10, token1Decimals));
-
-    final sqrtPriceRatio = quoteReserveRatio / priceWithDecimals;
-    final tick = (math.log(sqrtPriceRatio) / math.log(1.0001)).floor();
-
-    return BigInt.from(tick);
-  }
-
-  double tickToPrice({
-    required int token0Decimals,
-    required int token1Decimals,
+  ({double priceAsQuoteToken, double priceAsBaseToken}) tickToPrice({
     required BigInt tick,
-    bool asToken0byToken1 = false,
+    required int poolToken0Decimals,
+    required int poolToken1Decimals,
   }) {
-    final tickAsPrice = math.pow(1.0001, tick.toInt()).toDouble();
+    final basePrice = pow(1.0001, tick.toInt()) / pow(10, poolToken1Decimals - poolToken0Decimals);
+    final quotePrice = 1 / basePrice;
 
-    final priceAstoken0byToken1 = tickAsPrice / (math.pow(10, token1Decimals - token0Decimals));
-    final priceAsToken1byToken0 = 1 / priceAstoken0byToken1;
-
-    return asToken0byToken1 ? priceAstoken0byToken1 : priceAsToken1byToken0;
+    return (priceAsQuoteToken: quotePrice, priceAsBaseToken: basePrice);
   }
 
   BigInt tickToClosestValidTick({required BigInt tick, required int tickSpacing}) {
@@ -37,28 +24,47 @@ mixin V3PoolConversorsMixin {
     return highestValidTick;
   }
 
-  double priceToClosestValidPrice({
-    required int token0Decimals,
-    required int token1Decimals,
-    required int tickSpacing,
-    required double value,
+  BigInt priceToTick({
+    required double price,
+    required int poolToken0Decimals,
+    required int poolToken1Decimals,
+    bool isReversed = false,
   }) {
-    if (value == 0) return 0;
+    final baseTokenReserveRatio = (isReversed ? price : 1) * pow(10, poolToken0Decimals);
+    final quoteTokenReserveRatio = (isReversed ? 1 : price) * pow(10, poolToken1Decimals);
+    final sqrtPriceRatio = quoteTokenReserveRatio / baseTokenReserveRatio;
+    final tickForPrice = (log(sqrtPriceRatio) / log(1.0001)).floor();
 
+    return BigInt.from(tickForPrice);
+  }
+
+  ({double price, BigInt priceAsTick}) priceToClosestValidPrice(
+      {required double price,
+      required int poolToken0Decimals,
+      required int poolToken1Decimals,
+      required int tickSpacing,
+      required bool isReversed}) {
     final priceAsTick = priceToTick(
-      token0Decimals: token0Decimals,
-      token1Decimals: token1Decimals,
-      value: value,
+      price: price,
+      poolToken0Decimals: poolToken0Decimals,
+      poolToken1Decimals: poolToken1Decimals,
+      isReversed: isReversed,
     );
 
-    final closestUsableTickFromPrice = tickToClosestValidTick(tick: priceAsTick, tickSpacing: tickSpacing);
+    final closestValidTick = tickToClosestValidTick(
+      tick: priceAsTick,
+      tickSpacing: tickSpacing,
+    );
 
     final closestValidPrice = tickToPrice(
-      token0Decimals: token0Decimals,
-      token1Decimals: token1Decimals,
-      tick: closestUsableTickFromPrice,
+      tick: closestValidTick,
+      poolToken0Decimals: poolToken0Decimals,
+      poolToken1Decimals: poolToken1Decimals,
     );
 
-    return closestValidPrice;
+    return (
+      price: isReversed ? closestValidPrice.priceAsQuoteToken : closestValidPrice.priceAsBaseToken,
+      priceAsTick: closestValidTick
+    );
   }
 }

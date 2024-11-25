@@ -1,17 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/mixins/keys_mixin.dart';
+import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_core/zup_core.dart';
 
 part 'deposit_cubit.freezed.dart';
 part 'deposit_state.dart';
 
-class DepositCubit extends Cubit<DepositState> with KeysMixin {
+class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsMixin {
   DepositCubit(
     this._yieldRepository,
     this._zupSingletonCache,
@@ -24,6 +28,26 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin {
   final Wallet _wallet;
   final UniswapV3Pool _uniswapV3Pool;
 
+  final StreamController<BigInt?> _pooltickStreamController = StreamController.broadcast();
+  final StreamController<YieldDto?> _selectedYieldStreamController = StreamController.broadcast();
+
+  BigInt? _latestPoolTick;
+  YieldDto? _selectedYield;
+
+  late final Stream<YieldDto?> selectedYieldStream = _selectedYieldStreamController.stream;
+  late final Stream<BigInt?> poolTickStream = _pooltickStreamController.stream;
+
+  YieldDto? get selectedYield => _selectedYield;
+  BigInt? get latestPoolTick => _latestPoolTick;
+
+  void setup() async {
+    Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (_pooltickStreamController.isClosed) return timer.cancel();
+
+      if (selectedYield != null) getSelectedPoolTick();
+    });
+  }
+
   Future<void> getBestPools({required String token0Address, required String token1Address}) async {
     try {
       emit(const DepositState.loading());
@@ -35,6 +59,33 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin {
     } catch (e) {
       emit(const DepositState.error());
     }
+  }
+
+  Future<void> selectYield(YieldDto? yieldDto) async {
+    _selectedYield = yieldDto;
+    _selectedYieldStreamController.add(selectedYield);
+
+    if (selectedYield != null) await getSelectedPoolTick();
+  }
+
+  Future<void> getSelectedPoolTick() async {
+    if (selectedYield == null) return;
+
+    _latestPoolTick = null;
+    _pooltickStreamController.add(null);
+
+    final selectedYieldBeforeCall = selectedYield;
+
+    final uniswapV3Pool = _uniswapV3Pool.fromRpcProvider(
+      contractAddress: selectedYieldBeforeCall!.poolAddress,
+      rpcUrl: selectedYieldBeforeCall.network.rpcUrl ?? "",
+    );
+
+    final slot0 = await uniswapV3Pool.slot0();
+    if (selectedYieldBeforeCall != selectedYield) return await getSelectedPoolTick();
+
+    _pooltickStreamController.add(slot0.tick);
+    _latestPoolTick = slot0.tick;
   }
 
   Future<double> getWalletTokenAmount(String tokenAddress, {required Networks network}) async {
@@ -58,20 +109,10 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin {
     );
   }
 
-  Future<BigInt> getPoolTick(Networks poolNetwork, String poolAddress) async {
-    return await _zupSingletonCache.run(
-      () async {
-        try {
-          final pool = _uniswapV3Pool.fromRpcProvider(contractAddress: poolAddress, rpcUrl: poolNetwork.rpcUrl ?? "");
-          final slot0 = await pool.slot0();
-
-          return slot0.tick;
-        } catch (_) {
-          return BigInt.zero;
-        }
-      },
-      key: poolTickCacheKey(network: poolNetwork, poolAddress: poolAddress),
-      expiration: const Duration(minutes: 1),
-    );
+  @override
+  Future<void> close() async {
+    await _pooltickStreamController.close();
+    await _selectedYieldStreamController.close();
+    return super.close();
   }
 }

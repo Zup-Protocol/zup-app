@@ -1,4 +1,4 @@
-part of 'token_amount_card_user_balance_cubit.dart';
+part of 'token_amount_input_card_user_balance_cubit.dart';
 
 @freezed
 class TokenAmountCardUserBalanceState with _$TokenAmountCardUserBalanceState {

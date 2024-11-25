@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web3kit/web3kit.dart';
-import 'package:zup_app/app/create/deposit/widgets/token_amount_card/token_amount_card_user_balance_cubit.dart';
+import 'package:zup_app/app/create/deposit/widgets/token_amount_input_card/token_amount_input_card_user_balance_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
@@ -14,8 +14,8 @@ import 'package:zup_app/widgets/position_token.dart';
 import 'package:zup_core/zup_core.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
-class TokenAmountCard extends StatefulWidget {
-  const TokenAmountCard({
+class TokenAmountInputCard extends StatefulWidget {
+  const TokenAmountInputCard({
     super.key,
     required this.token,
     required this.onInput,
@@ -31,37 +31,41 @@ class TokenAmountCard extends StatefulWidget {
   final String? disabledText;
 
   @override
-  State<TokenAmountCard> createState() => _TokenAmountCardState();
+  State<TokenAmountInputCard> createState() => _TokenAmountInputCardState();
 }
 
-class _TokenAmountCardState extends State<TokenAmountCard> with SingleTickerProviderStateMixin {
+class _TokenAmountInputCardState extends State<TokenAmountInputCard> with SingleTickerProviderStateMixin {
   AnimationController? refreshBalanceAnimationController;
 
   Wallet get wallet => inject<Wallet>();
   ZupSingletonCache get zupSingletonCache => inject<ZupSingletonCache>();
 
-  TokenAmountCardUserBalanceCubit? userBalanceCubit;
+  late final TokenAmountCardUserBalanceCubit userBalanceCubit = TokenAmountCardUserBalanceCubit(
+    wallet,
+    widget.token.address,
+    widget.network,
+    zupSingletonCache,
+  );
 
   @override
   void initState() {
     refreshBalanceAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
-    userBalanceCubit = TokenAmountCardUserBalanceCubit(wallet, widget.token.address, widget.network, zupSingletonCache);
 
     WidgetsBinding.instance.addPostFrameCallback((tester) {
-      if (wallet.signer != null) userBalanceCubit!.getUserTokenAmount();
+      if (wallet.signer != null) userBalanceCubit.getUserTokenAmount();
     });
     super.initState();
   }
 
   @override
-  void didUpdateWidget(covariant TokenAmountCard oldWidget) {
+  void didUpdateWidget(covariant TokenAmountInputCard oldWidget) {
     if (widget.token != oldWidget.token) {
-      userBalanceCubit?.close();
-      userBalanceCubit =
-          TokenAmountCardUserBalanceCubit(wallet, widget.token.address, widget.network, zupSingletonCache);
-    }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        userBalanceCubit.updateToken(widget.token.address);
+      });
 
-    super.didUpdateWidget(oldWidget);
+      super.didUpdateWidget(oldWidget);
+    }
   }
 
   @override
@@ -133,7 +137,7 @@ class _TokenAmountCardState extends State<TokenAmountCard> with SingleTickerProv
                           ),
                           const Spacer(),
                           BlocProvider.value(
-                            value: userBalanceCubit!,
+                            value: userBalanceCubit,
                             child: BlocConsumer<TokenAmountCardUserBalanceCubit, TokenAmountCardUserBalanceState>(
                               listener: (context, state) {
                                 state.maybeWhen(
@@ -150,17 +154,17 @@ class _TokenAmountCardState extends State<TokenAmountCard> with SingleTickerProv
                                         ZupTextButton(
                                           key: const Key("user-balance-button"),
                                           onPressed: () {
-                                            final userBalance = userBalanceCubit!.userBalance;
+                                            final userBalance = userBalanceCubit.userBalance;
 
                                             if (userBalance == 0) return;
 
-                                            setState(() => widget.controller.text = userBalance.toString());
+                                            widget.controller.text = userBalance.toString();
                                             widget.onInput(userBalance);
                                           },
                                           alignLeft: false,
                                           icon: Assets.icons.walletBifold.svg(),
                                           label: state.maybeWhen(
-                                            orElse: () => userBalanceCubit!.userBalance.toAmount(
+                                            orElse: () => userBalanceCubit.userBalance.toAmount(
                                               useLessThan: true,
                                             ),
                                             loadingUserBalance: () => "........",
@@ -178,8 +182,8 @@ class _TokenAmountCardState extends State<TokenAmountCard> with SingleTickerProv
                                           backgroundColor: Colors.transparent,
                                           icon: Assets.icons.arrowClockwise.svg(),
                                           onPressed: () => state.mapOrNull(
-                                            error: (_) => userBalanceCubit!.getUserTokenAmount(ignoreCache: true),
-                                            showUserBalance: (_) => userBalanceCubit!.getUserTokenAmount(
+                                            error: (_) => userBalanceCubit.getUserTokenAmount(ignoreCache: true),
+                                            showUserBalance: (_) => userBalanceCubit.getUserTokenAmount(
                                               ignoreCache: true,
                                             ),
                                           ),

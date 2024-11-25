@@ -7,8 +7,8 @@ import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/mixins/keys_mixin.dart';
 import 'package:zup_core/zup_core.dart';
 
-part 'token_amount_card_user_balance_cubit.freezed.dart';
-part 'token_amount_card_user_balance_state.dart';
+part 'token_amount_input_card_user_balance_cubit.freezed.dart';
+part 'token_amount_input_card_user_balance_state.dart';
 
 class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceState> with KeysMixin {
   TokenAmountCardUserBalanceCubit(this._wallet, this._tokenAddress, this._network, this._zupSingletonCache)
@@ -16,8 +16,9 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
     _setupStreams();
   }
 
+  String _tokenAddress;
+
   final Wallet _wallet;
-  final String _tokenAddress;
   final Networks _network;
   final ZupSingletonCache _zupSingletonCache;
 
@@ -30,6 +31,12 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
 
       getUserTokenAmount();
     });
+  }
+
+  Future<void> updateToken(String tokenAddress) async {
+    _tokenAddress = tokenAddress;
+
+    if (_wallet.signer != null) await getUserTokenAmount();
   }
 
   Future<void> getUserTokenAmount({bool ignoreCache = false}) async {

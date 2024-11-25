@@ -31,7 +31,7 @@ void main() {
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<Debouncer>(() => Debouncer(milliseconds: 0));
 
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.base);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
     when(() => tokensRepository.getTokenList()).thenAnswer((_) async => TokenListDto.fixture());
     when(() => cubit.stream).thenAnswer((_) => const Stream.empty());
     when(() => cubit.state).thenReturn(const TokenSelectorModalState.initial());

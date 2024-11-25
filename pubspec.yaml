@@ -16,20 +16,20 @@ dependencies:
     sdk: flutter
   get_it: ^7.7.0
   web3kit:
-    git:
-      url: https://github.com/Zup-Protocol/web3kit.git
-      ref: main
-    # path: ../web3kit
+    path: ../web3kit
+    # git:
+    #   url: https://github.com/Zup-Protocol/web3kit.git
+    #   ref: main
   zup_ui_kit:
-    git:
-      url: https://github.com/Zup-Protocol/zup-ui-kit.git
-      ref: main
-    # path: ../zup_ui_kit
-  # zup_core:
-  #   git:
-  #     url: https://github.com/Zup-Protocol/zup-core.git
-  #     ref: main
-  # path: ../zup_core
+    path: ../zup_ui_kit
+    # git:
+    #   url: https://github.com/Zup-Protocol/zup-ui-kit.git
+    #   ref: main
+  zup_core:
+    path: ../zup_core
+    # git:
+    #   url: https://github.com/Zup-Protocol/zup-core.git
+    #   ref: main
   freezed_annotation: ^2.4.4
   flutter_bloc: ^8.1.6
   collection: ^1.18.0
@@ -58,6 +58,7 @@ dev_dependencies:
   mocktail: ^1.0.4
   json_serializable: ^6.8.0
   url_launcher_platform_interface: ^2.3.2
+  plugin_platform_interface: ^2.1.8
 
 flutter_gen:
   output: lib/gen/

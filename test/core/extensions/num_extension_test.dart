@@ -21,13 +21,13 @@ void main() {
   test('When the param `isUSD` is true on `formatCurrency` it should format and add the correct currency symbol', () {
     const number = 123456789.12345678;
 
-    expect(number.formatCurrency(isUSD: true), "\$123,456,789.12345678");
+    expect(number.formatCurrency(isUSD: true), "\$123,456,789.1235");
   });
 
   test('When the param `isUSD` is false on `formatCurrency` it should format and do not add any currency symbol', () {
     const number = 123456789.12345678;
 
-    expect(number.formatCurrency(isUSD: false), "123,456,789.12345678");
+    expect(number.formatCurrency(isUSD: false), "123,456,789.1235");
   });
 
   test("`toAmount` should return a string with the number formatted with fixed decimals of 4 (if none is passed)", () {

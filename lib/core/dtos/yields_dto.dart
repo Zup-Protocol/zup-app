@@ -28,90 +28,95 @@ class YieldsDto with _$YieldsDto {
         last90dYields: [],
       );
 
-  factory YieldsDto.fixture() => YieldsDto(
+  factory YieldsDto.fixture() => const YieldsDto(
         last24Yields: [
-          YieldDto.fixture().copyWith(
-            token0: TokenDto.fixture().copyWith(
-              symbol: "WETH",
-              decimals: 18,
-              address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-              logoUrl:
-                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0x82aF49447D8a07e3bd95BD0d56f35241523fBab1/logo.png",
-            ),
-            token1: TokenDto.fixture().copyWith(
-              symbol: "USDC",
-              decimals: 6,
-              address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-              logoUrl:
-                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/0xaf88d065e77c8cC2239327C5EDb3A432268e5831/logo.png",
-            ),
-            yearlyYield: 1432,
-            network: Networks.arbitrum,
-            tickSpacing: 10,
-            poolAddress: "0xC6962004f452bE9203591991D15f6b388e09E8D0",
-          ),
-          YieldDto.fixture().copyWith(yearlyYield: 432.2),
-          YieldDto.fixture().copyWith(yearlyYield: 11.4),
-          YieldDto.fixture().copyWith(yearlyYield: 64.2),
-          YieldDto.fixture().copyWith(yearlyYield: 754.12),
-        ],
-        last30dYields: [
-          YieldDto.fixture().copyWith(
-            token0: TokenDto.fixture().copyWith(
-              symbol: "USDC",
-              address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          YieldDto(
+            token0: TokenDto(
+              address: "0x02a3e7E0480B668bD46b42852C58363F93e3bA5C",
               decimals: 6,
               logoUrl:
-                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
+                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4/logo.png",
+              name: "USDC",
+              symbol: "USDC",
             ),
-            token1: TokenDto.fixture().copyWith(
-              symbol: "WETH",
+            token1: TokenDto(
+              address: "0x5300000000000000000000000000000000000004",
               decimals: 18,
-              address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
               logoUrl:
-                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
+                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x5300000000000000000000000000000000000004/logo.png",
+              name: "Wrapped Ether",
+              symbol: "WETH",
             ),
-            yearlyYield: 9842,
-            tickSpacing: 60,
-            poolAddress: "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8",
-            network: Networks.ethereum,
-            protocol: ProtocolDto.fixture().copyWith(
+            network: Networks.scrollSepolia,
+            poolAddress: "0x85AC4aA771827e806bd9b9CDdd379eB4dD0071C2",
+            tickSpacing: 200,
+            yearlyYield: 1732.42,
+            protocol: ProtocolDto(
               name: "PancakeSwap",
               logoUrl:
                   "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/exchange.pancakeswap.finance.png",
             ),
           ),
-          YieldDto.fixture().copyWith(yearlyYield: 432.2),
-          YieldDto.fixture().copyWith(yearlyYield: 11.4),
-          YieldDto.fixture().copyWith(yearlyYield: 64.2),
-          YieldDto.fixture().copyWith(yearlyYield: 754.12),
+        ],
+        last30dYields: [
+          YieldDto(
+            token0: TokenDto(
+              address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+              decimals: 6,
+              name: "USDC",
+              symbol: "USDC",
+              logoUrl:
+                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
+            ),
+            token1: TokenDto(
+              decimals: 18,
+              name: "Wrapped Ether",
+              symbol: "WETH",
+              address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+              logoUrl:
+                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
+            ),
+            positionManagerAddress: "0x1238536071E1c677A632429e3655c799b22cDA52",
+            network: Networks.sepolia,
+            poolAddress: "0xFeEd501c2B21D315F04946F85fC6416B640240b5",
+            tickSpacing: 1,
+            feeTier: 100,
+            yearlyYield: 143.76,
+            yieldTimeFrame: YieldTimeFrame.month,
+            protocol: ProtocolDto(
+              name: "Uniswap",
+              logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/app.uniswap.org.png",
+            ),
+          )
         ],
         last90dYields: [
-          YieldDto.fixture().copyWith(
-            token0: TokenDto.fixture().copyWith(
-              symbol: "WETH",
-              decimals: 18,
-              logoUrl:
-                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x4200000000000000000000000000000000000006/logo.png",
-            ),
-            token1: TokenDto.fixture().copyWith(
-              symbol: "USDC",
+          YieldDto(
+            token0: TokenDto(
+              address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
               decimals: 6,
+              name: "USDC",
+              symbol: "USDC",
               logoUrl:
-                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913/logo.png",
+                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
             ),
-            yearlyYield: 11,
-            tickSpacing: 60,
-            network: Networks.base,
-            poolAddress: "0xd0b53D9277642d899DF5C87A3966A349A798F224",
-            protocol: ProtocolDto.fixture().copyWith(
-              name: "Aerodrome",
-              logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/aerodrome.finance.png",
+            token1: TokenDto(
+              decimals: 18,
+              name: "Wrapped Ether",
+              symbol: "WETH",
+              address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+              logoUrl:
+                  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
             ),
-          ),
-          YieldDto.fixture().copyWith(yearlyYield: 4),
-          YieldDto.fixture().copyWith(yearlyYield: 1.2),
-          YieldDto.fixture().copyWith(yearlyYield: 0.042),
+            network: Networks.sepolia,
+            poolAddress: "0xFeEd501c2B21D315F04946F85fC6416B640240b5",
+            protocol: ProtocolDto(
+              name: "Uniswap",
+              logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/app.uniswap.org.png",
+            ),
+            tickSpacing: 1,
+            yearlyYield: 21.4,
+            yieldTimeFrame: YieldTimeFrame.threeMonth,
+          )
         ],
       );
 }

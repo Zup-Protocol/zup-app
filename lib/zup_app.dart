@@ -3,16 +3,20 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:routefly/routefly.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
+import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/routes.g.dart';
 import 'package:zup_app/theme/theme.dart';
 
 class ZupApp extends StatelessWidget {
-  const ZupApp({super.key});
+  ZupApp({super.key});
+
+  final scaffoldMessengerKey = inject<GlobalKey<ScaffoldMessengerState>>();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

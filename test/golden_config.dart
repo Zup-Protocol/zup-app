@@ -76,8 +76,7 @@ void zGoldenTest(
           await screenMatchesGolden(tester, goldenFileName);
           autoUpdateGoldenFiles = false;
 
-          // ignore: avoid_print
-          print("Golden file not detected. Auto-generated golden file: $goldenFileName");
+          debugPrint("Golden file not detected. Auto-generated golden file: $goldenFileName");
 
           return;
         }

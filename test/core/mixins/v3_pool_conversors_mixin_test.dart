@@ -1,81 +1,90 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 
-class _V3PoolConversorsMixinWrapper with V3PoolConversorsMixin {}
+class V3PoolConversorsMixinTest with V3PoolConversorsMixin {}
 
 void main() {
-  test("`priceToTick` should convert a given price to tick in v3 pool", () {
-    const token0Decimals = 18; // ETH
-    const token1Decimals = 6; // USDC / USDT
-    const value = 1200.12;
-
-    final tick = _V3PoolConversorsMixinWrapper().priceToTick(
-      token0Decimals: token0Decimals,
-      token1Decimals: token1Decimals,
-      value: value,
+  test("`tickToPrice` should correctly convert a passed tick to a price", () {
+    final price = V3PoolConversorsMixinTest().tickToPrice(
+      tick: BigInt.from(194822),
+      poolToken0Decimals: 6,
+      poolToken1Decimals: 18,
     );
 
-    expect(tick, BigInt.from(-347230));
+    expect(price.priceAsQuoteToken, 3462.6697030124183, reason: "`priceAsQuoteToken` is not correct");
+    expect(price.priceAsBaseToken, 0.00028879450994994706, reason: "`priceAsBaseToken` is not correct");
   });
 
-  test("`tickToPrice` should convert a given tick to price in v3 pool", () {
-    const token0Decimals = 18; // ETH
-    const token1Decimals = 6; // USDC / USDT
-    const tick = -347230;
-
-    final price = _V3PoolConversorsMixinWrapper().tickToPrice(
-      token0Decimals: token0Decimals,
-      token1Decimals: token1Decimals,
-      tick: BigInt.from(tick),
+  test("""`tickToClosestValidTick` should correctly convert a
+      passed tick to its closest valid tick based on the tick spacing (lower tick test case)""", () {
+    final closestValidTick = V3PoolConversorsMixinTest().tickToClosestValidTick(
+      tick: BigInt.from(7),
+      tickSpacing: 5,
     );
 
-    expect(price, 1200.1992333687367);
+    expect(closestValidTick, BigInt.from(5));
   });
 
-  test("""When the param `asToken0byToken1` is true,
-  `tickToPrice` should return the price with
-  token0 as the quote token (ex instead of "ETH/USDC" it will be "USDC/ETH")""", () {
-    const token0Decimals = 18; // ETH
-    const token1Decimals = 6; // USDC / USDT
-    const tick = -347230;
-
-    final price = _V3PoolConversorsMixinWrapper().tickToPrice(
-      token0Decimals: token0Decimals,
-      token1Decimals: token1Decimals,
-      tick: BigInt.from(tick),
-      asToken0byToken1: true,
+  test("""`tickToClosestValidTick` should correctly convert a
+      passed tick to its closest valid tick based on the tick spacing (higher tick test case)""", () {
+    final closestValidTick = V3PoolConversorsMixinTest().tickToClosestValidTick(
+      tick: BigInt.from(8),
+      tickSpacing: 5,
     );
 
-    expect(price, 0.0008331949997944803);
+    expect(closestValidTick, BigInt.from(10));
   });
 
-  test("`tickToClosestValidTick` should return the closest valid tick based on the tick spacing", () {
-    const tick = -347234;
-    const tickSpacing = 10;
-    const expectedClosestValidTick = -347230;
-
-    final closestValidTick = _V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-      tick: BigInt.from(tick),
-      tickSpacing: tickSpacing,
+  test("`priceToTick` should correctly convert a passed price to a tick", () {
+    final tick = V3PoolConversorsMixinTest().priceToTick(
+      price: 1200,
+      poolToken0Decimals: 6,
+      poolToken1Decimals: 18,
     );
 
-    expect(closestValidTick, BigInt.from(expectedClosestValidTick));
+    expect(tick, BigInt.from(347228));
   });
 
-  test("`priceToClosestValidPrice` should return the closest valid price based on the tick spacing", () {
-    const token0Decimals = 18; // ETH
-    const token1Decimals = 6; // USDC / USDT
-
-    const tickSpacing = 10;
-    const value = 1243.12;
-
-    final closestValidPrice = _V3PoolConversorsMixinWrapper().priceToClosestValidPrice(
-      token0Decimals: token0Decimals,
-      token1Decimals: token1Decimals,
-      tickSpacing: tickSpacing,
-      value: value,
+  test("when is reversed is true, `priceToTick` should correctly convert a passed price to a tick", () {
+    final tick = V3PoolConversorsMixinTest().priceToTick(
+      price: 1200,
+      poolToken0Decimals: 6,
+      poolToken1Decimals: 18,
+      isReversed: true,
     );
 
-    expect(closestValidPrice, 1242.9478055472944);
+    expect(tick, BigInt.from(205419));
   });
+
+  test(
+    "`priceToClosestValidPrice` should correctly convert a passed price to a closest valid price based on the tick spacing",
+    () {
+      final closestValidPrice = V3PoolConversorsMixinTest().priceToClosestValidPrice(
+        price: 1200,
+        poolToken0Decimals: 6,
+        poolToken1Decimals: 18,
+        tickSpacing: 1,
+        isReversed: false,
+      );
+
+      expect(closestValidPrice.price, 1199.9592295232399, reason: "`price` is not correct");
+      expect(closestValidPrice.priceAsTick, BigInt.from(347228), reason: "`priceAsTick` is not correct");
+    },
+  );
+
+  test(
+    "When is reversed is true, `priceToClosestValidPrice` should correctly convert a passed price to a closest valid price based on the tick spacing",
+    () {
+      final closestValidPrice = V3PoolConversorsMixinTest().priceToClosestValidPrice(
+        price: 1200,
+        poolToken0Decimals: 6,
+        poolToken1Decimals: 18,
+        tickSpacing: 1,
+        isReversed: true,
+      );
+
+      expect(closestValidPrice.price, 1200.0855710750832, reason: "`price` is not correct");
+      expect(closestValidPrice.priceAsTick, BigInt.from(205419), reason: "`priceAsTick` is not correct");
+    },
+  );
 }

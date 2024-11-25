@@ -17,6 +17,12 @@ class SEn extends S {
   }
 
   @override
+  String get preview => 'Preview';
+
+  @override
+  String get depositPageInvalidRange => 'Invalid range';
+
+  @override
   String get depositPageMinRangeOutOfRangeWarningText =>
       'You will not earn fees until the market price move up into your range';
 

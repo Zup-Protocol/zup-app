@@ -9,6 +9,8 @@
             }
         }
     },
+    "preview": "Preview",
+    "depositPageInvalidRange": "Invalid range",
     "depositPageMinRangeOutOfRangeWarningText": "You will not earn fees until the market price move up into your range",
     "depositPageMaxRangeOutOfRangeWarningText": "You will not earn fees until the market price move down into your range",
     "depositPageInvalidRangeErrorText": "Max range should be greater than min range",

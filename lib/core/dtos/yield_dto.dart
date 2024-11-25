@@ -29,8 +29,13 @@ class YieldDto with _$YieldDto {
     @JsonKey(name: "token_b") required TokenDto token1,
     @Default(0) @JsonKey(name: "yield") num yearlyYield,
     @Default("") @JsonKey(name: "address") String poolAddress,
+    @Default("") @JsonKey(name: "position_manager_address") String positionManagerAddress,
     @Default(ProtocolDto()) ProtocolDto protocol,
     @Default(0) @JsonKey(name: "tick_spacing") int tickSpacing,
+    @Default(0) @JsonKey(name: "fee_tier") int feeTier,
+    @Default(YieldTimeFrame.unknown)
+    @JsonKey(name: "timeframe", unknownEnumValue: YieldTimeFrame.unknown)
+    YieldTimeFrame yieldTimeFrame,
     required Networks network,
   }) = _YieldDto;
 
@@ -52,6 +57,7 @@ class YieldDto with _$YieldDto {
         yearlyYield: 5634.2,
         tickSpacing: 10,
         protocol: ProtocolDto.fixture(),
-        network: Networks.arbitrum,
+        network: Networks.sepolia,
+        yieldTimeFrame: YieldTimeFrame.day,
       );
 }

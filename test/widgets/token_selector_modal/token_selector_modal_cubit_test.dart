@@ -22,7 +22,7 @@ void main() {
     sut = TokenSelectorModalCubit(tokensRepository, appCubit);
 
     when(() => tokensRepository.getTokenList()).thenAnswer((_) async => TokenListDto.fixture());
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.base);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
     when(() => tokensRepository.searchToken(any())).thenAnswer((_) async => []);
   });
 
@@ -60,13 +60,13 @@ void main() {
       () async {
     final tokenList1 = TokenListDto.fixture();
     when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList1);
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.base);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
     await sut.loadData();
 
     const tokenList2 = TokenListDto();
     when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList2);
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.arbitrum);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.scrollSepolia);
 
     await sut.loadData();
 
@@ -79,17 +79,17 @@ void main() {
       () async {
     final tokenList1 = TokenListDto.fixture();
     when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList1);
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.base);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
     await sut.loadData();
 
     const tokenList2 = TokenListDto();
     when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList2);
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.arbitrum);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.scrollSepolia);
 
     await sut.loadData();
 
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.base);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
     when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList1);
     await sut.loadData();
 

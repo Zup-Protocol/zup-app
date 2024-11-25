@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/web3kit.dart';
-import 'package:zup_app/app/create/deposit/widgets/token_amount_card/token_amount_card.dart';
+import 'package:zup_app/app/create/deposit/widgets/token_amount_input_card/token_amount_input_card.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
@@ -39,8 +39,9 @@ void main() {
   });
 
   Future<DeviceBuilder> goldenBuilder({
+    Key? key,
     TextEditingController? controller,
-    Networks network = Networks.ethereum,
+    Networks network = Networks.sepolia,
     Function(double)? onInput,
     TokenDto? token,
     String? disabledText,
@@ -52,7 +53,8 @@ void main() {
             children: [
               SizedBox(
                 width: 500,
-                child: TokenAmountCard(
+                child: TokenAmountInputCard(
+                  key: key,
                   controller: controller ?? TextEditingController(),
                   network: network,
                   onInput: (value) => onInput?.call(value),
@@ -188,4 +190,19 @@ void main() {
 
     await tester.pumpAndSettle();
   });
+
+  zGoldenTest(
+    "When updating the widget with a different token, it should update the token in the cubit and get the balance again",
+    goldenFileName: "token_amount_card_update_token",
+    (tester) async {
+      const key = Key("token-amount-card");
+      const newTokenAddress = "0xN3W_T0K3N";
+      final newToken = TokenDto.fixture().copyWith(address: newTokenAddress, symbol: "NEW_TOKEN");
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(key: key));
+      await tester.pumpDeviceBuilder(await goldenBuilder(key: key, token: newToken));
+
+      verify(() => wallet.tokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
+    },
+  );
 }

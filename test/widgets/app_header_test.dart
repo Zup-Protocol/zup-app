@@ -35,7 +35,7 @@ void main() {
 
     when(() => zupNavigator.listenable).thenReturn(listenable);
     when(() => zupNavigator.currentRoute).thenReturn("any");
-    when(() => appCubit.selectedNetwork).thenReturn(Networks.ethereum);
+    when(() => appCubit.selectedNetwork).thenReturn(Networks.sepolia);
     when(() => zupNavigator.navigateToInitial()).thenAnswer((_) => Future.value());
     when(() => zupNavigator.navigateToMyPositions()).thenAnswer((_) => Future.value());
     when(() => zupNavigator.navigateToNewPosition()).thenAnswer((_) => Future.value());
@@ -123,27 +123,29 @@ void main() {
 
   zGoldenTest("The initial network of the Network switcher, should be the one defined in the app cubit",
       (tester) async {
-    when(() => appCubit.selectedNetwork).thenReturn(Networks.arbitrum);
+    when(() => appCubit.selectedNetwork).thenReturn(Networks.sepolia);
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
 
     final networkSwitcher = (find.byType(NetworkSwitcher)).first.evaluate().first.widget as NetworkSwitcher;
 
-    expect(networkSwitcher.initialNetworkIndex, Networks.arbitrum.index);
+    expect(networkSwitcher.initialNetworkIndex, Networks.sepolia.index);
   });
 
   zGoldenTest(
       "When selecting a network in the network switcher and the chain info is not null, it should update network in the the app cubit",
       (tester) async {
+    const network = Networks.scrollSepolia;
+
     await tester.pumpDeviceBuilder(await goldenBuilder());
 
     await tester.tap(find.byType(NetworkSwitcher));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text(Networks.arbitrum.label));
+    await tester.tap(find.text(network.label));
     await tester.pumpAndSettle();
 
-    verify(() => appCubit.updateAppNetwork(Networks.arbitrum)).called(1);
+    verify(() => appCubit.updateAppNetwork(network)).called(1);
   });
 
   zGoldenTest(

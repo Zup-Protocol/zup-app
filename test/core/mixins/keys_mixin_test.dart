@@ -18,7 +18,7 @@ void main() {
   });
 
   test("`poolTickCacheKey` should return correct key", () {
-    const network = Networks.ethereum;
+    const network = Networks.sepolia;
     const poolAddress = '0xPoolAddress';
 
     final key = _KeysMixinWrapper().poolTickCacheKey(

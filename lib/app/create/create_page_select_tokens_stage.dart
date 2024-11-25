@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
-import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
@@ -25,7 +24,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> {
   final navigator = inject<ZupNavigator>();
 
   late final token0SelectorController = TokenSelectorButtonController(
-    initialSelectedToken: appCubit.selectedNetwork.defaultToken,
+    initialSelectedToken: appCubit.selectedNetwork.wrappedNative,
   );
   final token1SelectorController = TokenSelectorButtonController(initialSelectedToken: null);
   StreamSubscription? _token0SelectorStreamSubscription;

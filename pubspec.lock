@@ -466,6 +466,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  hashlib:
+    dependency: transitive
+    description:
+      name: hashlib
+      sha256: e13e8237d93fb275cd1c55fc339bb90638994d1a4f140c7ee270173b51f3d169
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.21.1"
+  hashlib_codecs:
+    dependency: transitive
+    description:
+      name: hashlib_codecs
+      sha256: "8cea9ccafcfeaa7324d2ae52c61c69f7ff71f4237507a018caab31b9e416e3b1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.0"
   http:
     dependency: transitive
     description:
@@ -747,7 +763,7 @@ packages:
     source: hosted
     version: "3.1.5"
   plugin_platform_interface:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: plugin_platform_interface
       sha256: "4820fbfdb9478b1ebae27888254d445073732dae3d6ea81f0b7e06d5dedc3f02"
@@ -1162,11 +1178,9 @@ packages:
   web3kit:
     dependency: "direct main"
     description:
-      path: "."
-      ref: main
-      resolved-ref: "089a154d4f0e5378e74bdc50a108676d0840ee27"
-      url: "https://github.com/Zup-Protocol/web3kit.git"
-    source: git
+      path: "../web3kit"
+      relative: true
+    source: path
     version: "0.0.1"
   web_socket:
     dependency: transitive
@@ -1209,22 +1223,18 @@ packages:
     source: hosted
     version: "3.1.2"
   zup_core:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      path: "."
-      ref: main
-      resolved-ref: "0a02cb0c93803f6a6b9a093b07e9fac029a5aa60"
-      url: "https://github.com/Zup-Protocol/zup-core.git"
-    source: git
+      path: "../zup_core"
+      relative: true
+    source: path
     version: "0.0.1"
   zup_ui_kit:
     dependency: "direct main"
     description:
-      path: "."
-      ref: main
-      resolved-ref: "38d4e7231324e24efe7579ac7c8980c1e5c67e3d"
-      url: "https://github.com/Zup-Protocol/zup-ui-kit.git"
-    source: git
+      path: "../zup_ui_kit"
+      relative: true
+    source: path
     version: "0.0.1"
 sdks:
   dart: ">=3.5.2 <4.0.0"

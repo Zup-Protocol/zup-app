@@ -105,6 +105,18 @@ abstract class S {
   /// **'{tokenSymbol} is not necessary for your selected range'**
   String depositPageDepositSectionTokenNotNeeded(String tokenSymbol);
 
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
+  /// No description provided for @depositPageInvalidRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid range'**
+  String get depositPageInvalidRange;
+
   /// No description provided for @depositPageMinRangeOutOfRangeWarningText.
   ///
   /// In en, this message translates to:

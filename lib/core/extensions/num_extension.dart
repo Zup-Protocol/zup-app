@@ -3,7 +3,9 @@ import 'package:intl/intl.dart';
 extension NumExtension on num {
   String toAmount({bool useLessThan = false, int maxFixedDigits = 4}) {
     if (this == 0) return '0';
-    if (this < 0.0001) return useLessThan ? '<0.0001' : toString();
+    if (this < double.parse("0.${"0" * (maxFixedDigits - 1)}1")) {
+      return useLessThan ? '<${"0.${"0" * (maxFixedDigits - 1)}1"}' : toString();
+    }
 
     return toStringAsFixed(maxFixedDigits);
   }
@@ -24,10 +26,16 @@ extension NumExtension on num {
     return 0;
   }
 
-  String formatCurrency({bool isUSD = true}) => NumberFormat.simpleCurrency(
-        decimalDigits: decimals,
-        name: isUSD ? null : "",
-      ).format(this);
+  String formatCurrency({bool isUSD = true}) {
+    int decimalsDigits = decimals;
+
+    if (decimals > 4 && (this > 0.001)) decimalsDigits = 4;
+
+    return NumberFormat.simpleCurrency(
+      decimalDigits: decimalsDigits,
+      name: isUSD ? null : "",
+    ).format(this);
+  }
 
   String get formatPercent => "${NumberFormat.decimalPatternDigits(decimalDigits: 0).format(this)}%";
 }

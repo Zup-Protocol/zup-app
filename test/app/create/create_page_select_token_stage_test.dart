@@ -34,7 +34,7 @@ void main() {
       () => TokenSelectorModalCubit(tokensRepository, appCubit),
     );
 
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.arbitrum);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
     when(() => tokensRepository.getTokenList()).thenAnswer((_) async => TokenListDto.fixture());
   });
 
@@ -45,7 +45,7 @@ void main() {
   zGoldenTest(
       "When loading the page, it should select only the A token as the default token for the selected network (the token B should not be selected)",
       goldenFileName: "create_page_select_tokens_stage_default_a_token", (tester) async {
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.base);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
     await tester.pumpAndSettle();
@@ -63,8 +63,8 @@ void main() {
   zGoldenTest(
       "When selecting the B token with the same address as A token, it should change the A token to null, and the B token to the selected token",
       goldenFileName: "create_page_select_tokens_stage_change_b_token_to_same_token_as_a", (tester) async {
-    const selectedNetwork = Networks.base;
-    final token0 = selectedNetwork.defaultToken;
+    const selectedNetwork = Networks.sepolia;
+    final token0 = selectedNetwork.wrappedNative;
 
     when(() => tokensRepository.getTokenList()).thenAnswer(
       (_) async => TokenListDto.fixture().copyWith(
@@ -87,8 +87,8 @@ void main() {
   zGoldenTest(
       "When selecting the A token with the same address as B token, it should change the B token to null and the A token to the selected token",
       goldenFileName: "create_page_select_tokens_stage_change_a_token_to_same_token_as_b", (tester) async {
-    const selectedNetwork = Networks.base;
-    final token0 = selectedNetwork.defaultToken;
+    const selectedNetwork = Networks.sepolia;
+    final token0 = selectedNetwork.wrappedNative;
 
     when(() => tokensRepository.getTokenList()).thenAnswer(
       (_) async => TokenListDto.fixture().copyWith(
