@@ -53,7 +53,7 @@ void main() {
   zGoldenTest("When the network of the position is not null, it should be displayed",
       goldenFileName: "position_card_network", (tester) async {
     await tester.pumpDeviceBuilder(
-      await goldenBuilder(position: PositionDto.fixture().copyWith(network: Networks.arbitrum)),
+      await goldenBuilder(position: PositionDto.fixture().copyWith(network: Networks.sepolia)),
     );
   });
 

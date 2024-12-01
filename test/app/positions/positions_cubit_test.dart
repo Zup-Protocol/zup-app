@@ -114,8 +114,8 @@ void main() {
   group("When instantiating the cubit, it should listen for network changes", () {
     test("""When the signer is not null, it should filter the user positions,
         to only show positions on the selected network""", () async {
-      const newNetwork = Networks.base;
-      final positions = List.generate(10, (_) => PositionDto.fixture().copyWith(network: Networks.ethereum));
+      const newNetwork = Networks.sepolia;
+      final positions = List.generate(10, (_) => PositionDto.fixture().copyWith(network: Networks.scrollSepolia));
 
       final networkStreamController = StreamController<Networks>.broadcast();
 
@@ -138,7 +138,7 @@ void main() {
     });
 
     test("""When the signer is null, it should not filter the user positions""", () async {
-      const newNetwork = Networks.base;
+      const newNetwork = Networks.sepolia;
 
       final networkStreamController = StreamController<Networks>.broadcast();
 
@@ -225,14 +225,13 @@ void main() {
   test("""When filtering positions, the current network is not all,
        and the user has positions in the filtered network,
        it should emit the positions state with the filtered positions""", () async {
-    const selectedNetwork = Networks.base;
+    const selectedNetwork = Networks.sepolia;
     final expectedPositions = [PositionDto.fixture().copyWith(network: selectedNetwork)];
 
     when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
     when(() => wallet.signer).thenReturn(SignerMock());
     when(() => positionsRepository.fetchUserPositions()).thenAnswer((_) async => [
-          PositionDto.fixture().copyWith(network: Networks.ethereum),
-          PositionDto.fixture().copyWith(network: Networks.arbitrum),
+          PositionDto.fixture().copyWith(network: Networks.scrollSepolia),
           ...expectedPositions,
         ]);
 
@@ -251,13 +250,12 @@ void main() {
   test("""When filtering positions, the current network is not all,
        and the user has no positions in the filtered network,
        it should emit the no positions in network state""", () async {
-    const selectedNetwork = Networks.base;
+    const selectedNetwork = Networks.sepolia;
 
     when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
     when(() => wallet.signer).thenReturn(SignerMock());
     when(() => positionsRepository.fetchUserPositions()).thenAnswer((_) async => [
-          PositionDto.fixture().copyWith(network: Networks.ethereum),
-          PositionDto.fixture().copyWith(network: Networks.arbitrum),
+          PositionDto.fixture().copyWith(network: Networks.scrollSepolia),
         ]);
 
     sut = PositionsCubit(wallet, positionsRepository, appCubit, cache);
@@ -299,7 +297,7 @@ void main() {
 
   test("""When filtering positions with hide close positions and a network that it not all,
       it should return the positions matching the filter""", () async {
-    const selectedNetwork = Networks.base;
+    const selectedNetwork = Networks.sepolia;
     final expectedPositions = [
       PositionDto.fixture().copyWith(network: selectedNetwork, status: PositionStatus.outOfRange),
       PositionDto.fixture().copyWith(network: selectedNetwork, status: PositionStatus.inRange),
@@ -308,9 +306,8 @@ void main() {
     when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
     when(() => wallet.signer).thenReturn(SignerMock());
     when(() => positionsRepository.fetchUserPositions()).thenAnswer((_) async => [
-          PositionDto.fixture().copyWith(network: Networks.ethereum),
-          PositionDto.fixture().copyWith(network: Networks.arbitrum),
-          PositionDto.fixture().copyWith(network: Networks.base, status: PositionStatus.closed),
+          PositionDto.fixture().copyWith(network: Networks.scrollSepolia),
+          PositionDto.fixture().copyWith(network: Networks.sepolia, status: PositionStatus.closed),
           ...expectedPositions
         ]);
 
@@ -328,9 +325,8 @@ void main() {
 
   test("When filtering, it should not change the cached positions array", () async {
     final expectedPositions = [
-      PositionDto.fixture().copyWith(network: Networks.arbitrum, status: PositionStatus.outOfRange),
-      PositionDto.fixture().copyWith(network: Networks.base, status: PositionStatus.inRange),
-      PositionDto.fixture().copyWith(network: Networks.ethereum, status: PositionStatus.closed),
+      PositionDto.fixture().copyWith(network: Networks.sepolia, status: PositionStatus.outOfRange),
+      PositionDto.fixture().copyWith(network: Networks.scrollSepolia, status: PositionStatus.inRange),
     ];
 
     when(() => appCubit.selectedNetwork).thenReturn(Networks.all);
@@ -377,7 +373,7 @@ void main() {
 
   test("""When getting the user positions, and the current network
    is not all, it should filter the positions""", () async {
-    const selectedNetwork = Networks.base;
+    const selectedNetwork = Networks.sepolia;
 
     final expectedPositions = [
       PositionDto.fixture().copyWith(network: selectedNetwork, status: PositionStatus.outOfRange),
@@ -385,11 +381,8 @@ void main() {
     ];
 
     when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
-    when(() => positionsRepository.fetchUserPositions()).thenAnswer((_) async => [
-          PositionDto.fixture().copyWith(network: Networks.ethereum),
-          PositionDto.fixture().copyWith(network: Networks.arbitrum),
-          ...expectedPositions
-        ]);
+    when(() => positionsRepository.fetchUserPositions()).thenAnswer(
+        (_) async => [PositionDto.fixture().copyWith(network: Networks.scrollSepolia), ...expectedPositions]);
 
     sut = PositionsCubit(wallet, positionsRepository, appCubit, cache);
 
@@ -405,7 +398,7 @@ void main() {
 
   test("""When getting the user positions, and the user it currently hiding
   closed positions, it should filter the positions""", () async {
-    const selectedNetwork = Networks.base;
+    const selectedNetwork = Networks.sepolia;
 
     final expectedPositions = [
       PositionDto.fixture().copyWith(network: selectedNetwork, status: PositionStatus.outOfRange),
@@ -414,8 +407,7 @@ void main() {
 
     when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
     when(() => positionsRepository.fetchUserPositions()).thenAnswer((_) async => [
-          PositionDto.fixture().copyWith(network: Networks.ethereum, status: PositionStatus.closed),
-          PositionDto.fixture().copyWith(network: Networks.arbitrum, status: PositionStatus.closed),
+          PositionDto.fixture().copyWith(network: Networks.scrollSepolia, status: PositionStatus.closed),
           ...expectedPositions
         ]);
 

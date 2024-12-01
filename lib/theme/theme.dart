@@ -8,6 +8,8 @@ abstract class ZupTheme {
   static ThemeData get lightTheme => ThemeData(
         fontFamily: "SF Pro Rounded",
         primaryColor: ZupColors.brand,
+        scrollbarTheme:
+            const ScrollbarThemeData(mainAxisMargin: 10, crossAxisMargin: 3, thickness: WidgetStatePropertyAll(5)),
         scaffoldBackgroundColor: Colors.transparent,
         textButtonTheme: ZupTextButtonTheme.lightTheme,
         textSelectionTheme: const TextSelectionThemeData(selectionColor: ZupColors.brand5),

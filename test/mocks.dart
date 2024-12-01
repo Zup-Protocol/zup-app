@@ -6,9 +6,17 @@ import 'package:mocktail_image_network/mocktail_image_network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/erc_20.abi.g.dart';
+import 'package:zup_app/abis/fee_controller.abi.g.dart';
+import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
+import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
+import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
+import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
@@ -20,43 +28,67 @@ import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.
 import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_core/zup_singleton_cache.dart';
 
+class $AssetsLottiesGenMock extends Mock implements $AssetsLottiesGen {}
+
 class AppCubitMock extends Mock implements AppCubit {}
 
-class ZupNavigatorMock extends Mock implements ZupNavigator {}
-
-class ListenableMock extends Mock implements Listenable {}
-
-class WalletMock extends Mock implements Wallet {}
-
-class SignerMock extends Mock implements Signer {}
-
-class PositionsRepositoryMock extends Mock implements PositionsRepository {}
+class BuildContextMock extends Mock implements BuildContext {}
 
 class CacheMock extends Mock implements Cache {}
 
+class DebouncerMock extends Mock implements Debouncer {}
+
+class DepositCubitMock extends Mock implements DepositCubit {}
+
+class Erc20ImplMock extends Mock implements Erc20Impl {}
+
+class Erc20Mock extends Mock implements Erc20 {}
+
+class FeeControllerImplMock extends Mock implements FeeControllerImpl {}
+
+class FeeControllerMock extends Mock implements FeeController {}
+
 class ImageProviderMock extends Mock implements ImageProvider {}
 
-class ZupCachedImageMock extends Mock implements ZupCachedImage {}
+class ListenableMock extends Mock implements Listenable {}
+
+class PositionsCubitMock extends Mock implements PositionsCubit {}
+
+class PositionsRepositoryMock extends Mock implements PositionsRepository {}
 
 class SharedPreferencesWithCacheMock extends Mock implements SharedPreferencesWithCache {}
 
-class TokensRepositoryMock extends Mock implements TokensRepository {}
+class SignerMock extends Mock implements Signer {}
 
 class TokenSelectorModalCubitMock extends Mock implements TokenSelectorModalCubit {}
 
-class DebouncerMock extends Mock implements Debouncer {}
+class TokensRepositoryMock extends Mock implements TokensRepository {}
 
-class YieldRepositoryMock extends Mock implements YieldRepository {}
+class TransactionResponseMock extends Mock implements TransactionResponse {}
 
-class ZupSingletonCacheMock extends Mock implements ZupSingletonCache {}
+class UniswapPositionManagerImplMock extends Mock implements UniswapPositionManagerImpl {}
 
-class UniswapV3PoolMock extends Mock implements UniswapV3Pool {}
+class UniswapPositionManagerMock extends Mock implements UniswapPositionManager {}
 
 class UniswapV3PoolImplMock extends Mock implements UniswapV3PoolImpl {}
 
-class $AssetsLottiesGenMock extends Mock implements $AssetsLottiesGen {}
+class UniswapV3PoolMock extends Mock implements UniswapV3Pool {}
 
-class BuildContextMock extends Mock implements BuildContext {}
+class WalletMock extends Mock implements Wallet {}
+
+class YieldRepositoryMock extends Mock implements YieldRepository {}
+
+class ZupCachedImageMock extends Mock implements ZupCachedImage {}
+
+class ZupNavigatorMock extends Mock implements ZupNavigator {}
+
+class ZupRouterImplMock extends Mock implements ZupRouterImpl {}
+
+class ZupRouterMock extends Mock implements ZupRouter {}
+
+class ZupSingletonCacheMock extends Mock implements ZupSingletonCache {}
+
+class PreviewDepositModalCubitMock extends Mock implements PreviewDepositModalCubit {}
 
 class UrlLauncherPlatformCustomMock extends UrlLauncherPlatform {
   static String? lastLaunchedUrl;
@@ -68,14 +100,16 @@ class UrlLauncherPlatformCustomMock extends UrlLauncherPlatform {
   Future<bool> canLaunch(String url) async => true;
 
   @override
-  Future<bool> launch(String url,
-      {required bool useSafariVC,
-      required bool useWebView,
-      required bool enableJavaScript,
-      required bool enableDomStorage,
-      required bool universalLinksOnly,
-      required Map<String, String> headers,
-      String? webOnlyWindowName}) async {
+  Future<bool> launch(
+    String url, {
+    required bool useSafariVC,
+    required bool useWebView,
+    required bool enableJavaScript,
+    required bool enableDomStorage,
+    required bool universalLinksOnly,
+    required Map<String, String> headers,
+    String? webOnlyWindowName,
+  }) async {
     lastLaunchedUrl = url;
 
     return true;

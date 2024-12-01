@@ -33,7 +33,7 @@ void main() {
 
     when(() => tokensRepository.getTokenList()).thenAnswer((_) async => TokenListDto.fixture());
 
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.base);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
   });
 
   tearDown(() => inject.reset());

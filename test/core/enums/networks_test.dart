@@ -1,18 +1,26 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/core/dtos/chain_info.dart';
 import 'package:web3kit/core/enums/native_currencies.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
 import '../../golden_config.dart';
+import '../../mocks.dart';
 
 void main() {
+  UrlLauncherPlatform urlLauncherPlatform;
+
+  setUp(() {
+    urlLauncherPlatform = UrlLauncherPlatformCustomMock();
+    UrlLauncherPlatform.instance = urlLauncherPlatform;
+  });
+
   test("Label extension should match for all networks", () {
     expect(Networks.all.label, "All Networks", reason: "All networks's Label should match");
-    expect(Networks.arbitrum.label, "Arbitrum One", reason: "Arbitrum's Label should match");
-    expect(Networks.base.label, "Base", reason: "Base's Label should match");
-    expect(Networks.ethereum.label, "Ethereum", reason: "Ethereum's Label should match");
+    expect(Networks.scrollSepolia.label, "Scroll Sepolia", reason: "Scroll Sepolia Label should match");
+    expect(Networks.sepolia.label, "Sepolia", reason: "Sepolia Label should match");
   });
 
   test("Chain info extension should match for all networks", () {
@@ -23,38 +31,26 @@ void main() {
     );
 
     expect(
-      Networks.arbitrum.chainInfo,
+      Networks.sepolia.chainInfo,
       ChainInfo(
-        hexChainId: "0xa4b1",
-        chainName: "Arbitrum One",
-        blockExplorerUrls: const ["https://arbiscan.io"],
+        hexChainId: "0xaa36a7",
+        chainName: "Sepolia",
+        blockExplorerUrls: const ["https://sepolia.etherscan.io"],
         nativeCurrency: NativeCurrencies.eth.currencyInfo,
-        rpcUrls: const ["https://arb1.arbitrum.io/rpc"],
+        rpcUrls: const ["https://1rpc.io/sepolia"],
       ),
-      reason: "Arbitrum's ChainInfo should match",
+      reason: "Sepolia ChainInfo should match",
     );
 
     expect(
-      Networks.base.chainInfo,
+      Networks.scrollSepolia.chainInfo,
       ChainInfo(
-        hexChainId: "0x2105",
-        chainName: "Base",
-        blockExplorerUrls: const ["https://basescan.org/"],
+        hexChainId: "0x8274f",
+        chainName: "Scroll Sepolia",
+        blockExplorerUrls: const ["https://sepolia.scrollscan.com"],
         nativeCurrency: NativeCurrencies.eth.currencyInfo,
-        rpcUrls: const ["https://mainnet.base.org"],
+        rpcUrls: const ["https://scroll-sepolia-rpc.publicnode.com"],
       ),
-    );
-
-    expect(
-      Networks.ethereum.chainInfo,
-      ChainInfo(
-        hexChainId: "0x1",
-        chainName: "Ethereum",
-        blockExplorerUrls: const ["https://etherscan.io"],
-        nativeCurrency: NativeCurrencies.eth.currencyInfo,
-        rpcUrls: const ["https://eth.llamarpc.com"],
-      ),
-      reason: "Ethereum's ChainInfo should match",
     );
   });
 
@@ -66,65 +62,47 @@ void main() {
     );
 
     expect(
-      Networks.ethereum.wrappedNativeTokenAddress,
-      "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      reason: "Ethereum's wrapped native token address should match",
+      Networks.sepolia.wrappedNativeTokenAddress,
+      "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      reason: "Sepolia wrapped native token address should match",
     );
 
     expect(
-      Networks.base.wrappedNativeTokenAddress,
-      "0x4200000000000000000000000000000000000006",
-      reason: "Base's wrapped native token address should match",
-    );
-
-    expect(
-      Networks.arbitrum.wrappedNativeTokenAddress,
-      "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-      reason: "Arbitrum's wrapped native token address should match",
+      Networks.scrollSepolia.wrappedNativeTokenAddress,
+      "0x5300000000000000000000000000000000000004",
+      reason: "Scroll sepolia wrapped native token address should match",
     );
   });
 
-  test("default token should match for all networks", () {
+  test("wrapped native token should match for all networks", () {
     expect(
-      Networks.all.defaultToken,
+      Networks.all.wrappedNative,
       null,
       reason: "All networks's default token should be null",
     );
 
     expect(
-      Networks.ethereum.defaultToken,
-      TokenDto(
-        address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      Networks.sepolia.wrappedNative,
+      const TokenDto(
+        address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
         name: "Wrapped Ether",
+        decimals: 18,
         symbol: "WETH",
-        logoUrl:
-            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/${Networks.ethereum.wrappedNativeTokenAddress}/logo.png",
+        logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
       ),
-      reason: "Ethereum's default token should match",
+      reason: "Sepolia default token should match",
     );
 
     expect(
-      Networks.base.defaultToken,
-      TokenDto(
-        address: "0x4200000000000000000000000000000000000006",
+      Networks.scrollSepolia.wrappedNative,
+      const TokenDto(
+        address: "0x5300000000000000000000000000000000000004",
         name: "Wrapped Ether",
+        decimals: 18,
         symbol: "WETH",
-        logoUrl:
-            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/${Networks.base.wrappedNativeTokenAddress}/logo.png",
+        logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
       ),
-      reason: "Base's default token should match",
-    );
-
-    expect(
-      Networks.arbitrum.defaultToken,
-      TokenDto(
-        address: "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-        name: "Wrapped Ether",
-        symbol: "WETH",
-        logoUrl:
-            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/${Networks.arbitrum.wrappedNativeTokenAddress}/logo.png",
-      ),
-      reason: "Arbitrum's default token should match",
+      reason: "Scroll Sepolia default token should match",
     );
   });
 
@@ -133,22 +111,71 @@ void main() {
   });
 
   test("When calling `isAll` it should return false if the network is not All", () {
-    expect(Networks.arbitrum.isAll, false);
+    expect(Networks.sepolia.isAll, false);
+  });
+
+  test("RpcUrl extension should return the correct rpc url", () {
+    expect(Networks.all.rpcUrl, null, reason: "All networks's rpc url should be null");
+
+    expect(
+      Networks.sepolia.rpcUrl,
+      "https://1rpc.io/sepolia",
+      reason: "Sepolia rpc url should match",
+    );
+
+    expect(
+      Networks.scrollSepolia.rpcUrl,
+      "https://scroll-sepolia-rpc.publicnode.com",
+      reason: "Scroll Sepolia rpc url should match",
+    );
+  });
+
+  test("ZupRouterAddress extension should return the correct zup router address", () async {
+    expect(Networks.all.zupRouterAddress, null, reason: "All networks's zup router address should be null");
+
+    expect(
+      Networks.sepolia.zupRouterAddress,
+      "0xCd84aE98e975c4C1A82C0D9Debf992d3eeb7d6AD",
+      reason: "Sepolia zup router address should match",
+    );
+  });
+
+  test("FeeControllerAddress extension should return the correct fee controller address", () async {
+    expect(Networks.all.feeControllerAddress, null, reason: "All networks's fee controller address should be null");
+
+    expect(
+      Networks.sepolia.feeControllerAddress,
+      "0xFBFEfD600fFC1Ae6EabD66Bb8C90F25a314Ff3Cf",
+      reason: "Sepolia fee controller address should match",
+    );
+  });
+
+  test("openTx should open the correct url for each network", () async {
+    const txHash = "0x1271892718912u198haisghsg7223617";
+
+    for (final network in Networks.values) {
+      if (network.isAll) continue;
+
+      await network.openTx(txHash);
+
+      expect(
+        UrlLauncherPlatformCustomMock.lastLaunchedUrl,
+        "${network.chainInfo?.blockExplorerUrls?.first}/tx/$txHash",
+        reason: "${network.name} should open the correct url",
+      );
+    }
   });
 
   zGoldenTest("All networks icon should match", goldenFileName: "all_networks_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.all.icon, largeDevice: false));
   });
 
-  zGoldenTest("Ethereum network icon should match", goldenFileName: "ethereum_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.ethereum.icon, largeDevice: false));
+  zGoldenTest("Sepolia network icon should match", goldenFileName: "sepolia_network_icon", (tester) async {
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.sepolia.icon, largeDevice: false));
   });
 
-  zGoldenTest("Base network icon should match", goldenFileName: "base_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.base.icon, largeDevice: false));
-  });
-
-  zGoldenTest("Arbitrum network icon should match", goldenFileName: "arbitrum_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.arbitrum.icon, largeDevice: false));
+  zGoldenTest("Scroll Sepolia network icon should match", goldenFileName: "scroll_sepolia_network_icon",
+      (tester) async {
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.scrollSepolia.icon, largeDevice: false));
   });
 }

@@ -9,12 +9,135 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String get twentyFourHours => '24h';
+
+  @override
+  String get month => 'Month';
+
+  @override
+  String get threeMonths => '3 Months';
+
+  @override
+  String get twentyFourHoursCompact => '24h';
+
+  @override
+  String get monthCompact => '30d';
+
+  @override
+  String get threeMonthsCompact => '90d';
+
+  @override
   String get depositPageDepositSectionTitle => 'Deposit';
+
+  @override
+  String get previewDepositModalWaitingTransaction => 'Waiting Transaction';
+
+  @override
+  String previewDepositModalApprovingToken(String tokenSymbol) {
+    return 'Approving $tokenSymbol';
+  }
+
+  @override
+  String previewDepositModalDepositingIntoPool(
+      String baseTokenSymbol, String quoteTokenSymbol) {
+    return 'Depositing into $baseTokenSymbol/$quoteTokenSymbol pool';
+  }
+
+  @override
+  String previewDepositModalApproveToken(String tokenSymbol) {
+    return 'Approve $tokenSymbol';
+  }
+
+  @override
+  String get previewDepositModalDeposit => 'Deposit';
+
+  @override
+  String get previewDepositModalError => 'Error';
+
+  @override
+  String get previewDepositModalCurrentPrice => 'Current Price';
 
   @override
   String depositPageDepositSectionTokenNotNeeded(String tokenSymbol) {
     return '$tokenSymbol is not necessary for your selected range';
   }
+
+  @override
+  String get preview => 'Preview';
+
+  @override
+  String get previewDepositModalTitle => 'Preview Deposit';
+
+  @override
+  String get previewDepositModalWaitingTransactionSnackBarMessage =>
+      'Waiting transaction to be confirmed. ';
+
+  @override
+  String previewDepositModalApproveSuccessSnackBarMessage(String tokenSymbol) {
+    return '$tokenSymbol approved successfully. ';
+  }
+
+  @override
+  String get previewDepositModalMyPosition => 'My Position';
+
+  @override
+  String get previewDepositModalOutOfRange => 'Out of Range';
+
+  @override
+  String get previewDepositModalInRange => 'In Range';
+
+  @override
+  String get previewDepositModalProtocol => 'Protocol';
+
+  @override
+  String get previewDepositModalNetwork => 'Network';
+
+  @override
+  String previewDepositModalYearlyYieldTimeFrame(String timeFrame) {
+    return 'Yearly Yield ($timeFrame)';
+  }
+
+  @override
+  String get previewDepositModalTransactionErrorSnackBarMessage =>
+      'Transaction Failed. Please try again, if the problem persists, ';
+
+  @override
+  String get previewDepositModalTransactionErrorSnackBarHelperButtonTitle =>
+      'Contact us';
+
+  @override
+  String previewDepositModalDepositSuccessSnackBarMessage(
+      String baseTokenSymbol, String quoteTokenSymbol) {
+    return 'Successfully Deposited into the $baseTokenSymbol/$quoteTokenSymbol Pool. ';
+  }
+
+  @override
+  String yieldCardTimeFrameBest(String timeFrame) {
+    return '$timeFrame best';
+  }
+
+  @override
+  String yieldCardThisPoolIsAtNetwork(String network) {
+    return 'This pool is at $network';
+  }
+
+  @override
+  String get yieldCardYieldYearly => 'Yield (Yearly)';
+
+  @override
+  String get previewDepositModalDepositSuccessSnackBarHelperButtonTitle =>
+      'View Transaction';
+
+  @override
+  String get previewDepositModalApproveSuccessSnackBarHelperButtonTitle =>
+      'View Transaction';
+
+  @override
+  String get previewDepositModalWaitingTransactionSnackBarHelperButtonTitle =>
+      'View on Explorer';
+
+  @override
+  String get depositPageInvalidRange => 'Invalid range';
 
   @override
   String get depositPageMinRangeOutOfRangeWarningText =>
@@ -27,6 +150,12 @@ class SEn extends S {
   @override
   String get depositPageInvalidRangeErrorText =>
       'Max range should be greater than min range';
+
+  @override
+  String get previewDepositModalMinPrice => 'Min Price';
+
+  @override
+  String get previewDepositModalMaxPrice => 'Max Price';
 
   @override
   String get rangeSelectorMinRange => 'Min Range';

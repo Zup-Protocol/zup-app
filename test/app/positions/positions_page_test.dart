@@ -163,7 +163,7 @@ void main() {
 
   zGoldenTest("When the state is no positions in network, it should show the no positions in network state",
       goldenFileName: "positions_page_no_positions_in_network_state", (tester) async {
-    when(() => appCubit.selectedNetwork).thenReturn(Networks.base);
+    when(() => appCubit.selectedNetwork).thenReturn(Networks.sepolia);
     await tester.pumpDeviceBuilder(await goldenBuilder());
 
     (positionsCubit as BlocBase).emit(const PositionsState.noPositionsInNetwork());
@@ -242,7 +242,7 @@ void main() {
 
   zGoldenTest("When showing positions from other network, it should include a helper text below the positions",
       goldenFileName: "positions_page_positions_state_other_network", (tester) async {
-    when(() => appCubit.selectedNetwork).thenReturn(Networks.base);
+    when(() => appCubit.selectedNetwork).thenReturn(Networks.sepolia);
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
 

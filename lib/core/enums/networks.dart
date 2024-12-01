@@ -1,83 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 
-enum Networks { all, ethereum, base, arbitrum }
+enum Networks {
+  all,
+  sepolia,
+  scrollSepolia;
 
-extension NetworksExtension on Networks {
   bool get isAll => this == Networks.all;
 
-  String get label => ["All Networks", "Ethereum", "Base", "Arbitrum One"][index];
+  String get label => switch (this) {
+        all => "All Networks",
+        sepolia => "Sepolia",
+        scrollSepolia => "Scroll Sepolia",
+      };
 
-  Widget get icon => [
-        Assets.icons.all.svg(),
-        Assets.logos.ethereum.svg(),
-        Assets.logos.base.svg(),
-        Assets.logos.arbitrum.svg()
-      ][index];
+  Widget get icon => switch (this) {
+        all => Assets.icons.all.svg(),
+        sepolia => Assets.logos.ethereum.svg(),
+        scrollSepolia => Assets.logos.scroll.svg(),
+      };
 
-  ChainInfo? get chainInfo => [
-        null,
-        ChainInfo(
-          hexChainId: "0x1",
-          chainName: label,
-          blockExplorerUrls: const ["https://etherscan.io"],
-          nativeCurrency: NativeCurrencies.eth.currencyInfo,
-          rpcUrls: [rpcUrl ?? ""],
-        ),
-        ChainInfo(
-          hexChainId: "0x2105",
-          chainName: label,
-          blockExplorerUrls: const ["https://basescan.org/"],
-          nativeCurrency: NativeCurrencies.eth.currencyInfo,
-          rpcUrls: [rpcUrl ?? ""],
-        ),
-        ChainInfo(
-          hexChainId: "0xa4b1",
-          chainName: label,
-          blockExplorerUrls: const ["https://arbiscan.io"],
-          nativeCurrency: NativeCurrencies.eth.currencyInfo,
-          rpcUrls: [rpcUrl ?? ""],
-        ),
-      ][index];
+  ChainInfo? get chainInfo => switch (this) {
+        all => null,
+        sepolia => ChainInfo(
+            hexChainId: "0xaa36a7",
+            chainName: label,
+            blockExplorerUrls: const ["https://sepolia.etherscan.io"],
+            nativeCurrency: NativeCurrencies.eth.currencyInfo,
+            rpcUrls: [rpcUrl ?? ""],
+          ),
+        scrollSepolia => ChainInfo(
+            hexChainId: "0x8274f",
+            chainName: label,
+            blockExplorerUrls: const ["https://sepolia.scrollscan.com"],
+            nativeCurrency: NativeCurrencies.eth.currencyInfo,
+            rpcUrls: [rpcUrl ?? ""],
+          )
+      };
 
-  String? get wrappedNativeTokenAddress => [
-        null,
-        "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-        "0x4200000000000000000000000000000000000006",
-        "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-      ][index];
+  String? get wrappedNativeTokenAddress => switch (this) {
+        all => null,
+        sepolia => "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        scrollSepolia => "0x5300000000000000000000000000000000000004"
+      };
 
-  TokenDto? get defaultToken => [
-        null,
-        TokenDto(
-          address: wrappedNativeTokenAddress ?? "0x",
-          name: "Wrapped Ether",
-          symbol: "WETH",
-          logoUrl:
-              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/$wrappedNativeTokenAddress/logo.png",
-        ),
-        TokenDto(
-          address: wrappedNativeTokenAddress ?? "0x",
-          name: "Wrapped Ether",
-          symbol: "WETH",
-          logoUrl:
-              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/$wrappedNativeTokenAddress/logo.png",
-        ),
-        TokenDto(
-          address: wrappedNativeTokenAddress ?? "0x",
-          name: "Wrapped Ether",
-          symbol: "WETH",
-          logoUrl:
-              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/arbitrum/assets/$wrappedNativeTokenAddress/logo.png",
-        ),
-      ][index];
+  TokenDto? get wrappedNative => switch (this) {
+        all => null,
+        sepolia => TokenDto(
+            address: wrappedNativeTokenAddress ?? "0x",
+            name: "Wrapped Ether",
+            decimals: NativeCurrencies.eth.currencyInfo.decimals,
+            symbol: "WETH",
+            logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
+          ),
+        scrollSepolia => TokenDto(
+            address: wrappedNativeTokenAddress ?? "0x",
+            decimals: NativeCurrencies.eth.currencyInfo.decimals,
+            name: "Wrapped Ether",
+            symbol: "WETH",
+            logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
+          ),
+      };
 
-  String? get rpcUrl => [
-        null,
-        "https://eth.llamarpc.com",
-        "https://mainnet.base.org",
-        "https://arb1.arbitrum.io/rpc",
-      ][index];
+  String? get rpcUrl => switch (this) {
+        all => null,
+        sepolia => "https://1rpc.io/sepolia",
+        scrollSepolia => "https://scroll-sepolia-rpc.publicnode.com",
+      };
+
+  String? get zupRouterAddress => switch (this) {
+        all => null,
+        sepolia => "0xCd84aE98e975c4C1A82C0D9Debf992d3eeb7d6AD",
+        scrollSepolia => throw "Zup Router Not Available on Scroll Sepolia yet",
+      };
+
+  String? get feeControllerAddress => switch (this) {
+        all => null,
+        sepolia => "0xFBFEfD600fFC1Ae6EabD66Bb8C90F25a314Ff3Cf",
+        scrollSepolia => throw "Zup's Fee Controller Not Available on Scroll Sepolia yet",
+      };
+
+  Future<void> openTx(String txHash) async {
+    final url = "${chainInfo?.blockExplorerUrls?.first}/tx/$txHash";
+    if (!await canLaunchUrl(Uri.parse(url))) return;
+
+    await launchUrl(Uri.parse(url));
+  }
 }

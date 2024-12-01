@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:zup_app/core/dtos/position_dto.dart';
-import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/position_status.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';

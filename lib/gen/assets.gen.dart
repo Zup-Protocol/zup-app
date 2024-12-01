@@ -52,8 +52,14 @@ class $AssetsIconsGen {
   /// File path: assets/icons/exclamationmark.triangle.svg
   SvgGenImage get exclamationmarkTriangle => const SvgGenImage('assets/icons/exclamationmark.triangle.svg');
 
+  /// File path: assets/icons/gear.svg
+  SvgGenImage get gear => const SvgGenImage('assets/icons/gear.svg');
+
   /// File path: assets/icons/info.circle.svg
   SvgGenImage get infoCircle => const SvgGenImage('assets/icons/info.circle.svg');
+
+  /// File path: assets/icons/lock.open.svg
+  SvgGenImage get lockOpen => const SvgGenImage('assets/icons/lock.open.svg');
 
   /// File path: assets/icons/magnifyingglass.svg
   SvgGenImage get magnifyingglass => const SvgGenImage('assets/icons/magnifyingglass.svg');
@@ -81,6 +87,9 @@ class $AssetsIconsGen {
 
   /// File path: assets/icons/sad.magnifyingglass.svg
   SvgGenImage get sadMagnifyingglass => const SvgGenImage('assets/icons/sad.magnifyingglass.svg');
+
+  /// File path: assets/icons/scroll.fill.svg
+  SvgGenImage get scrollFill => const SvgGenImage('assets/icons/scroll.fill.svg');
 
   /// File path: assets/icons/slash.circle.svg
   SvgGenImage get slashCircle => const SvgGenImage('assets/icons/slash.circle.svg');
@@ -123,7 +132,9 @@ class $AssetsIconsGen {
         chevronRight,
         circleDotted,
         exclamationmarkTriangle,
+        gear,
         infoCircle,
+        lockOpen,
         magnifyingglass,
         minus,
         networkSlash,
@@ -133,6 +144,7 @@ class $AssetsIconsGen {
         questionmark,
         rectangleConnectedToLineBelow,
         sadMagnifyingglass,
+        scrollFill,
         slashCircle,
         sparkleMagnifyingglass,
         square3Layers3dSlash,
@@ -157,11 +169,14 @@ class $AssetsLogosGen {
   /// File path: assets/logos/ethereum.svg
   SvgGenImage get ethereum => const SvgGenImage('assets/logos/ethereum.svg');
 
+  /// File path: assets/logos/scroll.svg
+  SvgGenImage get scroll => const SvgGenImage('assets/logos/scroll.svg');
+
   /// File path: assets/logos/zup.svg
   SvgGenImage get zup => const SvgGenImage('assets/logos/zup.svg');
 
   /// List of all assets
-  List<SvgGenImage> get values => [arbitrum, base, ethereum, zup];
+  List<SvgGenImage> get values => [arbitrum, base, ethereum, scroll, zup];
 }
 
 class $AssetsLottiesGen {
@@ -170,8 +185,8 @@ class $AssetsLottiesGen {
   /// File path: assets/lotties/click.json
   LottieGenImage get click => const LottieGenImage('assets/lotties/click.json');
 
-  /// File path: assets/lotties/ghost.json
-  LottieGenImage get ghost => const LottieGenImage('assets/lotties/ghost.json');
+  /// File path: assets/lotties/empty.json
+  LottieGenImage get empty => const LottieGenImage('assets/lotties/empty.json');
 
   /// File path: assets/lotties/matching.json
   LottieGenImage get matching => const LottieGenImage('assets/lotties/matching.json');
@@ -183,7 +198,7 @@ class $AssetsLottiesGen {
   LottieGenImage get seaching => const LottieGenImage('assets/lotties/seaching.json');
 
   /// List of all assets
-  List<LottieGenImage> get values => [click, ghost, matching, radar, seaching];
+  List<LottieGenImage> get values => [click, empty, matching, radar, seaching];
 }
 
 class Assets {

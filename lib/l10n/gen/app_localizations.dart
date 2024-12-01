@@ -93,17 +93,217 @@ abstract class S {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
+  /// No description provided for @twentyFourHours.
+  ///
+  /// In en, this message translates to:
+  /// **'24h'**
+  String get twentyFourHours;
+
+  /// No description provided for @month.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get month;
+
+  /// No description provided for @threeMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'3 Months'**
+  String get threeMonths;
+
+  /// No description provided for @twentyFourHoursCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'24h'**
+  String get twentyFourHoursCompact;
+
+  /// No description provided for @monthCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'30d'**
+  String get monthCompact;
+
+  /// No description provided for @threeMonthsCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'90d'**
+  String get threeMonthsCompact;
+
   /// No description provided for @depositPageDepositSectionTitle.
   ///
   /// In en, this message translates to:
   /// **'Deposit'**
   String get depositPageDepositSectionTitle;
 
+  /// No description provided for @previewDepositModalWaitingTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting Transaction'**
+  String get previewDepositModalWaitingTransaction;
+
+  /// No description provided for @previewDepositModalApprovingToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Approving {tokenSymbol}'**
+  String previewDepositModalApprovingToken(String tokenSymbol);
+
+  /// No description provided for @previewDepositModalDepositingIntoPool.
+  ///
+  /// In en, this message translates to:
+  /// **'Depositing into {baseTokenSymbol}/{quoteTokenSymbol} pool'**
+  String previewDepositModalDepositingIntoPool(
+      String baseTokenSymbol, String quoteTokenSymbol);
+
+  /// No description provided for @previewDepositModalApproveToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve {tokenSymbol}'**
+  String previewDepositModalApproveToken(String tokenSymbol);
+
+  /// No description provided for @previewDepositModalDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get previewDepositModalDeposit;
+
+  /// No description provided for @previewDepositModalError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get previewDepositModalError;
+
+  /// No description provided for @previewDepositModalCurrentPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Price'**
+  String get previewDepositModalCurrentPrice;
+
   /// No description provided for @depositPageDepositSectionTokenNotNeeded.
   ///
   /// In en, this message translates to:
   /// **'{tokenSymbol} is not necessary for your selected range'**
   String depositPageDepositSectionTokenNotNeeded(String tokenSymbol);
+
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
+  /// No description provided for @previewDepositModalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview Deposit'**
+  String get previewDepositModalTitle;
+
+  /// No description provided for @previewDepositModalWaitingTransactionSnackBarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting transaction to be confirmed. '**
+  String get previewDepositModalWaitingTransactionSnackBarMessage;
+
+  /// No description provided for @previewDepositModalApproveSuccessSnackBarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokenSymbol} approved successfully. '**
+  String previewDepositModalApproveSuccessSnackBarMessage(String tokenSymbol);
+
+  /// No description provided for @previewDepositModalMyPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'My Position'**
+  String get previewDepositModalMyPosition;
+
+  /// No description provided for @previewDepositModalOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of Range'**
+  String get previewDepositModalOutOfRange;
+
+  /// No description provided for @previewDepositModalInRange.
+  ///
+  /// In en, this message translates to:
+  /// **'In Range'**
+  String get previewDepositModalInRange;
+
+  /// No description provided for @previewDepositModalProtocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol'**
+  String get previewDepositModalProtocol;
+
+  /// No description provided for @previewDepositModalNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Network'**
+  String get previewDepositModalNetwork;
+
+  /// No description provided for @previewDepositModalYearlyYieldTimeFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly Yield ({timeFrame})'**
+  String previewDepositModalYearlyYieldTimeFrame(String timeFrame);
+
+  /// No description provided for @previewDepositModalTransactionErrorSnackBarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Failed. Please try again, if the problem persists, '**
+  String get previewDepositModalTransactionErrorSnackBarMessage;
+
+  /// No description provided for @previewDepositModalTransactionErrorSnackBarHelperButtonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get previewDepositModalTransactionErrorSnackBarHelperButtonTitle;
+
+  /// No description provided for @previewDepositModalDepositSuccessSnackBarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool. '**
+  String previewDepositModalDepositSuccessSnackBarMessage(
+      String baseTokenSymbol, String quoteTokenSymbol);
+
+  /// No description provided for @yieldCardTimeFrameBest.
+  ///
+  /// In en, this message translates to:
+  /// **'{timeFrame} best'**
+  String yieldCardTimeFrameBest(String timeFrame);
+
+  /// No description provided for @yieldCardThisPoolIsAtNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'This pool is at {network}'**
+  String yieldCardThisPoolIsAtNetwork(String network);
+
+  /// No description provided for @yieldCardYieldYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yield (Yearly)'**
+  String get yieldCardYieldYearly;
+
+  /// No description provided for @previewDepositModalDepositSuccessSnackBarHelperButtonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View Transaction'**
+  String get previewDepositModalDepositSuccessSnackBarHelperButtonTitle;
+
+  /// No description provided for @previewDepositModalApproveSuccessSnackBarHelperButtonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View Transaction'**
+  String get previewDepositModalApproveSuccessSnackBarHelperButtonTitle;
+
+  /// No description provided for @previewDepositModalWaitingTransactionSnackBarHelperButtonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View on Explorer'**
+  String get previewDepositModalWaitingTransactionSnackBarHelperButtonTitle;
+
+  /// No description provided for @depositPageInvalidRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid range'**
+  String get depositPageInvalidRange;
 
   /// No description provided for @depositPageMinRangeOutOfRangeWarningText.
   ///
@@ -122,6 +322,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Max range should be greater than min range'**
   String get depositPageInvalidRangeErrorText;
+
+  /// No description provided for @previewDepositModalMinPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Min Price'**
+  String get previewDepositModalMinPrice;
+
+  /// No description provided for @previewDepositModalMaxPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Price'**
+  String get previewDepositModalMaxPrice;
 
   /// No description provided for @rangeSelectorMinRange.
   ///

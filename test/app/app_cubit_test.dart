@@ -40,7 +40,7 @@ void main() {
     when(() => wallet0.connectedNetwork).thenAnswer((_) async => const ChainInfo(hexChainId: signerNetwork));
     when(() => wallet0.switchOrAddNetwork(any())).thenAnswer((_) async {});
 
-    final sut0 = AppCubit(wallet0)..updateAppNetwork(Networks.arbitrum);
+    final sut0 = AppCubit(wallet0)..updateAppNetwork(Networks.sepolia);
 
     signerStreamController.add(signer);
 
@@ -90,13 +90,13 @@ void main() {
     final signerStreamController = StreamController<Signer?>.broadcast();
     final signerStream = signerStreamController.stream;
     final signer = SignerMock();
-    final signerNetwork = Networks.arbitrum.chainInfo!.hexChainId;
+    final signerNetwork = Networks.sepolia.chainInfo!.hexChainId;
 
     when(() => wallet0.signerStream).thenAnswer((_) => signerStream);
     when(() => wallet0.connectedNetwork).thenAnswer((_) async => ChainInfo(hexChainId: signerNetwork));
     when(() => wallet0.switchOrAddNetwork(any())).thenAnswer((_) async {});
 
-    AppCubit(wallet0).updateAppNetwork(Networks.arbitrum);
+    AppCubit(wallet0).updateAppNetwork(Networks.sepolia);
 
     signerStreamController.add(signer);
 
@@ -115,7 +115,7 @@ void main() {
     when(() => wallet0.connectedNetwork).thenAnswer((_) async => const ChainInfo(hexChainId: ""));
     when(() => wallet0.switchOrAddNetwork(any())).thenAnswer((_) async {});
 
-    AppCubit(wallet0).updateAppNetwork(Networks.arbitrum);
+    AppCubit(wallet0).updateAppNetwork(Networks.sepolia);
 
     signerStreamController.add(null);
 
@@ -125,14 +125,14 @@ void main() {
   });
 
   test("When calling `updateAppNetwork` it should update the selected network variable", () async {
-    sut.updateAppNetwork(Networks.base);
+    sut.updateAppNetwork(Networks.sepolia);
 
-    expect(sut.selectedNetwork, Networks.base);
+    expect(sut.selectedNetwork, Networks.sepolia);
   });
 
   test("""When calling `updateAppNetwork` it should emit the state `networkChanged` with the new network
       but it should finish with the event `standard` """, () async {
-    const network = Networks.base;
+    const network = Networks.sepolia;
 
     expectLater(sut.stream, emitsInOrder([const AppState.networkChanged(network), const AppState.standard()]));
 
@@ -142,7 +142,7 @@ void main() {
   });
 
   test("When changing the network, it should add an event to the network stream", () {
-    const network = Networks.base;
+    const network = Networks.sepolia;
 
     expectLater(sut.selectedNetworkStream, emits(network));
 
