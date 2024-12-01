@@ -272,10 +272,12 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               context,
               message: S.of(context).previewDepositModalWaitingTransactionSnackBarMessage,
               type: ZupSnackBarType.info,
-              helperButtonTitle: S.of(context).previewDepositModalWaitingTransactionSnackBarHelperButtonTitle,
+              helperButton: (
+                title: S.of(context).previewDepositModalWaitingTransactionSnackBarHelperButtonTitle,
+                onButtonTap: () => widget.currentYield.network.openTx(txId)
+              ),
               customIcon: const ZupCircularLoadingIndicator(size: 20),
               snackDuration: const Duration(minutes: 10),
-              onHelperButtonTap: () => widget.currentYield.network.openTx(txId),
             ),
           ),
           approveSuccess: (txId, tokenSymbol) async {
@@ -286,8 +288,10 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                 context,
                 message: S.of(context).previewDepositModalApproveSuccessSnackBarMessage(tokenSymbol),
                 type: ZupSnackBarType.success,
-                helperButtonTitle: S.of(context).previewDepositModalApproveSuccessSnackBarHelperButtonTitle,
-                onHelperButtonTap: () => widget.currentYield.network.openTx(txId),
+                helperButton: (
+                  title: S.of(context).previewDepositModalApproveSuccessSnackBarHelperButtonTitle,
+                  onButtonTap: () => widget.currentYield.network.openTx(txId),
+                ),
               ),
             );
           },
@@ -308,8 +312,10 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                       quoteToken.symbol,
                     ),
                 type: ZupSnackBarType.success,
-                helperButtonTitle: S.of(context).previewDepositModalDepositSuccessSnackBarHelperButtonTitle,
-                onHelperButtonTap: () => widget.currentYield.network.openTx(txId),
+                helperButton: (
+                  title: S.of(context).previewDepositModalDepositSuccessSnackBarHelperButtonTitle,
+                  onButtonTap: () => widget.currentYield.network.openTx(txId),
+                ),
               ),
             );
           },
@@ -319,11 +325,11 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
             return ScaffoldMessenger.of(context).showSnackBar(
               ZupSnackBar(
                 context,
+                helperButton: (
+                  title: S.of(context).previewDepositModalTransactionErrorSnackBarHelperButtonTitle,
+                  onButtonTap: () {}
+                ),
                 message: S.of(context).previewDepositModalTransactionErrorSnackBarMessage,
-                helperButtonTitle: S.of(context).previewDepositModalTransactionErrorSnackBarHelperButtonTitle,
-                onHelperButtonTap: () {
-                  // TODO: Implement contact support
-                },
                 type: ZupSnackBarType.error,
               ),
             );

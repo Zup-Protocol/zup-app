@@ -38,7 +38,6 @@ void main() {
   late Signer signer;
   late TransactionResponse transactionResponse;
   late UniswapPositionManager uniswapPositionManager;
-  late UniswapPositionManagerImpl uniswapPositionManagerImpl;
 
   setUp(() {
     uniswapV3Pool = UniswapV3PoolMock();
@@ -53,7 +52,6 @@ void main() {
     zupRouterImpl = ZupRouterImplMock();
     feeControllerImpl = FeeControllerImplMock();
     uniswapPositionManager = UniswapPositionManagerMock();
-    uniswapPositionManagerImpl = UniswapPositionManagerImplMock();
 
     sut = PreviewDepositModalCubit(
       initialPoolTick: initialPoolTick,
