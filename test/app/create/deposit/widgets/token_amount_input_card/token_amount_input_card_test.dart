@@ -205,4 +205,27 @@ void main() {
       verify(() => wallet.tokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
     },
   );
+
+  zGoldenTest(
+    """When there's a large number typed, it should not hard clip it in the left border,
+    but instead do a soft clip with a gradient""",
+    goldenFileName: "token_amount_card_large_number_left_border",
+    (tester) async {
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.enterText(find.byType(TextField), "1234567890123456789021762561752615261");
+    },
+  );
+
+  zGoldenTest(
+    """When there's a large number typed, it should not hard clip it in the right border,
+    but instead do a soft clip with a gradient""",
+    goldenFileName: "token_amount_card_large_number_right_border",
+    (tester) async {
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.enterText(find.byType(TextField), "1234567890123456789021762561752615261");
+      await tester.drag(find.byType(TextField), const Offset(-1, 0));
+
+      FocusManager.instance.primaryFocus?.unfocus();
+    },
+  );
 }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 
@@ -70,4 +72,134 @@ void main() {
 
     expect(number.toAmount(), "0");
   });
+
+  test("When using `formatCompactCurrency`, it should return a string in the compact form (100k instead of 100,000)",
+      () {
+    const number = 123456;
+
+    expect(number.formatCompactCurrency(), "USD 123K");
+  });
+
+  test("""When using `formatCompactCurrency` with `isUSD` false,
+  it should return a string in the compact form
+  (100k instead of 100,000), but without the currency symbol""", () {
+    const number = 123456;
+
+    expect(number.formatCompactCurrency(isUSD: false), "123K");
+  });
+
+  test(
+    """When passing `useMoreThan` true to `formatCompactCurrency`,
+    and the number is bigger than `maxBeforeMoreThan`, which
+    by default is `999 * (10 ** 12)` it should return a string with the symbol '>'
+    and the max number""",
+    () {
+      final number = pow(10, 13) * 999;
+
+      expect(number.formatCompactCurrency(useMoreThan: true), ">999T");
+    },
+  );
+
+  test(
+    """When passing `useMoreThan` true to `formatCompactCurrency`,
+    and the number is bigger than the passed `maxBeforeMoreThan`,
+    it should return a string with the symbol '>' and the max number
+    """,
+    () {
+      final number = pow(10, 13) * 999;
+
+      expect(
+          number.formatCompactCurrency(
+            useMoreThan: true,
+            maxBeforeMoreThan: 1000,
+          ),
+          ">1K");
+    },
+  );
+
+  test(
+    """When passing `useMoreThan` true to `formatCompactCurrency`,
+    and the number is not bigger than the passed `maxBeforeMoreThan`,
+    it should return the passed number, but formated compactly
+    """,
+    () {
+      expect(
+        1000.formatCompactCurrency(
+          useMoreThan: true,
+          maxBeforeMoreThan: 200000,
+          isUSD: false,
+        ),
+        "1K",
+      );
+    },
+  );
+
+  test(
+    """When passing `useMoreThan` true to `formatCompactCurrency`,
+    and the number is not bigger than the default `maxBeforeMoreThan`,
+    which is `999 * (10 ** 12)`, it should return the passed number,
+    but formated compactly
+    """,
+    () {
+      expect(
+        1000.formatCompactCurrency(
+          useMoreThan: true,
+          isUSD: false,
+        ),
+        "1K",
+      );
+    },
+  );
+
+  test(
+    """`maybeFormatCompactCurrency` should format compact if
+    the passed number is bigger than maxBeforeCompact""",
+    () {
+      expect(
+        1000.maybeFormatCompactCurrency(maxBeforeCompact: 999),
+        "USD 1K",
+      );
+    },
+  );
+
+  test(
+    """When `isUSD` is false in `maybeFormatCompactCurrency` should format compact if
+    the passed number is bigger than maxBeforeCompact, but without the currency symbol""",
+    () {
+      expect(
+        1000.maybeFormatCompactCurrency(
+          maxBeforeCompact: 999,
+          isUSD: false,
+        ),
+        "1K",
+      );
+    },
+  );
+
+  test(
+    """When `useMoreThan` is true in `maybeFormatCompactCurrency
+     should format compact if the passed number is bigger than maxBeforeMoreThan`""",
+    () {
+      expect(
+        1000.maybeFormatCompactCurrency(
+          maxBeforeMoreThan: 999,
+          useMoreThan: true,
+          isUSD: false,
+        ),
+        ">999",
+      );
+    },
+  );
+
+  test(
+    """When `useLessThan` is true in `maybeFormatCompactCurrency`
+    and the passed number is less than 0.0001 should use `<`
+    """,
+    () {
+      expect(
+        0.00001.maybeFormatCompactCurrency(useLessThan: true),
+        "<0.0001",
+      );
+    },
+  );
 }

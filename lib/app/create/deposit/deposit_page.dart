@@ -1,9 +1,11 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
+import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/range_selector.dart';
 import 'package:zup_app/app/create/deposit/widgets/token_amount_input_card/token_amount_input_card.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
@@ -183,19 +185,21 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
       return areTokensReversed ? minTickPrice.priceAsQuoteToken : maxTickPrice.priceAsBaseToken;
     }
 
-    final newQuoteTokenAmount = calculateToken1AmountFromToken0(
+    final newQuoteTokenAmount = Decimal.tryParse(calculateToken1AmountFromToken0(
       double.tryParse(baseTokenAmountController.text) ?? 0,
       currentPrice,
       getMinPrice(),
       getMaxPrice(),
-    ).toString();
+    ).toString())
+        .toString();
 
-    final newBaseTokenAmount = calculateToken0AmountFromToken1(
+    final newBaseTokenAmount = Decimal.tryParse(calculateToken0AmountFromToken1(
       double.tryParse(quoteTokenAmountController.text) ?? 0,
       currentPrice,
       getMinPrice(),
       getMaxPrice(),
-    ).toString();
+    ).toString())
+        .toString();
 
     if (isBaseTokenAmountUserInput) {
       if (newQuoteTokenAmount.isEmptyOrZero) return quoteTokenAmountController.clear();
@@ -237,7 +241,29 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
       return (title: S.of(context).depositPageInsufficientTokenBalance(quoteToken.symbol), icon: null, onPressed: null);
     }
 
-    return (title: S.of(context).preview, icon: Assets.icons.scrollFill.svg(), onPressed: () {});
+    return (
+      title: S.of(context).preview,
+      icon: Assets.icons.scrollFill.svg(),
+      onPressed: () {
+        PreviewDepositModal(
+          currentYield: _cubit.selectedYield!,
+          isReversed: areTokensReversed,
+          token0DepositAmount: double.tryParse(
+                areTokensReversed ? quoteTokenAmountController.text : baseTokenAmountController.text,
+              ) ??
+              0,
+          token1DepositAmount: double.tryParse(
+                areTokensReversed ? baseTokenAmountController.text : quoteTokenAmountController.text,
+              ) ??
+              0,
+          maxPrice: (isInfinity: isMaxRangeInfinity, price: maxPrice),
+          minPrice: (isInfinity: isMinRangeInfinity, price: minPrice),
+        ).show(
+          context,
+          currentPoolTick: _cubit.latestPoolTick ?? BigInt.zero,
+        );
+      }
+    );
   }
 
   @override

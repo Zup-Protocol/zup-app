@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 
-class V3PoolConversorsMixinTest with V3PoolConversorsMixin {}
+class _V3PoolConversorsMixinTest with V3PoolConversorsMixin {}
 
 void main() {
   test("`tickToPrice` should correctly convert a passed tick to a price", () {
-    final price = V3PoolConversorsMixinTest().tickToPrice(
+    final price = _V3PoolConversorsMixinTest().tickToPrice(
       tick: BigInt.from(194822),
       poolToken0Decimals: 6,
       poolToken1Decimals: 18,
@@ -17,7 +17,7 @@ void main() {
 
   test("""`tickToClosestValidTick` should correctly convert a
       passed tick to its closest valid tick based on the tick spacing (lower tick test case)""", () {
-    final closestValidTick = V3PoolConversorsMixinTest().tickToClosestValidTick(
+    final closestValidTick = _V3PoolConversorsMixinTest().tickToClosestValidTick(
       tick: BigInt.from(7),
       tickSpacing: 5,
     );
@@ -27,7 +27,7 @@ void main() {
 
   test("""`tickToClosestValidTick` should correctly convert a
       passed tick to its closest valid tick based on the tick spacing (higher tick test case)""", () {
-    final closestValidTick = V3PoolConversorsMixinTest().tickToClosestValidTick(
+    final closestValidTick = _V3PoolConversorsMixinTest().tickToClosestValidTick(
       tick: BigInt.from(8),
       tickSpacing: 5,
     );
@@ -36,7 +36,7 @@ void main() {
   });
 
   test("`priceToTick` should correctly convert a passed price to a tick", () {
-    final tick = V3PoolConversorsMixinTest().priceToTick(
+    final tick = _V3PoolConversorsMixinTest().priceToTick(
       price: 1200,
       poolToken0Decimals: 6,
       poolToken1Decimals: 18,
@@ -46,7 +46,7 @@ void main() {
   });
 
   test("when is reversed is true, `priceToTick` should correctly convert a passed price to a tick", () {
-    final tick = V3PoolConversorsMixinTest().priceToTick(
+    final tick = _V3PoolConversorsMixinTest().priceToTick(
       price: 1200,
       poolToken0Decimals: 6,
       poolToken1Decimals: 18,
@@ -59,7 +59,7 @@ void main() {
   test(
     "`priceToClosestValidPrice` should correctly convert a passed price to a closest valid price based on the tick spacing",
     () {
-      final closestValidPrice = V3PoolConversorsMixinTest().priceToClosestValidPrice(
+      final closestValidPrice = _V3PoolConversorsMixinTest().priceToClosestValidPrice(
         price: 1200,
         poolToken0Decimals: 6,
         poolToken1Decimals: 18,
@@ -75,7 +75,7 @@ void main() {
   test(
     "When is reversed is true, `priceToClosestValidPrice` should correctly convert a passed price to a closest valid price based on the tick spacing",
     () {
-      final closestValidPrice = V3PoolConversorsMixinTest().priceToClosestValidPrice(
+      final closestValidPrice = _V3PoolConversorsMixinTest().priceToClosestValidPrice(
         price: 1200,
         poolToken0Decimals: 6,
         poolToken1Decimals: 18,

@@ -15,6 +15,8 @@ class GoldenConfig {
   static final pcDevice = [const Device(size: Size(1912, 1040), name: "pc")];
   static final smallSquareDevice = [const Device(size: Size(800, 800), name: "square")];
 
+  static final scrollController = ScrollController();
+
   static Future<Widget> builder(Widget child) async {
     await loadAppFonts();
 
@@ -27,7 +29,7 @@ class GoldenConfig {
       ],
       home: Scaffold(
         backgroundColor: Colors.white,
-        body: CustomScrollView(slivers: [
+        body: CustomScrollView(controller: scrollController, slivers: [
           SliverFillRemaining(
             hasScrollBody: false,
             child: child,
@@ -38,14 +40,16 @@ class GoldenConfig {
     );
   }
 
-  static Widget Function(Widget) localizationsWrapper() {
+  static Widget Function(Widget) localizationsWrapper({GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey}) {
     return (child) => MaterialApp(
+          scaffoldMessengerKey: scaffoldMessengerKey,
           localizationsDelegates: const [
             S.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             Web3KitLocalizations.delegate,
           ],
+          theme: ZupTheme.lightTheme,
           home: Scaffold(body: child),
         );
   }

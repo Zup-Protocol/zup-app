@@ -3,6 +3,7 @@ import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
@@ -38,7 +39,7 @@ class _YieldCardState extends State<YieldCard> {
         Padding(
           padding: const EdgeInsets.only(left: 6),
           child: Text(
-            "${widget.timeFrame.label} best",
+            S.of(context).yieldCardTimeFrameBest(widget.timeFrame.label(context)),
             style: const TextStyle(color: ZupColors.gray, fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
@@ -56,7 +57,7 @@ class _YieldCardState extends State<YieldCard> {
                   right: 2,
                   top: 2,
                   child: ZupTooltip(
-                    message: "This pool is at ${widget.yield.network.label}",
+                    message: S.of(context).yieldCardThisPoolIsAtNetwork(widget.yield.network.label),
                     trailingIcon: widget.yield.network.icon,
                     child: AnimatedContainer(
                       duration: selectionAnimationDuration,
@@ -88,11 +89,11 @@ class _YieldCardState extends State<YieldCard> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 10),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
                     child: Text(
-                      "Yield (Yearly)",
-                      style: TextStyle(fontSize: 14),
+                      S.of(context).yieldCardYieldYearly,
+                      style: const TextStyle(fontSize: 14),
                     ),
                   ),
                   Text(

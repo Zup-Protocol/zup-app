@@ -35,7 +35,7 @@ void main() {
       ChainInfo(
         hexChainId: "0xaa36a7",
         chainName: "Sepolia",
-        blockExplorerUrls: const ["https://sepolia.etherscan.io/"],
+        blockExplorerUrls: const ["https://sepolia.etherscan.io"],
         nativeCurrency: NativeCurrencies.eth.currencyInfo,
         rpcUrls: const ["https://1rpc.io/sepolia"],
       ),
@@ -47,7 +47,7 @@ void main() {
       ChainInfo(
         hexChainId: "0x8274f",
         chainName: "Scroll Sepolia",
-        blockExplorerUrls: const ["https://sepolia.scrollscan.com/"],
+        blockExplorerUrls: const ["https://sepolia.scrollscan.com"],
         nativeCurrency: NativeCurrencies.eth.currencyInfo,
         rpcUrls: const ["https://scroll-sepolia-rpc.publicnode.com"],
       ),

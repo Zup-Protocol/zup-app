@@ -1,15 +1,21 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/erc_20.abi.g.dart';
+import 'package:zup_app/abis/fee_controller.abi.g.dart';
+import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_page.dart';
+import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
@@ -27,6 +33,11 @@ void main() {
   late Wallet wallet;
   late ZupNavigator navigator;
   late AppCubit appCubit;
+  late PositionsCubit positionsCubit;
+  late FeeController feeController;
+  late UniswapV3Pool uniswapV3pool;
+  late Erc20 erc20;
+  late ZupRouter zupRouter;
 
   setUp(() async {
     await Web3Kit.initializeForTest();
@@ -36,6 +47,11 @@ void main() {
     wallet = WalletMock();
     navigator = ZupNavigatorMock();
     appCubit = AppCubitMock();
+    positionsCubit = PositionsCubitMock();
+    feeController = FeeControllerMock();
+    uniswapV3pool = UniswapV3PoolMock();
+    erc20 = Erc20Mock();
+    zupRouter = ZupRouterMock();
 
     inject.registerFactory<LottieBuilder>(
       () => Assets.lotties.click.lottie(animate: false),
@@ -57,12 +73,23 @@ void main() {
       () => Assets.lotties.seaching.lottie(animate: false),
       instanceName: InjectInstanceNames.lottieSearching,
     );
+    inject.registerFactory<ScrollController>(
+      () => ScrollController(),
+      instanceName: InjectInstanceNames.appScrollController,
+    );
 
     inject.registerFactory<ZupNavigator>(() => navigator);
     inject.registerFactory<Wallet>(() => wallet);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerFactory<ZupSingletonCache>(() => ZupSingletonCache.shared);
+    inject.registerFactory<GlobalKey<ScaffoldMessengerState>>(() => GlobalKey());
+    inject.registerFactory<PositionsCubit>(() => positionsCubit);
+    inject.registerFactory<FeeController>(() => feeController);
+    inject.registerFactory<ZupRouter>(() => zupRouter);
+    inject.registerFactory<UniswapV3Pool>(() => uniswapV3pool);
+    inject.registerFactory<Erc20>(() => erc20);
+    inject.registerFactory<UniswapPositionManager>(() => UniswapPositionManagerMock());
 
     when(() => cubit.stream).thenAnswer((_) => const Stream.empty());
     when(() => cubit.state).thenAnswer((_) => const DepositState.initial());
@@ -1498,5 +1525,39 @@ void main() {
 
     await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
     await tester.pumpAndSettle();
+  });
+
+  zGoldenTest("When clicking the enabled deposit button, it should show the preview modal of the deposit",
+      goldenFileName: "deposit_page_preview_modal", (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      final signer = SignerMock();
+
+      when(() => wallet.signer).thenReturn(signer);
+      when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
+      when(() => cubit.getWalletTokenAmount(selectedYield.token0.address, network: any(named: "network"))).thenAnswer(
+        (_) => Future.value(347537253),
+      );
+      when(() => cubit.getWalletTokenAmount(selectedYield.token1.address, network: any(named: "network"))).thenAnswer(
+        (_) => Future.value(32576352673),
+      );
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+      await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("deposit-button")));
+      await tester.pumpAndSettle();
+    });
   });
 }

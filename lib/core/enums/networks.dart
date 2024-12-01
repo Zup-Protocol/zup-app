@@ -28,14 +28,14 @@ enum Networks {
         sepolia => ChainInfo(
             hexChainId: "0xaa36a7",
             chainName: label,
-            blockExplorerUrls: const ["https://sepolia.etherscan.io/"],
+            blockExplorerUrls: const ["https://sepolia.etherscan.io"],
             nativeCurrency: NativeCurrencies.eth.currencyInfo,
             rpcUrls: [rpcUrl ?? ""],
           ),
         scrollSepolia => ChainInfo(
             hexChainId: "0x8274f",
             chainName: label,
-            blockExplorerUrls: const ["https://sepolia.scrollscan.com/"],
+            blockExplorerUrls: const ["https://sepolia.scrollscan.com"],
             nativeCurrency: NativeCurrencies.eth.currencyInfo,
             rpcUrls: [rpcUrl ?? ""],
           )

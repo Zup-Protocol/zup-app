@@ -1,6 +1,43 @@
 {
     "@@locale": "en",
+    "twentyFourHours": "24h",
+    "month": "Month",
+    "threeMonths": "3 Months",
+    "twentyFourHoursCompact": "24h",
+    "monthCompact": "30d",
+    "threeMonthsCompact": "90d",
     "depositPageDepositSectionTitle": "Deposit",
+    "previewDepositModalWaitingTransaction": "Waiting Transaction",
+    "previewDepositModalApprovingToken": "Approving {tokenSymbol}",
+    "@previewDepositModalApprovingToken": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "previewDepositModalDepositingIntoPool": "Depositing into {baseTokenSymbol}/{quoteTokenSymbol} pool",
+    "@previewDepositModalDepositingIntoPool": {
+        "placeholders": {
+            "baseTokenSymbol": {
+                "type": "String"
+            },
+            "quoteTokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "previewDepositModalApproveToken": "Approve {tokenSymbol}",
+    "@previewDepositModalApproveToken": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "previewDepositModalDeposit": "Deposit",
+    "previewDepositModalError": "Error",
+    "previewDepositModalCurrentPrice": "Current Price",
     "depositPageDepositSectionTokenNotNeeded": "{tokenSymbol} is not necessary for your selected range",
     "@depositPageDepositSectionTokenNotNeeded": {
         "placeholders": {
@@ -10,10 +47,68 @@
         }
     },
     "preview": "Preview",
+    "previewDepositModalTitle": "Preview Deposit",
+    "previewDepositModalWaitingTransactionSnackBarMessage": "Waiting transaction to be confirmed. ",
+    "previewDepositModalApproveSuccessSnackBarMessage": "{tokenSymbol} approved successfully. ",
+    "@previewDepositModalApproveSuccessSnackBarMessage": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "previewDepositModalMyPosition": "My Position",
+    "previewDepositModalOutOfRange": "Out of Range",
+    "previewDepositModalInRange": "In Range",
+    "previewDepositModalProtocol": "Protocol",
+    "previewDepositModalNetwork": "Network",
+    "previewDepositModalYearlyYieldTimeFrame": "Yearly Yield ({timeFrame})",
+    "@previewDepositModalYearlyYieldTimeFrame": {
+        "placeholders": {
+            "timeFrame": {
+                "type": "String"
+            }
+        }
+    },
+    "previewDepositModalTransactionErrorSnackBarMessage": "Transaction Failed. Please try again, if the problem persists, ",
+    "previewDepositModalTransactionErrorSnackBarHelperButtonTitle": "Contact us",
+    "previewDepositModalDepositSuccessSnackBarMessage": "Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool. ",
+    "@previewDepositModalDepositSuccessSnackBarMessage": {
+        "placeholders": {
+            "baseTokenSymbol": {
+                "type": "String"
+            },
+            "quoteTokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "yieldCardTimeFrameBest": "{timeFrame} best",
+    "@yieldCardTimeFrameBest": {
+        "placeholders": {
+            "timeFrame": {
+                "type": "String"
+            }
+        }
+    },
+    "yieldCardThisPoolIsAtNetwork": "This pool is at {network}",
+    "@yieldCardThisPoolIsAtNetwork": {
+        "placeholders": {
+            "network": {
+                "type": "String"
+            }
+        }
+    },
+    "yieldCardYieldYearly": "Yield (Yearly)",
+    "previewDepositModalDepositSuccessSnackBarHelperButtonTitle": "View Transaction",
+    "previewDepositModalApproveSuccessSnackBarHelperButtonTitle": "View Transaction",
+    "previewDepositModalWaitingTransactionSnackBarHelperButtonTitle": "View on Explorer",
     "depositPageInvalidRange": "Invalid range",
     "depositPageMinRangeOutOfRangeWarningText": "You will not earn fees until the market price move up into your range",
     "depositPageMaxRangeOutOfRangeWarningText": "You will not earn fees until the market price move down into your range",
     "depositPageInvalidRangeErrorText": "Max range should be greater than min range",
+    "previewDepositModalMinPrice": "Min Price",
+    "previewDepositModalMaxPrice": "Max Price",
     "rangeSelectorMinRange": "Min Range",
     "rangeSelectorMaxRange": "Max Range",
     "loading": "Loading...",

@@ -47,6 +47,8 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
     zupSingletonCache,
   );
 
+  final double paddingValue = 20;
+
   @override
   void initState() {
     refreshBalanceAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
@@ -73,7 +75,7 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
     return Stack(
       children: [
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(paddingValue).copyWith(left: 0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(width: 0.5, color: ZupColors.gray5),
@@ -98,20 +100,70 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Expanded(
-                            child: TextField(
-                              controller: widget.controller,
-                              onChanged: (value) => widget.onInput(double.tryParse(value) ?? 0),
-                              style: const TextStyle(fontSize: 28),
-                              inputFormatters: [
-                                TokenAmountInputFormatter(),
-                              ],
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "0",
-                                hintStyle: TextStyle(color: ZupColors.gray5),
+                            child: ClipRect(
+                              clipBehavior: Clip.hardEdge,
+                              child: Stack(
+                                children: [
+                                  TextField(
+                                    clipBehavior: Clip.none,
+                                    controller: widget.controller,
+                                    onChanged: (value) => widget.onInput(double.tryParse(value) ?? 0),
+                                    style: const TextStyle(fontSize: 28),
+                                    inputFormatters: [
+                                      TokenAmountInputFormatter(),
+                                    ],
+                                    decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.only(right: paddingValue + 5, left: paddingValue),
+                                      border: InputBorder.none,
+                                      hintText: "0",
+                                      hintStyle: const TextStyle(color: ZupColors.gray5),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Transform.translate(
+                                      offset: const Offset(1, 0),
+                                      child: Container(
+                                        width: 40,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [
+                                              ZupColors.white,
+                                              ZupColors.white.withOpacity(0.8),
+                                              ZupColors.white.withOpacity(0.0)
+                                            ],
+                                            stops: const [0.1, 0.5, 1.0],
+                                            begin: Alignment.centerRight,
+                                            end: Alignment.centerLeft,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Transform.translate(
+                                      offset: const Offset(0, 0),
+                                      child: Container(
+                                        width: 25,
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            colors: [ZupColors.white, ZupColors.white.withOpacity(0.0)],
+                                            stops: const [0.5, 1.0],
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                ],
                               ),
                             ),
                           ),
+                          const SizedBox(width: 3),
                           Container(
                             padding: const EdgeInsets.all(8.0),
                             decoration: BoxDecoration(
@@ -131,9 +183,12 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                       const SizedBox(height: 5),
                       Row(
                         children: [
-                          const Text(
-                            r"$-",
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: ZupColors.gray),
+                          Padding(
+                            padding: EdgeInsets.only(left: paddingValue),
+                            child: const Text(
+                              r"$-",
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: ZupColors.gray),
+                            ),
                           ),
                           const Spacer(),
                           BlocProvider.value(
