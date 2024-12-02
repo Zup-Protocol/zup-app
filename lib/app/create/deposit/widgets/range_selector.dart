@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
@@ -85,30 +86,74 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
       return;
     }
 
+    final typedDecimals = typedPrice.decimals;
+
+    controller.text = Decimal.tryParse(getAdjustedPrice(typedPrice).toString())
+            ?.toStringAsFixed(typedDecimals < 4 ? 4 : typedDecimals) ??
+        "";
+
+    widget.onPriceChanged(getAdjustedPrice(typedPrice));
+  }
+
+  double getAdjustedPrice(double price) {
     final adjustedPrice = priceToClosestValidPrice(
-      price: typedPrice,
+      price: price,
       poolToken0Decimals: widget.poolToken0.decimals,
       poolToken1Decimals: widget.poolToken1.decimals,
       tickSpacing: widget.tickSpacing,
       isReversed: widget.isReversed,
     );
 
-    final typedDecimals = typedPrice.decimals;
-
-    controller.text = adjustedPrice.price.toStringAsFixed(typedDecimals < 4 ? 4 : typedDecimals);
-
-    widget.onPriceChanged(adjustedPrice.price);
+    return adjustedPrice.price;
   }
 
   void increaseOrDecrease({required bool increasing}) {
-    final currentPrice = double.tryParse(controller.text) ?? 0;
-    final currentPriceDecimals = currentPrice.decimals;
+    final currentPrice = double.tryParse(userTypedValue ?? "0") ?? 0;
 
-    final adjustment = currentPrice * 0.01;
-    final nextPrice = increasing ? currentPrice + adjustment : currentPrice - adjustment;
+    if (currentPrice == 0 && !increasing) return;
 
-    userTypedValue = nextPrice.toStringAsFixed(currentPriceDecimals <= 4 ? 4 : currentPriceDecimals);
+    if ((currentPrice == 0 || widget.isInfinity) && increasing) {
+      final minimumPrice = tickToPrice(
+        tick: BigInt.from(widget.tickSpacing),
+        poolToken0Decimals: widget.poolToken0.decimals,
+        poolToken1Decimals: widget.poolToken1.decimals,
+      );
 
+      userTypedValue = minimumPrice.priceAsBaseToken.toString();
+      return adjustTypedAmountAndCallback();
+    }
+
+    BigInt nextTick() {
+      final BigInt currentTick = tickToClosestValidTick(
+        tick: priceToTick(
+          price: currentPrice,
+          poolToken0Decimals: widget.poolToken0.decimals,
+          poolToken1Decimals: widget.poolToken1.decimals,
+          isReversed: widget.isReversed,
+        ),
+        tickSpacing: widget.tickSpacing,
+      );
+
+      final adjustment = BigInt.from(widget.tickSpacing * 2);
+
+      if (increasing && !widget.isReversed) return currentTick + adjustment;
+      if (!increasing && widget.isReversed) return currentTick + adjustment;
+
+      return currentTick - BigInt.from(widget.tickSpacing);
+    }
+
+    double nextPrice() {
+      final nextPrice = tickToPrice(
+        tick: nextTick(),
+        poolToken0Decimals: widget.poolToken0.decimals,
+        poolToken1Decimals: widget.poolToken1.decimals,
+      );
+
+      if (widget.isReversed) return nextPrice.priceAsQuoteToken;
+      return nextPrice.priceAsBaseToken;
+    }
+
+    userTypedValue = nextPrice().toAmount(maxFixedDigits: 4);
     adjustTypedAmountAndCallback();
   }
 
@@ -129,6 +174,7 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
   }
 
   void setInfinity() {
+    userTypedValue = "0";
     controller.text = widget.type.infinityLabel;
   }
 
@@ -144,7 +190,7 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
   }
 
   @override
-  void didUpdateWidget(covariant RangeSelector oldWidget) {
+  void didUpdateWidget(RangeSelector oldWidget) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.isInfinity) return setInfinity();
 

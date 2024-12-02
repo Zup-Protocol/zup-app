@@ -629,79 +629,96 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
         child: AnimatedOpacity(
           duration: const Duration(milliseconds: 300),
           opacity: isRangeInvalid ? 0.2 : 1,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _sectionTitle(S.of(context).depositPageDepositSectionTitle),
-              const SizedBox(height: 12),
-              TokenAmountInputCard(
-                key: const Key("base-token-input-card"),
-                token: baseToken,
-                disabledText: !(isBaseTokenNeeded)
-                    ? S.of(context).depositPageDepositSectionTokenNotNeeded(baseToken.symbol)
-                    : null,
-                onInput: (amount) {
-                  setState(() {
-                    isBaseTokenAmountUserInput = true;
+          child: StreamBuilder(
+              stream: _cubit.poolTickStream,
+              initialData: _cubit.latestPoolTick,
+              builder: (context, poolTickSnapshot) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _sectionTitle(S.of(context).depositPageDepositSectionTitle),
+                    const SizedBox(height: 12),
+                    TokenAmountInputCard(
+                      key: const Key("base-token-input-card"),
+                      token: baseToken,
+                      disabledText: () {
+                        if (!isBaseTokenNeeded) {
+                          return S.of(context).depositPageDepositSectionTokenNotNeeded(baseToken.symbol);
+                        }
 
-                    calculateDepositTokensAmount();
-                  });
-                },
-                controller: baseTokenAmountController,
-                network: _cubit.selectedYield!.network,
-              ),
-              const SizedBox(height: 6),
-              TokenAmountInputCard(
-                key: const Key("quote-token-input-card"),
-                token: quoteToken,
-                disabledText: !(isQuoteTokenNeeded)
-                    ? S.of(context).depositPageDepositSectionTokenNotNeeded(quoteToken.symbol)
-                    : null,
-                onInput: (amount) {
-                  setState(() {
-                    isBaseTokenAmountUserInput = false;
+                        if (!isBaseTokenAmountUserInput &&
+                            !poolTickSnapshot.hasData &&
+                            quoteTokenAmountController.text.isNotEmpty) return S.of(context).loading;
+                      }.call(),
+                      onInput: (amount) {
+                        setState(() {
+                          isBaseTokenAmountUserInput = true;
 
-                    calculateDepositTokensAmount();
-                  });
-                },
-                controller: quoteTokenAmountController,
-                network: _cubit.selectedYield!.network,
-              ),
-              const SizedBox(height: 20),
-              StreamBuilder(
-                key: const Key("deposit-button"),
-                stream: wallet.signerStream,
-                initialData: wallet.signer,
-                builder: (context, signerSnapshot) {
-                  if (!signerSnapshot.hasData) {
-                    return ZupPrimaryButton(
-                      width: double.maxFinite,
-                      title: S.of(context).connectWallet,
-                      icon: Assets.icons.walletBifold.svg(),
-                      fixedIcon: true,
-                      hoverElevation: 0,
-                      backgroundColor: ZupColors.brand7,
-                      foregroundColor: ZupColors.brand,
-                      onPressed: () => ConnectModal.show(context),
-                    );
-                  }
+                          calculateDepositTokensAmount();
+                        });
+                      },
+                      controller: baseTokenAmountController,
+                      network: _cubit.selectedYield!.network,
+                    ),
+                    const SizedBox(height: 6),
+                    TokenAmountInputCard(
+                      key: const Key("quote-token-input-card"),
+                      token: quoteToken,
+                      disabledText: () {
+                        if (!isQuoteTokenNeeded) {
+                          return S.of(context).depositPageDepositSectionTokenNotNeeded(quoteToken.symbol);
+                        }
 
-                  return FutureBuilder(
-                      future: depositButtonState(),
-                      builder: (context, stateSnapshot) {
-                        return ZupPrimaryButton(
-                          title: stateSnapshot.data?.title ?? "Loading...",
-                          icon: stateSnapshot.data?.icon,
-                          isLoading: stateSnapshot.connectionState == ConnectionState.waiting,
-                          fixedIcon: true,
-                          onPressed: stateSnapshot.data?.onPressed,
-                          width: double.maxFinite,
-                        );
-                      });
-                },
-              ),
-            ],
-          ),
+                        if (isBaseTokenAmountUserInput &&
+                            !poolTickSnapshot.hasData &&
+                            baseTokenAmountController.text.isNotEmpty) return S.of(context).loading;
+                      }.call(),
+                      onInput: (amount) {
+                        setState(() {
+                          isBaseTokenAmountUserInput = false;
+
+                          calculateDepositTokensAmount();
+                        });
+                      },
+                      controller: quoteTokenAmountController,
+                      network: _cubit.selectedYield!.network,
+                    ),
+                    const SizedBox(height: 20),
+                    StreamBuilder(
+                      key: const Key("deposit-button"),
+                      stream: wallet.signerStream,
+                      initialData: wallet.signer,
+                      builder: (context, signerSnapshot) {
+                        if (!signerSnapshot.hasData) {
+                          return ZupPrimaryButton(
+                            width: double.maxFinite,
+                            title: S.of(context).connectWallet,
+                            icon: Assets.icons.walletBifold.svg(),
+                            fixedIcon: true,
+                            hoverElevation: 0,
+                            backgroundColor: ZupColors.brand7,
+                            foregroundColor: ZupColors.brand,
+                            onPressed: () => ConnectModal.show(context),
+                          );
+                        }
+
+                        return FutureBuilder(
+                            future: depositButtonState(),
+                            builder: (context, stateSnapshot) {
+                              return ZupPrimaryButton(
+                                title: stateSnapshot.data?.title ?? "Loading...",
+                                icon: stateSnapshot.data?.icon,
+                                isLoading: stateSnapshot.connectionState == ConnectionState.waiting,
+                                fixedIcon: true,
+                                onPressed: stateSnapshot.data?.onPressed,
+                                width: double.maxFinite,
+                              );
+                            });
+                      },
+                    ),
+                  ],
+                );
+              }),
         ),
       );
 }

@@ -200,9 +200,9 @@ void main() {
   });
 
   zGoldenTest("""When passing a price, and clicking the button to increase,
-   it should increase the price by 1% (and yet adjust the price)""", goldenFileName: "range_selector_increase_price",
-      (tester) async {
-    const expectedIncreasedPrice = 1211.5369312111138;
+   it should increase the price by 2 ticks (based on the tick spacing)""",
+      goldenFileName: "range_selector_increase_price", (tester) async {
+    const expectedIncreasedPrice = 1201.8837824865475;
     const typedPrice = "1200";
     double actualIncreasedPrice = 0;
 
@@ -223,9 +223,9 @@ void main() {
   });
 
   zGoldenTest("""When passing a price, and clicking the button to decrease,
-   it should decrease the price by 1% (and yet adjust the price)""", goldenFileName: "range_selector_decrease_price",
-      (tester) async {
-    const expectedDecreasedPrice = 1187.5480801035965;
+   it should decrease the price by 2 ticks (based on the tick spacing)""",
+      goldenFileName: "range_selector_decrease_price", (tester) async {
+    const expectedDecreasedPrice = 1198.283713942248;
     const typedPrice = "1200";
     double actualDecreasedPrice = 0;
 
@@ -244,4 +244,153 @@ void main() {
 
     expect(actualDecreasedPrice, expectedDecreasedPrice);
   });
+
+  zGoldenTest(
+    "When typing a price with `isReversed` true, and clicking the button to increase, it should increase the price by 2 ticks",
+    goldenFileName: "range_selector_is_reversed_increase_price",
+    (tester) async {
+      const expectedIncreasedPrice = 1200.682559475813;
+      const typedPrice = "1200";
+      double actualIncreasedPrice = 0;
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(
+        isReversed: true,
+        onPriceChanged: (price) {
+          actualIncreasedPrice = price;
+        },
+      ));
+
+      await tester.enterText(find.byType(TextField), typedPrice);
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("increase-button")));
+      await tester.pumpAndSettle();
+
+      expect(actualIncreasedPrice, expectedIncreasedPrice);
+    },
+  );
+
+  zGoldenTest(
+    """When typing a price with `isReversed` true, and clicking the button to decrease,
+    it should decrease the price by 2 ticks""",
+    goldenFileName: "range_selector_is_reversed_decrease_price",
+    (tester) async {
+      const expectedDecreasedPrice = 1197.0860890208119;
+      const typedPrice = "1200";
+      double actualDecreasedPrice = 0;
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(
+        isReversed: true,
+        onPriceChanged: (price) {
+          actualDecreasedPrice = price;
+        },
+      ));
+
+      await tester.enterText(find.byType(TextField), typedPrice);
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("decrease-button")));
+      await tester.pumpAndSettle();
+
+      expect(actualDecreasedPrice, expectedDecreasedPrice);
+    },
+  );
+
+  zGoldenTest(
+    "When the price is infinity, and click to increase, the price should increase to the minimum price based on the tick spacing",
+    goldenFileName: "range_selector_is_infinity_increase_price",
+    (tester) async {
+      const expectedIncreasedPrice = 1.0010004501200209e-12;
+      double actualIncreasedPrice = 0;
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(
+        isInfinity: true,
+        poolToken0: TokenDto.fixture().copyWith(decimals: 6),
+        poolToken1: TokenDto.fixture().copyWith(decimals: 18),
+        onPriceChanged: (price) {
+          actualIncreasedPrice = price;
+        },
+      ));
+
+      await tester.tap(find.byKey(const Key("increase-button")));
+      await tester.pumpAndSettle();
+
+      expect(actualIncreasedPrice, expectedIncreasedPrice);
+    },
+  );
+
+  zGoldenTest(
+    """When the price is infinity, and click to increase with tokens reversed,
+    the price should increase to the minimum price based on the tick spacing""",
+    goldenFileName: "range_selector_is_infinity_increase_price_reversed",
+    (tester) async {
+      const expectedIncreasedPrice = 1.0008055719626048e-12;
+      double actualIncreasedPrice = 0;
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(
+        isInfinity: true,
+        isReversed: true,
+        poolToken0: TokenDto.fixture().copyWith(decimals: 6),
+        poolToken1: TokenDto.fixture().copyWith(decimals: 18),
+        onPriceChanged: (price) {
+          actualIncreasedPrice = price;
+        },
+      ));
+
+      await tester.tap(find.byKey(const Key("increase-button")));
+      await tester.pumpAndSettle();
+
+      expect(actualIncreasedPrice, expectedIncreasedPrice);
+    },
+  );
+
+  zGoldenTest(
+    """When the price is infinity, and click to decrease with tokens reversed,
+    the price should not change""",
+    goldenFileName: "range_selector_is_infinity_decrease_price_reversed",
+    (tester) async {
+      const expectedIncreasedPrice = 0;
+      double actualIncreasedPrice = 0;
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(
+        isInfinity: true,
+        isReversed: true,
+        poolToken0: TokenDto.fixture().copyWith(decimals: 6),
+        poolToken1: TokenDto.fixture().copyWith(decimals: 18),
+        onPriceChanged: (price) {
+          actualIncreasedPrice = price;
+        },
+      ));
+
+      await tester.tap(find.byKey(const Key("decrease-button")));
+      await tester.pumpAndSettle();
+
+      expect(actualIncreasedPrice, expectedIncreasedPrice);
+    },
+  );
+
+  zGoldenTest(
+    "When the price is infinity, and click to decrease, it should not change the price",
+    goldenFileName: "range_selector_is_infinity_decrease_price",
+    (tester) async {
+      const expectedIncreasedPrice = 0;
+      double actualIncreasedPrice = 0;
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(
+        isInfinity: true,
+        poolToken0: TokenDto.fixture().copyWith(decimals: 6),
+        poolToken1: TokenDto.fixture().copyWith(decimals: 18),
+        onPriceChanged: (price) {
+          actualIncreasedPrice = price;
+        },
+      ));
+
+      await tester.tap(find.byKey(const Key("decrease-button")));
+      await tester.pumpAndSettle();
+
+      expect(actualIncreasedPrice, expectedIncreasedPrice);
+    },
+  );
 }

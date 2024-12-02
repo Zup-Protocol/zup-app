@@ -1052,6 +1052,8 @@ void main() {
       await tester.enterText(find.byKey(const Key("max-price-selector")), "90000");
       await tester.pumpAndSettle();
 
+      FocusManager.instance.primaryFocus?.unfocus(); // unfocus the fields to calculate the valid price
+
       await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
       await tester.pumpAndSettle();
 
@@ -1087,6 +1089,8 @@ void main() {
 
       await tester.enterText(find.byKey(const Key("max-price-selector")), "90000");
       await tester.pumpAndSettle();
+
+      FocusManager.instance.primaryFocus?.unfocus(); // unfocus the fields to calculate the valid price
 
       await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
       await tester.pumpAndSettle();
@@ -1560,4 +1564,94 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+
+  zGoldenTest(
+    """When the base token amount input is not empty, and the pool tick is null,
+  the quote token input should be loading""",
+    goldenFileName: "deposit_page_quote_token_input_loading",
+    (tester) async {
+      final selectedYield = YieldsDto.fixture().last24Yields.first;
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => const Stream.empty());
+      when(() => cubit.latestPoolTick).thenReturn(null);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("base-token-input-card")), "1");
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When the quote token amount input is not empty, and the pool tick is null,
+  the base token input should be loading""",
+    goldenFileName: "deposit_page_base_token_input_loading",
+    (tester) async {
+      final selectedYield = YieldsDto.fixture().last24Yields.first;
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => const Stream.empty());
+      when(() => cubit.latestPoolTick).thenReturn(null);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When the quote token amount input is loading, and a non null pool tick
+    is emitted, the quote token amount should be enabled
+    """,
+    goldenFileName: "deposit_page_quote_token_input_enabled_after_loading",
+    (tester) async {
+      final selectedYield = YieldsDto.fixture().last24Yields.first;
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(BigInt.from(2131)));
+      when(() => cubit.latestPoolTick).thenReturn(null);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("base-token-input-card")), "1");
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When the base token amount input is loading, and a non null pool tick
+    is emitted, the base token amount should be enabled
+    """,
+    goldenFileName: "deposit_page_base_token_input_enabled_after_loading",
+    (tester) async {
+      final selectedYield = YieldsDto.fixture().last24Yields.first;
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(BigInt.from(2131)));
+      when(() => cubit.latestPoolTick).thenReturn(null);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
+      await tester.pumpAndSettle();
+    },
+  );
 }
