@@ -219,6 +219,12 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               ),
         );
       },
+      depositSuccess: (txId) => (
+        title: S.of(context).loading,
+        icon: null,
+        isLoading: true,
+        onPressed: null,
+      ),
       orElse: () => (
         title: S.of(context).previewDepositModalError,
         icon: null,
