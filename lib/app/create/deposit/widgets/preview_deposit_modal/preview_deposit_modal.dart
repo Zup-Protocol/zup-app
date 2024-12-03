@@ -333,7 +333,9 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                 context,
                 helperButton: (
                   title: S.of(context).previewDepositModalTransactionErrorSnackBarHelperButtonTitle,
-                  onButtonTap: () {}
+                  onButtonTap: () {
+                    // TODO: Add contact us info
+                  }
                 ),
                 message: S.of(context).previewDepositModalTransactionErrorSnackBarMessage,
                 type: ZupSnackBarType.error,
