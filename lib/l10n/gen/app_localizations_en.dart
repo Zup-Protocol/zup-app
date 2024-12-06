@@ -12,7 +12,34 @@ class SEn extends S {
   String get twentyFourHours => '24h';
 
   @override
+  String get slippageExplanation =>
+      'Slippage protects you by reverting the transaction if the price changes unfavorably beyond the percentage. This is necessary to prevent losses while adding liquidity';
+
+  @override
   String get month => 'Month';
+
+  @override
+  String get minutes => 'Minutes';
+
+  @override
+  String get depositSettingsDropdownChildHighSlippageWarningText =>
+      'High slippage can lead to Front Running and losses. Be careful! ';
+
+  @override
+  String get whatsThisQuestionText => 'What\'s this?';
+
+  @override
+  String get depositSettingsDropdownChildTransactionDeadlineExplanation =>
+      'Your transaction will be reverted if it is pending for more than this amount of time';
+
+  @override
+  String get depositSettingsDropdownTransactionDeadline =>
+      'Transaction Deadline';
+
+  @override
+  String depositPagePercentSlippage(String valuePercent) {
+    return '$valuePercent Slippage';
+  }
 
   @override
   String get threeMonths => '3 Months';
@@ -25,6 +52,9 @@ class SEn extends S {
 
   @override
   String get threeMonthsCompact => '90d';
+
+  @override
+  String get depositSettingsDropdownChildMaxSlippage => 'Max Slippage';
 
   @override
   String get depositPageDepositSectionTitle => 'Deposit';

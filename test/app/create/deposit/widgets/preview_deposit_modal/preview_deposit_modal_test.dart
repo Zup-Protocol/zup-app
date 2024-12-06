@@ -14,6 +14,7 @@ import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
@@ -41,6 +42,8 @@ void main() {
 
     registerFallbackValue(TokenDto.fixture());
     registerFallbackValue(BigInt.zero);
+    registerFallbackValue(Duration.zero);
+    registerFallbackValue(Slippage.fromValue(32));
 
     inject.registerLazySingleton<PreviewDepositModalCubit>(() => cubit);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
@@ -68,6 +71,20 @@ void main() {
         token1Allowance: BigInt.zero,
       ),
     );
+
+    when(
+      () => cubit.deposit(
+        deadline: any(named: "deadline"),
+        isReversed: any(named: "isReversed"),
+        isMaxPriceInfinity: any(named: "isMaxPriceInfinity"),
+        isMinPriceInfinity: any(named: "isMinPriceInfinity"),
+        maxPrice: any(named: "maxPrice"),
+        minPrice: any(named: "minPrice"),
+        slippage: any(named: "slippage"),
+        token0Amount: any(named: "token0Amount"),
+        token1Amount: any(named: "token1Amount"),
+      ),
+    ).thenAnswer((_) async {});
   });
 
   tearDown(() {
@@ -81,6 +98,8 @@ void main() {
     ({bool isInfinity, double price}) maxPrice = (isInfinity: false, price: 3000),
     double token0DepositAmount = 1,
     double token1DepositAmount = 3,
+    Duration deadline = const Duration(minutes: 30),
+    Slippage slippage = Slippage.halfPercent,
   }) =>
       goldenDeviceBuilder(
         Builder(builder: (context) {
@@ -92,6 +111,8 @@ void main() {
                 content: BlocProvider.value(
                   value: cubit,
                   child: PreviewDepositModal(
+                    deadline: deadline,
+                    maxSlippage: slippage,
                     currentYield: customYield ?? currentYield,
                     isReversed: isReversed,
                     minPrice: minPrice,
@@ -621,6 +642,72 @@ void main() {
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When the token0Allowance is higher than the amount to deposit,
+    and the token1Allowance is also higher, the deposit button should be
+    in the deposit state. Once the deposit button is clicked, it should call
+    the deposit function in the cubit passing the correct params (got from the constructor)""",
+    (tester) async {
+      final token0Allowance = 400.parseTokenAmount(decimals: currentYield.token0.decimals);
+      final token1Allowance = 1200.parseTokenAmount(decimals: currentYield.token1.decimals);
+
+      const deposit0Amount = 100.2;
+      const deposit1Amount = 110.2;
+      const deadline = Duration(minutes: 653);
+      const isReversed = false;
+      const maxPrice = 1299.32;
+      const minPrice = 100.32;
+      const slippage = Slippage.halfPercent;
+      const isMaxPriceInfinity = false;
+      const isMinPriceInfinity = false;
+
+      when(() => cubit.state).thenReturn(
+        PreviewDepositModalState.initial(
+          token0Allowance: token0Allowance,
+          token1Allowance: token1Allowance,
+        ),
+      );
+
+      when(() => cubit.stream).thenAnswer((_) {
+        return Stream.value(PreviewDepositModalState.initial(
+          token0Allowance: token0Allowance,
+          token1Allowance: token1Allowance,
+        ));
+      });
+
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(
+          token0DepositAmount: deposit0Amount,
+          token1DepositAmount: deposit1Amount,
+          deadline: deadline,
+          isReversed: isReversed,
+          minPrice: (isInfinity: isMinPriceInfinity, price: minPrice),
+          maxPrice: (isInfinity: isMaxPriceInfinity, price: maxPrice),
+          slippage: slippage,
+        ),
+        wrapper: GoldenConfig.localizationsWrapper(),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("deposit-button")));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => cubit.deposit(
+          deadline: deadline,
+          isReversed: isReversed,
+          isMaxPriceInfinity: isMaxPriceInfinity,
+          isMinPriceInfinity: isMinPriceInfinity,
+          maxPrice: maxPrice,
+          minPrice: minPrice,
+          slippage: slippage,
+          token0Amount: deposit0Amount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          token1Amount: deposit1Amount.parseTokenAmount(decimals: currentYield.token1.decimals),
+        ),
+      ).called(1);
     },
   );
 

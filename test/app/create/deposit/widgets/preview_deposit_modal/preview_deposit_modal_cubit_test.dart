@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -14,6 +15,7 @@ import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
 
 import '../../../../../matchers.dart';
@@ -522,6 +524,8 @@ void main() {
     expectLater(sut.stream, emits(const PreviewDepositModalState.depositing()));
 
     await sut.deposit(
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
       token0Amount: BigInt.one,
       token1Amount: BigInt.one,
       minPrice: 0,
@@ -544,6 +548,8 @@ void main() {
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         minPrice: 0,
         maxPrice: 0,
         isMinPriceInfinity: false,
@@ -568,6 +574,8 @@ void main() {
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         minPrice: 0,
         maxPrice: 0,
         isMinPriceInfinity: false,
@@ -586,6 +594,8 @@ void main() {
     await sut.deposit(
       token0Amount: token0Amount,
       token1Amount: token1Amount,
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
       minPrice: 1200,
       maxPrice: 3000,
       isMinPriceInfinity: false,
@@ -609,6 +619,8 @@ void main() {
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         minPrice: 0,
         maxPrice: 0,
         isMinPriceInfinity: true,
@@ -644,6 +656,8 @@ void main() {
       await sut.deposit(
         token0Amount: token0Amount,
         token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         minPrice: 0,
         maxPrice: 0,
         isMinPriceInfinity: true,
@@ -683,6 +697,8 @@ void main() {
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: token1Amount,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         minPrice: 0,
         maxPrice: 0,
         isMinPriceInfinity: true,
@@ -706,6 +722,96 @@ void main() {
   );
 
   test(
+    """When calling `deposit`, the amount1Min in the depositData should be
+      the passed token1 amount minus the slippage percent""",
+    () async {
+      final feeAmount = BigInt.from(431);
+      final token1Amount = BigInt.from(6721);
+      const slippage = Slippage.halfPercent;
+
+      when(() => feeControllerImpl.calculateJoinPoolFee(
+          token0Amount: any(named: "token0Amount"), token1Amount: any(named: "token1Amount"))).thenAnswer(
+        (_) async => (feeToken0: feeAmount, feeToken1: feeAmount),
+      );
+
+      when(() => uniswapPositionManager.getMintCalldata(params: any(named: "params"))).thenReturn("");
+
+      await sut.deposit(
+        token0Amount: BigInt.one,
+        token1Amount: token1Amount,
+        deadline: const Duration(minutes: 30),
+        slippage: slippage,
+        minPrice: 0,
+        maxPrice: 0,
+        isMinPriceInfinity: true,
+        isMaxPriceInfinity: true,
+        isReversed: false,
+      );
+
+      verify(
+        () => uniswapPositionManager.getMintCalldata(
+          params: any(
+            named: "params",
+            that: ExpectedMatcher(
+              expects: (item) {
+                expect(
+                  item.amount1Min,
+                  slippage.calculateTokenAmountFromSlippage(token1Amount - feeAmount),
+                );
+              },
+            ),
+          ),
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    """When calling `deposit`, the amount0Min in the depositData should be
+      the passed token0 amount minus the slippage percent""",
+    () async {
+      final feeAmount = BigInt.from(100);
+      final token0Amount = BigInt.from(32421);
+      final slippage = Slippage.fromValue(50);
+
+      when(() => feeControllerImpl.calculateJoinPoolFee(
+          token0Amount: any(named: "token0Amount"), token1Amount: any(named: "token1Amount"))).thenAnswer(
+        (_) async => (feeToken0: feeAmount, feeToken1: feeAmount),
+      );
+
+      when(() => uniswapPositionManager.getMintCalldata(params: any(named: "params"))).thenReturn("");
+
+      await sut.deposit(
+        token0Amount: token0Amount,
+        token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: slippage,
+        minPrice: 0,
+        maxPrice: 0,
+        isMinPriceInfinity: true,
+        isMaxPriceInfinity: true,
+        isReversed: false,
+      );
+
+      verify(
+        () => uniswapPositionManager.getMintCalldata(
+          params: any(
+            named: "params",
+            that: ExpectedMatcher(
+              expects: (item) {
+                expect(
+                  item.amount0Min,
+                  slippage.calculateTokenAmountFromSlippage(token0Amount - feeAmount),
+                );
+              },
+            ),
+          ),
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
     "When calling `deposit`, the recipient in the depositData, should be the connected signer address",
     () async {
       const signerAddress = "0x0000000000000000000000000000000000000231";
@@ -714,6 +820,8 @@ void main() {
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         minPrice: 0,
         maxPrice: 0,
         isMinPriceInfinity: true,
@@ -736,6 +844,8 @@ void main() {
     await sut.deposit(
       token0Amount: BigInt.one,
       token1Amount: BigInt.one,
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
       minPrice: 0,
       maxPrice: 3000,
       isMinPriceInfinity: true,
@@ -761,6 +871,8 @@ void main() {
     await sut.deposit(
       token0Amount: BigInt.one,
       token1Amount: BigInt.one,
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
       minPrice: 1200,
       maxPrice: 0,
       isMinPriceInfinity: false,
@@ -788,6 +900,8 @@ void main() {
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         minPrice: minPrice,
         maxPrice: 0,
         isMinPriceInfinity: false,
@@ -831,6 +945,8 @@ void main() {
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         minPrice: 1200,
         maxPrice: maxPrice,
         isMinPriceInfinity: false,
@@ -868,6 +984,8 @@ void main() {
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         minPrice: 1200,
         maxPrice: 0,
         isMinPriceInfinity: false,
@@ -895,6 +1013,8 @@ void main() {
       const isReversed = true;
 
       await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
         minPrice: 0,
@@ -928,6 +1048,8 @@ void main() {
       const maxPrice = 3000.50;
 
       await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
         minPrice: 1200,
@@ -970,6 +1092,8 @@ void main() {
       const isReversed = true;
 
       await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
         minPrice: minPrice,
@@ -1005,6 +1129,8 @@ void main() {
 
   test("When calling `deposit` the fee in the depositData should be the feeTier of the yield pool", () async {
     await sut.deposit(
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
       token0Amount: BigInt.one,
       token1Amount: BigInt.one,
       minPrice: 1200,
@@ -1028,6 +1154,8 @@ void main() {
 
   test("When calling `deposit` the token0 in the depositData should be the token0 of the yield pool", () async {
     await sut.deposit(
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
       token0Amount: BigInt.one,
       token1Amount: BigInt.one,
       minPrice: 1200,
@@ -1051,6 +1179,8 @@ void main() {
 
   test("When calling `deposit` the token1 in the depositData should be the token1 of the yield pool", () async {
     await sut.deposit(
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
       token0Amount: BigInt.one,
       token1Amount: BigInt.one,
       minPrice: 1200,
@@ -1098,6 +1228,8 @@ void main() {
       });
 
       await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
         minPrice: 1200,
@@ -1130,6 +1262,8 @@ void main() {
       });
 
       await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
         minPrice: 1200,
@@ -1152,6 +1286,8 @@ void main() {
       when(() => transactionResponse.hash).thenReturn(txId);
 
       await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
         minPrice: 1200,
@@ -1188,6 +1324,8 @@ void main() {
       );
 
       await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
         minPrice: 1200,
@@ -1220,6 +1358,8 @@ void main() {
       );
 
       await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
         minPrice: 1200,
@@ -1228,6 +1368,48 @@ void main() {
         isMaxPriceInfinity: false,
         isReversed: false,
       );
+    },
+  );
+
+  test(
+    "When calling `deposit`, the deadline in the deposit data should be the passed deadline, but as a unix timestamp",
+    () async {
+      final date = DateTime(1983, 2, 12);
+
+      withClock(Clock(() => date), () async {
+        const deadline = Duration(minutes: 54);
+        final expectedDeadline = date.add(deadline).millisecondsSinceEpoch;
+
+        when(() => zupRouterImpl.deposit(
+              token0: any(named: "token0"),
+              token1: any(named: "token1"),
+              positionManager: any(named: "positionManager"),
+              depositData: any(named: "depositData"),
+            )).thenAnswer((_) async => transactionResponse);
+
+        await sut.deposit(
+          deadline: deadline,
+          slippage: Slippage.halfPercent,
+          token0Amount: BigInt.one,
+          token1Amount: BigInt.one,
+          minPrice: 1200,
+          maxPrice: 3000.50,
+          isMinPriceInfinity: false,
+          isMaxPriceInfinity: false,
+          isReversed: false,
+        );
+
+        verify(
+          () => uniswapPositionManager.getMintCalldata(
+            params: any(
+              named: "params",
+              that: ExpectedMatcher(
+                expects: (item) => expect(item.deadline, BigInt.from(expectedDeadline)),
+              ),
+            ),
+          ),
+        ).called(1);
+      });
     },
   );
 }

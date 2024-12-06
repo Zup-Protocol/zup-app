@@ -15,11 +15,14 @@ import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_page.dart';
+import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/app/positions/positions_cubit.dart';
+import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
@@ -52,6 +55,12 @@ void main() {
     uniswapV3pool = UniswapV3PoolMock();
     erc20 = Erc20Mock();
     zupRouter = ZupRouterMock();
+
+    registerFallbackValue(BuildContextMock());
+    registerFallbackValue(Networks.sepolia);
+    registerFallbackValue(Slippage.fromValue(32));
+    registerFallbackValue(DepositSettingsDto.fixture());
+    registerFallbackValue(Duration.zero);
 
     inject.registerFactory<LottieBuilder>(
       () => Assets.lotties.click.lottie(animate: false),
@@ -102,9 +111,8 @@ void main() {
     when(() => cubit.latestPoolTick).thenAnswer((_) => BigInt.from(32523672));
     when(() => wallet.signerStream).thenAnswer((_) => const Stream.empty());
     when(() => wallet.signer).thenReturn(null);
-
-    registerFallbackValue(BuildContextMock());
-    registerFallbackValue(Networks.sepolia);
+    when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => ());
+    when(() => cubit.depositSettings).thenReturn(DepositSettingsDto.fixture());
   });
 
   tearDown(() async {
@@ -1652,6 +1660,231 @@ void main() {
 
       await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
       await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When the deposit settings dropdown callback the onSettingsChanged callback,
+    it should call saveDepositSettings in the cubit, to save the deposit
+    settings in the cache""",
+    (tester) async {
+      const expectedSlippageCallback = Slippage.onePercent;
+      const expectedDeadlineCallback = Duration(minutes: 21);
+
+      when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("slippage-text-field")), expectedSlippageCallback.value.toString());
+      await tester.enterText(
+          find.byKey(const Key("deadline-textfield")), expectedDeadlineCallback.inMinutes.toString());
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+
+      verify(() => cubit.saveDepositSettings(expectedSlippageCallback, expectedDeadlineCallback)).called(1);
+    },
+  );
+
+  zGoldenTest(
+    """When the selected slippage is not the default value from the deposit settings dto,
+    the title of the deposit settings button should be the selected slippage value""",
+    goldenFileName: "deposit_page_deposit_settings_button_slippage_title",
+    (tester) async {
+      when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("slippage-text-field")), "12.3");
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When the selected slippage value is lower than 10% and greater than 1%,
+    the deposit settings button should be orange-styled with the slippage value""",
+    goldenFileName: "deposit_page_deposit_settings_button_orange",
+    (tester) async {
+      when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("slippage-text-field")), "1.2");
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When the selected slippage value is lower than 1%,
+    the deposit settings button should be gray-styled with
+    zup purple with the slippage value""",
+    goldenFileName: "deposit_page_deposit_settings_button_zup_purple_gray",
+    (tester) async {
+      when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("slippage-text-field")), "0.32");
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When the selected slippage value is greater than 10%,
+    the deposit settings button should be red-styled with the 
+    slippage value""",
+    goldenFileName: "deposit_page_deposit_settings_button_red",
+    (tester) async {
+      when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("slippage-text-field")), "21.2");
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When the deposit settings callback the onSettingsChanged callback,
+    it should update the slippage and deadline variable""",
+    (tester) async {
+      const expectedSlippageCallback = Slippage.onePercent;
+      const expectedDeadlineCallback = Duration(minutes: 21);
+
+      when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("slippage-text-field")), expectedSlippageCallback.value.toString());
+      await tester.enterText(
+          find.byKey(const Key("deadline-textfield")), expectedDeadlineCallback.inMinutes.toString());
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+
+      verify(() => cubit.saveDepositSettings(expectedSlippageCallback, expectedDeadlineCallback)).called(1);
+    },
+  );
+
+  zGoldenTest(
+    """When opening the deposit settings dropdown, the default selected slippage and the deadline should be
+    the ones from the cubit""",
+    goldenFileName: "deposit_page_deposit_settings_dropdown",
+    (tester) async {
+      final expectedDepositSettings = DepositSettingsDto(maxSlippage: 32.1, deadlineMinutes: 98);
+      when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.depositSettings).thenReturn(expectedDepositSettings);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When selecting a slippage and a deadline in the deposit settings dropdown, closing the dropdown,
+    and opening it again, the selected slippage and deadline should be the ones selected previously""",
+    goldenFileName: "deposit_page_deposit_settings_dropdown_reopening",
+    (tester) async {
+      when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+          find.byKey(const Key("slippage-text-field")), "0.7"); // expected slippage to be shown on reopening
+      await tester.enterText(
+          find.byKey(const Key("deadline-textfield")), "76"); // expected deadline to be shown on reopening
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+
+      // Closing the dropdown
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+
+      // // Reopening the dropdown
+      await tester.tap(find.byKey(const Key("deposit-settings-button")));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When selecting a slippage and a deadline in the deposit settings dropdown,
+  and then clicking to preview the deposit, it should pass the correct slippage and deadline
+  to the preview modal""",
+    (tester) async {
+      final expectedSlippage = Slippage.custom(0.7);
+      const expectedDeadline = Duration(minutes: 76);
+
+      await tester.runAsync(() async {
+        final selectedYield = YieldsDto.fixture().last24Yields.first;
+        final currentPriceAsTick = BigInt.from(174072);
+
+        final signer = SignerMock();
+
+        when(() => wallet.signer).thenReturn(signer);
+        when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
+        when(() => cubit.getWalletTokenAmount(selectedYield.token0.address, network: any(named: "network"))).thenAnswer(
+          (_) => Future.value(347537253),
+        );
+        when(() => cubit.getWalletTokenAmount(selectedYield.token1.address, network: any(named: "network"))).thenAnswer(
+          (_) => Future.value(32576352673),
+        );
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+        await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+        await tester.tap(find.byKey(const Key("deposit-settings-button")));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("slippage-text-field")), expectedSlippage.value.toString());
+        await tester.enterText(find.byKey(const Key("deadline-textfield")), expectedDeadline.inMinutes.toString());
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key("deposit-settings-button"))); // closing the dropdown
+        await tester.pumpAndSettle();
+
+        await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key("deposit-button")));
+        await tester.pumpAndSettle();
+
+        final previewDepositModal = find.byType(PreviewDepositModal).evaluate().first.widget as PreviewDepositModal;
+
+        expect(previewDepositModal.maxSlippage, expectedSlippage, reason: "maxSlippage should be passed correctly");
+        expect(previewDepositModal.deadline, expectedDeadline, reason: "deadline should be passed correctly");
+      });
     },
   );
 }

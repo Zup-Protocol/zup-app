@@ -8,6 +8,20 @@ abstract class ZupTheme {
   static ThemeData get lightTheme => ThemeData(
         fontFamily: "SF Pro Rounded",
         primaryColor: ZupColors.brand,
+        inputDecorationTheme: const InputDecorationTheme(
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            borderSide: BorderSide(color: ZupColors.red, width: 1.5),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            borderSide: BorderSide(color: ZupColors.red, width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            borderSide: BorderSide(color: ZupColors.brand, width: 1.5),
+          ),
+        ),
         scrollbarTheme:
             const ScrollbarThemeData(mainAxisMargin: 10, crossAxisMargin: 3, thickness: WidgetStatePropertyAll(5)),
         scaffoldBackgroundColor: Colors.transparent,

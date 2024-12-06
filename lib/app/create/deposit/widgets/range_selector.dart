@@ -251,6 +251,8 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
                           onChanged: (value) => userTypedValue = value,
                           style: const TextStyle(fontSize: 28),
                           decoration: const InputDecoration(
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                             contentPadding: EdgeInsets.only(right: 20, left: 20),
                             hintStyle: TextStyle(color: ZupColors.gray5),
                             hintText: "0",

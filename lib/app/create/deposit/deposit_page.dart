@@ -1,13 +1,17 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
+import 'package:zup_app/app/create/deposit/widgets/deposit_settings_dropdown_child.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/range_selector.dart';
 import 'package:zup_app/app/create/deposit/widgets/token_amount_input_card/token_amount_input_card.dart';
+import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
@@ -19,6 +23,7 @@ import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/mixins/v3_pool_liquidity_calculations_mixin.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
+import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
@@ -39,6 +44,7 @@ Route routeBuilder(BuildContext context, RouteSettings settings) {
         inject<ZupSingletonCache>(),
         inject<Wallet>(),
         inject<UniswapV3Pool>(),
+        inject<Cache>(),
       ),
       child: const DepositPage(),
     ),
@@ -81,6 +87,8 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
   bool isBaseTokenAmountUserInput = false;
   double minPrice = 0;
   double maxPrice = 0;
+  late Slippage selectedSlippage = _cubit.depositSettings.slippage;
+  late Duration selectedDeadline = _cubit.depositSettings.deadline;
 
   bool get isRangeInvalid {
     if (isMaxRangeInfinity || isMinRangeInfinity) return false;
@@ -246,6 +254,9 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
       icon: Assets.icons.scrollFill.svg(),
       onPressed: () {
         PreviewDepositModal(
+          key: const Key("preview-deposit-modal"),
+          deadline: selectedDeadline,
+          maxSlippage: selectedSlippage,
           currentYield: _cubit.selectedYield!,
           isReversed: areTokensReversed,
           token0DepositAmount: double.tryParse(
@@ -301,7 +312,42 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
                             icon: Assets.icons.arrowLeft.svg(),
                             label: S.of(context).depositPageBackButtonTitle,
                           ),
-                          ZupPageTitle(S.of(context).depositPageTitle),
+                          Row(
+                            children: [
+                              ZupPageTitle(S.of(context).depositPageTitle),
+                              const Spacer(),
+                              const SizedBox(width: 14),
+                              ZupPillButton(
+                                key: const Key("deposit-settings-button"),
+                                backgroundColor: selectedSlippage.riskBackgroundColor,
+                                foregroundColor: selectedSlippage.riskForegroundColor,
+                                title: selectedSlippage.value != DepositSettingsDto.defaultMaxSlippage
+                                    ? S.of(context).depositPagePercentSlippage(selectedSlippage.value.formatPercent)
+                                    : null,
+                                onPressed: (buttonContext) => ZupDropdown.show(
+                                  showBelowContext: buttonContext,
+                                  child: DepositSettingsDropdownChild(
+                                    context,
+                                    selectedDeadline: selectedDeadline,
+                                    selectedSlippage: selectedSlippage,
+                                    onSettingsChanged: (slippage, deadline) {
+                                      _cubit.saveDepositSettings(slippage, deadline);
+
+                                      setState(() {
+                                        selectedDeadline = deadline;
+                                        selectedSlippage = slippage;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                icon: Assets.icons.gear.svg(
+                                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                  height: 20,
+                                  width: 20,
+                                ),
+                              ),
+                            ],
+                          ),
                           const SizedBox(height: 16),
                           _buildYieldSelectionSector(yields),
                           const SizedBox(height: 20),

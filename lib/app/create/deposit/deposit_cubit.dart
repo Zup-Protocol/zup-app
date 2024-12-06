@@ -4,12 +4,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/mixins/keys_mixin.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
+import 'package:zup_app/core/slippage.dart';
 import 'package:zup_core/zup_core.dart';
 
 part 'deposit_cubit.freezed.dart';
@@ -21,12 +24,14 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     this._zupSingletonCache,
     this._wallet,
     this._uniswapV3Pool,
+    this._cache,
   ) : super(const DepositState.initial());
 
   final YieldRepository _yieldRepository;
   final ZupSingletonCache _zupSingletonCache;
   final Wallet _wallet;
   final UniswapV3Pool _uniswapV3Pool;
+  final Cache _cache;
 
   final StreamController<BigInt?> _pooltickStreamController = StreamController.broadcast();
   final StreamController<YieldDto?> _selectedYieldStreamController = StreamController.broadcast();
@@ -39,6 +44,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
   YieldDto? get selectedYield => _selectedYield;
   BigInt? get latestPoolTick => _latestPoolTick;
+  DepositSettingsDto get depositSettings => _cache.getDepositSettings();
 
   void setup() async {
     Timer.periodic(const Duration(minutes: 1), (timer) {
@@ -106,6 +112,15 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
         userAddress: walletAddress,
       ),
       expiration: const Duration(minutes: 10),
+    );
+  }
+
+  Future<void> saveDepositSettings(Slippage slippage, Duration deadline) async {
+    await _cache.saveDepositSettings(
+      DepositSettingsDto(
+        deadlineMinutes: deadline.inMinutes,
+        maxSlippage: slippage.value.toDouble(),
+      ),
     );
   }
 

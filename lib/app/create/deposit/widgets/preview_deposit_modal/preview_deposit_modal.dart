@@ -16,6 +16,7 @@ import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
+import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
@@ -32,6 +33,8 @@ class PreviewDepositModal extends StatefulWidget {
     required this.maxPrice,
     required this.token0DepositAmount,
     required this.token1DepositAmount,
+    required this.deadline,
+    required this.maxSlippage,
   });
 
   final YieldDto currentYield;
@@ -40,6 +43,9 @@ class PreviewDepositModal extends StatefulWidget {
   final ({double price, bool isInfinity}) maxPrice;
   final double token0DepositAmount;
   final double token1DepositAmount;
+  final Duration deadline;
+  final Slippage maxSlippage;
+
   final double paddingSize = 20;
 
   show(BuildContext context, {required BigInt currentPoolTick}) {
@@ -60,6 +66,8 @@ class PreviewDepositModal extends StatefulWidget {
           zupRouter: inject<ZupRouter>(),
         ),
         child: PreviewDepositModal(
+          deadline: deadline,
+          maxSlippage: maxSlippage,
           token0DepositAmount: token0DepositAmount,
           token1DepositAmount: token1DepositAmount,
           minPrice: minPrice,
@@ -209,6 +217,8 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
           icon: Assets.icons.paperplaneFill.svg(),
           isLoading: false,
           onPressed: () => cubit.deposit(
+                deadline: widget.deadline,
+                slippage: widget.maxSlippage,
                 token0Amount: token0DepositAmount,
                 token1Amount: token1DepositAmount,
                 minPrice: widget.minPrice.price,
@@ -312,6 +322,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
             scaffoldMessengerKey.currentState?.showSnackBar(
               ZupSnackBar(
                 context,
+                hideCloseIcon: true,
                 maxWidth: 450,
                 message: S.of(context).previewDepositModalDepositSuccessSnackBarMessage(
                       baseToken.symbol,
@@ -527,8 +538,6 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                                 width: double.maxFinite,
                               ),
                             ),
-                            const SizedBox(width: 20),
-                            ZupIconButton(icon: Assets.icons.gear.svg(), onPressed: () {})
                           ],
                         ),
                         const SizedBox(height: 20)

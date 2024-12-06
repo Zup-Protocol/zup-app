@@ -114,6 +114,8 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                     ],
                                     decoration: InputDecoration(
                                       contentPadding: EdgeInsets.only(right: paddingValue + 5, left: paddingValue),
+                                      focusedBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
                                       border: InputBorder.none,
                                       hintText: "0",
                                       hintStyle: const TextStyle(color: ZupColors.gray5),

@@ -5,10 +5,13 @@ import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
+import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
+import 'package:zup_app/core/slippage.dart';
 import 'package:zup_core/zup_singleton_cache.dart';
 
 import '../../../mocks.dart';
@@ -20,17 +23,21 @@ void main() {
   late UniswapV3Pool uniswapV3Pool;
   late UniswapV3PoolImpl uniswapV3PoolImpl;
   late DepositCubit sut;
+  late Cache cache;
 
   final poolTick = BigInt.from(31276567121);
 
   setUp(() {
+    registerFallbackValue(DepositSettingsDto.fixture());
+
     yieldRepository = YieldRepositoryMock();
     zupSingletonCache = ZupSingletonCache.shared;
     wallet = WalletMock();
     uniswapV3Pool = UniswapV3PoolMock();
     uniswapV3PoolImpl = UniswapV3PoolImplMock();
+    cache = CacheMock();
 
-    sut = DepositCubit(yieldRepository, zupSingletonCache, wallet, uniswapV3Pool);
+    sut = DepositCubit(yieldRepository, zupSingletonCache, wallet, uniswapV3Pool, cache);
 
     when(
       () => uniswapV3Pool.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")),
@@ -461,4 +468,39 @@ void main() {
 
     expect(actualTokenBalance, 0.0);
   });
+
+  test(
+    "When calling `saveDepositSettings` it should save the passed params in the cache",
+    () async {
+      when(() => cache.saveDepositSettings(any())).thenAnswer((_) async => () {});
+
+      const slippage = Slippage.zeroPointOnePercent;
+      const deadline = Duration(minutes: 5);
+
+      final expectedDepositSettings = DepositSettingsDto(
+        deadlineMinutes: deadline.inMinutes,
+        maxSlippage: slippage.value.toDouble(),
+      );
+
+      await sut.saveDepositSettings(slippage, deadline);
+
+      verify(() => cache.saveDepositSettings(expectedDepositSettings)).called(1);
+    },
+  );
+
+  test(
+    "When calling `depositSettings` it should get the deposit settings from the cache",
+    () {
+      final expectedDepositSettings = DepositSettingsDto(
+        deadlineMinutes: 5,
+        maxSlippage: 0.01,
+      );
+
+      when(() => cache.getDepositSettings()).thenReturn(expectedDepositSettings);
+
+      final actualDepositSettings = sut.depositSettings;
+
+      expect(actualDepositSettings, expectedDepositSettings);
+    },
+  );
 }

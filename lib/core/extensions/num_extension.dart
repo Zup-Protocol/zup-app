@@ -91,5 +91,10 @@ extension NumExtension on num {
     );
   }
 
-  String get formatPercent => "${NumberFormat.decimalPatternDigits(decimalDigits: 0).format(this)}%";
+  String get formatPercent {
+    int decimalsDigits = 0;
+    if (decimals >= 1 && toString().split(".")[1] != "0") decimalsDigits = 1;
+
+    return "${NumberFormat.decimalPatternDigits(decimalDigits: decimalsDigits).format(this)}%";
+  }
 }

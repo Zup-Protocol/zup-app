@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 
 import '../mocks.dart';
 
@@ -10,8 +13,11 @@ void main() {
   late SharedPreferencesWithCache sharedPreferencesWithCache;
 
   const hidingClosedPositionsKey = "HIDING_CLOSED_POSITIONS";
+  const depositSettingsKey = "DEPOSIT_SETTINGS";
 
   setUp(() {
+    registerFallbackValue(DepositSettingsDto.fixture());
+
     sharedPreferencesWithCache = SharedPreferencesWithCacheMock();
     sut = Cache(sharedPreferencesWithCache);
   });
@@ -46,5 +52,52 @@ void main() {
     final result = await sut.getHidingClosedPositionsStatus();
 
     expect(result, false);
+  });
+
+  test(
+    "When calling `saveDepositSettings` it should use the correct key to store the deposit settings",
+    () async {
+      final settings = DepositSettingsDto();
+
+      when(() => sharedPreferencesWithCache.setString(any(), any())).thenAnswer((_) async => true);
+      await sut.saveDepositSettings(settings);
+
+      verify(() => sharedPreferencesWithCache.setString(depositSettingsKey, any())).called(1);
+    },
+  );
+
+  test(
+    "When calling `saveDepositSettings` it should convert the dto to json, and store the json as a string",
+    () async {
+      final settings = DepositSettingsDto();
+      when(() => sharedPreferencesWithCache.setString(any(), any())).thenAnswer((_) async => true);
+
+      await sut.saveDepositSettings(settings);
+
+      verify(
+        () => sharedPreferencesWithCache.setString(
+          any(),
+          jsonEncode(settings.toJson()).toString(),
+        ),
+      ).called(1);
+    },
+  );
+
+  test("When calling `getDepositSettings` it should use the correct key to get the deposit settings", () async {
+    when(() => sharedPreferencesWithCache.getString(any())).thenReturn("{}");
+
+    sut.getDepositSettings();
+
+    verify(() => sharedPreferencesWithCache.getString(depositSettingsKey)).called(1);
+  });
+
+  test("When calling `getDepositSettings` it should convert the returned saved json to a deposit settings dto", () {
+    final settings = DepositSettingsDto(deadlineMinutes: 321, maxSlippage: 7384);
+
+    when(() => sharedPreferencesWithCache.getString(any())).thenReturn(jsonEncode(settings.toJson()));
+
+    final result = sut.getDepositSettings();
+
+    expect(result, settings);
   });
 }

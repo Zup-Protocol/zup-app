@@ -99,11 +99,53 @@ abstract class S {
   /// **'24h'**
   String get twentyFourHours;
 
+  /// No description provided for @slippageExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Slippage protects you by reverting the transaction if the price changes unfavorably beyond the percentage. This is necessary to prevent losses while adding liquidity'**
+  String get slippageExplanation;
+
   /// No description provided for @month.
   ///
   /// In en, this message translates to:
   /// **'Month'**
   String get month;
+
+  /// No description provided for @minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get minutes;
+
+  /// No description provided for @depositSettingsDropdownChildHighSlippageWarningText.
+  ///
+  /// In en, this message translates to:
+  /// **'High slippage can lead to Front Running and losses. Be careful! '**
+  String get depositSettingsDropdownChildHighSlippageWarningText;
+
+  /// No description provided for @whatsThisQuestionText.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s this?'**
+  String get whatsThisQuestionText;
+
+  /// No description provided for @depositSettingsDropdownChildTransactionDeadlineExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Your transaction will be reverted if it is pending for more than this amount of time'**
+  String get depositSettingsDropdownChildTransactionDeadlineExplanation;
+
+  /// No description provided for @depositSettingsDropdownTransactionDeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Deadline'**
+  String get depositSettingsDropdownTransactionDeadline;
+
+  /// No description provided for @depositPagePercentSlippage.
+  ///
+  /// In en, this message translates to:
+  /// **'{valuePercent} Slippage'**
+  String depositPagePercentSlippage(String valuePercent);
 
   /// No description provided for @threeMonths.
   ///
@@ -128,6 +170,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'90d'**
   String get threeMonthsCompact;
+
+  /// No description provided for @depositSettingsDropdownChildMaxSlippage.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Slippage'**
+  String get depositSettingsDropdownChildMaxSlippage;
 
   /// No description provided for @depositPageDepositSectionTitle.
   ///

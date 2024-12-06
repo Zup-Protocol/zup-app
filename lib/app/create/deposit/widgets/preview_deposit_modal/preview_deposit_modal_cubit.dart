@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/core/exceptions/ethers_exceptions.dart';
@@ -12,6 +13,7 @@ import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
+import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
 
 part "preview_deposit_modal_cubit.freezed.dart";
@@ -113,6 +115,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     required bool isMinPriceInfinity,
     required bool isMaxPriceInfinity,
     required bool isReversed,
+    required Slippage slippage,
+    required Duration deadline,
   }) async {
     try {
       emit(const PreviewDepositModalState.depositing());
@@ -163,16 +167,18 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
         );
       }
 
+      final amount0Desired = token0Amount - fee.feeToken0;
+      final amount1Desired = token1Amount - fee.feeToken1;
+      final amount0Min = slippage.calculateTokenAmountFromSlippage(amount0Desired);
+      final amount1Min = slippage.calculateTokenAmountFromSlippage(amount1Desired);
+
       final depositData = _uniswapPositionManager.getMintCalldata(
         params: (
-          amount0Desired: token0Amount - fee.feeToken0,
-          amount1Desired: token1Amount - fee.feeToken1,
-          // TODO: add deadline in the configs and tests for it
-          deadline: BigInt.from(DateTime.now().add(const Duration(minutes: 10)).millisecondsSinceEpoch),
-          // TODO: add slippage in the configs and tests for it
-          amount0Min: BigInt.from(0),
-          // TODO: add slippage in the configs and tests for it
-          amount1Min: BigInt.from(0),
+          amount0Desired: amount0Desired,
+          amount1Desired: amount1Desired,
+          deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
+          amount0Min: amount0Min,
+          amount1Min: amount1Min,
           recipient: await _wallet.signer!.address,
           tickLower: tickLower(),
           tickUpper: tickUpper(),

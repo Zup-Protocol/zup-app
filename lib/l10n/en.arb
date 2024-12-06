@@ -1,11 +1,26 @@
 {
     "@@locale": "en",
     "twentyFourHours": "24h",
+    "slippageExplanation": "Slippage protects you by reverting the transaction if the price changes unfavorably beyond the percentage. This is necessary to prevent losses while adding liquidity",
     "month": "Month",
+    "minutes": "Minutes",
+    "depositSettingsDropdownChildHighSlippageWarningText": "High slippage can lead to Front Running and losses. Be careful! ",
+    "whatsThisQuestionText": "What's this?",
+    "depositSettingsDropdownChildTransactionDeadlineExplanation": "Your transaction will be reverted if it is pending for more than this amount of time",
+    "depositSettingsDropdownTransactionDeadline": "Transaction Deadline",
+    "depositPagePercentSlippage": "{valuePercent} Slippage",
+    "@depositPagePercentSlippage": {
+        "placeholders": {
+            "valuePercent": {
+                "type": "String"
+            }
+        }
+    },
     "threeMonths": "3 Months",
     "twentyFourHoursCompact": "24h",
     "monthCompact": "30d",
     "threeMonthsCompact": "90d",
+    "depositSettingsDropdownChildMaxSlippage": "Max Slippage",
     "depositPageDepositSectionTitle": "Deposit",
     "previewDepositModalWaitingTransaction": "Waiting Transaction",
     "previewDepositModalApprovingToken": "Approving {tokenSymbol}",
