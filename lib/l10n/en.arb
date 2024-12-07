@@ -1,6 +1,11 @@
 {
     "@@locale": "en",
     "twentyFourHours": "24h",
+    "appFooterTermsOfUse": "Terms of Use",
+    "appFooterPrivacyPolicy": "Privacy Policy",
+    "appFooterContactUs": "Contact Us",
+    "appFooterDocs": "Docs",
+    "appFooterFAQ": "FAQ",
     "slippageExplanation": "Slippage protects you by reverting the transaction if the price changes unfavorably beyond the percentage. This is necessary to prevent losses while adding liquidity",
     "month": "Month",
     "minutes": "Minutes",

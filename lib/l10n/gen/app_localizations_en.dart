@@ -12,6 +12,21 @@ class SEn extends S {
   String get twentyFourHours => '24h';
 
   @override
+  String get appFooterTermsOfUse => 'Terms of Use';
+
+  @override
+  String get appFooterPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get appFooterContactUs => 'Contact Us';
+
+  @override
+  String get appFooterDocs => 'Docs';
+
+  @override
+  String get appFooterFAQ => 'FAQ';
+
+  @override
   String get slippageExplanation =>
       'Slippage protects you by reverting the transaction if the price changes unfavorably beyond the percentage. This is necessary to prevent losses while adding liquidity';
 

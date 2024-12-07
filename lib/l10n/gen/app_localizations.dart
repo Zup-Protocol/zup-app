@@ -99,6 +99,36 @@ abstract class S {
   /// **'24h'**
   String get twentyFourHours;
 
+  /// No description provided for @appFooterTermsOfUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get appFooterTermsOfUse;
+
+  /// No description provided for @appFooterPrivacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get appFooterPrivacyPolicy;
+
+  /// No description provided for @appFooterContactUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Us'**
+  String get appFooterContactUs;
+
+  /// No description provided for @appFooterDocs.
+  ///
+  /// In en, this message translates to:
+  /// **'Docs'**
+  String get appFooterDocs;
+
+  /// No description provided for @appFooterFAQ.
+  ///
+  /// In en, this message translates to:
+  /// **'FAQ'**
+  String get appFooterFAQ;
+
   /// No description provided for @slippageExplanation.
   ///
   /// In en, this message translates to:

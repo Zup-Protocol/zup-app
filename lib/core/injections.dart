@@ -15,6 +15,7 @@ import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
+import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
@@ -60,6 +61,7 @@ Future<void> setupInjections() async {
   inject.registerLazySingleton<UniswapPositionManager>(() => UniswapPositionManager());
   inject.registerLazySingleton<FeeController>(() => FeeController());
   inject.registerLazySingleton<ZupSingletonCache>(() => ZupSingletonCache.shared);
+  inject.registerFactory<ZupLinks>(() => ZupLinks());
 
   inject.registerLazySingleton<ScrollController>(
     () => ScrollController(),

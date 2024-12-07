@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:routefly/routefly.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/widgets/app_footer.dart';
 import 'package:zup_app/widgets/app_header/app_header.dart';
 
 class AppPage extends StatefulWidget {
@@ -43,6 +44,9 @@ class _AppPageState extends State<AppPage> {
               const SliverFillRemaining(
                 hasScrollBody: false,
                 child: RouterOutlet(),
+              ),
+              const SliverToBoxAdapter(
+                child: AppFooter(),
               ),
             ],
           ),

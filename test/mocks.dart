@@ -22,6 +22,7 @@ import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
+import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
@@ -89,6 +90,8 @@ class ZupRouterMock extends Mock implements ZupRouter {}
 class ZupSingletonCacheMock extends Mock implements ZupSingletonCache {}
 
 class PreviewDepositModalCubitMock extends Mock implements PreviewDepositModalCubit {}
+
+class ZupLinksMock extends Mock implements ZupLinks {}
 
 class UrlLauncherPlatformCustomMock extends UrlLauncherPlatform {
   static String? lastLaunchedUrl;

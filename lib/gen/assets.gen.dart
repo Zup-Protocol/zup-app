@@ -169,14 +169,26 @@ class $AssetsLogosGen {
   /// File path: assets/logos/ethereum.svg
   SvgGenImage get ethereum => const SvgGenImage('assets/logos/ethereum.svg');
 
+  /// File path: assets/logos/github.svg
+  SvgGenImage get github => const SvgGenImage('assets/logos/github.svg');
+
   /// File path: assets/logos/scroll.svg
   SvgGenImage get scroll => const SvgGenImage('assets/logos/scroll.svg');
+
+  /// File path: assets/logos/telegram.svg
+  SvgGenImage get telegram => const SvgGenImage('assets/logos/telegram.svg');
+
+  /// File path: assets/logos/x.svg
+  SvgGenImage get x => const SvgGenImage('assets/logos/x.svg');
 
   /// File path: assets/logos/zup.svg
   SvgGenImage get zup => const SvgGenImage('assets/logos/zup.svg');
 
+  /// File path: assets/logos/zup_gray.svg
+  SvgGenImage get zupGray => const SvgGenImage('assets/logos/zup_gray.svg');
+
   /// List of all assets
-  List<SvgGenImage> get values => [arbitrum, base, ethereum, scroll, zup];
+  List<SvgGenImage> get values => [arbitrum, base, ethereum, github, scroll, telegram, x, zup, zupGray];
 }
 
 class $AssetsLottiesGen {
