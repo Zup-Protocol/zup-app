@@ -16,6 +16,7 @@ class ZupApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      title: "Zup | Liquidity Pools Aggregator",
       scaffoldMessengerKey: scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
