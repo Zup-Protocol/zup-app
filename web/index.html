@@ -19,6 +19,8 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Finding the most profitable pool is just a few clicks away">
+  <meta name="theme-color" content="#7357FF">
+
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,10 +31,13 @@
   <!-- Favicon -->
   <link rel="icon" href="favicon.ico", sizes="any"/>
 
-  <title>Zup Protocol</title>
+  <title>Zup Protocol </title>
   <link rel="manifest" href="manifest.json">
 </head>
-<body>
+<body style="margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center;">
+  <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+  <dotlottie-player src="loading.json" background="transparent" speed="1" style="width: 300px; height: 300px" loop autoplay></dotlottie-player>
+
   <script type="module">
     import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
     window.ethers = ethers;
