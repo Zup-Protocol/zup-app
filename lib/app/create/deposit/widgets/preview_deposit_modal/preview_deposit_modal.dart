@@ -22,9 +22,10 @@ import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/mixins/device_info_mixin.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
-class PreviewDepositModal extends StatefulWidget {
+class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
   const PreviewDepositModal({
     super.key,
     required this.currentYield,
@@ -51,9 +52,10 @@ class PreviewDepositModal extends StatefulWidget {
   show(BuildContext context, {required BigInt currentPoolTick}) {
     return ZupModal.show(
       context,
+      showAsBottomSheet: isMobileSize(context),
       title: S.of(context).previewDepositModalTitle,
-      size: const Size(550, 550),
-      padding: EdgeInsets.only(left: paddingSize),
+      size: const Size(450, 650),
+      padding: EdgeInsets.only(left: paddingSize).copyWith(top: 5),
       content: BlocProvider(
         create: (context) => PreviewDepositModalCubit(
           currentYield: currentYield,
@@ -182,13 +184,16 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
         isLoading: true,
       ),
       approvingToken: (symbol) => (
-        title: S.of(context).previewDepositModalApprovingToken(symbol),
+        title: S.of(context).previewDepositModalApprovingToken(tokenSymbol: symbol),
         icon: null,
         onPressed: null,
         isLoading: true,
       ),
       depositing: () => (
-        title: S.of(context).previewDepositModalDepositingIntoPool(baseToken.symbol, quoteToken.symbol),
+        title: S.of(context).previewDepositModalDepositingIntoPool(
+              baseTokenSymbol: baseToken.symbol,
+              quoteTokenSymbol: quoteToken.symbol,
+            ),
         icon: null,
         onPressed: null,
         isLoading: true,
@@ -196,7 +201,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
       initial: (token0Allowance, token1Allowance) {
         if (token0Allowance < token0DepositAmount) {
           return (
-            title: S.of(context).previewDepositModalApproveToken(widget.currentYield.token0.symbol),
+            title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token0.symbol),
             icon: Assets.icons.lockOpen.svg(),
             isLoading: false,
             onPressed: () => cubit.approveToken(widget.currentYield.token0, token0DepositAmount)
@@ -205,7 +210,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
 
         if (token1Allowance < token1DepositAmount) {
           return (
-            title: S.of(context).previewDepositModalApproveToken(widget.currentYield.token1.symbol),
+            title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token1.symbol),
             icon: Assets.icons.lockOpen.svg(),
             isLoading: false,
             onPressed: () => cubit.approveToken(widget.currentYield.token1, token1DepositAmount)
@@ -302,7 +307,9 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
             ScaffoldMessenger.of(context).showSnackBar(
               ZupSnackBar(
                 context,
-                message: S.of(context).previewDepositModalApproveSuccessSnackBarMessage(tokenSymbol),
+                message: S.of(context).previewDepositModalApproveSuccessSnackBarMessage(
+                      tokenSymbol: tokenSymbol,
+                    ),
                 type: ZupSnackBarType.success,
                 helperButton: (
                   title: S.of(context).previewDepositModalApproveSuccessSnackBarHelperButtonTitle,
@@ -312,21 +319,24 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
             );
           },
           depositSuccess: (txId) async {
+            //TODO: Change to not navigate to my Positions
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            Navigator.of(context).pop();
+            // Navigator.of(context).pop();
 
-            await navigator.navigateToMyPositions();
-            positionsCubit.getUserPositions();
-            appScrollController.jumpTo(0);
+            // await navigator.navigateToMyPositions();
+            // positionsCubit.getUserPositions();
+            // appScrollController.jumpTo(0);
 
-            scaffoldMessengerKey.currentState?.showSnackBar(
+            return ScaffoldMessenger.of(context).showSnackBar(
               ZupSnackBar(
                 context,
-                hideCloseIcon: true,
+                snackDuration: const Duration(days: 1),
+                hideCloseIcon: false,
                 maxWidth: 450,
                 message: S.of(context).previewDepositModalDepositSuccessSnackBarMessage(
-                      baseToken.symbol,
-                      quoteToken.symbol,
+                      baseTokenSymbol: baseToken.symbol,
+                      quoteTokenSymbol: quoteToken.symbol,
+                      protocol: widget.currentYield.protocol.name,
                     ),
                 type: ZupSnackBarType.success,
                 helperButton: (
@@ -360,251 +370,184 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
           physics: const ClampingScrollPhysics(),
           slivers: [
             SliverFillRemaining(
-                hasScrollBody: false,
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: ZupColors.brand5, width: 1.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.all(20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  _sectionTitle(S.of(context).previewDepositModalMyPosition),
-                                  const SizedBox(width: 10),
-                                  StreamBuilder(
-                                      stream: cubit.poolTickStream,
-                                      builder: (context, tickSnapshot) {
-                                        return ZupTag(
-                                          title: isOutOfRange.any
-                                              ? S.of(context).previewDepositModalOutOfRange
-                                              : S.of(context).previewDepositModalInRange,
-                                          color: isOutOfRange.any ? ZupColors.orange : ZupColors.green,
-                                        );
-                                      }),
-                                  const Spacer(),
-                                  CupertinoSlidingSegmentedControl(
-                                    groupValue: isReversedLocal,
-                                    children: {
-                                      false: MouseRegion(
-                                        key: const Key("unreverse-tokens"),
-                                        cursor: SystemMouseCursors.click,
-                                        child: IgnorePointer(
-                                          child: SizedBox(
-                                            height: 16,
-                                            child: Text(
-                                              "${widget.currentYield.token0.symbol} / ${widget.currentYield.token1.symbol}",
-                                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      true: MouseRegion(
-                                        key: const Key("reverse-tokens"),
-                                        child: IgnorePointer(
-                                          child: SizedBox(
-                                            height: 16,
-                                            child: Text(
-                                              "${widget.currentYield.token1.symbol} / ${widget.currentYield.token0.symbol}",
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    },
-                                    onValueChanged: (value) => setState(() => isReversedLocal = value ?? false),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  zupCachedImage.build(baseToken.logoUrl, height: 30, width: 30, radius: 50),
-                                  const SizedBox(width: 10),
-                                  Text(baseToken.symbol),
-                                  const Spacer(),
-                                  Text(
-                                      "${baseTokenAmount.formatCurrency(
-                                        isUSD: false,
-                                        useLessThan: true,
-                                        maxDecimals: 10,
-                                      )} ${baseToken.symbol}",
-                                      style: const TextStyle(fontWeight: FontWeight.w600)),
-                                ],
-                              ),
-                              const SizedBox(height: 15),
-                              Row(
-                                children: [
-                                  zupCachedImage.build(quoteToken.logoUrl, height: 30, width: 30, radius: 50),
-                                  const SizedBox(width: 10),
-                                  Text(quoteToken.symbol),
-                                  const Spacer(),
-                                  Text(
-                                      "${quoteTokenAmount.formatCurrency(
-                                        isUSD: false,
-                                        useLessThan: true,
-                                        maxDecimals: 10,
-                                      )} ${quoteToken.symbol}",
-                                      style: const TextStyle(fontWeight: FontWeight.w600)),
-                                ],
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 10),
-                                child: ZupDivider(),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Flexible(
-                                    fit: FlexFit.loose,
-                                    child: _fieldColumn(
-                                      title: S.of(context).previewDepositModalProtocol,
-                                      image: zupCachedImage.build(
-                                        widget.currentYield.protocol.logoUrl,
-                                        width: 30,
-                                        height: 30,
-                                        radius: 100,
-                                      ),
-                                      value: widget.currentYield.protocol.name,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 40),
-                                  Flexible(
-                                      fit: FlexFit.loose,
-                                      child: _fieldColumn(
-                                        title: S.of(context).previewDepositModalNetwork,
-                                        image: SizedBox(width: 30, height: 30, child: widget.currentYield.network.icon),
-                                        value: widget.currentYield.network.label,
-                                      )),
-                                  const SizedBox(width: 40),
-                                  Flexible(
-                                    fit: FlexFit.loose,
-                                    child: _fieldColumn(
-                                      spacing: 11,
-                                      title: S.of(context).previewDepositModalYearlyYieldTimeFrame(
-                                            widget.currentYield.yieldTimeFrame.compactDaysLabel(context),
-                                          ),
-                                      value: widget.currentYield.yearlyYield.formatPercent,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                        SizedBox(
+                          height: 30,
+                          child: ZupMergedWidgets(
+                            firstWidget: zupCachedImage.build(widget.currentYield.token0.logoUrl, radius: 50),
+                            secondWidget: zupCachedImage.build(widget.currentYield.token1.logoUrl, radius: 50),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: rangeInfoCard(isMinPrice: true),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: rangeInfoCard(
-                                isMinPrice: false,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: currentPriceCard,
-                            ),
-                          ],
+                        const SizedBox(width: 5),
+                        Text(
+                          "${baseToken.symbol}/${quoteToken.symbol}",
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(width: 10),
+                        StreamBuilder(
+                            stream: cubit.poolTickStream,
+                            builder: (context, tickSnapshot) {
+                              return ZupTag(
+                                title: isOutOfRange.any
+                                    ? S.of(context).previewDepositModalOutOfRange
+                                    : S.of(context).previewDepositModalInRange,
+                                color: isOutOfRange.any ? ZupColors.orange : ZupColors.green,
+                              );
+                            }),
                         const Spacer(),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ZupPrimaryButton(
-                                key: const Key("deposit-button"),
-                                fixedIcon: true,
-                                title: depositButtonState.title,
-                                onPressed: depositButtonState.onPressed,
-                                icon: depositButtonState.icon,
-                                isLoading: depositButtonState.isLoading ?? false,
-                                width: double.maxFinite,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20)
                       ],
                     ),
-                  ),
-                )),
+                    const SizedBox(height: 16),
+                    CupertinoSlidingSegmentedControl(
+                      groupValue: isReversedLocal,
+                      children: {
+                        false: MouseRegion(
+                          key: const Key("unreverse-tokens"),
+                          cursor: SystemMouseCursors.click,
+                          child: IgnorePointer(
+                            child: SizedBox(
+                              height: 15,
+                              child: Text(
+                                "${widget.currentYield.token0.symbol} / ${widget.currentYield.token1.symbol}",
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        ),
+                        true: MouseRegion(
+                          key: const Key("reverse-tokens"),
+                          cursor: SystemMouseCursors.click,
+                          child: IgnorePointer(
+                            child: SizedBox(
+                              height: 16,
+                              child: Text(
+                                "${widget.currentYield.token1.symbol} / ${widget.currentYield.token0.symbol}",
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      },
+                      onValueChanged: (value) => setState(() => isReversedLocal = value ?? false),
+                    ),
+                    const SizedBox(height: 10),
+                    const ZupDivider(),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        zupCachedImage.build(baseToken.logoUrl, height: 30, width: 30, radius: 50),
+                        const SizedBox(width: 10),
+                        Text(baseToken.symbol),
+                        const Spacer(),
+                        Text(
+                            "${baseTokenAmount.maybeFormatCompactCurrency(
+                              isUSD: false,
+                              useLessThan: true,
+                              useMoreThan: true,
+                            )} ${baseToken.symbol}",
+                            style: const TextStyle(fontWeight: FontWeight.w500)),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        zupCachedImage.build(quoteToken.logoUrl, height: 30, width: 30, radius: 50),
+                        const SizedBox(width: 10),
+                        Text(quoteToken.symbol),
+                        const Spacer(),
+                        Text(
+                            "${quoteTokenAmount.maybeFormatCompactCurrency(
+                              isUSD: false,
+                              useLessThan: true,
+                              useMoreThan: true,
+                            )} ${quoteToken.symbol}",
+                            style: const TextStyle(fontWeight: FontWeight.w500)),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    const ZupDivider(),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: _fieldColumn(
+                            title: S.of(context).previewDepositModalProtocol,
+                            image: zupCachedImage.build(
+                              widget.currentYield.protocol.logoUrl,
+                              width: 30,
+                              height: 30,
+                              radius: 100,
+                            ),
+                            value: widget.currentYield.protocol.name,
+                          ),
+                        ),
+                        const SizedBox(width: 40),
+                        Flexible(
+                            fit: FlexFit.loose,
+                            child: _fieldColumn(
+                              title: S.of(context).previewDepositModalNetwork,
+                              image: SizedBox(width: 30, height: 30, child: widget.currentYield.network.icon),
+                              value: widget.currentYield.network.label,
+                            )),
+                        const SizedBox(width: 40),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _fieldColumn(
+                      spacing: 0,
+                      title: S.of(context).previewDepositModalYearlyYieldTimeFrame(
+                            timeFrame: widget.currentYield.yieldTimeFrame.compactDaysLabel(context),
+                          ),
+                      value: widget.currentYield.yearlyYield.formatPercent,
+                    ),
+                    const SizedBox(height: 10),
+                    const ZupDivider(),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Expanded(child: rangeInfoCard(isMinPrice: true)),
+                        const SizedBox(width: 10),
+                        Expanded(child: rangeInfoCard(isMinPrice: false)),
+                      ],
+                    ),
+                    const Spacer(),
+                    const SizedBox(height: 10),
+                    ZupPrimaryButton(
+                      key: const Key("deposit-button"),
+                      fixedIcon: true,
+                      title: depositButtonState.title,
+                      onPressed: depositButtonState.onPressed,
+                      icon: depositButtonState.icon,
+                      isLoading: depositButtonState.isLoading ?? false,
+                      width: double.maxFinite,
+                    ),
+                    const SizedBox(height: 20)
+                  ],
+                ),
+              ),
+            ),
           ],
         );
       },
     );
   }
 
-  Widget get currentPriceCard => StreamBuilder(
-        stream: cubit.poolTickStream,
-        initialData: cubit.latestPoolTick,
-        builder: (context, tickSnapshot) {
-          return Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: ZupColors.brand.withOpacity(0.02),
-              border: Border.all(color: ZupColors.brand5, width: 0.5),
-              borderRadius: const BorderRadius.all(
-                Radius.circular(12),
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  S.of(context).previewDepositModalCurrentPrice,
-                  style: const TextStyle(
-                    color: ZupColors.brand,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                    currentPrice.maybeFormatCompactCurrency(
-                      isUSD: false,
-                      useLessThan: true,
-                      useMoreThan: true,
-                      maxBeforeCompact: pow(10, 6),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.clip,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 18,
-                      color: ZupColors.black,
-                    )),
-                const SizedBox(height: 5),
-                Text(
-                  "${baseToken.symbol} / ${quoteToken.symbol}",
-                  style: const TextStyle(
-                    color: ZupColors.gray,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-
   Widget rangeInfoCard({required bool isMinPrice}) => Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: ZupColors.brand.withOpacity(0.02),
           border: Border.all(color: ZupColors.brand5, width: 0.5),

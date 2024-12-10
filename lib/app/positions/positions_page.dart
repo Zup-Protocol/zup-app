@@ -77,7 +77,7 @@ class _PositionsPageState extends State<PositionsPage> {
                             backgroundColor: Colors.transparent,
                             title: S
                                 .of(context)
-                                .positionsPageShowHideClosedPositions(cubit.hidingClosedPositions.toString()),
+                                .positionsPageShowHideClosedPositions(isHidden: cubit.hidingClosedPositions.toString()),
                             fontWeight: FontWeight.w500,
                             foregroundColor: ZupColors.brand,
                             onPressed: () {
@@ -136,7 +136,7 @@ class _PositionsPageState extends State<PositionsPage> {
             description: S.of(context).positionsPageNotConnectedDescription,
             helpButtonTitle: S.of(context).connectYourWallet,
             helpButtonIcon: Assets.icons.cableConnectorHorizontal.svg(),
-            onHelpButtonTap: () => ConnectModal.show(context, onConnectWallet: (Signer signer) {}),
+            onHelpButtonTap: () => ConnectModal().show(context),
           )
         ],
       );
@@ -164,8 +164,12 @@ class _PositionsPageState extends State<PositionsPage> {
             icon: appCubit.selectedNetwork.icon,
             helpButtonSpacing: 12,
             iconSize: 120,
-            title: S.of(context).positionsPageNoPositionsInNetwork(appCubit.selectedNetwork.label),
-            description: S.of(context).positionsPageNoPositionsInNetworkDescription(appCubit.selectedNetwork.label),
+            title: S.of(context).positionsPageNoPositionsInNetwork(
+                  network: appCubit.selectedNetwork.label,
+                ),
+            description: S.of(context).positionsPageNoPositionsInNetworkDescription(
+                  network: appCubit.selectedNetwork.label,
+                ),
             helpButtonTitle: S.of(context).createNewPosition,
             helpButtonIcon: Assets.icons.plus.svg(),
             onHelpButtonTap: () => navigator.navigateToNewPosition(),

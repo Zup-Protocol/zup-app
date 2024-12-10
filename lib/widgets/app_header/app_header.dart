@@ -9,6 +9,7 @@ import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/app_header/app_header_tab_button.dart';
+import 'package:zup_core/mixins/device_info_mixin.dart';
 
 class AppHeader extends StatefulWidget {
   const AppHeader({super.key, required this.height});
@@ -19,7 +20,7 @@ class AppHeader extends StatefulWidget {
   State<AppHeader> createState() => _AppHeaderState();
 }
 
-class _AppHeaderState extends State<AppHeader> {
+class _AppHeaderState extends State<AppHeader> with DeviceInfoMixin {
   final ZupNavigator navigator = inject<ZupNavigator>();
   final appCubit = inject<AppCubit>();
 
@@ -55,49 +56,55 @@ class _AppHeaderState extends State<AppHeader> {
               child: Container(color: Colors.white.withOpacity(0.85)),
             ),
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  key: const Key("logo-button"),
-                  onTap: () => navigator.navigateToInitial(),
-                  child: Assets.logos.zup.svg(height: 30),
-                ),
-              ),
-              const SizedBox(width: 26),
-              AppHeaderTabButton(
-                key: const Key("my-positions-button"),
-                title: "My Positions",
-                icon: Assets.icons.waterWaves.svg(),
-                selected: navigator.currentRoute.isMyPositions,
-                onPressed: () => navigator.navigateToMyPositions(),
-              ),
-              const SizedBox(width: 10),
-              AppHeaderTabButton(
-                key: const Key("new-position-button"),
-                title: "New Position",
-                icon: Assets.icons.plusDiamond.svg(),
-                selected: navigator.currentRoute.isNewPosition,
-                onPressed: () => navigator.navigateToNewPosition(),
-              ),
-              const Spacer(),
-              NetworkSwitcher(
-                initialNetworkIndex: appCubit.selectedNetwork.index,
-                onSelect: (item, index) => appCubit.updateAppNetwork(Networks.values[index]),
-                networks: List.generate(
-                  Networks.values.length,
-                  (index) => NetworkSwitcherItem(
-                    title: Networks.values[index].label,
-                    icon: Networks.values[index].icon,
-                    chainInfo: Networks.values[index].chainInfo,
+          Padding(
+            padding: const EdgeInsets.only(left: 30, right: 15),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    key: const Key("logo-button"),
+                    onTap: () => navigator.navigateToInitial(),
+                    child: Assets.logos.zup.svg(height: 30),
                   ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              const ConnectButton()
-            ],
+                const SizedBox(width: 26),
+                if (!isMobileSize(context)) ...[
+                  AppHeaderTabButton(
+                    key: const Key("new-position-button"),
+                    title: "New Position",
+                    icon: Assets.icons.plusDiamond.svg(),
+                    selected: navigator.currentRoute.isNewPosition,
+                    onPressed: () => navigator.navigateToNewPosition(),
+                  ),
+                  const SizedBox(width: 10),
+                  AppHeaderTabButton(
+                    key: const Key("my-positions-button"),
+                    title: "My Positions (Soon)",
+                    icon: Assets.icons.waterWaves.svg(),
+                    selected: navigator.currentRoute.isMyPositions,
+                    onPressed: null, // () => navigator.navigateToMyPositions(),
+                  ),
+                ],
+                const Spacer(),
+                NetworkSwitcher(
+                  compact: !isDesktopSize(context),
+                  initialNetworkIndex: appCubit.selectedNetwork.index,
+                  onSelect: (item, index) => appCubit.updateAppNetwork(Networks.values[index]),
+                  networks: List.generate(
+                    Networks.values.length,
+                    (index) => NetworkSwitcherItem(
+                      title: Networks.values[index].label,
+                      icon: Networks.values[index].icon,
+                      chainInfo: Networks.values[index].chainInfo,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                const ConnectButton()
+              ],
+            ),
           ),
         ],
       ),

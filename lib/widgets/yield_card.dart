@@ -39,7 +39,7 @@ class _YieldCardState extends State<YieldCard> {
         Padding(
           padding: const EdgeInsets.only(left: 6),
           child: Text(
-            S.of(context).yieldCardTimeFrameBest(widget.timeFrame.label(context)),
+            S.of(context).yieldCardTimeFrameBest(timeFrame: widget.timeFrame.label(context)),
             style: const TextStyle(color: ZupColors.gray, fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
@@ -57,7 +57,7 @@ class _YieldCardState extends State<YieldCard> {
                   right: 2,
                   top: 2,
                   child: ZupTooltip(
-                    message: S.of(context).yieldCardThisPoolIsAtNetwork(widget.yield.network.label),
+                    message: S.of(context).yieldCardThisPoolIsAtNetwork(network: widget.yield.network.label),
                     trailingIcon: widget.yield.network.icon,
                     child: AnimatedContainer(
                       duration: selectionAnimationDuration,

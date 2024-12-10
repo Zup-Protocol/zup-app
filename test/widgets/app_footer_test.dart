@@ -20,12 +20,15 @@ void main() {
 
   tearDown(() => inject.reset());
 
-  Future<DeviceBuilder> goldenBuilder() async => await goldenDeviceBuilder(const Column(
-        children: [
-          Spacer(),
-          AppFooter(),
-        ],
-      ));
+  Future<DeviceBuilder> goldenBuilder({bool isMobile = false}) async => await goldenDeviceBuilder(
+        const Column(
+          children: [
+            Spacer(),
+            AppFooter(),
+          ],
+        ),
+        device: isMobile ? GoldenDevice.mobile : GoldenDevice.pc,
+      );
 
   zGoldenTest("App footer ", goldenFileName: "app_footer", (tester) async {
     await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -67,6 +70,14 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(() => zupLinks.launchZupTwitter()).called(1);
+    },
+  );
+
+  zGoldenTest(
+    "When the running device is with a mobile size, the footer should be mobile adapted",
+    goldenFileName: "app_footer_mobile",
+    (tester) async {
+      await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true));
     },
   );
 }

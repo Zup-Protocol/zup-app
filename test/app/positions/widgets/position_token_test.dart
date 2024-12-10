@@ -19,9 +19,10 @@ void main() {
 
   tearDown(() => inject.reset());
 
-  Future<DeviceBuilder> goldenBuilder({String tokenSymbol = "SYM", String tokenUrl = "url.com"}) =>
-      goldenDeviceBuilder(Center(child: PositionToken(tokenSymbol: tokenSymbol, tokenLogoUrl: tokenUrl)),
-          largeDevice: false);
+  Future<DeviceBuilder> goldenBuilder({String tokenSymbol = "SYM", String tokenUrl = "url.com"}) => goldenDeviceBuilder(
+        Center(child: PositionToken(tokenSymbol: tokenSymbol, tokenLogoUrl: tokenUrl)),
+        device: GoldenDevice.square,
+      );
 
   zGoldenTest(
     "Position token should display the token symbol",

@@ -92,13 +92,16 @@
     },
     "previewDepositModalTransactionErrorSnackBarMessage": "Transaction Failed. Please try again, if the problem persists, ",
     "previewDepositModalTransactionErrorSnackBarHelperButtonTitle": "Contact us",
-    "previewDepositModalDepositSuccessSnackBarMessage": "Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool. ",
+    "previewDepositModalDepositSuccessSnackBarMessage": "Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool at {protocol}. ",
     "@previewDepositModalDepositSuccessSnackBarMessage": {
         "placeholders": {
             "baseTokenSymbol": {
                 "type": "String"
             },
             "quoteTokenSymbol": {
+                "type": "String"
+            },
+            "protocol": {
                 "type": "String"
             }
         }
@@ -246,6 +249,10 @@
         }
     },
     "positionsPageMyPositions": "My Positions",
+    "appHeaderMyPositions": "My Positions (Soon)",
+    "appHeaderNewPosition": "New Position",
+    "appBottomNavigationBarMyPositions": "My Positions (Soon)",
+    "appBottomNavigationBarNewPosition": "New Position",
     "positionsPageCantFindAPosition": "Can’t find a position? Try switching the app’s network to \"All Networks\" or reload the page",
     "somethingWhenWrong": "Something went wrong",
     "positionsPageErrorStateDescription": "An error occurred while loading your positions.\nPlease try again. If the issue persists, feel free to contact us",

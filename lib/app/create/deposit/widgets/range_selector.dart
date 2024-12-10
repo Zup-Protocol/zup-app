@@ -246,6 +246,7 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
                           if (!isFocused) adjustTypedAmountAndCallback();
                         },
                         child: TextField(
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           clipBehavior: Clip.none,
                           controller: controller,
                           onChanged: (value) => userTypedValue = value,

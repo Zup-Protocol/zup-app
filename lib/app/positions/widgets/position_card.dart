@@ -118,9 +118,9 @@ class _PositionCardState extends State<PositionCard> {
                         TextSpan(text: S.of(context).positionCardMin, style: const TextStyle(color: ZupColors.gray)),
                         TextSpan(
                             text: S.of(context).positionCardTokenPerToken(
-                                  widget.position.minRange.formatCurrency(isUSD: false),
-                                  widget.position.token0?.symbol ?? "",
-                                  widget.position.token1?.symbol ?? "",
+                                  token0Qtd: widget.position.minRange.formatCurrency(isUSD: false),
+                                  token0Symbol: widget.position.token0?.symbol ?? "",
+                                  token1Symbol: widget.position.token1?.symbol ?? "",
                                 ),
                             style: const TextStyle(color: ZupColors.black)),
                         WidgetSpan(
@@ -138,9 +138,9 @@ class _PositionCardState extends State<PositionCard> {
                         TextSpan(text: S.of(context).positionCardMax, style: const TextStyle(color: ZupColors.gray)),
                         TextSpan(
                             text: S.of(context).positionCardTokenPerToken(
-                                  widget.position.maxRange.formatCurrency(isUSD: false),
-                                  widget.position.token0?.symbol ?? "",
-                                  widget.position.token1?.symbol ?? "",
+                                  token0Qtd: widget.position.maxRange.formatCurrency(isUSD: false),
+                                  token0Symbol: widget.position.token0?.symbol ?? "",
+                                  token1Symbol: widget.position.token1?.symbol ?? "",
                                 ),
                             style: const TextStyle(color: ZupColors.black)),
                       ],

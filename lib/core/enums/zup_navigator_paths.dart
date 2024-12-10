@@ -6,12 +6,12 @@ enum ZupNavigatorPaths {
   newPosition,
   deposit;
 
-  String get path => [
-        routePaths.positions,
-        routePaths.positions,
-        routePaths.create.path,
-        routePaths.create.deposit,
-      ][index];
+  String get path => switch (this) {
+        initial => routePaths.create.path,
+        myPositions => routePaths.positions,
+        newPosition => routePaths.create.path,
+        deposit => routePaths.create.deposit,
+      };
 
   ({String param0, String param1})? get routeParamsName => [
         null,

@@ -70,7 +70,7 @@ void main() {
               child: child,
             ),
           ),
-          largeDevice: false,
+          device: GoldenDevice.square,
         );
 
     zGoldenTest("The icon should be correct for the in range status", goldenFileName: "in_range_icon", (tester) async {

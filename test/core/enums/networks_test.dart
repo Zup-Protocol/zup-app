@@ -167,15 +167,24 @@ void main() {
   });
 
   zGoldenTest("All networks icon should match", goldenFileName: "all_networks_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.all.icon, largeDevice: false));
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+      Networks.all.icon,
+      device: GoldenDevice.square,
+    ));
   });
 
   zGoldenTest("Sepolia network icon should match", goldenFileName: "sepolia_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.sepolia.icon, largeDevice: false));
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+      Networks.sepolia.icon,
+      device: GoldenDevice.square,
+    ));
   });
 
   zGoldenTest("Scroll Sepolia network icon should match", goldenFileName: "scroll_sepolia_network_icon",
       (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(Networks.scrollSepolia.icon, largeDevice: false));
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+      Networks.scrollSepolia.icon,
+      device: GoldenDevice.square,
+    ));
   });
 }

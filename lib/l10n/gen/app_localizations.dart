@@ -175,7 +175,7 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'{valuePercent} Slippage'**
-  String depositPagePercentSlippage(String valuePercent);
+  String depositPagePercentSlippage({required String valuePercent});
 
   /// No description provided for @threeMonths.
   ///
@@ -223,20 +223,20 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Approving {tokenSymbol}'**
-  String previewDepositModalApprovingToken(String tokenSymbol);
+  String previewDepositModalApprovingToken({required String tokenSymbol});
 
   /// No description provided for @previewDepositModalDepositingIntoPool.
   ///
   /// In en, this message translates to:
   /// **'Depositing into {baseTokenSymbol}/{quoteTokenSymbol} pool'**
   String previewDepositModalDepositingIntoPool(
-      String baseTokenSymbol, String quoteTokenSymbol);
+      {required String baseTokenSymbol, required String quoteTokenSymbol});
 
   /// No description provided for @previewDepositModalApproveToken.
   ///
   /// In en, this message translates to:
   /// **'Approve {tokenSymbol}'**
-  String previewDepositModalApproveToken(String tokenSymbol);
+  String previewDepositModalApproveToken({required String tokenSymbol});
 
   /// No description provided for @previewDepositModalDeposit.
   ///
@@ -260,7 +260,7 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'{tokenSymbol} is not necessary for your selected range'**
-  String depositPageDepositSectionTokenNotNeeded(String tokenSymbol);
+  String depositPageDepositSectionTokenNotNeeded({required String tokenSymbol});
 
   /// No description provided for @preview.
   ///
@@ -284,7 +284,8 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'{tokenSymbol} approved successfully. '**
-  String previewDepositModalApproveSuccessSnackBarMessage(String tokenSymbol);
+  String previewDepositModalApproveSuccessSnackBarMessage(
+      {required String tokenSymbol});
 
   /// No description provided for @previewDepositModalMyPosition.
   ///
@@ -320,7 +321,7 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Yearly Yield ({timeFrame})'**
-  String previewDepositModalYearlyYieldTimeFrame(String timeFrame);
+  String previewDepositModalYearlyYieldTimeFrame({required String timeFrame});
 
   /// No description provided for @previewDepositModalTransactionErrorSnackBarMessage.
   ///
@@ -337,21 +338,23 @@ abstract class S {
   /// No description provided for @previewDepositModalDepositSuccessSnackBarMessage.
   ///
   /// In en, this message translates to:
-  /// **'Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool. '**
+  /// **'Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool at {protocol}. '**
   String previewDepositModalDepositSuccessSnackBarMessage(
-      String baseTokenSymbol, String quoteTokenSymbol);
+      {required String baseTokenSymbol,
+      required String quoteTokenSymbol,
+      required String protocol});
 
   /// No description provided for @yieldCardTimeFrameBest.
   ///
   /// In en, this message translates to:
   /// **'{timeFrame} best'**
-  String yieldCardTimeFrameBest(String timeFrame);
+  String yieldCardTimeFrameBest({required String timeFrame});
 
   /// No description provided for @yieldCardThisPoolIsAtNetwork.
   ///
   /// In en, this message translates to:
   /// **'This pool is at {network}'**
-  String yieldCardThisPoolIsAtNetwork(String network);
+  String yieldCardThisPoolIsAtNetwork({required String network});
 
   /// No description provided for @yieldCardYieldYearly.
   ///
@@ -555,19 +558,19 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Enter a valid amount for {tokenSymbol}'**
-  String depositPageInvalidTokenAmount(String tokenSymbol);
+  String depositPageInvalidTokenAmount({required String tokenSymbol});
 
   /// No description provided for @depositPageInsufficientTokenBalance.
   ///
   /// In en, this message translates to:
   /// **'Insufficient {tokenSymbol} balance'**
-  String depositPageInsufficientTokenBalance(String tokenSymbol);
+  String depositPageInsufficientTokenBalance({required String tokenSymbol});
 
   /// No description provided for @depositPagePleaseEnterAmountForToken.
   ///
   /// In en, this message translates to:
   /// **'Please enter an amount for {tokenSymbol}'**
-  String depositPagePleaseEnterAmountForToken(String tokenSymbol);
+  String depositPagePleaseEnterAmountForToken({required String tokenSymbol});
 
   /// No description provided for @depositPageDeposit.
   ///
@@ -609,7 +612,8 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'We hit a snag while searching for a token matching {searchedTerm}. Give it another go, and if it keeps happening, feel free to reach us'**
-  String tokenSelectorModalSearchErrorDescription(String searchedTerm);
+  String tokenSelectorModalSearchErrorDescription(
+      {required String searchedTerm});
 
   /// No description provided for @noResultsFor.
   ///
@@ -705,32 +709,59 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'No positions in {network}'**
-  String positionsPageNoPositionsInNetwork(String network);
+  String positionsPageNoPositionsInNetwork({required String network});
 
   /// Dynamically shows 'Hide' or 'Show' based on the isHidden boolean.
   ///
   /// In en, this message translates to:
   /// **'{isHidden, select, true {Show} false {Hide} other {Show/Hide}} closed positions'**
-  String positionsPageShowHideClosedPositions(String isHidden);
+  String positionsPageShowHideClosedPositions({required String isHidden});
 
   /// No description provided for @positionsPageNoPositionsInNetworkDescription.
   ///
   /// In en, this message translates to:
   /// **'It looks like you don’t have any positions in {network} yet.\nGo ahead and create one to get started!'**
-  String positionsPageNoPositionsInNetworkDescription(String network);
+  String positionsPageNoPositionsInNetworkDescription(
+      {required String network});
 
   /// No description provided for @positionCardTokenPerToken.
   ///
   /// In en, this message translates to:
   /// **'{token0Qtd} {token0Symbol} per {token1Symbol}'**
   String positionCardTokenPerToken(
-      String token0Qtd, String token0Symbol, String token1Symbol);
+      {required String token0Qtd,
+      required String token0Symbol,
+      required String token1Symbol});
 
   /// No description provided for @positionsPageMyPositions.
   ///
   /// In en, this message translates to:
   /// **'My Positions'**
   String get positionsPageMyPositions;
+
+  /// No description provided for @appHeaderMyPositions.
+  ///
+  /// In en, this message translates to:
+  /// **'My Positions (Soon)'**
+  String get appHeaderMyPositions;
+
+  /// No description provided for @appHeaderNewPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'New Position'**
+  String get appHeaderNewPosition;
+
+  /// No description provided for @appBottomNavigationBarMyPositions.
+  ///
+  /// In en, this message translates to:
+  /// **'My Positions (Soon)'**
+  String get appBottomNavigationBarMyPositions;
+
+  /// No description provided for @appBottomNavigationBarNewPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'New Position'**
+  String get appBottomNavigationBarNewPosition;
 
   /// No description provided for @positionsPageCantFindAPosition.
   ///

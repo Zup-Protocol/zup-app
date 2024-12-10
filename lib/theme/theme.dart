@@ -8,6 +8,10 @@ abstract class ZupTheme {
   static ThemeData get lightTheme => ThemeData(
         fontFamily: "SF Pro Rounded",
         primaryColor: ZupColors.brand,
+        badgeTheme: const BadgeThemeData(
+          backgroundColor: ZupColors.brand,
+          textColor: ZupColors.white,
+        ),
         inputDecorationTheme: const InputDecorationTheme(
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),

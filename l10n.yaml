@@ -5,3 +5,4 @@ nullable-getter: false
 synthetic-package: false
 output-dir: lib/l10n/gen
 format: true
+use-named-parameters: true

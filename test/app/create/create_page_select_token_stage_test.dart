@@ -40,7 +40,10 @@ void main() {
 
   tearDown(() => inject.reset());
 
-  Future<DeviceBuilder> goldenBuilder() async => await goldenDeviceBuilder(const CreatePageSelectTokensStage());
+  Future<DeviceBuilder> goldenBuilder({bool isMobile = false}) async => await goldenDeviceBuilder(
+        const CreatePageSelectTokensStage(),
+        device: isMobile ? GoldenDevice.mobile : GoldenDevice.pc,
+      );
 
   zGoldenTest(
       "When loading the page, it should select only the A token as the default token for the selected network (the token B should not be selected)",
@@ -57,6 +60,14 @@ void main() {
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.all);
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
+  });
+
+  zGoldenTest("When the device is mobile, it should have a horizontal padding, and less padding on the top",
+      goldenFileName: "create_page_select_tokens_stage_mobile", (tester) async {
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.all);
+
+    await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true));
     await tester.pumpAndSettle();
   });
 

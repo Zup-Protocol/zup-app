@@ -31,6 +31,7 @@ import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/yield_card.dart';
 import 'package:zup_app/widgets/zup_page_title.dart';
 import 'package:zup_core/extensions/extensions.dart';
+import 'package:zup_core/mixins/device_info_mixin.dart';
 import 'package:zup_core/zup_singleton_cache.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
@@ -62,7 +63,8 @@ class DepositPage extends StatefulWidget {
   State<DepositPage> createState() => _DepositPageState();
 }
 
-class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V3PoolLiquidityCalculationsMixin {
+class _DepositPageState extends State<DepositPage>
+    with V3PoolConversorsMixin, V3PoolLiquidityCalculationsMixin, DeviceInfoMixin {
   final lottieClick = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieClick);
   final lottieEmpty = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieEmpty);
   final lottieRadar = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieRadar);
@@ -234,19 +236,35 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
     if (isRangeInvalid) return (title: S.of(context).depositPageInvalidRange, icon: null, onPressed: null);
 
     if (isBaseTokenNeeded && baseTokenAmountController.text.isEmptyOrZero) {
-      return (title: S.of(context).depositPageInvalidTokenAmount(baseToken.symbol), icon: null, onPressed: null);
+      return (
+        title: S.of(context).depositPageInvalidTokenAmount(tokenSymbol: baseToken.symbol),
+        icon: null,
+        onPressed: null
+      );
     }
 
     if (isQuoteTokenNeeded && quoteTokenAmountController.text.isEmptyOrZero) {
-      return (title: S.of(context).depositPageInvalidTokenAmount(quoteToken.symbol), icon: null, onPressed: null);
+      return (
+        title: S.of(context).depositPageInvalidTokenAmount(tokenSymbol: quoteToken.symbol),
+        icon: null,
+        onPressed: null
+      );
     }
 
     if (userWalletBaseTokenAmount < (double.tryParse(baseTokenAmountController.text) ?? 0) && isBaseTokenNeeded) {
-      return (title: S.of(context).depositPageInsufficientTokenBalance(baseToken.symbol), icon: null, onPressed: null);
+      return (
+        title: S.of(context).depositPageInsufficientTokenBalance(tokenSymbol: baseToken.symbol),
+        icon: null,
+        onPressed: null
+      );
     }
 
     if (userWalletQuoteTokenAmount < (double.tryParse(quoteTokenAmountController.text) ?? 0) && isQuoteTokenNeeded) {
-      return (title: S.of(context).depositPageInsufficientTokenBalance(quoteToken.symbol), icon: null, onPressed: null);
+      return (
+        title: S.of(context).depositPageInsufficientTokenBalance(tokenSymbol: quoteToken.symbol),
+        icon: null,
+        onPressed: null
+      );
     }
 
     return (
@@ -289,82 +307,87 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DepositCubit, DepositState>(
-      builder: (context, state) {
-        return state.maybeWhen(
-          orElse: () => _buildLoadingState(),
-          noYields: () => _buildNoYieldsState(),
-          error: () => _buildErrorState(),
-          success: (yields) => StreamBuilder<YieldDto?>(
-              stream: _cubit.selectedYieldStream,
-              builder: (context, selectedYieldSnapshot) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 60),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 600),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ZupTextButton(
-                            key: const Key("back-button"),
-                            onPressed: () => _navigator.back(context),
-                            icon: Assets.icons.arrowLeft.svg(),
-                            label: S.of(context).depositPageBackButtonTitle,
-                          ),
-                          Row(
-                            children: [
-                              ZupPageTitle(S.of(context).depositPageTitle),
-                              const Spacer(),
-                              const SizedBox(width: 14),
-                              ZupPillButton(
-                                key: const Key("deposit-settings-button"),
-                                backgroundColor: selectedSlippage.riskBackgroundColor,
-                                foregroundColor: selectedSlippage.riskForegroundColor,
-                                title: selectedSlippage.value != DepositSettingsDto.defaultMaxSlippage
-                                    ? S.of(context).depositPagePercentSlippage(selectedSlippage.value.formatPercent)
-                                    : null,
-                                onPressed: (buttonContext) => ZupDropdown.show(
-                                  showBelowContext: buttonContext,
-                                  child: DepositSettingsDropdownChild(
-                                    context,
-                                    selectedDeadline: selectedDeadline,
-                                    selectedSlippage: selectedSlippage,
-                                    onSettingsChanged: (slippage, deadline) {
-                                      _cubit.saveDepositSettings(slippage, deadline);
+    return Padding(
+      padding: isMobileSize(context) ? const EdgeInsets.all(20) : EdgeInsets.zero,
+      child: BlocBuilder<DepositCubit, DepositState>(
+        builder: (context, state) {
+          return state.maybeWhen(
+            orElse: () => _buildLoadingState(),
+            noYields: () => _buildNoYieldsState(),
+            error: () => _buildErrorState(),
+            success: (yields) => StreamBuilder<YieldDto?>(
+                stream: _cubit.selectedYieldStream,
+                builder: (context, selectedYieldSnapshot) {
+                  return Padding(
+                    padding: EdgeInsets.only(top: isMobileSize(context) ? 20 : 60),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 600),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ZupTextButton(
+                              key: const Key("back-button"),
+                              onPressed: () => _navigator.back(context),
+                              icon: Assets.icons.arrowLeft.svg(),
+                              label: S.of(context).depositPageBackButtonTitle,
+                            ),
+                            Row(
+                              children: [
+                                ZupPageTitle(S.of(context).depositPageTitle),
+                                const Spacer(),
+                                const SizedBox(width: 14),
+                                ZupPillButton(
+                                  key: const Key("deposit-settings-button"),
+                                  backgroundColor: selectedSlippage.riskBackgroundColor,
+                                  foregroundColor: selectedSlippage.riskForegroundColor,
+                                  title: selectedSlippage.value != DepositSettingsDto.defaultMaxSlippage
+                                      ? S.of(context).depositPagePercentSlippage(
+                                            valuePercent: selectedSlippage.value.formatPercent,
+                                          )
+                                      : null,
+                                  onPressed: (buttonContext) => ZupDropdown.show(
+                                    showBelowContext: buttonContext,
+                                    child: DepositSettingsDropdownChild(
+                                      context,
+                                      selectedDeadline: selectedDeadline,
+                                      selectedSlippage: selectedSlippage,
+                                      onSettingsChanged: (slippage, deadline) {
+                                        _cubit.saveDepositSettings(slippage, deadline);
 
-                                      setState(() {
-                                        selectedDeadline = deadline;
-                                        selectedSlippage = slippage;
-                                      });
-                                    },
+                                        setState(() {
+                                          selectedDeadline = deadline;
+                                          selectedSlippage = slippage;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  icon: Assets.icons.gear.svg(
+                                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                    height: 20,
+                                    width: 20,
                                   ),
                                 ),
-                                icon: Assets.icons.gear.svg(
-                                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                  height: 20,
-                                  width: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          _buildYieldSelectionSector(yields),
-                          const SizedBox(height: 20),
-                          if (selectedYieldSnapshot.data != null) ...[
-                            _buildSelectRangeSector(),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            _buildYieldSelectionSector(yields),
                             const SizedBox(height: 20),
-                            _buildDepositSection(),
+                            if (selectedYieldSnapshot.data != null) ...[
+                              _buildSelectRangeSector(),
+                              const SizedBox(height: 20),
+                              _buildDepositSection(),
+                            ],
+                            const SizedBox(height: 200)
                           ],
-                          const SizedBox(height: 200)
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }),
-        );
-      },
+                  );
+                }),
+          );
+        },
+      ),
     );
   }
 
@@ -434,6 +457,41 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
     final best30dYield = yields.last30dYields.firstOrNull;
     final best90dYield = yields.last90dYields.firstOrNull;
 
+    final List<Widget> yieldCards = [
+      if (best24hYield != null)
+        YieldCard(
+          key: const Key("yield-card-24h"),
+          yield: best24hYield,
+          onChangeSelection: (yield) {
+            selectYield(yield);
+          },
+          isSelected: _cubit.selectedYield.equals(best24hYield),
+          timeFrame: YieldTimeFrame.day,
+        ),
+      const SizedBox(width: 8, height: 20),
+      if (best30dYield != null)
+        YieldCard(
+          key: const Key("yield-card-30d"),
+          yield: best30dYield,
+          onChangeSelection: (yield) {
+            selectYield(yield);
+          },
+          isSelected: _cubit.selectedYield.equals(best30dYield),
+          timeFrame: YieldTimeFrame.month,
+        ),
+      const SizedBox(width: 8, height: 20),
+      if (best90dYield != null)
+        YieldCard(
+          key: const Key("yield-card-90d"),
+          yield: best90dYield,
+          onChangeSelection: (yield) {
+            selectYield(yield);
+          },
+          isSelected: _cubit.selectedYield.equals(best90dYield),
+          timeFrame: YieldTimeFrame.threeMonth,
+        ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -459,48 +517,13 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
           ),
         ),
         const SizedBox(height: 10),
-        Row(
-          children: [
-            if (best24hYield != null)
-              Expanded(
-                child: YieldCard(
-                  key: const Key("yield-card-24h"),
-                  yield: best24hYield,
-                  onChangeSelection: (yield) {
-                    selectYield(yield);
-                  },
-                  isSelected: _cubit.selectedYield.equals(best24hYield),
-                  timeFrame: YieldTimeFrame.day,
-                ),
-              ),
-            const SizedBox(width: 8),
-            if (best30dYield != null)
-              Expanded(
-                child: YieldCard(
-                  key: const Key("yield-card-30d"),
-                  yield: best30dYield,
-                  onChangeSelection: (yield) {
-                    selectYield(yield);
-                  },
-                  isSelected: _cubit.selectedYield.equals(best30dYield),
-                  timeFrame: YieldTimeFrame.month,
-                ),
-              ),
-            const SizedBox(width: 8),
-            if (best90dYield != null)
-              Expanded(
-                child: YieldCard(
-                  key: const Key("yield-card-90d"),
-                  yield: best90dYield,
-                  onChangeSelection: (yield) {
-                    selectYield(yield);
-                  },
-                  isSelected: _cubit.selectedYield.equals(best90dYield),
-                  timeFrame: YieldTimeFrame.threeMonth,
-                ),
-              ),
-          ],
-        ),
+        isMobileSize(context)
+            ? Column(children: yieldCards)
+            : Row(
+                children: yieldCards.map((x) {
+                if (x is YieldCard) return Expanded(child: x);
+                return x;
+              }).toList()),
         if (_cubit.selectedYield == null) ...[
           const SizedBox(height: 60),
           Center(
@@ -516,158 +539,167 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
     );
   }
 
-  Widget _buildSelectRangeSector() => Column(
-        key: selectRangeSectorKey,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _sectionTitle(S.of(context).depositPageRangeSectionTitle),
-              const SizedBox(width: 12),
-              ZupTextButton(
-                key: const Key("full-range-button"),
-                onPressed: () => setFullRange(),
-                label: S.of(context).depositPageRangeSectionFullRange,
-                icon: Assets.icons.circleDotted.svg(),
-                alignLeft: false,
-              ),
-              const Spacer(),
-              CupertinoSlidingSegmentedControl(
-                groupValue: areTokensReversed,
-                children: {
-                  false: MouseRegion(
-                    key: const Key("reverse-tokens-not-reversed"),
-                    cursor: SystemMouseCursors.click,
-                    child: IgnorePointer(
-                      ignoring: true,
-                      child: Text(
-                        "${_cubit.selectedYield?.token0.symbol} / ${_cubit.selectedYield?.token1.symbol}",
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ),
-                  true: MouseRegion(
-                    key: const Key("reverse-tokens-reversed"),
-                    cursor: SystemMouseCursors.click,
-                    child: IgnorePointer(
-                        ignoring: true,
-                        child: Text(
-                          "${_cubit.selectedYield?.token1.symbol} / ${_cubit.selectedYield?.token0.symbol}",
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                        )),
-                  ),
-                },
-                onValueChanged: (isReversed) {
-                  switchTokens(isReversed ?? false);
-                },
-              ),
-            ],
+  Widget _buildSelectRangeSector() {
+    Widget tokenSwitcher = CupertinoSlidingSegmentedControl(
+      groupValue: areTokensReversed,
+      children: {
+        false: MouseRegion(
+          key: const Key("reverse-tokens-not-reversed"),
+          cursor: SystemMouseCursors.click,
+          child: IgnorePointer(
+            ignoring: true,
+            child: Text(
+              "${_cubit.selectedYield?.token0.symbol} / ${_cubit.selectedYield?.token1.symbol}",
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
           ),
-          const SizedBox(height: 10),
-          StreamBuilder(
-              stream: _cubit.poolTickStream,
-              builder: (context, poolTickSnapshot) {
-                return Text(
-                        "1 ${baseToken.symbol} ≈ ${() {
-                          final currentPrice = tickToPrice(
-                            tick: poolTickSnapshot.data ?? BigInt.zero,
-                            poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
-                            poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
-                          );
+        ),
+        true: MouseRegion(
+          key: const Key("reverse-tokens-reversed"),
+          cursor: SystemMouseCursors.click,
+          child: IgnorePointer(
+              ignoring: true,
+              child: Text(
+                "${_cubit.selectedYield?.token1.symbol} / ${_cubit.selectedYield?.token0.symbol}",
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              )),
+        ),
+      },
+      onValueChanged: (isReversed) {
+        switchTokens(isReversed ?? false);
+      },
+    );
 
-                          return areTokensReversed ? currentPrice.priceAsQuoteToken : currentPrice.priceAsBaseToken;
-                        }.call().toAmount(useLessThan: true, maxFixedDigits: 4)} ${quoteToken.symbol}",
-                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500))
-                    .redacted(
-                  enabled: poolTickSnapshot.data == null,
-                );
-              }),
-          const SizedBox(height: 20),
-          StreamBuilder(
-              stream: _cubit.poolTickStream,
-              builder: (context, snapshot) {
-                return RangeSelector(
-                  key: const Key("min-price-selector"),
-                  onPriceChanged: (price) {
-                    setState(() {
-                      if (price == 0) {
-                        isMinRangeInfinity = true;
-
-                        return calculateDepositTokensAmount();
-                      }
-
-                      isMinRangeInfinity = false;
-                      minPrice = price;
-                      calculateDepositTokensAmount();
-                    });
-                  },
-                  initialPrice: minPrice,
-                  poolToken0: _cubit.selectedYield!.token0,
-                  poolToken1: _cubit.selectedYield!.token1,
-                  isReversed: areTokensReversed,
-                  tickSpacing: _cubit.selectedYield!.tickSpacing,
-                  type: RangeSelectorType.minPrice,
-                  isInfinity: isMinRangeInfinity,
-                  state: () {
-                    if (isOutOfRange.minPrice) {
-                      return RangeSelectorState(
-                        type: RangeSelectorStateType.warning,
-                        message: S.of(context).depositPageMinRangeOutOfRangeWarningText,
-                      );
-                    }
-
-                    return const RangeSelectorState(type: RangeSelectorStateType.regular);
-                  }.call(),
-                );
-              }),
-          const SizedBox(height: 6),
-          StreamBuilder(
-              stream: _cubit.poolTickStream,
-              builder: (context, snapshot) {
-                return RangeSelector(
-                  key: const Key("max-price-selector"),
-                  onPriceChanged: (price) {
-                    setState(() {
-                      if (price == 0) {
-                        isMaxRangeInfinity = true;
-
-                        return calculateDepositTokensAmount();
-                      }
-
-                      isMaxRangeInfinity = false;
-                      maxPrice = price;
-
-                      calculateDepositTokensAmount();
-                    });
-                  },
-                  type: RangeSelectorType.maxPrice,
-                  isInfinity: isMaxRangeInfinity,
-                  initialPrice: maxPrice,
-                  poolToken0: _cubit.selectedYield!.token0,
-                  poolToken1: _cubit.selectedYield!.token1,
-                  isReversed: areTokensReversed,
-                  tickSpacing: _cubit.selectedYield!.tickSpacing,
-                  state: () {
-                    if (isRangeInvalid) {
-                      return RangeSelectorState(
-                        type: RangeSelectorStateType.error,
-                        message: S.of(context).depositPageInvalidRangeErrorText,
-                      );
-                    }
-
-                    if (isOutOfRange.maxPrice) {
-                      return RangeSelectorState(
-                        type: RangeSelectorStateType.warning,
-                        message: S.of(context).depositPageMaxRangeOutOfRangeWarningText,
-                      );
-                    }
-
-                    return const RangeSelectorState(type: RangeSelectorStateType.regular);
-                  }.call(),
-                );
-              }),
+    return Column(
+      key: selectRangeSectorKey,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _sectionTitle(S.of(context).depositPageRangeSectionTitle),
+            const SizedBox(width: 12),
+            ZupTextButton(
+              key: const Key("full-range-button"),
+              onPressed: () => setFullRange(),
+              label: S.of(context).depositPageRangeSectionFullRange,
+              icon: Assets.icons.circleDotted.svg(),
+              alignLeft: false,
+            ),
+            const Spacer(),
+            if (!isMobileSize(context)) tokenSwitcher
+          ],
+        ),
+        if (isMobileSize(context)) ...[
+          const SizedBox(height: 5),
+          tokenSwitcher,
+          const SizedBox(height: 5),
         ],
-      );
+        const SizedBox(height: 10),
+        StreamBuilder(
+            stream: _cubit.poolTickStream,
+            builder: (context, poolTickSnapshot) {
+              return Text(
+                      "1 ${baseToken.symbol} ≈ ${() {
+                        final currentPrice = tickToPrice(
+                          tick: poolTickSnapshot.data ?? BigInt.zero,
+                          poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
+                          poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
+                        );
+
+                        return areTokensReversed ? currentPrice.priceAsQuoteToken : currentPrice.priceAsBaseToken;
+                      }.call().toAmount(useLessThan: true, maxFixedDigits: 4)} ${quoteToken.symbol}",
+                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500))
+                  .redacted(
+                enabled: poolTickSnapshot.data == null,
+              );
+            }),
+        const SizedBox(height: 20),
+        StreamBuilder(
+            stream: _cubit.poolTickStream,
+            builder: (context, snapshot) {
+              return RangeSelector(
+                key: const Key("min-price-selector"),
+                onPriceChanged: (price) {
+                  setState(() {
+                    if (price == 0) {
+                      isMinRangeInfinity = true;
+
+                      return calculateDepositTokensAmount();
+                    }
+
+                    isMinRangeInfinity = false;
+                    minPrice = price;
+                    calculateDepositTokensAmount();
+                  });
+                },
+                initialPrice: minPrice,
+                poolToken0: _cubit.selectedYield!.token0,
+                poolToken1: _cubit.selectedYield!.token1,
+                isReversed: areTokensReversed,
+                tickSpacing: _cubit.selectedYield!.tickSpacing,
+                type: RangeSelectorType.minPrice,
+                isInfinity: isMinRangeInfinity,
+                state: () {
+                  if (isOutOfRange.minPrice) {
+                    return RangeSelectorState(
+                      type: RangeSelectorStateType.warning,
+                      message: S.of(context).depositPageMinRangeOutOfRangeWarningText,
+                    );
+                  }
+
+                  return const RangeSelectorState(type: RangeSelectorStateType.regular);
+                }.call(),
+              );
+            }),
+        const SizedBox(height: 6),
+        StreamBuilder(
+            stream: _cubit.poolTickStream,
+            builder: (context, snapshot) {
+              return RangeSelector(
+                key: const Key("max-price-selector"),
+                onPriceChanged: (price) {
+                  setState(() {
+                    if (price == 0) {
+                      isMaxRangeInfinity = true;
+
+                      return calculateDepositTokensAmount();
+                    }
+
+                    isMaxRangeInfinity = false;
+                    maxPrice = price;
+
+                    calculateDepositTokensAmount();
+                  });
+                },
+                type: RangeSelectorType.maxPrice,
+                isInfinity: isMaxRangeInfinity,
+                initialPrice: maxPrice,
+                poolToken0: _cubit.selectedYield!.token0,
+                poolToken1: _cubit.selectedYield!.token1,
+                isReversed: areTokensReversed,
+                tickSpacing: _cubit.selectedYield!.tickSpacing,
+                state: () {
+                  if (isRangeInvalid) {
+                    return RangeSelectorState(
+                      type: RangeSelectorStateType.error,
+                      message: S.of(context).depositPageInvalidRangeErrorText,
+                    );
+                  }
+
+                  if (isOutOfRange.maxPrice) {
+                    return RangeSelectorState(
+                      type: RangeSelectorStateType.warning,
+                      message: S.of(context).depositPageMaxRangeOutOfRangeWarningText,
+                    );
+                  }
+
+                  return const RangeSelectorState(type: RangeSelectorStateType.regular);
+                }.call(),
+              );
+            }),
+      ],
+    );
+  }
 
   Widget _buildDepositSection() => IgnorePointer(
         key: const Key("deposit-section"),
@@ -689,7 +721,7 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
                       token: baseToken,
                       disabledText: () {
                         if (!isBaseTokenNeeded) {
-                          return S.of(context).depositPageDepositSectionTokenNotNeeded(baseToken.symbol);
+                          return S.of(context).depositPageDepositSectionTokenNotNeeded(tokenSymbol: baseToken.symbol);
                         }
 
                         if (!isBaseTokenAmountUserInput &&
@@ -712,7 +744,7 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
                       token: quoteToken,
                       disabledText: () {
                         if (!isQuoteTokenNeeded) {
-                          return S.of(context).depositPageDepositSectionTokenNotNeeded(quoteToken.symbol);
+                          return S.of(context).depositPageDepositSectionTokenNotNeeded(tokenSymbol: quoteToken.symbol);
                         }
 
                         if (isBaseTokenAmountUserInput &&
@@ -744,7 +776,7 @@ class _DepositPageState extends State<DepositPage> with V3PoolConversorsMixin, V
                             hoverElevation: 0,
                             backgroundColor: ZupColors.brand7,
                             foregroundColor: ZupColors.brand,
-                            onPressed: () => ConnectModal.show(context),
+                            onPressed: () => ConnectModal().show(context),
                           );
                         }
 

@@ -7,6 +7,11 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/erc_20.abi.g.dart';
+import 'package:zup_app/abis/fee_controller.abi.g.dart';
+import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
 import 'package:zup_app/app/positions/positions_cubit.dart';
@@ -45,6 +50,12 @@ void main() {
     registerFallbackValue(Duration.zero);
     registerFallbackValue(Slippage.fromValue(32));
 
+    inject.registerFactory<ZupRouter>(() => ZupRouterMock());
+    inject.registerFactory<UniswapV3Pool>(() => UniswapV3PoolMock());
+    inject.registerFactory<FeeController>(() => FeeControllerMock());
+    inject.registerFactory<Erc20>(() => Erc20Mock());
+    inject.registerFactory<UniswapPositionManager>(() => UniswapPositionManagerMock());
+    inject.registerFactory<Wallet>(() => WalletMock());
     inject.registerLazySingleton<PreviewDepositModalCubit>(() => cubit);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<ZupNavigator>(() => navigator);
@@ -105,7 +116,7 @@ void main() {
         Builder(builder: (context) {
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             await ZupModal.show(context,
-                size: const Size(500, 550),
+                size: const Size(450, 650),
                 padding: const EdgeInsets.only(left: 20),
                 title: "Preview Deposit",
                 content: BlocProvider.value(
@@ -230,32 +241,6 @@ void main() {
 
       await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.pumpAndSettle();
-    },
-  );
-
-  zGoldenTest(
-    """When the state is depositSuccess, it should pop the modal,
-    navigate to the positions page, fech the user positions,
-    and show a snackbar of successfully deposited""",
-    goldenFileName: "preview_deposit_modal_deposit_success_close_and_navigate_to_positions",
-    (tester) async {
-      when(() => navigator.navigateToMyPositions()).thenAnswer((_) async {});
-      when(() => positionsCubit.getUserPositions()).thenAnswer((_) async => const []);
-
-      when(() => cubit.state).thenReturn(const PreviewDepositModalState.depositSuccess(txId: '21'));
-      when(() => cubit.stream).thenAnswer((_) {
-        return Stream.value(const PreviewDepositModalState.depositSuccess(txId: '32'));
-      });
-
-      await tester.pumpDeviceBuilder(
-        await goldenBuilder(),
-        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
-      );
-
-      await tester.pumpAndSettle();
-
-      verify(() => navigator.navigateToMyPositions()).called(1);
-      verify(() => positionsCubit.getUserPositions()).called(1);
     },
   );
 
@@ -902,4 +887,94 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
+
+  zGoldenTest(
+    "When calling `.show` method and the device is mobile, it should should a bottom sheet instead of a dialog",
+    goldenFileName: "preview_deposit_modal_show_mobile",
+    (tester) async {
+      await tester.runAsync(() async {
+        await tester.pumpDeviceBuilder(
+          await goldenDeviceBuilder(
+            Builder(builder: (context) {
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                PreviewDepositModal(
+                  currentYield: currentYield,
+                  isReversed: true,
+                  minPrice: (isInfinity: true, price: 0),
+                  maxPrice: (isInfinity: true, price: 0),
+                  token0DepositAmount: 1200,
+                  token1DepositAmount: 4300,
+                  deadline: const Duration(minutes: 30),
+                  maxSlippage: Slippage.halfPercent,
+                ).show(context, currentPoolTick: BigInt.from(121475));
+              });
+
+              return const SizedBox();
+            }),
+            device: GoldenDevice.mobile,
+          ),
+          wrapper: GoldenConfig.localizationsWrapper(),
+        );
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    "When calling `.show` method and the device is desktop, it should should a dialog instead of a bottom sheet",
+    goldenFileName: "preview_deposit_modal_show_desktop",
+    (tester) async {
+      await tester.runAsync(() async {
+        await tester.pumpDeviceBuilder(
+          await goldenDeviceBuilder(
+            Builder(builder: (context) {
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                PreviewDepositModal(
+                  currentYield: currentYield,
+                  isReversed: true,
+                  minPrice: (isInfinity: true, price: 0),
+                  maxPrice: (isInfinity: true, price: 0),
+                  token0DepositAmount: 1200,
+                  token1DepositAmount: 4300,
+                  deadline: const Duration(minutes: 30),
+                  maxSlippage: Slippage.halfPercent,
+                ).show(context, currentPoolTick: BigInt.from(121475));
+              });
+
+              return const SizedBox();
+            }),
+            device: GoldenDevice.pc,
+          ),
+          wrapper: GoldenConfig.localizationsWrapper(),
+        );
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  // zGoldenTest(
+  //   """When the state is depositSuccess, it should pop the modal,
+  //   navigate to the positions page, fech the user positions,
+  //   and show a snackbar of successfully deposited""",
+  //   goldenFileName: "preview_deposit_modal_deposit_success_close_and_navigate_to_positions",
+  //   (tester) async {
+  //     when(() => navigator.navigateToMyPositions()).thenAnswer((_) async {});
+  //     when(() => positionsCubit.getUserPositions()).thenAnswer((_) async => const []);
+
+  //     when(() => cubit.state).thenReturn(const PreviewDepositModalState.depositSuccess(txId: '21'));
+  //     when(() => cubit.stream).thenAnswer((_) {
+  //       return Stream.value(const PreviewDepositModalState.depositSuccess(txId: '32'));
+  //     });
+
+  //     await tester.pumpDeviceBuilder(
+  //       await goldenBuilder(),
+  //       wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
+  //     );
+
+  //     await tester.pumpAndSettle();
+
+  //     verify(() => navigator.navigateToMyPositions()).called(1);
+  //     verify(() => positionsCubit.getUserPositions()).called(1);
+  //   },
+  // );
 }

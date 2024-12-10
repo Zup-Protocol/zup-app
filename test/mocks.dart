@@ -93,6 +93,10 @@ class PreviewDepositModalCubitMock extends Mock implements PreviewDepositModalCu
 
 class ZupLinksMock extends Mock implements ZupLinks {}
 
+class ChangeNotifierMock extends Mock with ChangeNotifier {
+  void notify() => notifyListeners();
+}
+
 class UrlLauncherPlatformCustomMock extends UrlLauncherPlatform {
   static String? lastLaunchedUrl;
 

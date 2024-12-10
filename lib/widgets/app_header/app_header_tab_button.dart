@@ -13,7 +13,7 @@ class AppHeaderTabButton extends StatefulWidget {
   final String title;
   final bool selected;
   final Widget? icon;
-  final Function() onPressed;
+  final Function()? onPressed;
 
   @override
   State<AppHeaderTabButton> createState() => _AppHeaderTabButtonState();

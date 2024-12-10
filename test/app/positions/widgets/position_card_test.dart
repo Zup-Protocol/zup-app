@@ -23,7 +23,7 @@ void main() {
 
   Future<DeviceBuilder> goldenBuilder({PositionDto? position}) async => await goldenDeviceBuilder(
         PositionCard(position: position ?? PositionDto.fixture()),
-        largeDevice: false,
+        device: GoldenDevice.square,
       );
 
   zGoldenTest(

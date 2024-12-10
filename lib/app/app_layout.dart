@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:routefly/routefly.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/widgets/app_bottom_navigation_bar.dart';
 import 'package:zup_app/widgets/app_footer.dart';
 import 'package:zup_app/widgets/app_header/app_header.dart';
+import 'package:zup_core/mixins/device_info_mixin.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({super.key});
@@ -11,7 +13,9 @@ class AppPage extends StatefulWidget {
   State<AppPage> createState() => _AppPageState();
 }
 
-class _AppPageState extends State<AppPage> {
+class _AppPageState extends State<AppPage> with DeviceInfoMixin {
+  bool get shouldShowBottomNavigationBar => isMobileSize(context);
+
   final double appBarHeight = 85;
 
   final ScrollController appScrollController = inject<ScrollController>(
@@ -23,6 +27,8 @@ class _AppPageState extends State<AppPage> {
     return SelectionArea(
       child: Scaffold(
         backgroundColor: Colors.white,
+        bottomNavigationBar: shouldShowBottomNavigationBar ? const AppBottomNavigationBar() : null,
+        extendBody: shouldShowBottomNavigationBar,
         body: ScrollbarTheme(
           data: const ScrollbarThemeData(mainAxisMargin: 10, crossAxisMargin: 3, thickness: WidgetStatePropertyAll(5)),
           child: CustomScrollView(
@@ -35,18 +41,22 @@ class _AppPageState extends State<AppPage> {
                 forceMaterialTransparency: true,
                 pinned: true,
                 titleSpacing: 0,
-                title: Padding(
-                  padding: const EdgeInsets.only(left: 30, right: 15),
-                  child: AppHeader(height: appBarHeight),
-                ),
+                title: AppHeader(height: appBarHeight),
                 toolbarHeight: appBarHeight,
               ),
               const SliverFillRemaining(
                 hasScrollBody: false,
-                child: RouterOutlet(),
+                child: RouterOutlet(
+                  key: Key("screen"),
+                ),
               ),
-              const SliverToBoxAdapter(
-                child: AppFooter(),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: shouldShowBottomNavigationBar ? AppBottomNavigationBar.height : 0,
+                  ),
+                  child: const AppFooter(),
+                ),
               ),
             ],
           ),

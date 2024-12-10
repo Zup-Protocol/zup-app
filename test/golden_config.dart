@@ -11,9 +11,30 @@ import "package:zup_app/theme/theme.dart";
 
 import "mocks.dart";
 
+enum GoldenDevice {
+  pc,
+  mobile,
+  square,
+  pcAndMobile;
+
+  List<Device> get devices {
+    switch (this) {
+      case GoldenDevice.pc:
+        return GoldenConfig.pcDevice;
+      case GoldenDevice.mobile:
+        return GoldenConfig.mobileDevice;
+      case GoldenDevice.square:
+        return GoldenConfig.smallSquareDevice;
+      case GoldenDevice.pcAndMobile:
+        return [...GoldenConfig.pcDevice, ...GoldenConfig.mobileDevice];
+    }
+  }
+}
+
 class GoldenConfig {
   static final pcDevice = [const Device(size: Size(1912, 1040), name: "pc")];
   static final smallSquareDevice = [const Device(size: Size(800, 800), name: "square")];
+  static final mobileDevice = [const Device(size: Size(375, 812), name: "mobile")];
 
   static final scrollController = ScrollController();
 
@@ -27,15 +48,15 @@ class GoldenConfig {
         GlobalWidgetsLocalizations.delegate,
         Web3KitLocalizations.delegate,
       ],
-      home: Scaffold(
-        backgroundColor: Colors.white,
-        body: CustomScrollView(controller: scrollController, slivers: [
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: child,
-          )
-        ]),
-      ),
+      home: Scaffold(backgroundColor: Colors.white, body: child
+
+          //  CustomScrollView(controller: scrollController, slivers: [
+          //   SliverFillRemaining(
+          //     hasScrollBody: false,
+          //     child: child,
+          //   )
+          // ]),
+          ),
       theme: ZupTheme.lightTheme,
     );
   }
@@ -55,9 +76,10 @@ class GoldenConfig {
   }
 }
 
-Future<DeviceBuilder> goldenDeviceBuilder(Widget child, {bool largeDevice = true}) async => DeviceBuilder()
-  ..overrideDevicesForAllScenarios(devices: largeDevice ? GoldenConfig.pcDevice : GoldenConfig.smallSquareDevice)
-  ..addScenario(widget: await GoldenConfig.builder(child));
+Future<DeviceBuilder> goldenDeviceBuilder(Widget child, {GoldenDevice device = GoldenDevice.pc}) async =>
+    DeviceBuilder()
+      ..overrideDevicesForAllScenarios(devices: device.devices)
+      ..addScenario(widget: await GoldenConfig.builder(child));
 
 @isTest
 void zGoldenTest(

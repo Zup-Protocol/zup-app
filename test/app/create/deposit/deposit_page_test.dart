@@ -18,6 +18,7 @@ import 'package:zup_app/app/create/deposit/deposit_page.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
@@ -120,11 +121,12 @@ void main() {
     await inject.reset();
   });
 
-  Future<DeviceBuilder> goldenBuilder() => goldenDeviceBuilder(
+  Future<DeviceBuilder> goldenBuilder({bool isMobile = false}) => goldenDeviceBuilder(
         BlocProvider.value(
           value: cubit,
           child: const DepositPage(),
         ),
+        device: isMobile ? GoldenDevice.mobile : GoldenDevice.pc,
       );
 
   zGoldenTest("When initializing the page it should call setup in the cubit", (tester) async {
@@ -226,6 +228,48 @@ void main() {
 
     await tester.pumpAndSettle();
   });
+
+  zGoldenTest("When the state is sucess, and the running device is a mobile, the yield cards should be in a column",
+      goldenFileName: "deposit_page_success_mobile", (tester) async {
+    final yields = YieldsDto.fixture();
+
+    when(() => cubit.depositSettings).thenReturn(DepositSettingsDto(
+      deadlineMinutes: 10,
+      maxSlippage: DepositSettingsDto.defaultMaxSlippage,
+    ));
+
+    when(() => cubit.state).thenReturn(DepositState.success(yields));
+
+    await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true));
+
+    await tester.pumpAndSettle();
+  });
+
+  zGoldenTest(
+    "When the running device is mobile, the range section should be adapted to it",
+    goldenFileName: "deposit_page_range_section_mobile",
+    (tester) async {
+      final selectedYield = YieldDto.fixture();
+      final yields = YieldsDto.fixture();
+
+      when(() => cubit.depositSettings).thenReturn(DepositSettingsDto(
+        deadlineMinutes: 10,
+        maxSlippage: DepositSettingsDto.defaultMaxSlippage,
+      ));
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(yields));
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true));
+      await tester.pumpAndSettle();
+      await tester.drag(find.byKey(const Key("full-range-button")), const Offset(0, -500));
+      await tester.pumpAndSettle();
+
+      await tester.pumpAndSettle();
+    },
+  );
 
   zGoldenTest("When clicking back in the success state, it should navigate to the choose tokens page", (tester) async {
     when(() => navigator.back(any())).thenAnswer((_) async {});

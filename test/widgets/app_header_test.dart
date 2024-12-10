@@ -14,10 +14,6 @@ import 'package:zup_app/widgets/app_header/app_header.dart';
 import '../golden_config.dart';
 import '../mocks.dart';
 
-class ChangeNotifierImpl extends Mock with ChangeNotifier {
-  void notify() => notifyListeners();
-}
-
 void main() {
   late AppCubit appCubit;
   late ZupNavigator zupNavigator;
@@ -43,7 +39,10 @@ void main() {
 
   tearDown(() => GetIt.I.reset());
 
-  Future<DeviceBuilder> goldenBuilder() async => await goldenDeviceBuilder(const AppHeader(height: 80));
+  Future<DeviceBuilder> goldenBuilder({bool isMobile = false}) async => await goldenDeviceBuilder(
+        const AppHeader(height: 80),
+        device: isMobile ? GoldenDevice.mobile : GoldenDevice.pc,
+      );
 
   zGoldenTest("Zup Header Default", goldenFileName: "zup_header", (tester) async {
     await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -69,14 +68,6 @@ void main() {
     await tester.tap(find.byKey(const Key("logo-button")));
 
     verify(() => zupNavigator.navigateToInitial()).called(1);
-  });
-
-  zGoldenTest("When clicking the my positions button, it should navigate to the my positions route", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenBuilder());
-
-    await tester.tap(find.byKey(const Key("my-positions-button")));
-
-    verify(() => zupNavigator.navigateToMyPositions()).called(1);
   });
 
   zGoldenTest("When clicking the new position button, it should navigate to the new position route", (tester) async {
@@ -151,7 +142,7 @@ void main() {
   zGoldenTest(
       "When an event about the route is emitted, and the new route is My positions, it should select my positions button",
       goldenFileName: "zup_header_my_positions_event", (tester) async {
-    final changeNotifier = ChangeNotifierImpl();
+    final changeNotifier = ChangeNotifierMock();
 
     when(() => zupNavigator.listenable).thenReturn(changeNotifier);
     await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -163,7 +154,7 @@ void main() {
   zGoldenTest(
       "When an event about the route is emitted, and the new route is New position, it should select New position button",
       goldenFileName: "zup_header_new_position_event", (tester) async {
-    final changeNotifier = ChangeNotifierImpl();
+    final changeNotifier = ChangeNotifierMock();
 
     when(() => zupNavigator.listenable).thenReturn(changeNotifier);
     await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -175,7 +166,7 @@ void main() {
   zGoldenTest(
       "When an event about the route is emitted, but the new route is not My positions or New position, it should not select any button",
       goldenFileName: "zup_header_generic_route_event", (tester) async {
-    final changeNotifier = ChangeNotifierImpl();
+    final changeNotifier = ChangeNotifierMock();
 
     when(() => zupNavigator.listenable).thenReturn(changeNotifier);
     await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -183,4 +174,12 @@ void main() {
     when(() => zupNavigator.currentRoute).thenReturn("some_crazy_route");
     changeNotifier.notify();
   });
+
+  zGoldenTest(
+    "When the running device is mobile size, the app header should hide the tab buttons and make the network switcher compact",
+    goldenFileName: "zup_header_mobile",
+    (tester) async {
+      await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true));
+    },
+  );
 }

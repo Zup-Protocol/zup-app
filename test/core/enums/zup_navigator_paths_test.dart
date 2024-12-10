@@ -3,8 +3,8 @@ import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/routes.g.dart';
 
 void main() {
-  test("Zup navigator paths `initial` path should be positions", () {
-    expect(ZupNavigatorPaths.initial.path, routePaths.positions);
+  test("Zup navigator paths `initial` path should be create", () {
+    expect(ZupNavigatorPaths.initial.path, routePaths.create.path);
   });
 
   test("Zup navigator paths `path` extension should use routefly generated paths", () {

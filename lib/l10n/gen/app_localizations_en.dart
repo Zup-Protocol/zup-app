@@ -52,7 +52,7 @@ class SEn extends S {
       'Transaction Deadline';
 
   @override
-  String depositPagePercentSlippage(String valuePercent) {
+  String depositPagePercentSlippage({required String valuePercent}) {
     return '$valuePercent Slippage';
   }
 
@@ -78,18 +78,18 @@ class SEn extends S {
   String get previewDepositModalWaitingTransaction => 'Waiting Transaction';
 
   @override
-  String previewDepositModalApprovingToken(String tokenSymbol) {
+  String previewDepositModalApprovingToken({required String tokenSymbol}) {
     return 'Approving $tokenSymbol';
   }
 
   @override
   String previewDepositModalDepositingIntoPool(
-      String baseTokenSymbol, String quoteTokenSymbol) {
+      {required String baseTokenSymbol, required String quoteTokenSymbol}) {
     return 'Depositing into $baseTokenSymbol/$quoteTokenSymbol pool';
   }
 
   @override
-  String previewDepositModalApproveToken(String tokenSymbol) {
+  String previewDepositModalApproveToken({required String tokenSymbol}) {
     return 'Approve $tokenSymbol';
   }
 
@@ -103,7 +103,8 @@ class SEn extends S {
   String get previewDepositModalCurrentPrice => 'Current Price';
 
   @override
-  String depositPageDepositSectionTokenNotNeeded(String tokenSymbol) {
+  String depositPageDepositSectionTokenNotNeeded(
+      {required String tokenSymbol}) {
     return '$tokenSymbol is not necessary for your selected range';
   }
 
@@ -118,7 +119,8 @@ class SEn extends S {
       'Waiting transaction to be confirmed. ';
 
   @override
-  String previewDepositModalApproveSuccessSnackBarMessage(String tokenSymbol) {
+  String previewDepositModalApproveSuccessSnackBarMessage(
+      {required String tokenSymbol}) {
     return '$tokenSymbol approved successfully. ';
   }
 
@@ -138,7 +140,7 @@ class SEn extends S {
   String get previewDepositModalNetwork => 'Network';
 
   @override
-  String previewDepositModalYearlyYieldTimeFrame(String timeFrame) {
+  String previewDepositModalYearlyYieldTimeFrame({required String timeFrame}) {
     return 'Yearly Yield ($timeFrame)';
   }
 
@@ -152,17 +154,19 @@ class SEn extends S {
 
   @override
   String previewDepositModalDepositSuccessSnackBarMessage(
-      String baseTokenSymbol, String quoteTokenSymbol) {
-    return 'Successfully Deposited into the $baseTokenSymbol/$quoteTokenSymbol Pool. ';
+      {required String baseTokenSymbol,
+      required String quoteTokenSymbol,
+      required String protocol}) {
+    return 'Successfully Deposited into the $baseTokenSymbol/$quoteTokenSymbol Pool at $protocol. ';
   }
 
   @override
-  String yieldCardTimeFrameBest(String timeFrame) {
+  String yieldCardTimeFrameBest({required String timeFrame}) {
     return '$timeFrame best';
   }
 
   @override
-  String yieldCardThisPoolIsAtNetwork(String network) {
+  String yieldCardThisPoolIsAtNetwork({required String network}) {
     return 'This pool is at $network';
   }
 
@@ -280,17 +284,17 @@ class SEn extends S {
   String get depositPageRangeSectionFullRange => 'Full Range';
 
   @override
-  String depositPageInvalidTokenAmount(String tokenSymbol) {
+  String depositPageInvalidTokenAmount({required String tokenSymbol}) {
     return 'Enter a valid amount for $tokenSymbol';
   }
 
   @override
-  String depositPageInsufficientTokenBalance(String tokenSymbol) {
+  String depositPageInsufficientTokenBalance({required String tokenSymbol}) {
     return 'Insufficient $tokenSymbol balance';
   }
 
   @override
-  String depositPagePleaseEnterAmountForToken(String tokenSymbol) {
+  String depositPagePleaseEnterAmountForToken({required String tokenSymbol}) {
     return 'Please enter an amount for $tokenSymbol';
   }
 
@@ -315,7 +319,8 @@ class SEn extends S {
       'We hit a snag loading your token list. Give it another go, and if it keeps happening, feel free to reach us';
 
   @override
-  String tokenSelectorModalSearchErrorDescription(String searchedTerm) {
+  String tokenSelectorModalSearchErrorDescription(
+      {required String searchedTerm}) {
     return 'We hit a snag while searching for a token matching $searchedTerm. Give it another go, and if it keeps happening, feel free to reach us';
   }
 
@@ -368,12 +373,12 @@ class SEn extends S {
   String get positionCardViewMore => 'View more';
 
   @override
-  String positionsPageNoPositionsInNetwork(String network) {
+  String positionsPageNoPositionsInNetwork({required String network}) {
     return 'No positions in $network';
   }
 
   @override
-  String positionsPageShowHideClosedPositions(String isHidden) {
+  String positionsPageShowHideClosedPositions({required String isHidden}) {
     String _temp0 = intl.Intl.selectLogic(
       isHidden,
       {
@@ -386,18 +391,33 @@ class SEn extends S {
   }
 
   @override
-  String positionsPageNoPositionsInNetworkDescription(String network) {
+  String positionsPageNoPositionsInNetworkDescription(
+      {required String network}) {
     return 'It looks like you don’t have any positions in $network yet.\nGo ahead and create one to get started!';
   }
 
   @override
   String positionCardTokenPerToken(
-      String token0Qtd, String token0Symbol, String token1Symbol) {
+      {required String token0Qtd,
+      required String token0Symbol,
+      required String token1Symbol}) {
     return '$token0Qtd $token0Symbol per $token1Symbol';
   }
 
   @override
   String get positionsPageMyPositions => 'My Positions';
+
+  @override
+  String get appHeaderMyPositions => 'My Positions (Soon)';
+
+  @override
+  String get appHeaderNewPosition => 'New Position';
+
+  @override
+  String get appBottomNavigationBarMyPositions => 'My Positions (Soon)';
+
+  @override
+  String get appBottomNavigationBarNewPosition => 'New Position';
 
   @override
   String get positionsPageCantFindAPosition =>

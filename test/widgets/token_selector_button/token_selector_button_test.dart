@@ -38,9 +38,10 @@ void main() {
 
   tearDown(() => inject.reset());
 
-  Future<DeviceBuilder> goldenBuilder(TokenSelectorButtonController? controller) async => await goldenDeviceBuilder(
+  Future<DeviceBuilder> goldenBuilder(TokenSelectorButtonController? controller, {bool isMobile = false}) async =>
+      await goldenDeviceBuilder(
         Center(child: TokenSelectorButton(controller: controller ?? TokenSelectorButtonController())),
-        largeDevice: false,
+        device: isMobile ? GoldenDevice.mobile : GoldenDevice.square,
       );
 
   zGoldenTest("When the initialSelectedToken is not null in the controller, it should show the selected token",
@@ -71,6 +72,25 @@ void main() {
 
     await tester.pumpAndSettle();
   });
+
+  zGoldenTest(
+    """When pressing the button in a mobile-size device,
+  it should show a bottom sheet instead of a dialog to select tokens""",
+    goldenFileName: "token_selector_button_click_mobile",
+    (tester) async {
+      await tester.pumpDeviceBuilder(
+          await goldenBuilder(
+            TokenSelectorButtonController(),
+            isMobile: true,
+          ),
+          wrapper: GoldenConfig.localizationsWrapper());
+
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(TokenSelectorButton));
+
+      await tester.pumpAndSettle();
+    },
+  );
 
   zGoldenTest("When selecting a token in the modal, it should update the button state to selected",
       goldenFileName: "token_selector_button_selection", (tester) async {

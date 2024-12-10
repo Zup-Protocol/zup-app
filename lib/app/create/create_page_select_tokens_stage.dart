@@ -10,6 +10,7 @@ import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/token_selector_button/token_selector_button.dart';
 import 'package:zup_app/widgets/token_selector_button/token_selector_button_controller.dart';
 import 'package:zup_app/widgets/zup_page_title.dart';
+import 'package:zup_core/mixins/device_info_mixin.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 class CreatePageSelectTokensStage extends StatefulWidget {
@@ -19,7 +20,7 @@ class CreatePageSelectTokensStage extends StatefulWidget {
   State<CreatePageSelectTokensStage> createState() => _CreatePageState();
 }
 
-class _CreatePageState extends State<CreatePageSelectTokensStage> {
+class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInfoMixin {
   final appCubit = inject<AppCubit>();
   final navigator = inject<ZupNavigator>();
 
@@ -63,7 +64,12 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 70, bottom: 50),
+      padding: EdgeInsets.only(
+        top: isMobileSize(context) ? 20 : 70,
+        bottom: 50,
+        left: isMobileSize(context) ? 20 : 0,
+        right: isMobileSize(context) ? 20 : 0,
+      ),
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(

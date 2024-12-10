@@ -60,6 +60,12 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
   }
 
   @override
+  void dispose() {
+    refreshBalanceAnimationController?.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(covariant TokenAmountInputCard oldWidget) {
     if (widget.token != oldWidget.token) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -105,6 +111,7 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                               child: Stack(
                                 children: [
                                   TextField(
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     clipBehavior: Clip.none,
                                     controller: widget.controller,
                                     onChanged: (value) => widget.onInput(double.tryParse(value) ?? 0),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:zup_core/mixins/device_info_mixin.dart';
 
-class ZupPageTitle extends StatelessWidget {
+class ZupPageTitle extends StatelessWidget with DeviceInfoMixin {
   const ZupPageTitle(this.title, {super.key});
 
   final String title;
@@ -9,7 +10,7 @@ class ZupPageTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+      style: TextStyle(fontSize: isMobileSize(context) ? 28 : 28, fontWeight: FontWeight.w600),
     );
   }
 }

@@ -9,6 +9,7 @@ import 'package:zup_app/widgets/token_card.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_app/widgets/zup_skeletonizer.dart';
+import 'package:zup_core/mixins/device_info_mixin.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 class TokenSelectorModal extends StatefulWidget {
@@ -16,14 +17,19 @@ class TokenSelectorModal extends StatefulWidget {
 
   final Function(TokenDto token) onSelectToken;
 
-  static void show(BuildContext context, {required Function(TokenDto token) onSelectToken}) async {
+  static void show(
+    BuildContext context, {
+    required bool showAsBottomSheet,
+    required Function(TokenDto token) onSelectToken,
+  }) async {
     return ZupModal.show(
       context,
+      showAsBottomSheet: showAsBottomSheet,
       content: BlocProvider.value(
         value: inject<TokenSelectorModalCubit>(),
         child: TokenSelectorModal(onSelectToken: onSelectToken),
       ),
-      size: const Size(500, 600),
+      size: const Size(450, 600),
       title: S.of(context).tokenSelectorModalTitle,
       description: S.of(context).tokenSelectorModalDescription,
       padding: const EdgeInsets.all(0).copyWith(bottom: 1),
@@ -34,7 +40,7 @@ class TokenSelectorModal extends StatefulWidget {
   State<TokenSelectorModal> createState() => _TokenSelectorModalState();
 }
 
-class _TokenSelectorModalState extends State<TokenSelectorModal> {
+class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfoMixin {
   final double _horizontalPadding = 20;
   final EdgeInsetsGeometry _paddingBetweenListItems = const EdgeInsets.symmetric(vertical: 5);
 
@@ -138,7 +144,7 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> {
                   colorFilter: const ColorFilter.mode(ZupColors.brand, BlendMode.srcIn),
                 ),
                 title: S.of(context).somethingWhenWrong,
-                description: S.of(context).tokenSelectorModalSearchErrorDescription(searchedTerm),
+                description: S.of(context).tokenSelectorModalSearchErrorDescription(searchedTerm: searchedTerm),
                 helpButtonTitle: S.of(context).letsGiveItAnotherShot,
                 helpButtonIcon: Assets.icons.arrowClockwise.svg(),
                 onHelpButtonTap: () => _cubit.searchToken(searchedTerm),
@@ -312,6 +318,6 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> {
               },
             ),
           ),
-        )
+        ),
       ];
 }

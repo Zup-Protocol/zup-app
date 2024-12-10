@@ -44,7 +44,11 @@ void main() {
   Future<DeviceBuilder> goldenBuilder({Function(TokenDto)? onSelectToken}) async => await goldenDeviceBuilder(
         Builder(builder: (context) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            TokenSelectorModal.show(context, onSelectToken: onSelectToken ?? (token) {});
+            TokenSelectorModal.show(
+              context,
+              onSelectToken: onSelectToken ?? (token) {},
+              showAsBottomSheet: false,
+            );
           });
 
           return const SizedBox();
