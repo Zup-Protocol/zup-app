@@ -62,11 +62,13 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
   @override
   void initState() {
     onRouteChange = () {
-      setState(
-        () => _currentIndex = items.indexOf(
-          items.firstWhereOrNull((item) => item.path == _navigator.currentRoute) ?? items.first,
-        ),
-      );
+      if (mounted) {
+        setState(
+          () => _currentIndex = items.indexOf(
+            items.firstWhereOrNull((item) => item.path == _navigator.currentRoute) ?? items.first,
+          ),
+        );
+      }
     };
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

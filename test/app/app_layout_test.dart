@@ -10,6 +10,7 @@ import 'package:zup_app/app/app_layout.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/routes.g.dart';
@@ -25,6 +26,7 @@ void main() {
 
     appCubit = AppCubitMock();
 
+    inject.registerFactory<ZupLinks>(() => ZupLinksMock());
     inject.registerFactory<ZupNavigator>(() => ZupNavigator());
     inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerFactory<ScrollController>(

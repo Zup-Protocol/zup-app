@@ -48,15 +48,15 @@ class GoldenConfig {
         GlobalWidgetsLocalizations.delegate,
         Web3KitLocalizations.delegate,
       ],
-      home: Scaffold(backgroundColor: Colors.white, body: child
-
-          //  CustomScrollView(controller: scrollController, slivers: [
-          //   SliverFillRemaining(
-          //     hasScrollBody: false,
-          //     child: child,
-          //   )
-          // ]),
-          ),
+      home: Scaffold(
+        backgroundColor: Colors.white,
+        body: CustomScrollView(controller: scrollController, slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: child,
+          )
+        ]),
+      ),
       theme: ZupTheme.lightTheme,
     );
   }
