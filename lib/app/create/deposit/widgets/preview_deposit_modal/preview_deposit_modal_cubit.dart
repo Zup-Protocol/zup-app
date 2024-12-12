@@ -138,31 +138,39 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       );
 
       BigInt tickLower() {
-        if (isMinPriceInfinity && !isReversed) return V3PoolConstants.minTick;
-        if (isReversed && isMaxPriceInfinity) return V3PoolConstants.minTick;
+        BigInt convertPriceToTickLower() {
+          if (isMinPriceInfinity && !isReversed) return V3PoolConstants.minTick;
+          if (isReversed && isMaxPriceInfinity) return V3PoolConstants.minTick;
 
-        return tickToClosestValidTick(
-          tick: priceToTick(
+          return priceToTick(
             price: isReversed ? maxPrice : minPrice,
             poolToken0Decimals: _yield.token0.decimals,
             poolToken1Decimals: _yield.token1.decimals,
             isReversed: isReversed,
-          ),
+          );
+        }
+
+        return tickToClosestValidTick(
+          tick: convertPriceToTickLower(),
           tickSpacing: _yield.tickSpacing,
         );
       }
 
       BigInt tickUpper() {
-        if (isMaxPriceInfinity && !isReversed) return V3PoolConstants.maxTick;
-        if (isReversed && isMinPriceInfinity) return V3PoolConstants.maxTick;
+        BigInt convertPriceToTickUpper() {
+          if (isMaxPriceInfinity && !isReversed) return V3PoolConstants.maxTick;
+          if (isReversed && isMinPriceInfinity) return V3PoolConstants.maxTick;
 
-        return tickToClosestValidTick(
-          tick: priceToTick(
+          return priceToTick(
             price: isReversed ? minPrice : maxPrice,
             poolToken0Decimals: _yield.token0.decimals,
             poolToken1Decimals: _yield.token1.decimals,
             isReversed: isReversed,
-          ),
+          );
+        }
+
+        return tickToClosestValidTick(
+          tick: convertPriceToTickUpper(),
           tickSpacing: _yield.tickSpacing,
         );
       }

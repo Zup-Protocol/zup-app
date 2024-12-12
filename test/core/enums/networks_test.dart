@@ -138,6 +138,12 @@ void main() {
       "0xCd84aE98e975c4C1A82C0D9Debf992d3eeb7d6AD",
       reason: "Sepolia zup router address should match",
     );
+
+    expect(
+      Networks.scrollSepolia.zupRouterAddress,
+      "0x1f8A0f1FFB3047744279530Ea2635E5524D10436",
+      reason: "Scroll Sepolia zup router address should match",
+    );
   });
 
   test("FeeControllerAddress extension should return the correct fee controller address", () async {
@@ -147,6 +153,12 @@ void main() {
       Networks.sepolia.feeControllerAddress,
       "0xFBFEfD600fFC1Ae6EabD66Bb8C90F25a314Ff3Cf",
       reason: "Sepolia fee controller address should match",
+    );
+
+    expect(
+      Networks.scrollSepolia.feeControllerAddress,
+      "0x63f02Ae6B29AacFC7555E48ef129f4269B4Fe591",
+      reason: "Scroll Sepolia fee controller address should match",
     );
   });
 

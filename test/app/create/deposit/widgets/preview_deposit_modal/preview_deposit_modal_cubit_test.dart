@@ -838,9 +838,8 @@ void main() {
     },
   );
 
-  test(
-      "When calling `deposit` the minPrice is infinity, and is not reversed, the tick lower in the depositData should be the min tick",
-      () async {
+  test("""When calling `deposit` the minPrice is infinity, and is not reversed,
+      the tick lower in the depositData should be the min tick (adjusted for the tick spacing)""", () async {
     await sut.deposit(
       token0Amount: BigInt.one,
       token1Amount: BigInt.one,
@@ -858,16 +857,21 @@ void main() {
         params: any(
           named: "params",
           that: ExpectedMatcher(
-            expects: (item) => expect(item.tickLower, V3PoolConstants.minTick),
+            expects: (item) => expect(
+              item.tickLower,
+              V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+                tick: V3PoolConstants.minTick,
+                tickSpacing: currentYield.tickSpacing,
+              ),
+            ),
           ),
         ),
       ),
     ).called(1);
   });
 
-  test(
-      "When calling `deposit` with the maxPrice infinity, and reversed, the tick lower in the depositData should be the min tick",
-      () async {
+  test("""When calling `deposit` with the maxPrice infinity, and reversed,
+      the tick lower in the depositData should be the min tick (but adjusted for the tick spacing)""", () async {
     await sut.deposit(
       token0Amount: BigInt.one,
       token1Amount: BigInt.one,
@@ -885,7 +889,13 @@ void main() {
         params: any(
           named: "params",
           that: ExpectedMatcher(
-            expects: (item) => expect(item.tickLower, V3PoolConstants.minTick),
+            expects: (item) => expect(
+              item.tickLower,
+              V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+                tick: V3PoolConstants.minTick,
+                tickSpacing: currentYield.tickSpacing,
+              ),
+            ),
           ),
         ),
       ),
@@ -979,7 +989,8 @@ void main() {
   );
 
   test(
-    "When calling `deposit` with a max price that is infinity, and it's not reversed, the tick upper in the depositData should be the max tick",
+    """When calling `deposit` with a max price that is infinity, and it's not reversed,
+    the tick upper in the depositData should be the max tick (but adjusted for the tick spacing)""",
     () async {
       await sut.deposit(
         token0Amount: BigInt.one,
@@ -998,7 +1009,13 @@ void main() {
           params: any(
             named: "params",
             that: ExpectedMatcher(
-              expects: (item) => expect(item.tickUpper, V3PoolConstants.maxTick),
+              expects: (item) => expect(
+                item.tickUpper,
+                V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+                  tick: V3PoolConstants.maxTick,
+                  tickSpacing: currentYield.tickSpacing,
+                ),
+              ),
             ),
           ),
         ),
@@ -1007,7 +1024,8 @@ void main() {
   );
 
   test(
-    "When calling `deposit` with a min price that is infinity, and it's reversed, the tick upper in the depositData should be the max tick",
+    """When calling `deposit` with a min price that is infinity, and it's reversed,
+    the tick upper in the depositData should be the max tick (but adjusted for the tick spacing)""",
     () async {
       const maxPrice = 3000.0;
       const isReversed = true;
@@ -1031,7 +1049,10 @@ void main() {
             that: ExpectedMatcher(
               expects: (item) => expect(
                 item.tickUpper,
-                V3PoolConstants.maxTick,
+                V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+                  tick: V3PoolConstants.maxTick,
+                  tickSpacing: currentYield.tickSpacing,
+                ),
               ),
             ),
           ),

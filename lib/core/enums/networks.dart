@@ -74,13 +74,13 @@ enum Networks {
   String? get zupRouterAddress => switch (this) {
         all => null,
         sepolia => "0xCd84aE98e975c4C1A82C0D9Debf992d3eeb7d6AD",
-        scrollSepolia => throw "Zup Router Not Available on Scroll Sepolia yet",
+        scrollSepolia => "0x1f8A0f1FFB3047744279530Ea2635E5524D10436",
       };
 
   String? get feeControllerAddress => switch (this) {
         all => null,
         sepolia => "0xFBFEfD600fFC1Ae6EabD66Bb8C90F25a314Ff3Cf",
-        scrollSepolia => throw "Zup's Fee Controller Not Available on Scroll Sepolia yet",
+        scrollSepolia => "0x63f02Ae6B29AacFC7555E48ef129f4269B4Fe591",
       };
 
   Future<void> openTx(String txHash) async {

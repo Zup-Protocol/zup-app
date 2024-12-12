@@ -22,11 +22,7 @@ class YieldsDto with _$YieldsDto {
 
   factory YieldsDto.fromJson(Map<String, dynamic> json) => _$YieldsDtoFromJson(json);
 
-  factory YieldsDto.empty() => const YieldsDto(
-        last24Yields: [],
-        last30dYields: [],
-        last90dYields: [],
-      );
+  factory YieldsDto.empty() => const YieldsDto(last24Yields: [], last30dYields: [], last90dYields: []);
 
   factory YieldsDto.fixture() => const YieldsDto(
         last24Yields: [
@@ -48,9 +44,12 @@ class YieldsDto with _$YieldsDto {
               symbol: "WETH",
             ),
             network: Networks.scrollSepolia,
-            poolAddress: "0x85AC4aA771827e806bd9b9CDdd379eB4dD0071C2",
-            tickSpacing: 200,
+            poolAddress: "0x4040CE732c1A538A4Ac3157FDC35179D73ea76cd",
+            tickSpacing: 10,
             yearlyYield: 1732.42,
+            positionManagerAddress: "0x0F81fD8DaC20A21029B496D8F8E08385201B8ca0",
+            feeTier: 500,
+            yieldTimeFrame: YieldTimeFrame.day,
             protocol: ProtocolDto(
               name: "PancakeSwap",
               logoUrl:
@@ -91,6 +90,8 @@ class YieldsDto with _$YieldsDto {
         ],
         last90dYields: [
           YieldDto(
+            feeTier: 100,
+            positionManagerAddress: "0x1238536071E1c677A632429e3655c799b22cDA52",
             token0: TokenDto(
               address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
               decimals: 6,
