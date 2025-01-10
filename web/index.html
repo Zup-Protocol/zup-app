@@ -35,8 +35,35 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body style="margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center;">
-  <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
-  <dotlottie-player src="loading.json" background="transparent" speed="1" style="width: 300px; height: 300px" loop autoplay></dotlottie-player>
+  <!-- Lottie Pre-loader Animation Start -->
+   <script src="https://cdn.jsdelivr.net/npm/lottie-web@5.7.8/build/player/lottie.min.js"></script>
+
+   <script>
+   document.addEventListener('DOMContentLoaded', function() {
+   var animationContainer = document.createElement('div'); 
+
+   animationContainer.id = 'lottie-animation';
+   document.body.appendChild(animationContainer);
+   
+   var animationData = {
+    container: animationContainer,
+    renderer: 'svg',
+    loop: true,
+    autoplay: true,
+    path: "loading.json",
+   };
+   
+   lottie.loadAnimation(animationData);
+   });
+   </script>
+   
+   <style>
+   #lottie-animation {
+    width: 300px;
+    margin: 0 auto;
+   }
+   </style>
+   <!-- Lottie Pre-loader Animation End -->
 
   <script type="module">
     import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
