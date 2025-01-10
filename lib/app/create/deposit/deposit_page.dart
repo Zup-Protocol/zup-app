@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
@@ -500,7 +501,7 @@ class _DepositPageState extends State<DepositPage>
           message: S.of(context).depositPageTimeFrameTooltipMessage,
           helperButtonTitle: S.of(context).depositPageTimeFrameTooltipHelperButtonTitle,
           helperButtonOnPressed: () {
-            // launchUrl(Uri.parse("https://docs.thirdweb.com/zap/liquidity-mining/"));
+            launchUrl(Uri.parse("https://zupprotocol.substack.com/p/zup-timeframes-explained-why-you"));
           },
           child: Row(
             mainAxisSize: MainAxisSize.min,

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:lottie/lottie.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/fee_controller.abi.g.dart';
@@ -46,6 +47,7 @@ void main() {
   setUp(() async {
     await Web3Kit.initializeForTest();
     await inject.unregister<Wallet>();
+    UrlLauncherPlatform.instance = UrlLauncherPlatformCustomMock();
 
     cubit = DepositCubitMock();
     wallet = WalletMock();
@@ -292,6 +294,25 @@ void main() {
 
     await tester.hover(find.byKey(const Key("timeframe-tooltip")));
     await tester.pumpAndSettle();
+  });
+
+  zGoldenTest(
+      "When clicking learn more in the pool time frame tooltip, it should launch the Zup blog page explaining it",
+      (tester) async {
+    when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+
+    await tester.hover(find.byKey(const Key("timeframe-tooltip")));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key("helper-button-tooltip")));
+    await tester.pumpAndSettle();
+
+    expect(
+      UrlLauncherPlatformCustomMock.lastLaunchedUrl,
+      "https://zupprotocol.substack.com/p/zup-timeframes-explained-why-you",
+    );
   });
 
   zGoldenTest("When the selected yield stream in the cubit emits a yield, it should select the yield",
