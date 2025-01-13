@@ -73,6 +73,36 @@ void main() {
     },
   );
 
+  zGoldenTest("When clicking the docs button, it should launch the zup docs website", (tester) async {
+    when(() => zupLinks.launchZupDocs()).thenAnswer((_) async {});
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.tap(find.byKey(const Key("docs-button")));
+    await tester.pumpAndSettle();
+
+    verify(() => zupLinks.launchZupDocs()).called(1);
+  });
+
+  zGoldenTest("When clicking the FAQ button, it should launch the zup FAQ website", (tester) async {
+    when(() => zupLinks.launchZupFAQ()).thenAnswer((_) async {});
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.tap(find.byKey(const Key("faq-button")));
+    await tester.pumpAndSettle();
+
+    verify(() => zupLinks.launchZupFAQ()).called(1);
+  });
+
+  zGoldenTest("When clicking the contact us button, it should launch the zup contact us guide website", (tester) async {
+    when(() => zupLinks.launchZupContactUs()).thenAnswer((_) async {});
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.tap(find.byKey(const Key("contact-us-button")));
+    await tester.pumpAndSettle();
+
+    verify(() => zupLinks.launchZupContactUs()).called(1);
+  });
+
   zGoldenTest(
     "When the running device is with a mobile size, the footer should be mobile adapted",
     goldenFileName: "app_footer_mobile",

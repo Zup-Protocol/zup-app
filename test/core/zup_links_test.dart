@@ -29,6 +29,18 @@ void main() {
     () => expect(ZupLinks.zupTwitter, "https://x.com/zup_protocol"),
   );
 
+  test("`zupDocs` should return the correct link for the protocol documentation website", () {
+    expect(ZupLinks.zupDocs, "https://zupprotocol.gitbook.io/documentation");
+  });
+
+  test("`zupFAQ` should return the correct link for the protocol FAQ", () {
+    expect(ZupLinks.zupFAQ, "https://zupprotocol.gitbook.io/documentation/general/faq");
+  });
+
+  test("`zupContactUs` should return the correct link for the protocol contact us", () {
+    expect(ZupLinks.zupContactUs, "https://zupprotocol.gitbook.io/documentation/other/contact-us");
+  });
+
   test("`launchZupWebsite` should launch the correct link", () {
     ZupLinks().launchZupWebsite();
 
@@ -51,5 +63,23 @@ void main() {
     ZupLinks().launchZupTwitter();
 
     expect(UrlLauncherPlatformCustomMock.lastLaunchedUrl, ZupLinks.zupTwitter);
+  });
+
+  test("`launchZupDocs` should launch the correct link", () {
+    ZupLinks().launchZupDocs();
+
+    expect(UrlLauncherPlatformCustomMock.lastLaunchedUrl, ZupLinks.zupDocs);
+  });
+
+  test("`launchZupFAQ` should launch the correct link", () {
+    ZupLinks().launchZupFAQ();
+
+    expect(UrlLauncherPlatformCustomMock.lastLaunchedUrl, ZupLinks.zupFAQ);
+  });
+
+  test("`launchZupContactUs` should launch the correct link", () {
+    ZupLinks().launchZupContactUs();
+
+    expect(UrlLauncherPlatformCustomMock.lastLaunchedUrl, ZupLinks.zupContactUs);
   });
 }
