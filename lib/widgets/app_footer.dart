@@ -66,9 +66,15 @@ enum _AppFooterButton {
           },
         _AppFooterButton.termsOfUse => () {},
         _AppFooterButton.privacyPolicy => () {},
-        _AppFooterButton.docs => () {},
-        _AppFooterButton.faq => () {},
-        _AppFooterButton.contactUs => () {},
+        _AppFooterButton.docs => () {
+            zupLinks.launchZupDocs();
+          },
+        _AppFooterButton.faq => () {
+            zupLinks.launchZupFAQ();
+          },
+        _AppFooterButton.contactUs => () {
+            zupLinks.launchZupContactUs();
+          },
       };
 }
 
@@ -131,6 +137,7 @@ class _AppFooterState extends State<AppFooter> with DeviceInfoMixin {
             spacing: 20,
             children: [
               GestureDetector(
+                key: _AppFooterButton.termsOfUse.key,
                 onTap: _AppFooterButton.termsOfUse.onTap(_zupLinks),
                 child: Text(
                   _AppFooterButton.termsOfUse.title(context),
@@ -141,6 +148,7 @@ class _AppFooterState extends State<AppFooter> with DeviceInfoMixin {
                 ),
               ),
               GestureDetector(
+                key: _AppFooterButton.privacyPolicy.key,
                 onTap: _AppFooterButton.privacyPolicy.onTap(_zupLinks),
                 child: Text(
                   _AppFooterButton.privacyPolicy.title(context),
@@ -151,6 +159,7 @@ class _AppFooterState extends State<AppFooter> with DeviceInfoMixin {
                 ),
               ),
               GestureDetector(
+                key: _AppFooterButton.docs.key,
                 onTap: _AppFooterButton.docs.onTap(_zupLinks),
                 child: Text(
                   _AppFooterButton.docs.title(context),
@@ -161,6 +170,7 @@ class _AppFooterState extends State<AppFooter> with DeviceInfoMixin {
                 ),
               ),
               GestureDetector(
+                key: _AppFooterButton.faq.key,
                 onTap: _AppFooterButton.faq.onTap(_zupLinks),
                 child: Text(
                   _AppFooterButton.faq.title(context),
@@ -171,6 +181,7 @@ class _AppFooterState extends State<AppFooter> with DeviceInfoMixin {
                 ),
               ),
               GestureDetector(
+                key: _AppFooterButton.contactUs.key,
                 onTap: _AppFooterButton.contactUs.onTap(_zupLinks),
                 child: Text(
                   _AppFooterButton.contactUs.title(context),
@@ -190,26 +201,31 @@ class _AppFooterState extends State<AppFooter> with DeviceInfoMixin {
           Assets.logos.zupGray.svg(height: 25),
           const SizedBox(width: 40),
           ZupLightButton(
+            key: _AppFooterButton.termsOfUse.key,
             onPressed: _AppFooterButton.termsOfUse.onTap(_zupLinks),
             child: Text(_AppFooterButton.termsOfUse.title(context), style: const TextStyle(fontSize: 14)),
           ),
           _spacing(),
           ZupLightButton(
+            key: _AppFooterButton.privacyPolicy.key,
             onPressed: _AppFooterButton.privacyPolicy.onTap(_zupLinks),
             child: Text(_AppFooterButton.privacyPolicy.title(context), style: const TextStyle(fontSize: 14)),
           ),
           _spacing(),
           ZupLightButton(
+            key: _AppFooterButton.docs.key,
             onPressed: _AppFooterButton.docs.onTap(_zupLinks),
             child: Text(_AppFooterButton.docs.title(context), style: const TextStyle(fontSize: 14)),
           ),
           _spacing(),
           ZupLightButton(
+            key: _AppFooterButton.faq.key,
             onPressed: _AppFooterButton.faq.onTap(_zupLinks),
             child: Text(_AppFooterButton.faq.title(context), style: const TextStyle(fontSize: 14)),
           ),
           _spacing(),
           ZupLightButton(
+            key: _AppFooterButton.contactUs.key,
             onPressed: _AppFooterButton.contactUs.onTap(_zupLinks),
             child: Text(_AppFooterButton.contactUs.title(context), style: const TextStyle(fontSize: 14)),
           ),
