@@ -2,6 +2,7 @@ name: zup_app
 
 environment:
   sdk: ^3.5.2
+  flutter: 3.27.3
 
 dependencies:
   build_runner: ^2.4.12
