@@ -362,6 +362,12 @@ abstract class S {
   /// **'Yield (Yearly)'**
   String get yieldCardYieldYearly;
 
+  /// No description provided for @yieldCardAverageYieldYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Yield (Yearly)'**
+  String get yieldCardAverageYieldYearly;
+
   /// No description provided for @previewDepositModalDepositSuccessSnackBarHelperButtonTitle.
   ///
   /// In en, this message translates to:
