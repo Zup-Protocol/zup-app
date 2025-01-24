@@ -34,23 +34,21 @@ extension YieldTimeFrameExtension on YieldTimeFrame {
 class YieldDto with _$YieldDto {
   @JsonSerializable(explicitToJson: true)
   const factory YieldDto({
-    @JsonKey(name: "token_a") required TokenDto token0,
-    @JsonKey(name: "token_b") required TokenDto token1,
-    @Default(0) @JsonKey(name: "yield") num yearlyYield,
-    @Default("") @JsonKey(name: "address") String poolAddress,
-    @Default("") @JsonKey(name: "position_manager_address") String positionManagerAddress,
-    @Default(ProtocolDto()) ProtocolDto protocol,
-    @Default(0) @JsonKey(name: "tick_spacing") int tickSpacing,
-    @Default(0) @JsonKey(name: "fee_tier") int feeTier,
-    @Default(YieldTimeFrame.unknown)
-    @JsonKey(name: "timeframe", unknownEnumValue: YieldTimeFrame.unknown)
-    YieldTimeFrame yieldTimeFrame,
+    required TokenDto token0,
+    required TokenDto token1,
+    required String poolAddress,
+    required int tickSpacing,
+    required ProtocolDto protocol,
+    required int feeTier,
+    @JsonKey(name: "yield") required num yearlyYield,
     required Networks network,
   }) = _YieldDto;
 
   factory YieldDto.fromJson(Map<String, dynamic> json) => _$YieldDtoFromJson(json);
 
   factory YieldDto.fixture() => YieldDto(
+        feeTier: 0,
+        poolAddress: "0x5Df2f0aFb5b5bB2Df9D1e9C7b6f5f0DD5f9eD5e0",
         token0: TokenDto.fixture().copyWith(
           symbol: "USDC",
           decimals: 6,
@@ -69,6 +67,5 @@ class YieldDto with _$YieldDto {
         tickSpacing: 10,
         protocol: ProtocolDto.fixture(),
         network: Networks.sepolia,
-        yieldTimeFrame: YieldTimeFrame.day,
       );
 }

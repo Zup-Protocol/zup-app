@@ -199,7 +199,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       final tx = await zupRouterContract.deposit(
         token0: (amount: token0Amount, token: _yield.token0.address),
         token1: (amount: token1Amount, token: _yield.token1.address),
-        positionManager: _yield.positionManagerAddress,
+        positionManager: _yield.protocol.positionManager,
         depositData: depositData,
       );
 

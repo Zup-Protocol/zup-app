@@ -20,6 +20,7 @@ import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview
 import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
+import 'package:zup_app/core/dtos/yields_by_timeframe_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
@@ -318,7 +319,7 @@ void main() {
   zGoldenTest("When the selected yield stream in the cubit emits a yield, it should select the yield",
       goldenFileName: "deposit_page_selected_yield_stream", (tester) async {
     final yields = YieldsDto.fixture();
-    final selectedYield = yields.last24Yields.first;
+    final selectedYield = yields.timeframedYields.best24hYields.first;
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
     when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -342,7 +343,7 @@ void main() {
 
   zGoldenTest("When selecting a yield, it should scroll down to the range section",
       goldenFileName: "deposit_page_select_yield_scroll", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
     when(() => cubit.selectedYield).thenReturn(null);
@@ -360,7 +361,10 @@ void main() {
 
   zGoldenTest("When there is not yields in 24h, it should not show the 24h card", goldenFileName: "deposit_page_no_24h",
       (tester) async {
-    final yields = YieldsDto.fixture().copyWith(last24Yields: []);
+    final yields = YieldsDto.fixture().copyWith(
+      timeframedYields: YieldsByTimeframeDto.fixture().copyWith(best24hYields: []),
+    );
+
     when(() => cubit.state).thenReturn(DepositState.success(yields));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -368,7 +372,10 @@ void main() {
 
   zGoldenTest("When there is not yields in 30d, it should not show the 30d card", goldenFileName: "deposit_page_no_30d",
       (tester) async {
-    final yields = YieldsDto.fixture().copyWith(last30dYields: []);
+    final yields = YieldsDto.fixture().copyWith(
+      timeframedYields: YieldsByTimeframeDto.fixture().copyWith(best30dYields: []),
+    );
+
     when(() => cubit.state).thenReturn(DepositState.success(yields));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -378,7 +385,9 @@ void main() {
 
   zGoldenTest("When there is not yields in 3months, it should not show the 3months card",
       goldenFileName: "deposit_page_no_3months", (tester) async {
-    final yields = YieldsDto.fixture().copyWith(last90dYields: []);
+    final yields = YieldsDto.fixture().copyWith(
+      timeframedYields: YieldsByTimeframeDto.fixture().copyWith(best90dYields: []),
+    );
     when(() => cubit.state).thenReturn(DepositState.success(yields));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -389,7 +398,7 @@ void main() {
   zGoldenTest(
       "When clicking the segmented control to switch the base token to quote token, it should reverse the tokens",
       goldenFileName: "deposit_page_reverse_tokens", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
     when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -404,7 +413,7 @@ void main() {
   zGoldenTest(
       "When clicking the segmented control to switch back to base token, after reversing the tokens, it should reverse again",
       goldenFileName: "deposit_page_reverse_tokens_back", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
     when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -422,7 +431,7 @@ void main() {
   zGoldenTest(
       "When clicking the segmented control to switch back to base token, after reversing the tokens, it should reverse again",
       goldenFileName: "deposit_page_reverse_tokens_back", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
     when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -440,7 +449,7 @@ void main() {
   zGoldenTest("""When emitting an event to the tick stream,
       it should calculate the price of the selected yield assets""", goldenFileName: "deposit_page_calculate_price",
       (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
     when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -453,7 +462,7 @@ void main() {
   zGoldenTest(
       "When reversing the tokens, it should calculate the price based on the reversed tokens, from a given tick in the cubit",
       goldenFileName: "deposit_page_calculate_price_reversed", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
     when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -470,7 +479,7 @@ void main() {
     "When typing a min price more than the current price, it should show an alert saying that is out of range",
     goldenFileName: "deposit_page_min_price_out_of_range",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -495,7 +504,7 @@ void main() {
      is not out of range, it should not show the alert""",
     goldenFileName: "deposit_page_min_price_out_of_range_reversed_in_range",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -521,7 +530,7 @@ void main() {
      is is still out of range, it should keep showing the alert""",
     goldenFileName: "deposit_page_min_price_out_of_range_reversed",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -542,7 +551,7 @@ void main() {
 
   zGoldenTest("When typing a max price less than the min price, it should show an error message",
       goldenFileName: "deposit_page_max_price_less_than_min_price", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -563,7 +572,7 @@ void main() {
   zGoldenTest("""When typing a max price lower than the current price
   but higher than min price, it shouw show a alert of out of range""",
       goldenFileName: "deposit_page_max_price_out_of_range", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -583,7 +592,7 @@ void main() {
 
   zGoldenTest("When typing 0 in the max price, it should set it to infinity max price",
       goldenFileName: "deposit_page_max_price_set_to_infinity", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -610,7 +619,7 @@ void main() {
 
   zGoldenTest("When typing a min price, but then selecting the full range button, it should set it to 0",
       goldenFileName: "deposit_page_min_price_set_to_full_range", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -630,7 +639,7 @@ void main() {
 
   zGoldenTest("When typing a max price, but then selecting the full range button, it should set it to infinity",
       goldenFileName: "deposit_page_max_price_set_to_full_range", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -651,7 +660,7 @@ void main() {
   zGoldenTest("""When typing a min and max price and then clicking the full range button,
    it should set the min price to 0 and the max price to infinity""",
       goldenFileName: "deposit_page_min_and_max_price_set_to_full_range", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -675,7 +684,7 @@ void main() {
   zGoldenTest(
       "When there's a invalid range, the deposit section should be disabled (with opacity) and cannot be clicked or typed",
       goldenFileName: "deposit_page_invalid_range_deposit_section", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -702,7 +711,7 @@ void main() {
     "When inputing the base token amount, the quote amount token should be automatically calculated",
     goldenFileName: "deposit_page_input_base_token_amount",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -724,7 +733,7 @@ void main() {
     "When inputing the quote token amount, the base amount token should be automatically calculated",
     goldenFileName: "deposit_page_input_quote_token_amount",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -748,7 +757,7 @@ void main() {
     and the new base token amount should be automatically calculated""",
     goldenFileName: "deposit_page_input_base_token_amount_and_reverse",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -775,7 +784,7 @@ void main() {
     and the new quote token amount should be automatically calculated""",
     goldenFileName: "deposit_page_input_quote_token_amount_and_reverse",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -800,7 +809,7 @@ void main() {
     """When inputing the base token amount with the tokens reversed, the quote token amount should be automatically calculated""",
     goldenFileName: "deposit_page_input_base_token_amount_reversed",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -825,7 +834,7 @@ void main() {
     """When inputing the quote token amount with the tokens reversed, the base token amount should be automatically calculated""",
     goldenFileName: "deposit_page_input_quote_token_amount_reversed",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -850,7 +859,7 @@ void main() {
    then turning them normal, the quote token amount should now be the 
    previous base token amount, and the new base token amount should be automatically calculated""",
       goldenFileName: "deposit_page_input_base_token_amount_and_reverse_back", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -877,7 +886,7 @@ void main() {
    then turning them normal, the base token amount should now be the 
    previous quote token amount, and the new quote token amount should be automatically calculated""",
       goldenFileName: "deposit_page_input_quote_token_amount_and_reverse_back", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -904,7 +913,7 @@ void main() {
     "When inputing the base token amount, then changing the range, the quote token amount should be recalculated",
     goldenFileName: "deposit_page_input_base_token_amount_and_change_range",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -936,7 +945,7 @@ void main() {
     "When inputing the quote token amount, then changing the range, the base token amount should be recalculated",
     goldenFileName: "deposit_page_input_quote_token_amount_and_change_range",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -968,7 +977,7 @@ void main() {
   zGoldenTest(
       "When inputing the base token amount, reversing the tokens and then changing the range, the base token amount should be recalculated",
       goldenFileName: "deposit_page_input_base_token_amount_reverse_tokens_and_change_range", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1002,7 +1011,7 @@ void main() {
   zGoldenTest(
       "When inputing the quote token amount, reversing the tokens and then changing the range, the quote token amount should be recalculated",
       goldenFileName: "deposit_page_input_quote_token_amount_reverse_tokens_and_change_range", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1037,7 +1046,7 @@ void main() {
     "When inputing a range, then inputing the base token amount, the quote token amount should be automatically calculated",
     goldenFileName: "deposit_page_input_range_then_input_base_token_amount",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1070,7 +1079,7 @@ void main() {
     "When inputing a range, then inputing the quote token amount, the base token amount should be automatically calculated",
     goldenFileName: "deposit_page_input_range_then_input_quote_token_amount",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1103,7 +1112,7 @@ void main() {
     "When inputing a range,reversing the tokens, then inputing the base token amount, the quote token amount should be automatically calculated",
     goldenFileName: "deposit_page_input_range_then_reverse_tokens_then_input_base_token_amount",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1141,7 +1150,7 @@ void main() {
     "When inputing a range, reversing the tokens, then inputing the quote token amount, the base token amount should be automatically calculated",
     goldenFileName: "deposit_page_input_range_then_reverse_tokens_then_input_quote_token_amount",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1178,7 +1187,7 @@ void main() {
   zGoldenTest("""When inputing base token amount, and then setting a max price out of range,
        it should keep the quote token amount and disable the base token input""",
       goldenFileName: "deposit_page_input_base_token_amount_then_set_max_price_out_of_range", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1206,7 +1215,7 @@ void main() {
   zGoldenTest("""When inputing quote token amount, and then setting a min price out of range,
        it should keep the base token amount and disable the quote token input""",
       goldenFileName: "deposit_page_input_quote_token_amount_then_set_min_price_out_of_range", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1232,7 +1241,7 @@ void main() {
        it should keep the quote token amount and disable the base token input""",
       goldenFileName: "deposit_page_input_base_token_amount_then_reverse_tokens_then_set_max_price_out_of_range",
       (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1264,7 +1273,7 @@ void main() {
        it should keep the base token amount and disable the quote token input""",
       goldenFileName: "deposit_page_input_quote_token_amount_then_reverse_tokens_then_set_min_price_out_of_range",
       (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
@@ -1293,7 +1302,7 @@ void main() {
     "When the user is is not connected, it should show the connect wallet button instead of the deposit button",
     goldenFileName: "deposit_page_not_connected",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => wallet.signer).thenReturn(null);
@@ -1317,7 +1326,7 @@ void main() {
     """,
     goldenFileName: "deposit_page_not_connected_deposit_button_click",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       when(() => wallet.signer).thenReturn(null);
@@ -1342,7 +1351,7 @@ void main() {
     the deposit button should should be disabled""",
     goldenFileName: "deposit_page_no_amount_deposit_button",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
       final signer = SignerMock();
 
@@ -1369,7 +1378,7 @@ void main() {
     the deposit button should should be disabled""",
     goldenFileName: "deposit_page_not_enough_base_token_balance_deposit_button",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
       final signer = SignerMock();
 
@@ -1399,7 +1408,7 @@ void main() {
     the deposit button should should be disabled""",
     goldenFileName: "deposit_page_not_enough_quote_token_balance_deposit_button",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
       final signer = SignerMock();
 
@@ -1432,7 +1441,7 @@ void main() {
     without having enough balance of base token, the deposit button should should be disabled""",
     goldenFileName: "deposit_page_not_enough_base_token_balance_deposit_button_after_connecting",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
       final signerStreamController = StreamController<Signer?>.broadcast();
       final signer = SignerMock();
@@ -1468,7 +1477,7 @@ void main() {
     without having enough balance of quote token, the deposit button should should be disabled""",
     goldenFileName: "deposit_page_not_enough_quote_token_balance_deposit_button_after_connecting",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
       final signerStreamController = StreamController<Signer?>.broadcast();
       final signer = SignerMock();
@@ -1504,7 +1513,7 @@ void main() {
     the deposit button should be enabled""",
     goldenFileName: "deposit_page_enough_balance_deposit_button",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       final signer = SignerMock();
@@ -1535,7 +1544,7 @@ void main() {
   zGoldenTest("""When the min range is out of range, and the user does not have quote token balance
        but has enough balance of base token, the deposit button should be enabled""",
       goldenFileName: "deposit_page_min_range_out_of_range_deposit_button", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     final signer = SignerMock();
@@ -1568,7 +1577,7 @@ void main() {
   zGoldenTest("""When the max range is out of range, and the user does not have base token balance
        but has enough balance of quote token, the deposit button should be enabled""",
       goldenFileName: "deposit_page_max_range_out_of_range_deposit_button", (tester) async {
-    final selectedYield = YieldsDto.fixture().last24Yields.first;
+    final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
     final currentPriceAsTick = BigInt.from(174072);
 
     final signer = SignerMock();
@@ -1607,7 +1616,7 @@ void main() {
   zGoldenTest("When clicking the enabled deposit button, it should show the preview modal of the deposit",
       goldenFileName: "deposit_page_preview_modal", (tester) async {
     await tester.runAsync(() async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
       final currentPriceAsTick = BigInt.from(174072);
 
       final signer = SignerMock();
@@ -1643,7 +1652,7 @@ void main() {
   the quote token input should be loading""",
     goldenFileName: "deposit_page_quote_token_input_loading",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
       when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -1665,7 +1674,7 @@ void main() {
   the base token input should be loading""",
     goldenFileName: "deposit_page_base_token_input_loading",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
       when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -1688,7 +1697,7 @@ void main() {
     """,
     goldenFileName: "deposit_page_quote_token_input_enabled_after_loading",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
       when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -1711,7 +1720,7 @@ void main() {
     """,
     goldenFileName: "deposit_page_base_token_input_enabled_after_loading",
     (tester) async {
-      final selectedYield = YieldsDto.fixture().last24Yields.first;
+      final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
 
       when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
       when(() => cubit.selectedYield).thenReturn(selectedYield);
@@ -1905,7 +1914,7 @@ void main() {
       const expectedDeadline = Duration(minutes: 76);
 
       await tester.runAsync(() async {
-        final selectedYield = YieldsDto.fixture().last24Yields.first;
+        final selectedYield = YieldsDto.fixture().timeframedYields.best24hYields.first;
         final currentPriceAsTick = BigInt.from(174072);
 
         final signer = SignerMock();

@@ -11,7 +11,8 @@ class ProtocolDto with _$ProtocolDto {
   const factory ProtocolDto({
     @Default("") String name,
     @Default("") String url,
-    @Default("") @JsonKey(name: 'logo_url') String logoUrl,
+    @Default("") String logo,
+    @Default("") String positionManager,
   }) = _ProtocolDto;
 
   factory ProtocolDto.fromJson(Map<String, dynamic> json) => _$ProtocolDtoFromJson(json);
@@ -19,6 +20,7 @@ class ProtocolDto with _$ProtocolDto {
   factory ProtocolDto.fixture() => const ProtocolDto(
         name: "Uniswap",
         url: "https://app.uniswap.org/pool",
-        logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/app.uniswap.org.png",
+        logo: "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/app.uniswap.org.png",
+        positionManager: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
       );
 }

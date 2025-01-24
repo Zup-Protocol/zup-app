@@ -82,14 +82,7 @@
     "previewDepositModalInRange": "In Range",
     "previewDepositModalProtocol": "Protocol",
     "previewDepositModalNetwork": "Network",
-    "previewDepositModalYearlyYieldTimeFrame": "Yearly Yield ({timeFrame})",
-    "@previewDepositModalYearlyYieldTimeFrame": {
-        "placeholders": {
-            "timeFrame": {
-                "type": "String"
-            }
-        }
-    },
+    "previewDepositModalYearlyYield": "Yearly Yield",
     "previewDepositModalTransactionErrorSnackBarMessage": "Transaction Failed. Please try again, if the problem persists, ",
     "previewDepositModalTransactionErrorSnackBarHelperButtonTitle": "Contact us",
     "previewDepositModalDepositSuccessSnackBarMessage": "Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool at {protocol}. ",

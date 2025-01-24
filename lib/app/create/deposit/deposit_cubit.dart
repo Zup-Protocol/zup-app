@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
@@ -25,6 +26,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     this._wallet,
     this._uniswapV3Pool,
     this._cache,
+    this._appCubit,
   ) : super(const DepositState.initial());
 
   final YieldRepository _yieldRepository;
@@ -32,6 +34,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
   final Wallet _wallet;
   final UniswapV3Pool _uniswapV3Pool;
   final Cache _cache;
+  final AppCubit _appCubit;
 
   final StreamController<BigInt?> _pooltickStreamController = StreamController.broadcast();
   final StreamController<YieldDto?> _selectedYieldStreamController = StreamController.broadcast();
@@ -57,7 +60,11 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
   Future<void> getBestPools({required String token0Address, required String token1Address}) async {
     try {
       emit(const DepositState.loading());
-      final yields = await _yieldRepository.getYields(token0Address: token0Address, token1Address: token1Address);
+      final yields = await _yieldRepository.getYields(
+        token0Address: token0Address,
+        token1Address: token1Address,
+        network: _appCubit.selectedNetwork,
+      );
 
       if (yields.isEmpty) return emit(const DepositState.noYields());
 

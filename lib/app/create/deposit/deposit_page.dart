@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/widgets/deposit_settings_dropdown_child.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
@@ -47,6 +48,7 @@ Route routeBuilder(BuildContext context, RouteSettings settings) {
         inject<Wallet>(),
         inject<UniswapV3Pool>(),
         inject<Cache>(),
+        inject<AppCubit>(),
       ),
       child: const DepositPage(),
     ),
@@ -454,9 +456,9 @@ class _DepositPageState extends State<DepositPage>
       );
 
   Widget _buildYieldSelectionSector(YieldsDto yields) {
-    final best24hYield = yields.last24Yields.firstOrNull;
-    final best30dYield = yields.last30dYields.firstOrNull;
-    final best90dYield = yields.last90dYields.firstOrNull;
+    final best24hYield = yields.timeframedYields.best24hYields.firstOrNull;
+    final best30dYield = yields.timeframedYields.best30dYields.firstOrNull;
+    final best90dYield = yields.timeframedYields.best90dYields.firstOrNull;
 
     final List<Widget> yieldCards = [
       if (best24hYield != null)

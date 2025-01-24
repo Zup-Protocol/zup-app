@@ -104,9 +104,9 @@ class _YieldCardState extends State<YieldCard> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (widget.yield.protocol.logoUrl.isNotEmpty)
+                      if (widget.yield.protocol.logo.isNotEmpty)
                         zupCachedImage.build(
-                          widget.yield.protocol.logoUrl,
+                          widget.yield.protocol.logo,
                           height: 25,
                           width: 25,
                           radius: 50,

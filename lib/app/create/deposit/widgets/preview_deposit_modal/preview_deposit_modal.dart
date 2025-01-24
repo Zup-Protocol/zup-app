@@ -487,7 +487,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                           child: _fieldColumn(
                             title: S.of(context).previewDepositModalProtocol,
                             image: zupCachedImage.build(
-                              widget.currentYield.protocol.logoUrl,
+                              widget.currentYield.protocol.logo,
                               width: 30,
                               height: 30,
                               radius: 100,
@@ -509,9 +509,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                     const SizedBox(height: 20),
                     _fieldColumn(
                       spacing: 0,
-                      title: S.of(context).previewDepositModalYearlyYieldTimeFrame(
-                            timeFrame: widget.currentYield.yieldTimeFrame.compactDaysLabel(context),
-                          ),
+                      title: S.of(context).previewDepositModalYearlyYield,
                       value: widget.currentYield.yearlyYield.formatPercent,
                     ),
                     const SizedBox(height: 10),

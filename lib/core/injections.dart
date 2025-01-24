@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
@@ -33,10 +34,19 @@ abstract class InjectInstanceNames {
   static final lottieRadar = Assets.lotties.radar.path;
   static final lottieMatching = Assets.lotties.matching.path;
   static final lottieSearching = Assets.lotties.seaching.path;
+  static const zupAPIDio = 'zup_api_dio';
 }
 
 Future<void> setupInjections() async {
   await inject.reset();
+
+  inject.registerLazySingleton<Dio>(
+    () => Dio(BaseOptions(baseUrl: "https://api.zupprotocol.xyz"))
+      ..interceptors.add(
+        LogInterceptor(request: true, requestBody: true, responseBody: true, error: true),
+      ),
+    instanceName: InjectInstanceNames.zupAPIDio,
+  );
 
   inject.registerLazySingleton<ZupNavigator>(() => ZupNavigator());
   inject.registerLazySingleton<Wallet>(() => Wallet.shared);
@@ -53,7 +63,9 @@ Future<void> setupInjections() async {
     () => TokenSelectorModalCubit(inject<TokensRepository>(), inject<AppCubit>()),
   );
   inject.registerLazySingleton<Debouncer>(() => Debouncer(milliseconds: 500));
-  inject.registerLazySingleton<YieldRepository>(() => YieldRepository());
+  inject.registerLazySingleton<YieldRepository>(
+    () => YieldRepository(inject<Dio>(instanceName: InjectInstanceNames.zupAPIDio)),
+  );
   inject.registerLazySingleton<ZupHolder>(() => ZupHolder());
   inject.registerLazySingleton<Erc20>(() => Erc20());
   inject.registerLazySingleton<GlobalKey<ScaffoldMessengerState>>(() => GlobalKey<ScaffoldMessengerState>());

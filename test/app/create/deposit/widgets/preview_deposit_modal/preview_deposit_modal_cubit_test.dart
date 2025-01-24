@@ -632,7 +632,7 @@ void main() {
         () => zupRouterImpl.deposit(
           token0: any(named: "token0"),
           token1: any(named: "token1"),
-          positionManager: currentYield.positionManagerAddress,
+          positionManager: currentYield.protocol.positionManager,
           depositData: any(named: "depositData"),
         ),
       );
