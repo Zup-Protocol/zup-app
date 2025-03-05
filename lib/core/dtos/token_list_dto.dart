@@ -10,9 +10,9 @@ class TokenListDto with _$TokenListDto {
 
   @JsonSerializable(explicitToJson: true)
   const factory TokenListDto({
-    @Default(<TokenDto>[]) @JsonKey(name: "most_used_tokens") List<TokenDto> mostUsedTokens,
-    @Default(<TokenDto>[]) @JsonKey(name: "user_tokens") List<TokenDto> userTokens,
-    @Default(<TokenDto>[]) @JsonKey(name: "popular_tokens") List<TokenDto> popularTokens,
+    @Default(<TokenDto>[]) List<TokenDto> mostUsedTokens,
+    @Default(<TokenDto>[]) List<TokenDto> userTokens,
+    @Default(<TokenDto>[]) List<TokenDto> popularTokens,
   }) = _TokenListDto;
 
   factory TokenListDto.fromJson(Map<String, dynamic> json) => _$TokenListDtoFromJson(json);

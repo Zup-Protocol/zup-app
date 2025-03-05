@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:web3kit/core/core.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
@@ -10,7 +11,7 @@ import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/token_selector_button/token_selector_button.dart';
 import 'package:zup_app/widgets/token_selector_button/token_selector_button_controller.dart';
 import 'package:zup_app/widgets/zup_page_title.dart';
-import 'package:zup_core/mixins/device_info_mixin.dart';
+import 'package:zup_core/zup_core.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 class CreatePageSelectTokensStage extends StatefulWidget {
@@ -34,6 +35,20 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
   bool areTokensEqual(TokenDto? token0, TokenDto? token1) {
     if (token0 == null || token1 == null) return false;
     if (token0.address == token1.address) return true;
+
+    // Note: If implementing all networks feature, this check should be refactored to work with all networks,
+    //as all networks network does not have a native token or a wrapped native token
+    if (token0.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative!.address.toLowerCase()) &&
+        token1.address.lowercasedEquals(EthereumConstants.zeroAddress)) {
+      return true;
+    }
+
+    // Note: If implementing all networks feature, this check should be refactored to work with all networks,
+    //as all networks network does not have a native token or a wrapped native token
+    if (token1.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative!.address.toLowerCase()) &&
+        token0.address.lowercasedEquals(EthereumConstants.zeroAddress)) {
+      return true;
+    }
 
     return false;
   }

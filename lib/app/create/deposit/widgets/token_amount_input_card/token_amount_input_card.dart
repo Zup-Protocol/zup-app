@@ -22,6 +22,7 @@ class TokenAmountInputCard extends StatefulWidget {
     required this.controller,
     this.disabledText,
     required this.network,
+    this.onRefreshBalance,
   });
 
   final TokenDto token;
@@ -29,6 +30,7 @@ class TokenAmountInputCard extends StatefulWidget {
   final TextEditingController controller;
   final Function(double value) onInput;
   final String? disabledText;
+  final VoidCallback? onRefreshBalance;
 
   @override
   State<TokenAmountInputCard> createState() => _TokenAmountInputCardState();
@@ -45,6 +47,7 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
     widget.token.address,
     widget.network,
     zupSingletonCache,
+    widget.onRefreshBalance,
   );
 
   final double paddingValue = 20;

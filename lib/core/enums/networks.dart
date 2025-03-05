@@ -67,7 +67,7 @@ enum Networks {
 
   String? get rpcUrl => switch (this) {
         all => null,
-        sepolia => "https://1rpc.io/sepolia",
+        sepolia => "https://ethereum-sepolia-rpc.publicnode.com",
         scrollSepolia => "https://scroll-sepolia-rpc.publicnode.com",
       };
 

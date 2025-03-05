@@ -9,10 +9,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/fee_controller.abi.g.dart';
 import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
-import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_page.dart';
@@ -40,10 +38,8 @@ void main() {
   late ZupNavigator navigator;
   late AppCubit appCubit;
   late PositionsCubit positionsCubit;
-  late FeeController feeController;
   late UniswapV3Pool uniswapV3pool;
   late Erc20 erc20;
-  late ZupRouter zupRouter;
 
   setUp(() async {
     await Web3Kit.initializeForTest();
@@ -55,10 +51,8 @@ void main() {
     navigator = ZupNavigatorMock();
     appCubit = AppCubitMock();
     positionsCubit = PositionsCubitMock();
-    feeController = FeeControllerMock();
     uniswapV3pool = UniswapV3PoolMock();
     erc20 = Erc20Mock();
-    zupRouter = ZupRouterMock();
 
     registerFallbackValue(BuildContextMock());
     registerFallbackValue(Networks.sepolia);
@@ -98,8 +92,6 @@ void main() {
     inject.registerFactory<ZupSingletonCache>(() => ZupSingletonCache.shared);
     inject.registerFactory<GlobalKey<ScaffoldMessengerState>>(() => GlobalKey());
     inject.registerFactory<PositionsCubit>(() => positionsCubit);
-    inject.registerFactory<FeeController>(() => feeController);
-    inject.registerFactory<ZupRouter>(() => zupRouter);
     inject.registerFactory<UniswapV3Pool>(() => uniswapV3pool);
     inject.registerFactory<Erc20>(() => erc20);
     inject.registerFactory<UniswapPositionManager>(() => UniswapPositionManagerMock());

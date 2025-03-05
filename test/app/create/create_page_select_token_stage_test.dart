@@ -25,6 +25,7 @@ void main() {
   setUp(() {
     appCubit = AppCubitMock();
     tokensRepository = TokensRepositoryMock();
+    registerFallbackValue(Networks.sepolia);
 
     inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
@@ -35,7 +36,7 @@ void main() {
     );
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => TokenListDto.fixture());
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
   });
 
   tearDown(() => inject.reset());
@@ -77,7 +78,7 @@ void main() {
     const selectedNetwork = Networks.sepolia;
     final token0 = selectedNetwork.wrappedNative;
 
-    when(() => tokensRepository.getTokenList()).thenAnswer(
+    when(() => tokensRepository.getTokenList(any())).thenAnswer(
       (_) async => TokenListDto.fixture().copyWith(
         mostUsedTokens: [token0!],
         popularTokens: [token0],
@@ -101,7 +102,7 @@ void main() {
     const selectedNetwork = Networks.sepolia;
     final token0 = selectedNetwork.wrappedNative;
 
-    when(() => tokensRepository.getTokenList()).thenAnswer(
+    when(() => tokensRepository.getTokenList(any())).thenAnswer(
       (_) async => TokenListDto.fixture().copyWith(
         mostUsedTokens: [token0!],
         popularTokens: [token0],
@@ -171,7 +172,7 @@ void main() {
     const token0Name = "Token1";
     const token1Name = "Token2";
 
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => const TokenListDto(popularTokens: [
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => const TokenListDto(popularTokens: [
           TokenDto(address: "token1", name: "Token1"),
           TokenDto(address: "token2", name: "Token2"),
         ]));

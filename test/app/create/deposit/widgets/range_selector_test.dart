@@ -28,6 +28,8 @@ void main() {
               width: 600,
               child: RangeSelector(
                 key: key,
+                displayBaseTokenSymbol: "Token A",
+                displayQuoteTokenSymbol: "Token B",
                 isReversed: isReversed,
                 onPriceChanged: onPriceChanged ?? (_) {},
                 poolToken0: poolToken0 ?? TokenDto.fixture().copyWith(symbol: "Token A"),

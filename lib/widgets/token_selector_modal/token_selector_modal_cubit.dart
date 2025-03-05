@@ -28,7 +28,8 @@ class TokenSelectorModalCubit extends Cubit<TokenSelectorModalState> {
 
     try {
       emit(const TokenSelectorModalState.loading());
-      _tokenListCachedPerNetwork[_appCubit.selectedNetwork] = await _tokensRepository.getTokenList();
+      _tokenListCachedPerNetwork[_appCubit.selectedNetwork] =
+          await _tokensRepository.getTokenList(_appCubit.selectedNetwork);
 
       if (_shouldDiscardTokenListLoadedState) return;
 

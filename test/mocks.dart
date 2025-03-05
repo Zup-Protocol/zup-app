@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mocktail_image_network/mocktail_image_network.dart';
@@ -9,10 +10,8 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/fee_controller.abi.g.dart';
 import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
-import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
@@ -44,10 +43,6 @@ class DepositCubitMock extends Mock implements DepositCubit {}
 class Erc20ImplMock extends Mock implements Erc20Impl {}
 
 class Erc20Mock extends Mock implements Erc20 {}
-
-class FeeControllerImplMock extends Mock implements FeeControllerImpl {}
-
-class FeeControllerMock extends Mock implements FeeController {}
 
 class ImageProviderMock extends Mock implements ImageProvider {}
 
@@ -83,15 +78,13 @@ class ZupCachedImageMock extends Mock implements ZupCachedImage {}
 
 class ZupNavigatorMock extends Mock implements ZupNavigator {}
 
-class ZupRouterImplMock extends Mock implements ZupRouterImpl {}
-
-class ZupRouterMock extends Mock implements ZupRouter {}
-
 class ZupSingletonCacheMock extends Mock implements ZupSingletonCache {}
 
 class PreviewDepositModalCubitMock extends Mock implements PreviewDepositModalCubit {}
 
 class ZupLinksMock extends Mock implements ZupLinks {}
+
+class DioMock extends Mock implements Dio {}
 
 class ChangeNotifierMock extends Mock with ChangeNotifier {
   void notify() => notifyListeners();

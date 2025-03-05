@@ -37,7 +37,7 @@ void main() {
         chainName: "Sepolia",
         blockExplorerUrls: const ["https://sepolia.etherscan.io"],
         nativeCurrency: NativeCurrencies.eth.currencyInfo,
-        rpcUrls: const ["https://1rpc.io/sepolia"],
+        rpcUrls: const ["https://ethereum-sepolia-rpc.publicnode.com"],
       ),
       reason: "Sepolia ChainInfo should match",
     );
@@ -119,7 +119,7 @@ void main() {
 
     expect(
       Networks.sepolia.rpcUrl,
-      "https://1rpc.io/sepolia",
+      "https://ethereum-sepolia-rpc.publicnode.com",
       reason: "Sepolia rpc url should match",
     );
 

@@ -8,10 +8,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/fee_controller.abi.g.dart';
 import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
-import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
 import 'package:zup_app/app/positions/positions_cubit.dart';
@@ -49,10 +47,7 @@ void main() {
     registerFallbackValue(BigInt.zero);
     registerFallbackValue(Duration.zero);
     registerFallbackValue(Slippage.fromValue(32));
-
-    inject.registerFactory<ZupRouter>(() => ZupRouterMock());
     inject.registerFactory<UniswapV3Pool>(() => UniswapV3PoolMock());
-    inject.registerFactory<FeeController>(() => FeeControllerMock());
     inject.registerFactory<Erc20>(() => Erc20Mock());
     inject.registerFactory<UniswapPositionManager>(() => UniswapPositionManagerMock());
     inject.registerFactory<Wallet>(() => WalletMock());
@@ -94,6 +89,7 @@ void main() {
         slippage: any(named: "slippage"),
         token0Amount: any(named: "token0Amount"),
         token1Amount: any(named: "token1Amount"),
+        depositWithNative: false,
       ),
     ).thenAnswer((_) async {});
   });
@@ -111,6 +107,7 @@ void main() {
     double token1DepositAmount = 3,
     Duration deadline = const Duration(minutes: 30),
     Slippage slippage = Slippage.halfPercent,
+    bool depositWithNativeToken = false,
   }) =>
       goldenDeviceBuilder(
         Builder(builder: (context) {
@@ -122,6 +119,7 @@ void main() {
                 content: BlocProvider.value(
                   value: cubit,
                   child: PreviewDepositModal(
+                    depositWithNativeToken: depositWithNativeToken,
                     deadline: deadline,
                     maxSlippage: slippage,
                     currentYield: customYield ?? currentYield,
@@ -266,6 +264,24 @@ void main() {
           await goldenBuilder(
             minPrice: (price: 0, isInfinity: true),
             maxPrice: (price: 0, isInfinity: true),
+          ),
+          wrapper: GoldenConfig.localizationsWrapper());
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    "When depositWithNativeToken is true, the wrapped native token should be the native token",
+    goldenFileName: "preview_deposit_modal_deposit_with_native_token",
+    (tester) async {
+      await tester.pumpDeviceBuilder(
+          await goldenBuilder(
+            depositWithNativeToken: true,
+            customYield: currentYield.copyWith(
+              token0: TokenDto.fixture().copyWith(address: currentYield.network.wrappedNative!.address),
+              token1: TokenDto.fixture().copyWith(address: "0x21"),
+            ),
           ),
           wrapper: GoldenConfig.localizationsWrapper());
 
@@ -691,6 +707,7 @@ void main() {
           slippage: slippage,
           token0Amount: deposit0Amount.parseTokenAmount(decimals: currentYield.token0.decimals),
           token1Amount: deposit1Amount.parseTokenAmount(decimals: currentYield.token1.decimals),
+          depositWithNative: false,
         ),
       ).called(1);
     },
@@ -898,6 +915,7 @@ void main() {
             Builder(builder: (context) {
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 PreviewDepositModal(
+                  depositWithNativeToken: false,
                   currentYield: currentYield,
                   isReversed: true,
                   minPrice: (isInfinity: true, price: 0),
@@ -930,6 +948,7 @@ void main() {
             Builder(builder: (context) {
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 PreviewDepositModal(
+                  depositWithNativeToken: false,
                   currentYield: currentYield,
                   isReversed: true,
                   minPrice: (isInfinity: true, price: 0),

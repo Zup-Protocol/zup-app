@@ -27,11 +27,13 @@ void main() {
     tokensRepository = TokensRepositoryMock();
     appCubit = AppCubitMock();
 
+    registerFallbackValue(Networks.sepolia);
+
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerLazySingleton<TokenSelectorModalCubit>(() => TokenSelectorModalCubit(tokensRepository, appCubit));
     inject.registerLazySingleton<Debouncer>(() => Debouncer(milliseconds: 0));
 
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => TokenListDto.fixture());
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
   });

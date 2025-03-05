@@ -40,20 +40,22 @@ void main() {
       when(() => wallet.signer).thenReturn(signer);
       when(() => wallet.signerStream).thenAnswer((_) => signerStream);
       when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
-      when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
+      when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+          .thenAnswer((_) => Future.value(12.1));
 
       final sut0 = TokenAmountCardUserBalanceCubit(
         wallet,
         tokenAddress,
         Networks.sepolia,
         ZupSingletonCache.shared,
+        () {},
       );
 
       signerStreamController0.add(signer);
 
       await Future.delayed(const Duration(milliseconds: 0)); // Needed to wait for the stream to emit
 
-      verify(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
+      verify(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
       expect(sut0.state, const TokenAmountCardUserBalanceState.showUserBalance(userBalance));
     },
   );
@@ -78,6 +80,7 @@ void main() {
         tokenAddress,
         Networks.sepolia,
         ZupSingletonCache.shared,
+        () {},
       );
 
       await Future.delayed(const Duration(milliseconds: 0)); // Needed to wait for the creation
@@ -102,6 +105,7 @@ void main() {
       tokenAddress,
       Networks.sepolia,
       ZupSingletonCache.shared,
+      () {},
     );
 
     await Future.delayed(const Duration(milliseconds: 0)); // Needed to wait for the creation
@@ -118,18 +122,19 @@ void main() {
     when(() => wallet.signer).thenReturn(signer);
     when(() => wallet.signerStream).thenAnswer((_) => signerStream);
     when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
 
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
       Networks.sepolia,
       ZupSingletonCache.shared,
+      () {},
     );
 
     await sut0.getUserTokenAmount();
 
-    verify(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
+    verify(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
   });
 
   test("""
@@ -143,13 +148,14 @@ void main() {
     when(() => wallet.signer).thenReturn(signer);
     when(() => wallet.signerStream).thenAnswer((_) => signerStream);
     when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
 
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
       Networks.sepolia,
       ZupSingletonCache.shared,
+      () {},
     );
 
     const expectedUserBalance = userBalance;
@@ -163,7 +169,7 @@ void main() {
         .thenAnswer((_) => Future.value(notExpectedUserBalance));
     await sut0.getUserTokenAmount();
 
-    verify(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
+    verify(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
     expect(sut0.state, const TokenAmountCardUserBalanceState.showUserBalance(expectedUserBalance));
   });
 
@@ -178,28 +184,29 @@ void main() {
     when(() => wallet.signer).thenReturn(signer);
     when(() => wallet.signerStream).thenAnswer((_) => signerStream);
     when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
 
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
       Networks.sepolia,
       ZupSingletonCache.shared,
+      () {},
     );
 
     const expectedUserBalance = 4311.322;
     const notExpectedUserBalance = userBalance;
 
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
         .thenAnswer((_) => Future.value(notExpectedUserBalance));
     await sut0.getUserTokenAmount();
 
     await withClock(Clock(() => DateTime.now().add(const Duration(minutes: 11))), () async {
-      when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+      when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
           .thenAnswer((_) => Future.value(expectedUserBalance));
       await sut0.getUserTokenAmount();
 
-      verify(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(2);
+      verify(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(2);
       expect(sut0.state, const TokenAmountCardUserBalanceState.showUserBalance(expectedUserBalance));
     });
   });
@@ -215,27 +222,28 @@ void main() {
     when(() => wallet.signer).thenReturn(signer);
     when(() => wallet.signerStream).thenAnswer((_) => signerStream);
     when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
 
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
       Networks.sepolia,
       ZupSingletonCache.shared,
+      () {},
     );
 
     const expectedUserBalance = 4311.322;
     const notExpectedUserBalance = userBalance;
 
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
         .thenAnswer((_) => Future.value(notExpectedUserBalance));
     await sut0.getUserTokenAmount();
 
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
         .thenAnswer((_) => Future.value(expectedUserBalance));
     await sut0.getUserTokenAmount(ignoreCache: true);
 
-    verify(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(2);
+    verify(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(2);
     expect(sut0.state, const TokenAmountCardUserBalanceState.showUserBalance(expectedUserBalance));
   });
 
@@ -246,18 +254,21 @@ void main() {
     when(() => wallet.signer).thenReturn(signer);
     when(() => signer.address).thenAnswer((_) => Future.value("0xS0M3_4ddr355"));
     when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
 
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
       Networks.sepolia,
       ZupSingletonCache.shared,
+      () {},
     );
+
+    await Future.delayed(const Duration(seconds: 0));
 
     await sut0.updateToken(newTokenAddress);
 
-    verify(() => wallet.tokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
+    verify(() => wallet.nativeOrTokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
   });
 
   test("when calling `updateToken` and the signer is null, it should not get the user token balance again", () async {
@@ -266,17 +277,18 @@ void main() {
 
     when(() => wallet.signer).thenReturn(null);
     when(() => wallet.signerStream).thenAnswer((_) => const Stream.empty());
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12.1));
 
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
       Networks.sepolia,
       ZupSingletonCache.shared,
+      () {},
     );
 
     await sut0.updateToken(newTokenAddress);
 
-    verifyNever(() => wallet.tokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl")));
+    verifyNever(() => wallet.nativeOrTokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl")));
   });
 }

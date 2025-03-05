@@ -5,10 +5,8 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/fee_controller.abi.g.dart';
 import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
-import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/cache.dart';
@@ -58,7 +56,8 @@ Future<void> setupInjections() async {
   inject.registerLazySingleton<ZupCachedImage>(() => ZupCachedImage());
   inject.registerLazySingleton<PositionsCubit>(
       () => PositionsCubit(inject<Wallet>(), inject<PositionsRepository>(), inject<AppCubit>(), inject<Cache>()));
-  inject.registerLazySingleton<TokensRepository>(() => TokensRepository());
+  inject.registerLazySingleton<TokensRepository>(
+      () => TokensRepository(inject<Dio>(instanceName: InjectInstanceNames.zupAPIDio)));
   inject.registerLazySingleton<TokenSelectorModalCubit>(
     () => TokenSelectorModalCubit(inject<TokensRepository>(), inject<AppCubit>()),
   );
@@ -69,9 +68,7 @@ Future<void> setupInjections() async {
   inject.registerLazySingleton<ZupHolder>(() => ZupHolder());
   inject.registerLazySingleton<Erc20>(() => Erc20());
   inject.registerLazySingleton<GlobalKey<ScaffoldMessengerState>>(() => GlobalKey<ScaffoldMessengerState>());
-  inject.registerLazySingleton<ZupRouter>(() => ZupRouter());
   inject.registerLazySingleton<UniswapPositionManager>(() => UniswapPositionManager());
-  inject.registerLazySingleton<FeeController>(() => FeeController());
   inject.registerLazySingleton<ZupSingletonCache>(() => ZupSingletonCache.shared);
   inject.registerFactory<ZupLinks>(() => ZupLinks());
 

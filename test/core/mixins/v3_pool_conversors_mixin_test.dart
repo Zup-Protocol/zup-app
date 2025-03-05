@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
+import 'package:zup_app/core/v3_pool_constants.dart';
 
 class _V3PoolConversorsMixinTest with V3PoolConversorsMixin {}
 
@@ -23,6 +24,26 @@ void main() {
     );
 
     expect(closestValidTick, BigInt.from(5));
+  });
+
+  test("""When calling `tickToClosestValidTick` and the closest valid tick is lower
+  than the minimum tick, it should return the higher valid tick""", () {
+    final closestValidTick = _V3PoolConversorsMixinTest().tickToClosestValidTick(
+      tick: V3PoolConstants.minTick - BigInt.from(1),
+      tickSpacing: 1,
+    );
+
+    expect(closestValidTick, V3PoolConstants.minTick);
+  });
+
+  test("""When calling `tickToClosestValidTick` and the closest valid tick is higher
+  than the maximum tick, it should return the lower valid tick""", () {
+    final closestValidTick = _V3PoolConversorsMixinTest().tickToClosestValidTick(
+      tick: V3PoolConstants.maxTick + BigInt.from(2),
+      tickSpacing: 4,
+    );
+
+    expect(closestValidTick, V3PoolConstants.maxTick);
   });
 
   test("""`tickToClosestValidTick` should correctly convert a

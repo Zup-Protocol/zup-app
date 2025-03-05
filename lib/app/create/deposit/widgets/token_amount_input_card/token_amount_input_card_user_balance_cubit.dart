@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/web3kit.dart';
@@ -11,7 +12,8 @@ part 'token_amount_input_card_user_balance_cubit.freezed.dart';
 part 'token_amount_input_card_user_balance_state.dart';
 
 class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceState> with KeysMixin {
-  TokenAmountCardUserBalanceCubit(this._wallet, this._tokenAddress, this._network, this._zupSingletonCache)
+  TokenAmountCardUserBalanceCubit(
+      this._wallet, this._tokenAddress, this._network, this._zupSingletonCache, this._onRefreshBalance)
       : super(const TokenAmountCardUserBalanceState.hideUserBalance()) {
     _setupStreams();
   }
@@ -21,6 +23,7 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
   final Wallet _wallet;
   final Networks _network;
   final ZupSingletonCache _zupSingletonCache;
+  final VoidCallback? _onRefreshBalance;
 
   StreamSubscription<Signer?>? _signerStreamSubscription;
   double userBalance = 0;
@@ -43,15 +46,17 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
     try {
       emit(const TokenAmountCardUserBalanceState.loadingUserBalance());
 
-      userBalance =
-          await _zupSingletonCache.run(() async => await _wallet.tokenBalance(_tokenAddress, rpcUrl: _network.rpcUrl),
-              key: userTokenBalanceCacheKey(
-                tokenAddress: _tokenAddress,
-                userAddress: await _wallet.signer!.address,
-              ),
-              ignoreCache: ignoreCache,
-              expiration: const Duration(minutes: 10));
+      userBalance = await _zupSingletonCache.run(() async {
+        return await _wallet.nativeOrTokenBalance(_tokenAddress, rpcUrl: _network.rpcUrl);
+      },
+          key: userTokenBalanceCacheKey(
+            tokenAddress: _tokenAddress,
+            userAddress: await _wallet.signer!.address,
+          ),
+          ignoreCache: ignoreCache,
+          expiration: const Duration(minutes: 10));
 
+      _onRefreshBalance?.call();
       emit(TokenAmountCardUserBalanceState.showUserBalance(userBalance));
     } catch (e) {
       emit(const TokenAmountCardUserBalanceState.error());

@@ -90,14 +90,14 @@ class _AppHeaderState extends State<AppHeader> with DeviceInfoMixin {
                 const Spacer(),
                 NetworkSwitcher(
                   compact: !isDesktopSize(context),
-                  initialNetworkIndex: appCubit.selectedNetwork.index,
-                  onSelect: (item, index) => appCubit.updateAppNetwork(Networks.values[index]),
+                  initialNetworkIndex: 0, //appCubit.selectedNetwork.index,
+                  onSelect: (item, index) => appCubit.updateAppNetwork(Networks.values[0]),
                   networks: List.generate(
-                    Networks.values.length,
+                    1,
                     (index) => NetworkSwitcherItem(
-                      title: Networks.values[index].label,
-                      icon: Networks.values[index].icon,
-                      chainInfo: Networks.values[index].chainInfo,
+                      title: appCubit.selectedNetwork.label, //Networks.values[index].label,
+                      icon: appCubit.selectedNetwork.icon, //Networks.values[index].icon,
+                      chainInfo: appCubit.selectedNetwork.chainInfo, // Networks.values[index].chainInfo,
                     ),
                   ),
                 ),
