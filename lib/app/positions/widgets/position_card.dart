@@ -180,7 +180,7 @@ class _PositionCardState extends State<PositionCard> {
                 children: [
                   Row(
                     children: [
-                      zupCachedImage.build(widget.position.protocol?.logoUrl ?? "", height: 22, width: 22, radius: 50),
+                      zupCachedImage.build(widget.position.protocol?.logo ?? "", height: 22, width: 22, radius: 50),
                       const SizedBox(width: 10),
                       Text(
                         widget.position.protocol?.name ?? "",

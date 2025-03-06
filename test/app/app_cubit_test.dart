@@ -24,7 +24,7 @@ void main() {
 
   test("When calling the `selectedNetwork` after initializing the cubit, it should return the initial selected network",
       () {
-    expect(sut.selectedNetwork, Networks.all);
+    expect(sut.selectedNetwork, Networks.sepolia);
   });
 
   test("""When an event is emitted that the signer changed,
@@ -132,7 +132,7 @@ void main() {
 
   test("""When calling `updateAppNetwork` it should emit the state `networkChanged` with the new network
       but it should finish with the event `standard` """, () async {
-    const network = Networks.sepolia;
+    const network = Networks.scrollSepolia;
 
     expectLater(sut.stream, emitsInOrder([const AppState.networkChanged(network), const AppState.standard()]));
 
@@ -142,7 +142,7 @@ void main() {
   });
 
   test("When changing the network, it should add an event to the network stream", () {
-    const network = Networks.sepolia;
+    const network = Networks.scrollSepolia;
 
     expectLater(sut.selectedNetworkStream, emits(network));
 

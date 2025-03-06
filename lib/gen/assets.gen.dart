@@ -52,9 +52,6 @@ class $AssetsIconsGen {
   /// File path: assets/icons/exclamationmark.triangle.svg
   SvgGenImage get exclamationmarkTriangle => const SvgGenImage('assets/icons/exclamationmark.triangle.svg');
 
-  /// File path: assets/icons/filter.svg
-  SvgGenImage get filter => const SvgGenImage('assets/icons/filter.svg');
-
   /// File path: assets/icons/gear.svg
   SvgGenImage get gear => const SvgGenImage('assets/icons/gear.svg');
 
@@ -135,7 +132,6 @@ class $AssetsIconsGen {
         chevronRight,
         circleDotted,
         exclamationmarkTriangle,
-        filter,
         gear,
         infoCircle,
         lockOpen,

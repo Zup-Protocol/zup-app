@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
@@ -24,11 +25,13 @@ void main() {
   late UniswapV3PoolImpl uniswapV3PoolImpl;
   late DepositCubit sut;
   late Cache cache;
+  late AppCubit appCubit;
 
   final poolTick = BigInt.from(31276567121);
 
   setUp(() {
     registerFallbackValue(DepositSettingsDto.fixture());
+    registerFallbackValue(Networks.sepolia);
 
     yieldRepository = YieldRepositoryMock();
     zupSingletonCache = ZupSingletonCache.shared;
@@ -36,8 +39,11 @@ void main() {
     uniswapV3Pool = UniswapV3PoolMock();
     uniswapV3PoolImpl = UniswapV3PoolImplMock();
     cache = CacheMock();
+    appCubit = AppCubitMock();
 
-    sut = DepositCubit(yieldRepository, zupSingletonCache, wallet, uniswapV3Pool, cache);
+    sut = DepositCubit(yieldRepository, zupSingletonCache, wallet, uniswapV3Pool, cache, appCubit);
+
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
     when(
       () => uniswapV3Pool.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")),
@@ -141,7 +147,9 @@ void main() {
 
   test("When calling `getBestPools` it should call the yield repository to get the best pools", () async {
     when(() => yieldRepository.getYields(
-        token0Address: any(named: "token0Address"), token1Address: any(named: "token1Address"))).thenAnswer(
+        token0Address: any(named: "token0Address"),
+        token1Address: any(named: "token1Address"),
+        network: any(named: "network"))).thenAnswer(
       (_) async => YieldsDto.fixture(),
     );
 
@@ -150,12 +158,18 @@ void main() {
 
     await sut.getBestPools(token0Address: token0Address, token1Address: token1Address);
 
-    verify(() => yieldRepository.getYields(token0Address: token0Address, token1Address: token1Address)).called(1);
+    verify(() => yieldRepository.getYields(
+          token0Address: token0Address,
+          token1Address: token1Address,
+          network: any(named: "network"),
+        )).called(1);
   });
 
   test("When calling `getBestPools` and receiving an empty list of pools, it should emit the noYields state", () async {
     when(() => yieldRepository.getYields(
-        token0Address: any(named: "token0Address"), token1Address: any(named: "token1Address"))).thenAnswer(
+        token0Address: any(named: "token0Address"),
+        token1Address: any(named: "token1Address"),
+        network: any(named: "network"))).thenAnswer(
       (_) async => YieldsDto.empty(),
     );
 
@@ -169,7 +183,8 @@ void main() {
 
     when(() => yieldRepository.getYields(
         token0Address: any(named: "token0Address"),
-        token1Address: any(named: "token1Address"))).thenAnswer((_) async => pools);
+        token1Address: any(named: "token1Address"),
+        network: any(named: "network"))).thenAnswer((_) async => pools);
 
     expectLater(sut.stream, emitsInOrder([const DepositState.loading(), DepositState.success(pools)]));
 
@@ -178,7 +193,9 @@ void main() {
 
   test("When calling `getBestPools` and receiving an error, it should emit the error state", () async {
     when(() => yieldRepository.getYields(
-        token0Address: any(named: "token0Address"), token1Address: any(named: "token1Address"))).thenThrow(Exception());
+        token0Address: any(named: "token0Address"),
+        token1Address: any(named: "token1Address"),
+        network: any(named: "network"))).thenThrow(Exception());
 
     expectLater(sut.stream, emitsInOrder([const DepositState.loading(), const DepositState.error()]));
 

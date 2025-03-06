@@ -317,11 +317,11 @@ abstract class S {
   /// **'Network'**
   String get previewDepositModalNetwork;
 
-  /// No description provided for @previewDepositModalYearlyYieldTimeFrame.
+  /// No description provided for @previewDepositModalYearlyYield.
   ///
   /// In en, this message translates to:
-  /// **'Yearly Yield ({timeFrame})'**
-  String previewDepositModalYearlyYieldTimeFrame({required String timeFrame});
+  /// **'Yearly Yield'**
+  String get previewDepositModalYearlyYield;
 
   /// No description provided for @previewDepositModalTransactionErrorSnackBarMessage.
   ///
@@ -361,6 +361,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Yield (Yearly)'**
   String get yieldCardYieldYearly;
+
+  /// No description provided for @yieldCardAverageYieldYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Yield (Yearly)'**
+  String get yieldCardAverageYieldYearly;
 
   /// No description provided for @previewDepositModalDepositSuccessSnackBarHelperButtonTitle.
   ///

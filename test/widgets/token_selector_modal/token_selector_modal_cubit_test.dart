@@ -18,10 +18,11 @@ void main() {
   setUp(() {
     appCubit = AppCubitMock();
     tokensRepository = TokensRepositoryMock();
+    registerFallbackValue(Networks.sepolia);
 
     sut = TokenSelectorModalCubit(tokensRepository, appCubit);
 
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => TokenListDto.fixture());
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
     when(() => tokensRepository.searchToken(any())).thenAnswer((_) async => []);
   });
@@ -31,7 +32,7 @@ void main() {
       () async {
     final tokenList = TokenListDto.fixture().copyWith(mostUsedTokens: []);
 
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList);
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList);
 
     expectLater(
         sut.stream,
@@ -52,49 +53,49 @@ void main() {
 
     await sut.loadData();
 
-    verify(() => tokensRepository.getTokenList()).called(1);
+    verify(() => tokensRepository.getTokenList(any())).called(1);
   });
 
   test(
       "When calling `loadData` and it has not already been called yet in the current network, it should get the tokens list again",
       () async {
     final tokenList1 = TokenListDto.fixture();
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList1);
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList1);
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
     await sut.loadData();
 
     const tokenList2 = TokenListDto();
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList2);
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList2);
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.scrollSepolia);
 
     await sut.loadData();
 
     expect(sut.tokenList.hashCode, tokenList2.hashCode);
-    verify(() => tokensRepository.getTokenList()).called(2);
+    verify(() => tokensRepository.getTokenList(any())).called(2);
   });
 
   test(
       "When calling `loadData` switching networks, and the current network has already been called, it should return the cached list ",
       () async {
     final tokenList1 = TokenListDto.fixture();
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList1);
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList1);
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
     await sut.loadData();
 
     const tokenList2 = TokenListDto();
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList2);
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList2);
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.scrollSepolia);
 
     await sut.loadData();
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList1);
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList1);
     await sut.loadData();
 
     expect(sut.tokenList.hashCode, tokenList1.hashCode);
-    verify(() => tokensRepository.getTokenList()).called(2);
+    verify(() => tokensRepository.getTokenList(any())).called(2);
   });
 
   test("""When calling `loadData` and right after calling 
@@ -105,7 +106,7 @@ void main() {
     const requestDuration = Duration(milliseconds: 1);
     final tokenList = TokenListDto.fixture();
 
-    when(() => tokensRepository.getTokenList()).thenAnswer(
+    when(() => tokensRepository.getTokenList(any())).thenAnswer(
       (_) async => Future.delayed(requestDuration, () => tokenList),
     );
 
@@ -126,7 +127,8 @@ void main() {
   error, it should not update the cached list or emit error state""", () async {
     const requestDuration = Duration(milliseconds: 1);
 
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) => Future.delayed(requestDuration, () => throw "dale"));
+    when(() => tokensRepository.getTokenList(any()))
+        .thenAnswer((_) => Future.delayed(requestDuration, () => throw "dale"));
 
     sut.loadData();
     await sut.searchToken(""); // update the state before the future completes
@@ -137,7 +139,7 @@ void main() {
   });
 
   test("when calling load data, and the repository throws an error, it should emit an error state", () async {
-    when(() => tokensRepository.getTokenList()).thenThrow("dale");
+    when(() => tokensRepository.getTokenList(any())).thenThrow("dale");
 
     await sut.loadData();
 
@@ -147,7 +149,7 @@ void main() {
   test("when calling load data, and the repository returns success, it should emit the success state", () async {
     final tokenList = TokenListDto.fixture();
 
-    when(() => tokensRepository.getTokenList()).thenAnswer((_) async => tokenList);
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList);
 
     await sut.loadData();
 

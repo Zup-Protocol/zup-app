@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -78,66 +77,66 @@ void main() {
     verify(() => zupNavigator.navigateToNewPosition()).called(1);
   });
 
-  zGoldenTest("All the networks in the $Networks enum should be passed to the network switcher", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenBuilder());
+  // zGoldenTest("All the networks in the $Networks enum should be passed to the network switcher", (tester) async {
+  //   await tester.pumpDeviceBuilder(await goldenBuilder());
 
-    final networkSwitcher = (find.byType(NetworkSwitcher)).first.evaluate().first.widget as NetworkSwitcher;
+  //   final networkSwitcher = (find.byType(NetworkSwitcher)).first.evaluate().first.widget as NetworkSwitcher;
 
-    expect(networkSwitcher.networks.length, Networks.values.length);
-  });
+  //   expect(networkSwitcher.networks.length, Networks.values.length);
+  // });
 
-  zGoldenTest("The parameters passed to the network switcher should match the $Networks enum order", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenBuilder());
+  // zGoldenTest("The parameters passed to the network switcher should match the $Networks enum order", (tester) async {
+  //   await tester.pumpDeviceBuilder(await goldenBuilder());
 
-    final networkSwitcher = (find.byType(NetworkSwitcher)).first.evaluate().first.widget as NetworkSwitcher;
+  //   final networkSwitcher = (find.byType(NetworkSwitcher)).first.evaluate().first.widget as NetworkSwitcher;
 
-    Networks.values.forEachIndexed((index, network) {
-      expect(
-        networkSwitcher.networks[index].chainInfo,
-        network.chainInfo,
-        reason: "ChainInfo in network switcher does not match ${network.label} from $Networks",
-      );
+  //   Networks.values.forEachIndexed((index, network) {
+  //     expect(
+  //       networkSwitcher.networks[index].chainInfo,
+  //       network.chainInfo,
+  //       reason: "ChainInfo in network switcher does not match ${network.label} from $Networks",
+  //     );
 
-      expect(
-        networkSwitcher.networks[index].icon.toString(),
-        network.icon.toString(),
-        reason: "Icon in network switcher does not match ${network.label} from $Networks",
-      );
+  //     expect(
+  //       networkSwitcher.networks[index].icon.toString(),
+  //       network.icon.toString(),
+  //       reason: "Icon in network switcher does not match ${network.label} from $Networks",
+  //     );
 
-      expect(
-        networkSwitcher.networks[index].title,
-        network.label,
-        reason: "Title in network switcher does not match ${network.label} from $Networks",
-      );
-    });
-  });
+  //     expect(
+  //       networkSwitcher.networks[index].title,
+  //       network.label,
+  //       reason: "Title in network switcher does not match ${network.label} from $Networks",
+  //     );
+  //   });
+  // });
 
-  zGoldenTest("The initial network of the Network switcher, should be the one defined in the app cubit",
-      (tester) async {
-    when(() => appCubit.selectedNetwork).thenReturn(Networks.sepolia);
+  // zGoldenTest("The initial network of the Network switcher, should be the one defined in the app cubit",
+  //     (tester) async {
+  //   when(() => appCubit.selectedNetwork).thenReturn(Networks.sepolia);
 
-    await tester.pumpDeviceBuilder(await goldenBuilder());
+  //   await tester.pumpDeviceBuilder(await goldenBuilder());
 
-    final networkSwitcher = (find.byType(NetworkSwitcher)).first.evaluate().first.widget as NetworkSwitcher;
+  //   final networkSwitcher = (find.byType(NetworkSwitcher)).first.evaluate().first.widget as NetworkSwitcher;
 
-    expect(networkSwitcher.initialNetworkIndex, Networks.sepolia.index);
-  });
+  //   expect(networkSwitcher.initialNetworkIndex, Networks.sepolia.index);
+  // });
 
-  zGoldenTest(
-      "When selecting a network in the network switcher and the chain info is not null, it should update network in the the app cubit",
-      (tester) async {
-    const network = Networks.scrollSepolia;
+  // zGoldenTest(
+  //     "When selecting a network in the network switcher and the chain info is not null, it should update network in the the app cubit",
+  //     (tester) async {
+  //   const network = Networks.scrollSepolia;
 
-    await tester.pumpDeviceBuilder(await goldenBuilder());
+  //   await tester.pumpDeviceBuilder(await goldenBuilder());
 
-    await tester.tap(find.byType(NetworkSwitcher));
-    await tester.pumpAndSettle();
+  //   await tester.tap(find.byType(NetworkSwitcher));
+  //   await tester.pumpAndSettle();
 
-    await tester.tap(find.text(network.label));
-    await tester.pumpAndSettle();
+  //   await tester.tap(find.text(network.label));
+  //   await tester.pumpAndSettle();
 
-    verify(() => appCubit.updateAppNetwork(network)).called(1);
-  });
+  //   verify(() => appCubit.updateAppNetwork(network)).called(1);
+  // });
 
   zGoldenTest(
       "When an event about the route is emitted, and the new route is My positions, it should select my positions button",

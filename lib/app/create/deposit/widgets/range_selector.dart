@@ -47,6 +47,8 @@ class RangeSelector extends StatefulWidget {
     super.key,
     required this.poolToken0,
     required this.poolToken1,
+    required this.displayBaseTokenSymbol,
+    required this.displayQuoteTokenSymbol,
     required this.isReversed,
     required this.tickSpacing,
     required this.onPriceChanged,
@@ -58,6 +60,8 @@ class RangeSelector extends StatefulWidget {
 
   final TokenDto poolToken0;
   final TokenDto poolToken1;
+  final String displayBaseTokenSymbol;
+  final String displayQuoteTokenSymbol;
   final bool isReversed;
   final double? initialPrice;
   final int tickSpacing;
@@ -228,9 +232,7 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
           Padding(
             padding: EdgeInsets.only(left: padding),
             child: Text(
-              widget.isReversed
-                  ? "${widget.poolToken1.symbol}/${widget.poolToken0.symbol}"
-                  : "${widget.poolToken0.symbol}/${widget.poolToken1.symbol}",
+              "${widget.displayBaseTokenSymbol}/${widget.displayQuoteTokenSymbol}",
               style: const TextStyle(color: ZupColors.gray, fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),

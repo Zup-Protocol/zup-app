@@ -15,7 +15,7 @@ class AppCubit extends Cubit<AppState> {
 
   final Wallet _wallet;
 
-  Networks _selectedNetwork = Networks.all;
+  Networks _selectedNetwork = Networks.sepolia;
   final StreamController<Networks> _selectedNetworkStreamController = StreamController<Networks>.broadcast();
 
   Stream<Networks> get selectedNetworkStream => _selectedNetworkStreamController.stream;

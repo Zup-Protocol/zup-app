@@ -76,27 +76,27 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
           child: CustomScrollView(
             physics: const ClampingScrollPhysics(),
             slivers: [
-              SliverAppBar(
-                leading: const SizedBox.shrink(),
-                backgroundColor: Colors.white,
-                surfaceTintColor: Colors.white,
-                titleSpacing: 20,
-                toolbarHeight: 60,
-                automaticallyImplyLeading: false,
-                leadingWidth: 0,
-                floating: true,
-                snap: true,
-                title: ZupTextField(
-                  key: const Key("search-token-field"),
-                  hintText: S.of(context).tokenSelectorModalSearchTitle,
-                  onChanged: (query) {
-                    _debouncer.run(() async {
-                      if (query.isEmpty) return _cubit.loadData();
-                      _cubit.searchToken(query);
-                    });
-                  },
-                ),
-              ),
+              // SliverAppBar(
+              //   leading: const SizedBox.shrink(),
+              //   backgroundColor: Colors.white,
+              //   surfaceTintColor: Colors.white,
+              //   titleSpacing: 20,
+              //   toolbarHeight: 60,
+              //   automaticallyImplyLeading: false,
+              //   leadingWidth: 0,
+              //   floating: true,
+              //   snap: true,
+              //   title: ZupTextField(
+              //     key: const Key("search-token-field"),
+              //     hintText: S.of(context).tokenSelectorModalSearchTitle,
+              //     onChanged: (query) {
+              //       _debouncer.run(() async {
+              //         if (query.isEmpty) return _cubit.loadData();
+              //         _cubit.searchToken(query);
+              //       });
+              //     },
+              //   ),
+              // ),
               ...state.maybeWhen(
                 orElse: () => _buildSuccessOrLoadingSlivers(state),
                 error: () => _buildErrorStateSlivers(),

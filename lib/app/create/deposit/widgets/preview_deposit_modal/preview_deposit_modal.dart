@@ -5,10 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/fee_controller.abi.g.dart';
 import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
-import 'package:zup_app/abis/zup_router.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
 import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
@@ -22,7 +20,7 @@ import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
-import 'package:zup_core/mixins/device_info_mixin.dart';
+import 'package:zup_core/zup_core.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
@@ -36,6 +34,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
     required this.token1DepositAmount,
     required this.deadline,
     required this.maxSlippage,
+    required this.depositWithNativeToken,
   });
 
   final YieldDto currentYield;
@@ -46,6 +45,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
   final double token1DepositAmount;
   final Duration deadline;
   final Slippage maxSlippage;
+  final bool depositWithNativeToken;
 
   final double paddingSize = 20;
 
@@ -60,15 +60,15 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
         create: (context) => PreviewDepositModalCubit(
           currentYield: currentYield,
           uniswapPositionManager: inject<UniswapPositionManager>(),
-          feeController: inject<FeeController>(),
           erc20: inject<Erc20>(),
           wallet: inject<Wallet>(),
           uniswapV3Pool: inject<UniswapV3Pool>(),
           initialPoolTick: currentPoolTick,
-          zupRouter: inject<ZupRouter>(),
+          depositWithNative: depositWithNativeToken,
         ),
         child: PreviewDepositModal(
           deadline: deadline,
+          depositWithNativeToken: depositWithNativeToken,
           maxSlippage: maxSlippage,
           token0DepositAmount: token0DepositAmount,
           token1DepositAmount: token1DepositAmount,
@@ -94,8 +94,22 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
     instanceName: InjectInstanceNames.appScrollController,
   );
 
-  TokenDto get baseToken => isReversedLocal ? widget.currentYield.token1 : widget.currentYield.token0;
-  TokenDto get quoteToken => isReversedLocal ? widget.currentYield.token0 : widget.currentYield.token1;
+  TokenDto get baseToken {
+    if (isReversedLocal) {
+      return widget.currentYield.maybeNativeToken1(permitNative: widget.depositWithNativeToken);
+    }
+
+    return widget.currentYield.maybeNativeToken0(permitNative: widget.depositWithNativeToken);
+  }
+
+  TokenDto get quoteToken {
+    if (isReversedLocal) {
+      return widget.currentYield.maybeNativeToken0(permitNative: widget.depositWithNativeToken);
+    }
+
+    return widget.currentYield.maybeNativeToken1(permitNative: widget.depositWithNativeToken);
+  }
+
   double get baseTokenAmount => isReversedLocal ? widget.token1DepositAmount : widget.token0DepositAmount;
   double get quoteTokenAmount => isReversedLocal ? widget.token0DepositAmount : widget.token1DepositAmount;
   PreviewDepositModalCubit get cubit => context.read<PreviewDepositModalCubit>();
@@ -199,22 +213,26 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
         isLoading: true,
       ),
       initial: (token0Allowance, token1Allowance) {
-        if (token0Allowance < token0DepositAmount) {
-          return (
-            title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token0.symbol),
-            icon: Assets.icons.lockOpen.svg(),
-            isLoading: false,
-            onPressed: () => cubit.approveToken(widget.currentYield.token0, token0DepositAmount)
-          );
+        if (!(widget.depositWithNativeToken && widget.currentYield.isToken0WrappedNative)) {
+          if (token0Allowance < token0DepositAmount) {
+            return (
+              title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token0.symbol),
+              icon: Assets.icons.lockOpen.svg(),
+              isLoading: false,
+              onPressed: () => cubit.approveToken(widget.currentYield.token0, token0DepositAmount)
+            );
+          }
         }
 
-        if (token1Allowance < token1DepositAmount) {
-          return (
-            title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token1.symbol),
-            icon: Assets.icons.lockOpen.svg(),
-            isLoading: false,
-            onPressed: () => cubit.approveToken(widget.currentYield.token1, token1DepositAmount)
-          );
+        if (!(widget.depositWithNativeToken && widget.currentYield.isToken1WrappedNative)) {
+          if (token1Allowance < token1DepositAmount) {
+            return (
+              title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token1.symbol),
+              icon: Assets.icons.lockOpen.svg(),
+              isLoading: false,
+              onPressed: () => cubit.approveToken(widget.currentYield.token1, token1DepositAmount)
+            );
+          }
         }
 
         return (
@@ -231,6 +249,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                 isMinPriceInfinity: widget.minPrice.isInfinity,
                 isMaxPriceInfinity: widget.maxPrice.isInfinity,
                 isReversed: widget.isReversed,
+                depositWithNative: widget.depositWithNativeToken,
               ),
         );
       },
@@ -416,7 +435,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                             child: SizedBox(
                               height: 15,
                               child: Text(
-                                "${widget.currentYield.token0.symbol} / ${widget.currentYield.token1.symbol}",
+                                "${widget.currentYield.maybeNativeToken0(permitNative: widget.depositWithNativeToken).symbol} / ${widget.currentYield.maybeNativeToken1(permitNative: widget.depositWithNativeToken).symbol}",
                                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                               ),
                             ),
@@ -429,7 +448,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                             child: SizedBox(
                               height: 16,
                               child: Text(
-                                "${widget.currentYield.token1.symbol} / ${widget.currentYield.token0.symbol}",
+                                "${widget.currentYield.maybeNativeToken1(permitNative: widget.depositWithNativeToken).symbol} / ${widget.currentYield.maybeNativeToken0(permitNative: widget.depositWithNativeToken).symbol}",
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -487,7 +506,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                           child: _fieldColumn(
                             title: S.of(context).previewDepositModalProtocol,
                             image: zupCachedImage.build(
-                              widget.currentYield.protocol.logoUrl,
+                              widget.currentYield.protocol.logo,
                               width: 30,
                               height: 30,
                               radius: 100,
@@ -509,9 +528,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                     const SizedBox(height: 20),
                     _fieldColumn(
                       spacing: 0,
-                      title: S.of(context).previewDepositModalYearlyYieldTimeFrame(
-                            timeFrame: widget.currentYield.yieldTimeFrame.compactDaysLabel(context),
-                          ),
+                      title: S.of(context).previewDepositModalYearlyYield,
                       value: widget.currentYield.yearlyYield.formatPercent,
                     ),
                     const SizedBox(height: 10),

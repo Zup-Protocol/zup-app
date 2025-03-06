@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/widgets/deposit_settings_dropdown_child.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
@@ -47,6 +48,7 @@ Route routeBuilder(BuildContext context, RouteSettings settings) {
         inject<Wallet>(),
         inject<UniswapV3Pool>(),
         inject<Cache>(),
+        inject<AppCubit>(),
       ),
       child: const DepositPage(),
     ),
@@ -81,8 +83,17 @@ class _DepositPageState extends State<DepositPage>
   DepositCubit get _cubit => context.read<DepositCubit>();
   String get token0Address => _navigator.getParam(ZupNavigatorPaths.deposit.routeParamsName?.param0 ?? "") ?? "";
   String get token1Address => _navigator.getParam(ZupNavigatorPaths.deposit.routeParamsName?.param1 ?? "") ?? "";
-  TokenDto get baseToken => areTokensReversed ? _cubit.selectedYield!.token1 : _cubit.selectedYield!.token0;
-  TokenDto get quoteToken => areTokensReversed ? _cubit.selectedYield!.token0 : _cubit.selectedYield!.token1;
+  TokenDto get baseToken {
+    return areTokensReversed
+        ? _cubit.selectedYield!.maybeNativeToken1(permitNative: depositWithNativeToken)
+        : _cubit.selectedYield!.maybeNativeToken0(permitNative: depositWithNativeToken);
+  }
+
+  TokenDto get quoteToken {
+    return areTokensReversed
+        ? _cubit.selectedYield!.maybeNativeToken0(permitNative: depositWithNativeToken)
+        : _cubit.selectedYield!.maybeNativeToken1(permitNative: depositWithNativeToken);
+  }
 
   bool areTokensReversed = false;
   bool isMaxRangeInfinity = true;
@@ -90,6 +101,8 @@ class _DepositPageState extends State<DepositPage>
   bool isBaseTokenAmountUserInput = false;
   double minPrice = 0;
   double maxPrice = 0;
+  late bool depositWithNativeToken =
+      token0Address == EthereumConstants.zeroAddress || token1Address == EthereumConstants.zeroAddress;
   late Slippage selectedSlippage = _cubit.depositSettings.slippage;
   late Duration selectedDeadline = _cubit.depositSettings.deadline;
 
@@ -274,6 +287,7 @@ class _DepositPageState extends State<DepositPage>
       onPressed: () {
         PreviewDepositModal(
           key: const Key("preview-deposit-modal"),
+          depositWithNativeToken: depositWithNativeToken,
           deadline: selectedDeadline,
           maxSlippage: selectedSlippage,
           currentYield: _cubit.selectedYield!,
@@ -454,9 +468,9 @@ class _DepositPageState extends State<DepositPage>
       );
 
   Widget _buildYieldSelectionSector(YieldsDto yields) {
-    final best24hYield = yields.last24Yields.firstOrNull;
-    final best30dYield = yields.last30dYields.firstOrNull;
-    final best90dYield = yields.last90dYields.firstOrNull;
+    final best24hYield = yields.timeframedYields.best24hYields.firstOrNull;
+    final best30dYield = yields.timeframedYields.best30dYields.firstOrNull;
+    final best90dYield = yields.timeframedYields.best90dYields.firstOrNull;
 
     final List<Widget> yieldCards = [
       if (best24hYield != null)
@@ -550,7 +564,7 @@ class _DepositPageState extends State<DepositPage>
           child: IgnorePointer(
             ignoring: true,
             child: Text(
-              "${_cubit.selectedYield?.token0.symbol} / ${_cubit.selectedYield?.token1.symbol}",
+              "${_cubit.selectedYield?.maybeNativeToken0(permitNative: depositWithNativeToken).symbol} / ${_cubit.selectedYield?.maybeNativeToken1(permitNative: depositWithNativeToken).symbol}",
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),
@@ -561,7 +575,7 @@ class _DepositPageState extends State<DepositPage>
           child: IgnorePointer(
               ignoring: true,
               child: Text(
-                "${_cubit.selectedYield?.token1.symbol} / ${_cubit.selectedYield?.token0.symbol}",
+                "${_cubit.selectedYield?.maybeNativeToken1(permitNative: depositWithNativeToken).symbol} / ${_cubit.selectedYield?.maybeNativeToken0(permitNative: depositWithNativeToken).symbol}",
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               )),
         ),
@@ -637,6 +651,8 @@ class _DepositPageState extends State<DepositPage>
                 poolToken0: _cubit.selectedYield!.token0,
                 poolToken1: _cubit.selectedYield!.token1,
                 isReversed: areTokensReversed,
+                displayBaseTokenSymbol: baseToken.symbol,
+                displayQuoteTokenSymbol: quoteToken.symbol,
                 tickSpacing: _cubit.selectedYield!.tickSpacing,
                 type: RangeSelectorType.minPrice,
                 isInfinity: isMinRangeInfinity,
@@ -658,6 +674,8 @@ class _DepositPageState extends State<DepositPage>
             builder: (context, snapshot) {
               return RangeSelector(
                 key: const Key("max-price-selector"),
+                displayBaseTokenSymbol: baseToken.symbol,
+                displayQuoteTokenSymbol: quoteToken.symbol,
                 onPriceChanged: (price) {
                   setState(() {
                     if (price == 0) {
@@ -715,11 +733,39 @@ class _DepositPageState extends State<DepositPage>
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _sectionTitle(S.of(context).depositPageDepositSectionTitle),
+                    Row(
+                      children: [
+                        _sectionTitle(S.of(context).depositPageDepositSectionTitle),
+                        const Spacer(),
+                        Text(
+                          "Deposit with Native ${_cubit.selectedYield?.network.chainInfo!.nativeCurrency!.symbol}",
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          height: 32,
+                          child: FittedBox(
+                            child: Switch(
+                              value: depositWithNativeToken,
+                              onChanged: (value) {
+                                setState(() => depositWithNativeToken = value);
+                              },
+                              trackOutlineWidth: const WidgetStatePropertyAll(0),
+                              trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+                              activeTrackColor: ZupColors.brand,
+                              inactiveThumbColor: ZupColors.brand,
+                              inactiveTrackColor: ZupColors.gray5,
+                              padding: const EdgeInsets.all(0),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 12),
                     TokenAmountInputCard(
                       key: const Key("base-token-input-card"),
                       token: baseToken,
+                      onRefreshBalance: () => setState(() {}),
                       disabledText: () {
                         if (!isBaseTokenNeeded) {
                           return S.of(context).depositPageDepositSectionTokenNotNeeded(tokenSymbol: baseToken.symbol);
@@ -727,7 +773,9 @@ class _DepositPageState extends State<DepositPage>
 
                         if (!isBaseTokenAmountUserInput &&
                             !poolTickSnapshot.hasData &&
-                            quoteTokenAmountController.text.isNotEmpty) return S.of(context).loading;
+                            quoteTokenAmountController.text.isNotEmpty) {
+                          return S.of(context).loading;
+                        }
                       }.call(),
                       onInput: (amount) {
                         setState(() {
@@ -743,6 +791,7 @@ class _DepositPageState extends State<DepositPage>
                     TokenAmountInputCard(
                       key: const Key("quote-token-input-card"),
                       token: quoteToken,
+                      onRefreshBalance: () => setState(() {}),
                       disabledText: () {
                         if (!isQuoteTokenNeeded) {
                           return S.of(context).depositPageDepositSectionTokenNotNeeded(tokenSymbol: quoteToken.symbol);

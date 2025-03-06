@@ -10,7 +10,7 @@ class TokenDto with _$TokenDto {
     @Default("") String symbol,
     @Default("") String name,
     @Default("") String address,
-    @Default("") @JsonKey(name: 'logo_url') String logoUrl,
+    @Default("") String logoUrl,
     @Default(0) int decimals,
   }) = _TokenDto;
 

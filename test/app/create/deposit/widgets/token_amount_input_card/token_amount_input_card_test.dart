@@ -93,7 +93,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    verify(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).called(1);
+    verify(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).called(1);
   });
 
   zGoldenTest(""""
@@ -110,7 +110,8 @@ void main() {
     when(() => wallet.signerStream).thenAnswer((_) => signerStreamController.stream);
     when(() => wallet.signer).thenReturn(signer1);
     when(() => signer2.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(43727653762.1));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+        .thenAnswer((_) => Future.value(43727653762.1));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
     await tester.pumpAndSettle();
@@ -119,7 +120,7 @@ void main() {
     when(() => wallet.signer).thenReturn(signer2);
 
     await tester.pumpAndSettle();
-    verify(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).called(1);
+    verify(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).called(1);
   });
 
   zGoldenTest("""When there is a connected wallet,
@@ -169,7 +170,8 @@ void main() {
     const expectedValue = 43727653762.1;
     double? actualValue;
 
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(expectedValue));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+        .thenAnswer((_) => Future.value(expectedValue));
 
     await tester.pumpDeviceBuilder(await goldenBuilder(onInput: (value) => actualValue = value));
 
@@ -181,11 +183,13 @@ void main() {
 
   zGoldenTest("When clicking in the refresh button, it should get the token amount again, ignoring the cache",
       goldenFileName: "token_amount_card_refresh", (tester) async {
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(43727653762.1));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+        .thenAnswer((_) => Future.value(43727653762.1));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
 
-    when(() => wallet.tokenBalance(any(), rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) => Future.value(12345.43));
+    when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+        .thenAnswer((_) => Future.value(12345.43));
     await tester.tap(find.byKey(const Key("refresh-balance-button")));
 
     await tester.pumpAndSettle();
@@ -202,7 +206,7 @@ void main() {
       await tester.pumpDeviceBuilder(await goldenBuilder(key: key));
       await tester.pumpDeviceBuilder(await goldenBuilder(key: key, token: newToken));
 
-      verify(() => wallet.tokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
+      verify(() => wallet.nativeOrTokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
     },
   );
 

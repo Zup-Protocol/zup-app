@@ -140,9 +140,7 @@ class SEn extends S {
   String get previewDepositModalNetwork => 'Network';
 
   @override
-  String previewDepositModalYearlyYieldTimeFrame({required String timeFrame}) {
-    return 'Yearly Yield ($timeFrame)';
-  }
+  String get previewDepositModalYearlyYield => 'Yearly Yield';
 
   @override
   String get previewDepositModalTransactionErrorSnackBarMessage =>
@@ -172,6 +170,9 @@ class SEn extends S {
 
   @override
   String get yieldCardYieldYearly => 'Yield (Yearly)';
+
+  @override
+  String get yieldCardAverageYieldYearly => 'Average Yield (Yearly)';
 
   @override
   String get previewDepositModalDepositSuccessSnackBarHelperButtonTitle =>

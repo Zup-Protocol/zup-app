@@ -92,7 +92,9 @@ class _YieldCardState extends State<YieldCard> {
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: Text(
-                      S.of(context).yieldCardYieldYearly,
+                      widget.timeFrame.isDay
+                          ? S.of(context).yieldCardYieldYearly
+                          : S.of(context).yieldCardAverageYieldYearly,
                       style: const TextStyle(fontSize: 14),
                     ),
                   ),
@@ -104,9 +106,9 @@ class _YieldCardState extends State<YieldCard> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (widget.yield.protocol.logoUrl.isNotEmpty)
+                      if (widget.yield.protocol.logo.isNotEmpty)
                         zupCachedImage.build(
-                          widget.yield.protocol.logoUrl,
+                          widget.yield.protocol.logo,
                           height: 25,
                           width: 25,
                           radius: 50,
