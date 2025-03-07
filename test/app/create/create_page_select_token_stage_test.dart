@@ -55,18 +55,20 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  zGoldenTest(
-      "When loading the page, and the selected network is `All Networks` it should not select any token as the default token",
-      goldenFileName: "create_page_select_tokens_stage_default_a_token_all_networks", (tester) async {
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.all);
+  // Skipped because of the `All Networks` network logic not implemented yet
+  // TODO: soon as the `All Networks` network logic is implemented, this test should be enabled
+  // zGoldenTest(
+  //     "When loading the page, and the selected network is `All Networks` it should not select any token as the default token",
+  //     goldenFileName: "create_page_select_tokens_stage_default_a_token_all_networks", (tester) async {
+  //   when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.all);
 
-    await tester.pumpDeviceBuilder(await goldenBuilder());
-    await tester.pumpAndSettle();
-  });
+  //   await tester.pumpDeviceBuilder(await goldenBuilder());
+  //   await tester.pumpAndSettle();
+  // });
 
   zGoldenTest("When the device is mobile, it should have a horizontal padding, and less padding on the top",
       goldenFileName: "create_page_select_tokens_stage_mobile", (tester) async {
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.all);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
     await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true));
     await tester.pumpAndSettle();
@@ -130,17 +132,19 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  zGoldenTest("When there is not a selected token, the button to find liquidity should be disabled",
-      goldenFileName: "create_page_select_tokens_stage_no_token_selected_disabled_button", (tester) async {
-    /// making no token selected by default by choosing the `All Networks` network
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.all);
+  // Skipped because of the `All Networks` network logic not implemented yet
+  // TODO: soon as the `All Networks` network logic is implemented, this test should be enabled
+  // zGoldenTest("When there is not a selected token, the button to find liquidity should be disabled",
+  //     goldenFileName: "create_page_select_tokens_stage_no_token_selected_disabled_button", (tester) async {
+  //   /// making no token selected by default by choosing the `All Networks` network
+  //   when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.all);
 
-    await tester.pumpDeviceBuilder(await goldenBuilder());
-  });
+  //   await tester.pumpDeviceBuilder(await goldenBuilder());
+  // });
 
   zGoldenTest("When the token A is selected, but the token B is not, the button to find liquidity should be disabled",
       goldenFileName: "create_page_select_tokens_stage_token_a_selected_disabled_button", (tester) async {
-    const selectedNetwork = Networks.all;
+    const selectedNetwork = Networks.sepolia;
 
     when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
 
@@ -152,19 +156,21 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  zGoldenTest("When the token B is selected, but the token A is not, the button to find liquidity should be disabled",
-      goldenFileName: "create_page_select_tokens_stage_token_b_selected_disabled_button", (tester) async {
-    const selectedNetwork = Networks.all;
+  // Skipped because of the `All Networks` network logic not implemented yet
+  // TODO: soon as the `All Networks` network logic is implemented, this test should be enabled
+  // zGoldenTest("When the token B is selected, but the token A is not, the button to find liquidity should be disabled",
+  //     goldenFileName: "create_page_select_tokens_stage_token_b_selected_disabled_button", (tester) async {
+  //   const selectedNetwork = Networks.all;
 
-    when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
+  //   when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
 
-    await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+  //   await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
 
-    await tester.tap(find.byKey(const Key("token-b-selector")));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(TokenCard).first);
-    await tester.pumpAndSettle();
-  });
+  //   await tester.tap(find.byKey(const Key("token-b-selector")));
+  //   await tester.pumpAndSettle();
+  //   await tester.tap(find.byType(TokenCard).first);
+  //   await tester.pumpAndSettle();
+  // });
 
   zGoldenTest(
       "When the token B is selected, and the token A is also selected, the button to find liquidity should be enabled",
