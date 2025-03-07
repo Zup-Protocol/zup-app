@@ -343,7 +343,7 @@ class _DepositPageState extends State<DepositPage>
                           children: [
                             ZupTextButton(
                               key: const Key("back-button"),
-                              onPressed: () => _navigator.back(context),
+                              onPressed: () => _navigator.navigateToNewPosition(),
                               icon: Assets.icons.arrowLeft.svg(),
                               label: S.of(context).depositPageBackButtonTitle,
                             ),
