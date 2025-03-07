@@ -267,7 +267,7 @@ void main() {
   );
 
   zGoldenTest("When clicking back in the success state, it should navigate to the choose tokens page", (tester) async {
-    when(() => navigator.back(any())).thenAnswer((_) async {});
+    when(() => navigator.navigateToNewPosition()).thenAnswer((_) async {});
 
     when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
@@ -276,7 +276,7 @@ void main() {
     await tester.tap(find.byKey(const Key("back-button")));
     await tester.pumpAndSettle();
 
-    verify(() => navigator.back(any())).called(1);
+    verify(() => navigator.navigateToNewPosition()).called(1);
   });
 
   zGoldenTest("When hovering the title of the pool time frame section, it should show a tooltip explaining it",
