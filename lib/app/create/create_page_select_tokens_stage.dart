@@ -26,7 +26,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
   final navigator = inject<ZupNavigator>();
 
   late final token0SelectorController = TokenSelectorButtonController(
-    initialSelectedToken: appCubit.selectedNetwork.wrappedNative,
+    initialSelectedToken: appCubit.selectedNetwork.nativeCurrency,
   );
   final token1SelectorController = TokenSelectorButtonController(initialSelectedToken: null);
   StreamSubscription? _token0SelectorStreamSubscription;

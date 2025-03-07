@@ -83,6 +83,24 @@ enum Networks {
         scrollSepolia => "0x63f02Ae6B29AacFC7555E48ef129f4269B4Fe591",
       };
 
+  TokenDto get nativeCurrency => switch (this) {
+        all => throw UnsupportedError("All networks do not have a native currency"),
+        sepolia => TokenDto(
+            address: EthereumConstants.zeroAddress,
+            name: NativeCurrencies.eth.currencyInfo.name,
+            decimals: NativeCurrencies.eth.currencyInfo.decimals,
+            symbol: NativeCurrencies.eth.currencyInfo.symbol,
+            logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
+          ),
+        scrollSepolia => TokenDto(
+            address: EthereumConstants.zeroAddress,
+            name: NativeCurrencies.eth.currencyInfo.name,
+            decimals: NativeCurrencies.eth.currencyInfo.decimals,
+            symbol: NativeCurrencies.eth.currencyInfo.symbol,
+            logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
+          ),
+      };
+
   Future<void> openTx(String txHash) async {
     final url = "${chainInfo?.blockExplorerUrls?.first}/tx/$txHash";
     if (!await canLaunchUrl(Uri.parse(url))) return;

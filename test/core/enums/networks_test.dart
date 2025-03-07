@@ -3,6 +3,7 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/core/dtos/chain_info.dart';
 import 'package:web3kit/core/enums/native_currencies.dart';
+import 'package:web3kit/core/ethereum_constants.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
@@ -176,6 +177,41 @@ void main() {
         reason: "${network.name} should open the correct url",
       );
     }
+  });
+
+  test("'nativeCurrency' should throw an error for all networks network", () {
+    expect(
+      () => Networks.all.nativeCurrency,
+      throwsUnsupportedError,
+    );
+  });
+
+  test("'nativeCurrency' should return the correct currency for sepolia network", () {
+    expect(
+      Networks.sepolia.nativeCurrency,
+      TokenDto(
+        address: EthereumConstants.zeroAddress,
+        name: NativeCurrencies.eth.currencyInfo.name,
+        decimals: NativeCurrencies.eth.currencyInfo.decimals,
+        symbol: NativeCurrencies.eth.currencyInfo.symbol,
+        logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
+      ),
+      reason: "Sepolia native currency should match",
+    );
+  });
+
+  test("'nativeCurrency' should return the correct currency for scroll sepolia network", () {
+    expect(
+      Networks.scrollSepolia.nativeCurrency,
+      TokenDto(
+        address: EthereumConstants.zeroAddress,
+        name: NativeCurrencies.eth.currencyInfo.name,
+        decimals: NativeCurrencies.eth.currencyInfo.decimals,
+        symbol: NativeCurrencies.eth.currencyInfo.symbol,
+        logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
+      ),
+      reason: "Scroll Sepolia native currency should match",
+    );
   });
 
   zGoldenTest("All networks icon should match", goldenFileName: "all_networks_icon", (tester) async {
