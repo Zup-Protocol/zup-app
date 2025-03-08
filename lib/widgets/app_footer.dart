@@ -10,8 +10,8 @@ enum _AppFooterButton {
   github,
   twitter,
   telegram,
-  termsOfUse,
-  privacyPolicy,
+  // termsOfUse,
+  // privacyPolicy,
   docs,
   faq,
   contactUs;
@@ -20,8 +20,8 @@ enum _AppFooterButton {
         github => const Key("github-button"),
         twitter => const Key("twitter-button"),
         telegram => const Key("telegram-button"),
-        termsOfUse => const Key("terms-of-use-button"),
-        privacyPolicy => const Key("privacy-policy-button"),
+        // termsOfUse => const Key("terms-of-use-button"),
+        // privacyPolicy => const Key("privacy-policy-button"),
         docs => const Key("docs-button"),
         faq => const Key("faq-button"),
         contactUs => const Key("contact-us-button")
@@ -31,8 +31,8 @@ enum _AppFooterButton {
         _AppFooterButton.github => "",
         _AppFooterButton.twitter => "",
         _AppFooterButton.telegram => "",
-        _AppFooterButton.termsOfUse => S.of(context).appFooterTermsOfUse,
-        _AppFooterButton.privacyPolicy => S.of(context).appFooterPrivacyPolicy,
+        // _AppFooterButton.termsOfUse => S.of(context).appFooterTermsOfUse,
+        // _AppFooterButton.privacyPolicy => S.of(context).appFooterPrivacyPolicy,
         _AppFooterButton.docs => S.of(context).appFooterDocs,
         _AppFooterButton.faq => S.of(context).appFooterFAQ,
         _AppFooterButton.contactUs => S.of(context).appFooterContactUs
@@ -64,8 +64,8 @@ enum _AppFooterButton {
         _AppFooterButton.telegram => () {
             zupLinks.launchZupTelegram();
           },
-        _AppFooterButton.termsOfUse => () {},
-        _AppFooterButton.privacyPolicy => () {},
+        // _AppFooterButton.termsOfUse => () {},
+        // _AppFooterButton.privacyPolicy => () {},
         _AppFooterButton.docs => () {
             zupLinks.launchZupDocs();
           },
@@ -136,28 +136,28 @@ class _AppFooterState extends State<AppFooter> with DeviceInfoMixin {
             runSpacing: 10,
             spacing: 20,
             children: [
-              GestureDetector(
-                key: _AppFooterButton.termsOfUse.key,
-                onTap: _AppFooterButton.termsOfUse.onTap(_zupLinks),
-                child: Text(
-                  _AppFooterButton.termsOfUse.title(context),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: ZupColors.gray,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                key: _AppFooterButton.privacyPolicy.key,
-                onTap: _AppFooterButton.privacyPolicy.onTap(_zupLinks),
-                child: Text(
-                  _AppFooterButton.privacyPolicy.title(context),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: ZupColors.gray,
-                  ),
-                ),
-              ),
+              // GestureDetector(
+              //   key: _AppFooterButton.termsOfUse.key,
+              //   onTap: _AppFooterButton.termsOfUse.onTap(_zupLinks),
+              //   child: Text(
+              //     _AppFooterButton.termsOfUse.title(context),
+              //     style: const TextStyle(
+              //       fontSize: 14,
+              //       color: ZupColors.gray,
+              //     ),
+              //   ),
+              // ),
+              // GestureDetector(
+              //   key: _AppFooterButton.privacyPolicy.key,
+              //   onTap: _AppFooterButton.privacyPolicy.onTap(_zupLinks),
+              //   child: Text(
+              //     _AppFooterButton.privacyPolicy.title(context),
+              //     style: const TextStyle(
+              //       fontSize: 14,
+              //       color: ZupColors.gray,
+              //     ),
+              //   ),
+              // ),
               GestureDetector(
                 key: _AppFooterButton.docs.key,
                 onTap: _AppFooterButton.docs.onTap(_zupLinks),
@@ -200,18 +200,18 @@ class _AppFooterState extends State<AppFooter> with DeviceInfoMixin {
         children: [
           Assets.logos.zupGray.svg(height: 25),
           const SizedBox(width: 40),
-          ZupLightButton(
-            key: _AppFooterButton.termsOfUse.key,
-            onPressed: _AppFooterButton.termsOfUse.onTap(_zupLinks),
-            child: Text(_AppFooterButton.termsOfUse.title(context), style: const TextStyle(fontSize: 14)),
-          ),
-          _spacing(),
-          ZupLightButton(
-            key: _AppFooterButton.privacyPolicy.key,
-            onPressed: _AppFooterButton.privacyPolicy.onTap(_zupLinks),
-            child: Text(_AppFooterButton.privacyPolicy.title(context), style: const TextStyle(fontSize: 14)),
-          ),
-          _spacing(),
+          // ZupLightButton(
+          //   key: _AppFooterButton.termsOfUse.key,
+          //   onPressed: _AppFooterButton.termsOfUse.onTap(_zupLinks),
+          //   child: Text(_AppFooterButton.termsOfUse.title(context), style: const TextStyle(fontSize: 14)),
+          // ),
+          // _spacing(),
+          // ZupLightButton(
+          //   key: _AppFooterButton.privacyPolicy.key,
+          //   onPressed: _AppFooterButton.privacyPolicy.onTap(_zupLinks),
+          //   child: Text(_AppFooterButton.privacyPolicy.title(context), style: const TextStyle(fontSize: 14)),
+          // ),
+          // _spacing(),
           ZupLightButton(
             key: _AppFooterButton.docs.key,
             onPressed: _AppFooterButton.docs.onTap(_zupLinks),
