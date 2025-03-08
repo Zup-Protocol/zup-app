@@ -3,6 +3,7 @@ import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
+import 'package:zup_app/widgets/token_avatar.dart';
 import 'package:zup_app/widgets/token_selector_button/token_selector_button_controller.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
@@ -71,11 +72,7 @@ class _TokenSelectorButtonState extends State<TokenSelectorButton> with DeviceIn
                         colorFilter: const ColorFilter.mode(ZupColors.brand, BlendMode.srcIn),
                       )
                     else
-                      zupCachedImage.build(
-                        radius: 50,
-                        width: 30,
-                        selectedToken!.logoUrl,
-                      ),
+                      TokenAvatar(asset: selectedToken!, size: 30),
                     const SizedBox(width: 10),
                     Expanded(
                         child: Text(

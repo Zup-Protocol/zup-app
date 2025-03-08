@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/widgets/token_avatar.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
@@ -52,7 +53,7 @@ class _TokenCardState extends State<TokenCard> {
           ),
           child: Row(
             children: [
-              zupCachedImage.build(widget.asset.logoUrl, width: 35, radius: 50),
+              TokenAvatar(asset: widget.asset, size: 35),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(

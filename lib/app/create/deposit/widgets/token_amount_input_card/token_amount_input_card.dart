@@ -185,10 +185,7 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                 color: ZupColors.gray5,
                               ),
                             ),
-                            child: PositionToken(
-                              tokenSymbol: widget.token.symbol,
-                              tokenLogoUrl: widget.token.logoUrl,
-                            ),
+                            child: PositionToken(token: widget.token),
                           )
                         ],
                       ),

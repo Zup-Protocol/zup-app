@@ -24,7 +24,7 @@ void main() {
 
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
-    when(() => tokensRepository.searchToken(any())).thenAnswer((_) async => []);
+    when(() => tokensRepository.searchToken(any(), any())).thenAnswer((_) async => []);
   });
 
   test(
@@ -40,7 +40,7 @@ void main() {
           const TokenSelectorModalState.loading(),
           TokenSelectorModalState.success(tokenList),
           const TokenSelectorModalState.searchLoading(),
-          const TokenSelectorModalState.searchSuccess([]),
+          const TokenSelectorModalState.searchNotFound(""),
 
           // expected to emit the cached token list
           TokenSelectorModalState.success(tokenList),
@@ -159,11 +159,11 @@ void main() {
   test("When calling `searchToken`  it should call the repository with the passed query", () async {
     const query = "dale";
 
-    when(() => tokensRepository.searchToken(query)).thenAnswer((_) async => []);
+    when(() => tokensRepository.searchToken(query, any())).thenAnswer((_) async => []);
 
     await sut.searchToken(query);
 
-    verify(() => tokensRepository.searchToken(query)).called(1);
+    verify(() => tokensRepository.searchToken(query, any())).called(1);
   });
 
   test("""When calling `searchTokens` and right after call another function
@@ -172,7 +172,7 @@ void main() {
     const requestDuration = Duration(milliseconds: 1);
     final futureResult = <TokenDto>[];
 
-    when(() => tokensRepository.searchToken(any())).thenAnswer(
+    when(() => tokensRepository.searchToken(any(), any())).thenAnswer(
       (_) => Future.delayed(requestDuration, () => futureResult),
     );
 
@@ -191,7 +191,7 @@ void main() {
     const requestDuration = Duration(milliseconds: 1);
     const searchQuery = "dale";
 
-    when(() => tokensRepository.searchToken(any()))
+    when(() => tokensRepository.searchToken(any(), any()))
         .thenAnswer((_) => Future.delayed(requestDuration, () => throw "error"));
 
     expectLater(sut.stream, neverEmits(const TokenSelectorModalState.searchError(searchQuery)));
@@ -206,36 +206,49 @@ void main() {
   test("When calling `searchTokens` and the repository returns success it should emit the searchSuccess state",
       () async {
     final searchResult = [TokenDto.fixture(), TokenDto.fixture()];
-    when(() => tokensRepository.searchToken(any())).thenAnswer((_) async => searchResult);
+    when(() => tokensRepository.searchToken(any(), any())).thenAnswer((_) async => searchResult);
 
     await sut.searchToken("dale");
 
     expect(sut.state, TokenSelectorModalState.searchSuccess(searchResult));
   });
 
-  test(
-      "When calling `searchTokens` and the repository throw an error with 404, it should emit the searchNotFound state",
+  test("When calling `searchTokens` and the repository throw an generic error, it should emit the searchError state",
       () async {
     const searchQuery = "dale";
 
-    when(() => tokensRepository.searchToken(any())).thenThrow(DioException(
-      response: Response(statusCode: 404, requestOptions: RequestOptions(path: "")),
-      requestOptions: RequestOptions(path: ""),
-    ));
+    when(() => tokensRepository.searchToken(any(), any())).thenThrow("some error");
+
+    await sut.searchToken(searchQuery);
+
+    expect(sut.state, const TokenSelectorModalState.searchError(searchQuery));
+  });
+
+  test("When calling `searchTokens` and the repository returns a empty list, it should emit the search not found state",
+      () async {
+    const searchQuery = "dale";
+
+    when(() => tokensRepository.searchToken(any(), any())).thenAnswer((_) async => []);
 
     await sut.searchToken(searchQuery);
 
     expect(sut.state, const TokenSelectorModalState.searchNotFound(searchQuery));
   });
 
-  test("When calling `searchTokens` and the repository throw an generic error, it should emit the searchError state",
-      () async {
+  test("""When calling `searchTokens` and the repository throw an error,
+  but the error is because the dio request have been canceled, it should keep
+  the state as the last one""", () async {
     const searchQuery = "dale";
 
-    when(() => tokensRepository.searchToken(any())).thenThrow("some error");
+    when(() => tokensRepository.searchToken(any(), any())).thenThrow(DioException(
+      requestOptions: RequestOptions(path: ""),
+      type: DioExceptionType.cancel,
+    ));
 
+    expectLater(sut.stream, neverEmits(const TokenSelectorModalState.searchError(searchQuery)));
     await sut.searchToken(searchQuery);
 
-    expect(sut.state, const TokenSelectorModalState.searchError(searchQuery));
+    expect(sut.state, const TokenSelectorModalState.searchLoading());
+    await sut.close();
   });
 }
