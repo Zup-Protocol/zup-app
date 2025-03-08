@@ -44,17 +44,17 @@ class TokenSelectorModalCubit extends Cubit<TokenSelectorModalState> {
   Future<void> searchToken(String query) async {
     try {
       emit(const TokenSelectorModalState.searchLoading());
-      final tokensList = await _tokensRepository.searchToken(query);
+      final tokensList = await _tokensRepository.searchToken(query, _appCubit.selectedNetwork);
 
       if (_shouldDiscardSearchState) return;
+
+      if (tokensList.isEmpty) {
+        return emit(TokenSelectorModalState.searchNotFound(query));
+      }
 
       emit(TokenSelectorModalState.searchSuccess(tokensList));
     } catch (e) {
-      if (_shouldDiscardSearchState) return;
-
-      if (e is DioException && e.response?.statusCode == 404) {
-        return emit(TokenSelectorModalState.searchNotFound(query));
-      }
+      if (_shouldDiscardSearchState || (e is DioException && CancelToken.isCancel(e))) return;
 
       emit(TokenSelectorModalState.searchError(query));
     }

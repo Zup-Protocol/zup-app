@@ -7,6 +7,8 @@ class TokensRepository {
   TokensRepository(this._zupAPIDio);
 
   final Dio _zupAPIDio;
+  bool isSearchingTokens = false;
+  CancelToken? _searchTokenLastCancelToken;
 
   Future<TokenListDto> getTokenList(Networks network) async {
     final request = await _zupAPIDio.get(
@@ -19,31 +21,19 @@ class TokensRepository {
     return TokenListDto.fromJson(request.data);
   }
 
-  Future<List<TokenDto>> searchToken(String query) async {
-    await Future.delayed(const Duration(seconds: 4));
-    // throw DioException(
-    //   requestOptions: RequestOptions(path: "searchToken"),
-    //   response: Response(statusCode: 404, requestOptions: RequestOptions(path: "searchToken"), data: null),
-    // );
+  Future<List<TokenDto>> searchToken(String query, Networks network) async {
+    if (_searchTokenLastCancelToken != null) {
+      _searchTokenLastCancelToken!.cancel();
+    }
 
-    // throw "any error";
+    _searchTokenLastCancelToken = CancelToken();
 
-    /// TODO: Cancel previous requests if a new request is made
-    return [
-      TokenDto.fixture().copyWith(
-        symbol: "WETH",
-        name: "Wrapped Ether",
-        address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-        logoUrl:
-            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
-      ),
-      TokenDto.fixture().copyWith(
-        symbol: "WBTC",
-        name: "Wrapped BTC",
-        address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-        logoUrl:
-            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
-      )
-    ];
+    final response = await _zupAPIDio.get("/tokens/search", cancelToken: _searchTokenLastCancelToken, queryParameters: {
+      "network": network.name,
+      "query": query,
+    });
+
+    _searchTokenLastCancelToken = null;
+    return (response.data as List<dynamic>).map((token) => TokenDto.fromJson(token)).toList();
   }
 }

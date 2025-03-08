@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/widgets/token_avatar.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 
 class PositionToken extends StatelessWidget {
-  PositionToken({super.key, required this.tokenSymbol, required this.tokenLogoUrl});
+  PositionToken({super.key, required this.token});
 
-  final String tokenSymbol;
-  final String tokenLogoUrl;
-
+  final TokenDto token;
   final zupCachedImage = inject<ZupCachedImage>();
 
   @override
@@ -15,10 +15,10 @@ class PositionToken extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        zupCachedImage.build(tokenLogoUrl, height: 30, width: 30, radius: 50),
+        TokenAvatar(asset: token, size: 30),
         const SizedBox(width: 10),
         Text(
-          tokenSymbol,
+          token.symbol,
           style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w500,

@@ -79,13 +79,9 @@ class _PositionCardState extends State<PositionCard> {
                 children: [
                   Row(
                     children: [
-                      PositionToken(
-                          tokenSymbol: widget.position.token0?.symbol ?? "",
-                          tokenLogoUrl: widget.position.token0?.logoUrl ?? ""),
+                      PositionToken(token: widget.position.token0!),
                       const SizedBox(width: 15),
-                      PositionToken(
-                          tokenSymbol: widget.position.token1?.symbol ?? "",
-                          tokenLogoUrl: widget.position.token1?.logoUrl ?? ""),
+                      PositionToken(token: widget.position.token1!),
                       const SizedBox(width: 20),
                       if (widget.position.network != null) ...[
                         Skeleton.ignore(
