@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -33,6 +34,7 @@ abstract class InjectInstanceNames {
   static final lottieMatching = Assets.lotties.matching.path;
   static final lottieSearching = Assets.lotties.seaching.path;
   static const zupAPIDio = 'zup_api_dio';
+  static const confettiController10s = 'confetti_controller_10s';
 }
 
 Future<void> setupInjections() async {
@@ -108,7 +110,14 @@ Future<void> setupInjections() async {
     () => ZupPeriodicTask(duration: const Duration(minutes: 1)),
     instanceName: InjectInstanceNames.zupPeriodicTask1Minute,
   );
+
   inject.registerLazySingleton<UniswapV3Pool>(() => UniswapV3Pool());
+
+  // WARNING: this should be factory, as it's a controller and can/should be disposed
+  inject.registerFactory<ConfettiController>(
+    () => ConfettiController(duration: const Duration(seconds: 10)),
+    instanceName: InjectInstanceNames.confettiController10s,
+  );
 
   await inject.allReady();
 }

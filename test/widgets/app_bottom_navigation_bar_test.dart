@@ -29,7 +29,6 @@ void main() {
         device: GoldenDevice.mobile,
       );
 
-  // autoUpdateGoldenFiles = true;
   zGoldenTest(
     "When initializing the widget, and the current route is new position, it should selected the new position tab",
     goldenFileName: "app_bottom_navigation_bar_initial_new_position",

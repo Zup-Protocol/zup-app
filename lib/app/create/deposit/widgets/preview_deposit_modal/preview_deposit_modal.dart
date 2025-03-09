@@ -7,6 +7,7 @@ import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
 import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
@@ -86,7 +87,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
   State<PreviewDepositModal> createState() => _PreviewDepositModalState();
 }
 
-class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolConversorsMixin {
+class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolConversorsMixin, DeviceInfoMixin {
   final zupCachedImage = inject<ZupCachedImage>();
   final navigator = inject<ZupNavigator>();
   final scaffoldMessengerKey = inject<GlobalKey<ScaffoldMessengerState>>();
@@ -339,31 +340,14 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
             );
           },
           depositSuccess: (txId) async {
-            //TODO: Change to not navigate to my Positions
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            // Navigator.of(context).pop();
+            if (context.mounted) Navigator.of(context).pop();
+            navigator.navigateToNewPosition();
 
-            // await navigator.navigateToMyPositions();
-            // positionsCubit.getUserPositions();
-            // appScrollController.jumpTo(0);
-
-            return ScaffoldMessenger.of(context).showSnackBar(
-              ZupSnackBar(
-                context,
-                snackDuration: const Duration(days: 1),
-                hideCloseIcon: false,
-                maxWidth: 450,
-                message: S.of(context).previewDepositModalDepositSuccessSnackBarMessage(
-                      baseTokenSymbol: baseToken.symbol,
-                      quoteTokenSymbol: quoteToken.symbol,
-                      protocol: widget.currentYield.protocol.name,
-                    ),
-                type: ZupSnackBarType.success,
-                helperButton: (
-                  title: S.of(context).previewDepositModalDepositSuccessSnackBarHelperButtonTitle,
-                  onButtonTap: () => widget.currentYield.network.openTx(txId),
-                ),
-              ),
+            DepositSuccessModal.show(
+              context,
+              depositedYield: widget.currentYield,
+              showAsBottomSheet: isMobileSize(context),
             );
           },
           transactionError: () {

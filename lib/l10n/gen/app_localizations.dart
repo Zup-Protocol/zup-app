@@ -829,6 +829,42 @@ abstract class S {
   /// **'Token B'**
   String get token1;
 
+  /// No description provided for @depositSuccessModalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit Successful!'**
+  String get depositSuccessModalTitle;
+
+  /// No description provided for @depositSuccessModalDescriptionPart1.
+  ///
+  /// In en, this message translates to:
+  /// **'You have successfully deposited into'**
+  String get depositSuccessModalDescriptionPart1;
+
+  /// No description provided for @depositSuccessModalDescriptionPart2.
+  ///
+  /// In en, this message translates to:
+  /// **'Pool at'**
+  String get depositSuccessModalDescriptionPart2;
+
+  /// No description provided for @depositSuccessModalDescriptionPart3.
+  ///
+  /// In en, this message translates to:
+  /// **'on'**
+  String get depositSuccessModalDescriptionPart3;
+
+  /// No description provided for @depositSuccessModalViewPositionOnDEX.
+  ///
+  /// In en, this message translates to:
+  /// **'View Position on {dexName}'**
+  String depositSuccessModalViewPositionOnDEX({required String dexName});
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
   /// No description provided for @createPageTitle.
   ///
   /// In en, this message translates to:
