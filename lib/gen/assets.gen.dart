@@ -28,6 +28,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/arrow.left.svg
   SvgGenImage get arrowLeft => const SvgGenImage('assets/icons/arrow.left.svg');
 
+  /// File path: assets/icons/arrow.right.svg
+  SvgGenImage get arrowRight => const SvgGenImage('assets/icons/arrow.right.svg');
+
   /// File path: assets/icons/arrow.up.right.svg
   SvgGenImage get arrowUpRight => const SvgGenImage('assets/icons/arrow.up.right.svg');
 
@@ -124,6 +127,7 @@ class $AssetsIconsGen {
         arrow2Squarepath,
         arrowClockwise,
         arrowLeft,
+        arrowRight,
         arrowUpRight,
         basketFill,
         boltCircleFill,

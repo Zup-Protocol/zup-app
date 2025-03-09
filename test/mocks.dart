@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:confetti/confetti.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
@@ -85,6 +86,8 @@ class PreviewDepositModalCubitMock extends Mock implements PreviewDepositModalCu
 class ZupLinksMock extends Mock implements ZupLinks {}
 
 class DioMock extends Mock implements Dio {}
+
+class ConfettiControllerMock extends Mock implements ConfettiController {}
 
 class ChangeNotifierMock extends Mock with ChangeNotifier {
   void notify() => notifyListeners();

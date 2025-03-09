@@ -221,7 +221,7 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
           enabled: state.maybeWhen(orElse: () => false, loading: () => true),
           child: SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: _horizontalPadding).copyWith(top: 0),
+              padding: EdgeInsets.symmetric(horizontal: _horizontalPadding).copyWith(top: 10),
               child: Wrap(
                 spacing: 10,
                 runSpacing: 10,

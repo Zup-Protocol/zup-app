@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +33,7 @@ void main() {
   late ZupNavigator navigator;
   late PositionsCubit positionsCubit;
   late UrlLauncherPlatform urlLauncherPlatform;
+  late ConfettiController confettiController;
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final currentYield = YieldDto.fixture();
 
@@ -40,6 +42,7 @@ void main() {
     cubit = PreviewDepositModalCubitMock();
     positionsCubit = PositionsCubitMock();
     urlLauncherPlatform = UrlLauncherPlatformCustomMock();
+    confettiController = ConfettiControllerMock();
 
     UrlLauncherPlatform.instance = urlLauncherPlatform;
 
@@ -47,6 +50,10 @@ void main() {
     registerFallbackValue(BigInt.zero);
     registerFallbackValue(Duration.zero);
     registerFallbackValue(Slippage.fromValue(32));
+    inject.registerFactory<ConfettiController>(
+      () => confettiController,
+      instanceName: InjectInstanceNames.confettiController10s,
+    );
     inject.registerFactory<UniswapV3Pool>(() => UniswapV3PoolMock());
     inject.registerFactory<Erc20>(() => Erc20Mock());
     inject.registerFactory<UniswapPositionManager>(() => UniswapPositionManagerMock());
@@ -92,6 +99,10 @@ void main() {
         depositWithNative: false,
       ),
     ).thenAnswer((_) async {});
+
+    when(() => confettiController.duration).thenReturn(Duration.zero);
+    when(() => confettiController.play()).thenAnswer((_) async {});
+    when(() => confettiController.state).thenReturn(ConfettiControllerState.stoppedAndCleared);
   });
 
   tearDown(() {
@@ -971,29 +982,25 @@ void main() {
     },
   );
 
-  // zGoldenTest(
-  //   """When the state is depositSuccess, it should pop the modal,
-  //   navigate to the positions page, fech the user positions,
-  //   and show a snackbar of successfully deposited""",
-  //   goldenFileName: "preview_deposit_modal_deposit_success_close_and_navigate_to_positions",
-  //   (tester) async {
-  //     when(() => navigator.navigateToMyPositions()).thenAnswer((_) async {});
-  //     when(() => positionsCubit.getUserPositions()).thenAnswer((_) async => const []);
+  zGoldenTest(
+    """When the state is depositSuccess, it should navigate back to new positions and show a deposit success modal""",
+    goldenFileName: "preview_deposit_modal_deposit_success_modal",
+    (tester) async {
+      when(() => navigator.navigateToNewPosition()).thenAnswer((_) async {});
 
-  //     when(() => cubit.state).thenReturn(const PreviewDepositModalState.depositSuccess(txId: '21'));
-  //     when(() => cubit.stream).thenAnswer((_) {
-  //       return Stream.value(const PreviewDepositModalState.depositSuccess(txId: '32'));
-  //     });
+      when(() => cubit.state).thenReturn(const PreviewDepositModalState.depositSuccess(txId: '21'));
+      when(() => cubit.stream).thenAnswer((_) {
+        return Stream.value(const PreviewDepositModalState.depositSuccess(txId: '32'));
+      });
 
-  //     await tester.pumpDeviceBuilder(
-  //       await goldenBuilder(),
-  //       wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
-  //     );
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(),
+        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
+      );
 
-  //     await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-  //     verify(() => navigator.navigateToMyPositions()).called(1);
-  //     verify(() => positionsCubit.getUserPositions()).called(1);
-  //   },
-  // );
+      verify(() => navigator.navigateToNewPosition()).called(1);
+    },
+  );
 }

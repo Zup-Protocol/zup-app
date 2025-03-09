@@ -257,6 +257,19 @@
     "selectToken": "Select Token",
     "token0": "Token A",
     "token1": "Token B",
+    "depositSuccessModalTitle": "Deposit Successful!",
+    "depositSuccessModalDescriptionPart1": "You have successfully deposited into",
+    "depositSuccessModalDescriptionPart2": "Pool at",
+    "depositSuccessModalDescriptionPart3": "on",
+    "depositSuccessModalViewPositionOnDEX": "View Position on {dexName}",
+    "@depositSuccessModalViewPositionOnDEX": {
+        "placeholders": {
+            "dexName": {
+                "type": "String"
+            }
+        }
+    },
+    "close": "Close",
     "createPageTitle": "New Position",
     "createPageShowMeTheMoney": "Show me the money!",
     "createPageDescription": "Ready to dive in? First, pick the dynamic duo of tokens you want to team up in the pool. Just choose your pair right below and you’re set to make some magic!",

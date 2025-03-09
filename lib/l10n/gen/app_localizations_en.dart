@@ -453,6 +453,27 @@ class SEn extends S {
   String get token1 => 'Token B';
 
   @override
+  String get depositSuccessModalTitle => 'Deposit Successful!';
+
+  @override
+  String get depositSuccessModalDescriptionPart1 =>
+      'You have successfully deposited into';
+
+  @override
+  String get depositSuccessModalDescriptionPart2 => 'Pool at';
+
+  @override
+  String get depositSuccessModalDescriptionPart3 => 'on';
+
+  @override
+  String depositSuccessModalViewPositionOnDEX({required String dexName}) {
+    return 'View Position on $dexName';
+  }
+
+  @override
+  String get close => 'Close';
+
+  @override
   String get createPageTitle => 'New Position';
 
   @override
