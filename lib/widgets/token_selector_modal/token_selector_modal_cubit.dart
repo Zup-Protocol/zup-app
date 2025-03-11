@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/token_list_dto.dart';
@@ -11,29 +12,44 @@ part 'token_selector_modal_cubit.freezed.dart';
 part 'token_selector_modal_state.dart';
 
 class TokenSelectorModalCubit extends Cubit<TokenSelectorModalState> {
-  TokenSelectorModalCubit(this._tokensRepository, this._appCubit) : super(const TokenSelectorModalState.initial());
+  TokenSelectorModalCubit(this._tokensRepository, this._appCubit, this._wallet)
+      : super(const TokenSelectorModalState.initial());
 
   final TokensRepository _tokensRepository;
   final AppCubit _appCubit;
+  final Wallet _wallet;
 
-  final Map<Networks, TokenListDto?> _tokenListCachedPerNetwork = {};
-  TokenListDto? get tokenList => _tokenListCachedPerNetwork[_appCubit.selectedNetwork];
+  final Map<Networks, Map<String, TokenListDto>> _tokenListCachedPerNetworkByAddress = {};
+  Future<TokenListDto?> get tokenList async => _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork]
+      ?[await _wallet.signer?.address ?? EthereumConstants.zeroAddress];
 
-  void _emitSuccessCached() => emit(TokenSelectorModalState.success(tokenList!));
+  Future<void> _emitSuccessCached() async => emit(TokenSelectorModalState.success((await tokenList)!));
   bool get _shouldDiscardSearchState => state != const TokenSelectorModalState.searchLoading();
   bool get _shouldDiscardTokenListLoadedState => state != const TokenSelectorModalState.loading();
 
-  Future<void> loadData() async {
-    if (tokenList != null) return _emitSuccessCached();
+  Future<void> fetchTokenList({bool forceRefresh = false}) async {
+    if ((await tokenList) != null && !forceRefresh) {
+      return await _emitSuccessCached();
+    }
+
+    if (_tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork] == null) {
+      _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork] = {};
+    }
+
+    final userAddress = await _wallet.signer?.address ?? EthereumConstants.zeroAddress;
 
     try {
       emit(const TokenSelectorModalState.loading());
-      _tokenListCachedPerNetwork[_appCubit.selectedNetwork] =
-          await _tokensRepository.getTokenList(_appCubit.selectedNetwork);
+
+      _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork]![userAddress] =
+          await _tokensRepository.getTokenList(
+        _appCubit.selectedNetwork,
+        userAddress: await _wallet.signer?.address,
+      );
 
       if (_shouldDiscardTokenListLoadedState) return;
 
-      _emitSuccessCached();
+      await _emitSuccessCached();
     } catch (e) {
       if (_shouldDiscardTokenListLoadedState) return;
 

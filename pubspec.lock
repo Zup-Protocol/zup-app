@@ -1246,7 +1246,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "321198f16b44c64bb30ff1e6497e9e3a855a1a19"
+      resolved-ref: a0f943133634adee673f199faecadd041073732d
       url: "https://github.com/Zup-Protocol/zup-ui-kit.git"
     source: git
     version: "0.0.1"

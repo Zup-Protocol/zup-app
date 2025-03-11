@@ -35,7 +35,7 @@ void main() {
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
     when(() => cubit.stream).thenAnswer((_) => const Stream.empty());
     when(() => cubit.state).thenReturn(const TokenSelectorModalState.initial());
-    when(() => cubit.loadData()).thenAnswer((_) async {});
+    when(() => cubit.fetchTokenList()).thenAnswer((_) async {});
     when(() => cubit.searchToken(any())).thenAnswer((_) async {});
   });
 
@@ -60,7 +60,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    verify(() => cubit.loadData()).called(1);
+    verify(() => cubit.fetchTokenList()).called(1);
   });
 
   zGoldenTest("When typing on the search field, it should use the debouncer", (tester) async {
@@ -101,7 +101,7 @@ void main() {
     await tester.enterText(find.byKey(const Key("search-token-field")), "dale search");
     await tester.enterText(find.byKey(const Key("search-token-field")), "");
 
-    verify(() => cubit.loadData()).called(2); // 2 because of the initial one
+    verify(() => cubit.fetchTokenList()).called(2); // 2 because of the initial one
   });
 
   zGoldenTest("When the error state is emitted, it should show the error state",
@@ -121,7 +121,7 @@ void main() {
     await tester.tap(find.byKey(const Key("help-button")));
     await tester.pumpAndSettle();
 
-    verify(() => cubit.loadData()).called(2); // 2 because of the initial one
+    verify(() => cubit.fetchTokenList()).called(2); // 2 because of the initial one
   });
 
   zGoldenTest("When the search error is emitted, it should show the search error state",
@@ -279,4 +279,26 @@ void main() {
 
     expect(selectedToken.hashCode, tokenList.popularTokens.first.hashCode);
   });
+
+  zGoldenTest(
+    "When clicking the refresh button in the my tokens section, it should refetch the token list ignoring the cache",
+    (tester) async {
+      final tokenList = TokenListDto(
+        mostUsedTokens: [TokenDto.fixture()],
+        popularTokens: [const TokenDto()],
+        userTokens: [TokenDto.fixture()],
+      );
+
+      when(() => cubit.state).thenReturn(TokenSelectorModalState.success(tokenList));
+      when(() => cubit.fetchTokenList(forceRefresh: any(named: "forceRefresh"))).thenAnswer((_) async {});
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("refresh-button")));
+      await tester.pumpAndSettle();
+
+      verify(() => cubit.fetchTokenList(forceRefresh: true)).called(1);
+    },
+  );
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/create/deposit/widgets/token_amount_input_card/token_amount_input_card_user_balance_cubit.dart';
@@ -60,12 +59,6 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
       if (wallet.signer != null) userBalanceCubit.getUserTokenAmount();
     });
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    refreshBalanceAnimationController?.dispose();
-    super.dispose();
   }
 
   @override
@@ -241,26 +234,18 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                           ),
                                         ),
                                         const SizedBox(width: 5),
-                                        ZupIconButton(
+                                        ZupRefreshButton(
+                                          animationController: refreshBalanceAnimationController,
                                           key: const Key("refresh-balance-button"),
-                                          backgroundColor: Colors.transparent,
-                                          icon: Assets.icons.arrowClockwise.svg(),
-                                          onPressed: () => state.mapOrNull(
-                                            error: (_) => userBalanceCubit.getUserTokenAmount(ignoreCache: true),
-                                            showUserBalance: (_) => userBalanceCubit.getUserTokenAmount(
+                                          onPressed: () async => state.mapOrNull(
+                                            error: (_) async => await userBalanceCubit.getUserTokenAmount(
+                                              ignoreCache: true,
+                                            ),
+                                            showUserBalance: (_) async => await userBalanceCubit.getUserTokenAmount(
                                               ignoreCache: true,
                                             ),
                                           ),
-                                        ).animate(
-                                            autoPlay: false,
-                                            controller: refreshBalanceAnimationController,
-                                            effects: [
-                                              const RotateEffect(
-                                                duration: Duration(milliseconds: 500),
-                                                begin: 0,
-                                                end: 1,
-                                              )
-                                            ])
+                                        ),
                                       ],
                                     ),
                                   ),

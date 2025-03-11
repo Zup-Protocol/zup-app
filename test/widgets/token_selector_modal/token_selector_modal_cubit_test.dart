@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/token_list_dto.dart';
@@ -14,21 +15,23 @@ void main() {
   late TokenSelectorModalCubit sut;
   late TokensRepository tokensRepository;
   late AppCubit appCubit;
+  late Wallet wallet;
 
   setUp(() {
     appCubit = AppCubitMock();
     tokensRepository = TokensRepositoryMock();
+    wallet = WalletMock();
     registerFallbackValue(Networks.sepolia);
 
-    sut = TokenSelectorModalCubit(tokensRepository, appCubit);
+    sut = TokenSelectorModalCubit(tokensRepository, appCubit, wallet);
 
-    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
+    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
     when(() => tokensRepository.searchToken(any(), any())).thenAnswer((_) async => []);
   });
 
   test(
-      "Whe calling `loadData` and it has already been called in the same network, it should return the cached token list",
+      "Whe calling `fetchTokenList` and it has already been called in the same network, it should return the cached token list",
       () async {
     final tokenList = TokenListDto.fixture().copyWith(mostUsedTokens: []);
 
@@ -46,59 +49,59 @@ void main() {
           TokenSelectorModalState.success(tokenList),
         ]));
 
-    await sut.loadData();
+    await sut.fetchTokenList();
 
     // update the state to make it emit the cached token list again
     await sut.searchToken("");
 
-    await sut.loadData();
+    await sut.fetchTokenList();
 
     verify(() => tokensRepository.getTokenList(any())).called(1);
   });
 
   test(
-      "When calling `loadData` and it has not already been called yet in the current network, it should get the tokens list again",
+      "When calling `fetchTokenList` and it has not already been called yet in the current network, it should get the tokens list again",
       () async {
     final tokenList1 = TokenListDto.fixture();
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList1);
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
-    await sut.loadData();
+    await sut.fetchTokenList();
 
     const tokenList2 = TokenListDto();
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList2);
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.scrollSepolia);
 
-    await sut.loadData();
+    await sut.fetchTokenList();
 
-    expect(sut.tokenList.hashCode, tokenList2.hashCode);
+    expect((await sut.tokenList).hashCode, tokenList2.hashCode);
     verify(() => tokensRepository.getTokenList(any())).called(2);
   });
 
   test(
-      "When calling `loadData` switching networks, and the current network has already been called, it should return the cached list ",
+      "When calling `fetchTokenList` switching networks, and the current network has already been called, it should return the cached list ",
       () async {
     final tokenList1 = TokenListDto.fixture();
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList1);
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
-    await sut.loadData();
+    await sut.fetchTokenList();
 
     const tokenList2 = TokenListDto();
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList2);
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.scrollSepolia);
 
-    await sut.loadData();
+    await sut.fetchTokenList();
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList1);
-    await sut.loadData();
+    await sut.fetchTokenList();
 
-    expect(sut.tokenList.hashCode, tokenList1.hashCode);
+    expect((await sut.tokenList).hashCode, tokenList1.hashCode);
     verify(() => tokensRepository.getTokenList(any())).called(2);
   });
 
-  test("""When calling `loadData` and right after calling 
+  test("""When calling `fetchTokenList` and right after calling 
   another function that will change the state before the
   future to get the list of tokens completes, it should
   not emit the state of loaded, but should update the
@@ -112,15 +115,16 @@ void main() {
 
     expectLater(sut.stream, neverEmits(TokenSelectorModalState.success(tokenList)));
 
-    sut.loadData();
+    sut.fetchTokenList();
+    await Future.delayed(Duration.zero);
     await sut.searchToken(""); // update the state before the future completes
 
     await Future.delayed(requestDuration);
 
-    sut.close();
+    sut.close(); // should not emit a new state, so we close it to make the test fail if it does
   });
 
-  test("""When calling `loadData` and right after calling 
+  test("""When calling `fetchTokenList` and right after calling 
   another function that will change the state before the
   future to get the list of tokens completes, it should
   not emit the List loaded state, and if it completes with
@@ -130,7 +134,7 @@ void main() {
     when(() => tokensRepository.getTokenList(any()))
         .thenAnswer((_) => Future.delayed(requestDuration, () => throw "dale"));
 
-    sut.loadData();
+    sut.fetchTokenList();
     await sut.searchToken(""); // update the state before the future completes
 
     await Future.delayed(requestDuration);
@@ -141,7 +145,7 @@ void main() {
   test("when calling load data, and the repository throws an error, it should emit an error state", () async {
     when(() => tokensRepository.getTokenList(any())).thenThrow("dale");
 
-    await sut.loadData();
+    await sut.fetchTokenList();
 
     expect(sut.state, const TokenSelectorModalState.error());
   });
@@ -151,7 +155,7 @@ void main() {
 
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList);
 
-    await sut.loadData();
+    await sut.fetchTokenList();
 
     expect(sut.state, TokenSelectorModalState.success(tokenList));
   });
@@ -178,7 +182,7 @@ void main() {
 
     expectLater(sut.stream, neverEmits(TokenSelectorModalState.searchSuccess(futureResult)));
     sut.searchToken("dale");
-    await sut.loadData();
+    await sut.fetchTokenList();
 
     await Future.delayed(requestDuration);
 
@@ -196,7 +200,7 @@ void main() {
 
     expectLater(sut.stream, neverEmits(const TokenSelectorModalState.searchError(searchQuery)));
     sut.searchToken(searchQuery);
-    await sut.loadData();
+    await sut.fetchTokenList();
 
     await Future.delayed(requestDuration);
 
@@ -250,5 +254,31 @@ void main() {
 
     expect(sut.state, const TokenSelectorModalState.searchLoading());
     await sut.close();
+  });
+
+  test("""When calling `fetchTokenList` without a connected wallet, then connecting a wallet,
+      and calling `fetchTokenList` again, it should refetch the token list passing the user address
+      to the repository""", () async {
+    final signer = SignerMock();
+    when(() => wallet.signer).thenReturn(null);
+    await sut.fetchTokenList();
+
+    when(() => wallet.signer).thenReturn(signer);
+    when(() => signer.address).thenAnswer((_) async => "0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c");
+    await sut.fetchTokenList();
+
+    verify(
+      () => tokensRepository.getTokenList(any(), userAddress: "0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"),
+    ).called(1);
+    verify(() => tokensRepository.getTokenList(any())).called(1);
+  });
+
+  test("When calling `fetchTokenList` with 'forceRefresh' true, it should refetch the token list ignoring the cache",
+      () async {
+    await sut.fetchTokenList(forceRefresh: true);
+    await sut.fetchTokenList(forceRefresh: true);
+    await sut.fetchTokenList(forceRefresh: true);
+
+    verify(() => tokensRepository.getTokenList(any())).called(3);
   });
 }

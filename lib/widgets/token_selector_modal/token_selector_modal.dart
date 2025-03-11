@@ -53,16 +53,23 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
     Navigator.of(context).pop();
   }
 
+  Widget _buildSectionTitle(String title, {double topPadding = 20}) => Padding(
+        padding: EdgeInsets.symmetric(horizontal: _horizontalPadding).copyWith(top: topPadding, bottom: 5),
+        child: Text(title, style: const TextStyle(fontSize: 14, color: ZupColors.gray)),
+      );
+
   Widget _buildSliverSectionTitle(String title, {double topPadding = 20}) {
-    return SliverPadding(
-      padding: EdgeInsets.symmetric(horizontal: _horizontalPadding).copyWith(top: topPadding, bottom: 5),
-      sliver: SliverToBoxAdapter(child: Text(title, style: const TextStyle(fontSize: 14, color: ZupColors.gray))),
+    return SliverToBoxAdapter(
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: _buildSectionTitle(title, topPadding: topPadding),
+      ),
     );
   }
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.loadData());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _cubit.fetchTokenList());
 
     super.initState();
   }
@@ -91,7 +98,7 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
                   hintText: S.of(context).tokenSelectorModalSearchTitle,
                   onChanged: (query) {
                     _debouncer.run(() async {
-                      if (query.isEmpty) return _cubit.loadData();
+                      if (query.isEmpty) return _cubit.fetchTokenList();
                       _cubit.searchToken(query);
                     });
                   },
@@ -125,7 +132,7 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
                 description: S.of(context).tokenSelectorModalErrorDescription,
                 helpButtonTitle: S.of(context).letsGiveItAnotherShot,
                 helpButtonIcon: Assets.icons.arrowClockwise.svg(),
-                onHelpButtonTap: () => _cubit.loadData(),
+                onHelpButtonTap: () => _cubit.fetchTokenList(),
               ),
             ),
           ),
@@ -259,7 +266,27 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
             orElse: () => const SliverToBoxAdapter(),
             loading: () => _buildSliverSectionTitle("Loading..."),
             success: (tokenList) {
-              return tokenList.userTokens.isEmpty ? const SliverToBoxAdapter() : _buildSliverSectionTitle("My Tokens");
+              return tokenList.userTokens.isEmpty
+                  ? const SliverToBoxAdapter()
+                  : SliverToBoxAdapter(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildSectionTitle("My Tokens", topPadding: 0),
+                          const Spacer(),
+                          ZupRefreshButton(
+                              key: const Key("refresh-token-list"),
+                              size: 20,
+                              onPressed: () async {
+                                await Future.delayed(const Duration(milliseconds: 500));
+                                await _cubit.fetchTokenList(forceRefresh: true);
+                              }),
+                          SizedBox(
+                            width: _horizontalPadding,
+                          )
+                        ],
+                      ),
+                    );
             },
           ),
         ).sliver(),
