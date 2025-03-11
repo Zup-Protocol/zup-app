@@ -2,6 +2,7 @@ import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
@@ -22,15 +23,19 @@ import '../../mocks.dart';
 void main() {
   late TokensRepository tokensRepository;
   late AppCubit appCubit;
+  late Wallet wallet;
 
   setUp(() {
     tokensRepository = TokensRepositoryMock();
     appCubit = AppCubitMock();
+    wallet = WalletMock();
 
     registerFallbackValue(Networks.sepolia);
 
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
-    inject.registerLazySingleton<TokenSelectorModalCubit>(() => TokenSelectorModalCubit(tokensRepository, appCubit));
+    inject.registerLazySingleton<TokenSelectorModalCubit>(
+      () => TokenSelectorModalCubit(tokensRepository, appCubit, wallet),
+    );
     inject.registerLazySingleton<Debouncer>(() => Debouncer(milliseconds: 0));
 
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/create_page_select_tokens_stage.dart';
 import 'package:zup_app/core/debouncer.dart';
@@ -21,10 +22,13 @@ import '../../mocks.dart';
 void main() {
   late AppCubit appCubit;
   late TokensRepository tokensRepository;
+  late Wallet wallet;
 
   setUp(() {
     appCubit = AppCubitMock();
     tokensRepository = TokensRepositoryMock();
+    wallet = WalletMock();
+
     registerFallbackValue(Networks.sepolia);
 
     inject.registerFactory<AppCubit>(() => appCubit);
@@ -32,7 +36,7 @@ void main() {
     inject.registerFactory<Debouncer>(() => Debouncer(milliseconds: 0));
     inject.registerFactory<ZupNavigator>(() => ZupNavigatorMock());
     inject.registerLazySingleton<TokenSelectorModalCubit>(
-      () => TokenSelectorModalCubit(tokensRepository, appCubit),
+      () => TokenSelectorModalCubit(tokensRepository, appCubit, wallet),
     );
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);

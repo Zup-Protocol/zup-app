@@ -10,11 +10,12 @@ class TokensRepository {
   bool isSearchingTokens = false;
   CancelToken? _searchTokenLastCancelToken;
 
-  Future<TokenListDto> getTokenList(Networks network) async {
+  Future<TokenListDto> getTokenList(Networks network, {String? userAddress}) async {
     final request = await _zupAPIDio.get(
       "/tokens",
       queryParameters: {
         "network": network.name,
+        if (userAddress != null) "userAddress": userAddress,
       },
     );
 

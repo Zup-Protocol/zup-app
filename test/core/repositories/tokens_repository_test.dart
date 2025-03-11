@@ -36,6 +36,28 @@ void main() {
         ));
   });
 
+  test("When calling `getTokenList passing a user address, it should include the user address in the request",
+      () async {
+    const userAddress = "0x123";
+    when(() => dio.get(any(), queryParameters: any(named: "queryParameters"))).thenAnswer(
+      (_) async => Response(
+        data: TokenListDto.fixture().toJson(),
+        statusCode: 200,
+        requestOptions: RequestOptions(),
+      ),
+    );
+
+    await sut.getTokenList(Networks.sepolia, userAddress: userAddress);
+
+    verify(() => dio.get(
+          "/tokens",
+          queryParameters: {
+            "network": Networks.sepolia.name,
+            "userAddress": userAddress,
+          },
+        ));
+  });
+
   test("When calling `getTokenList` it should correctly parse the response", () async {
     final tokens = TokenListDto.fixture();
 

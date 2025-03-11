@@ -61,7 +61,7 @@ Future<void> setupInjections() async {
   inject.registerLazySingleton<TokensRepository>(
       () => TokensRepository(inject<Dio>(instanceName: InjectInstanceNames.zupAPIDio)));
   inject.registerLazySingleton<TokenSelectorModalCubit>(
-    () => TokenSelectorModalCubit(inject<TokensRepository>(), inject<AppCubit>()),
+    () => TokenSelectorModalCubit(inject<TokensRepository>(), inject<AppCubit>(), inject<Wallet>()),
   );
   inject.registerLazySingleton<Debouncer>(() => Debouncer(milliseconds: 500));
   inject.registerLazySingleton<YieldRepository>(
