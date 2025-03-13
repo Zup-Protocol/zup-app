@@ -4,6 +4,10 @@ on:
     pull_request:
         branches:
             - main
+        paths:
+            - "lib"
+            - "test"
+            - "assets"
 jobs:
     run-tests:
         runs-on: macos-latest
