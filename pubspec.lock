@@ -830,8 +830,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: main
-      resolved-ref: bc6593a8fe4ea21f4bc66f6995fc9e35bc1b9306
+      ref: hotfix-vercel
+      resolved-ref: c43d65f57143605eaa2b7c4d9be753f2baa50307
       url: "https://github.com/RyanHolanda/routefly.git"
     source: git
     version: "3.1.3"

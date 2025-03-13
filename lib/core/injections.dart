@@ -41,7 +41,7 @@ Future<void> setupInjections() async {
   await inject.reset();
 
   inject.registerLazySingleton<Dio>(
-    () => Dio(BaseOptions(baseUrl: "http://localhost:3000"))
+    () => Dio(BaseOptions(baseUrl: "https://api.zupprotocol.xyz"))
       ..interceptors.add(
         LogInterceptor(request: true, requestBody: true, responseBody: true, error: true),
       ),
