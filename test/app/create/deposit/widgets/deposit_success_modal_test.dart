@@ -7,7 +7,9 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
 import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
+import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/widgets/token_avatar.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 
 import '../../../../golden_config.dart';
@@ -33,11 +35,19 @@ void main() {
 
   tearDown(() => inject.reset());
 
-  Future<DeviceBuilder> goldenBuilder({YieldDto? customYield}) async =>
+  Future<DeviceBuilder> goldenBuilder({
+    YieldDto? customYield,
+    bool showAsBottomSheet = false,
+    bool depositedWithNative = false,
+  }) async =>
       await goldenDeviceBuilder(Builder(builder: (context) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          DepositSuccessModal.show(context,
-              depositedYield: customYield ?? YieldDto.fixture().copyWith(), showAsBottomSheet: false);
+          DepositSuccessModal.show(
+            context,
+            depositedYield: customYield ?? YieldDto.fixture().copyWith(),
+            showAsBottomSheet: showAsBottomSheet,
+            depositedWithNative: depositedWithNative,
+          );
         });
 
         return const SizedBox.shrink();
@@ -95,5 +105,67 @@ void main() {
 
     await tester.tap(find.byKey(const Key("close-button")));
     await tester.pumpAndSettle();
+  });
+
+  zGoldenTest("When passing showAsBottomSheet to true, the modal should be displayed as a bottom sheet",
+      goldenFileName: "deposit_success_modal_bottom_sheet", (tester) async {
+    await tester.pumpDeviceBuilder(
+      await goldenBuilder(showAsBottomSheet: true),
+      wrapper: GoldenConfig.localizationsWrapper(),
+    );
+    await tester.pumpAndSettle();
+  });
+
+  zGoldenTest(
+      """When passing depositedWithNative to true, the modal should use the native token symbol in the description
+  if the token0 or token1 are wrapped natives""", (tester) async {
+    final wrappedNativeYield = YieldDto.fixture().copyWith(
+      network: Networks.sepolia,
+      token0: Networks.sepolia.wrappedNative!,
+      token1: Networks.sepolia.wrappedNative!,
+    );
+
+    await tester.pumpDeviceBuilder(
+      await goldenBuilder(
+        depositedWithNative: true,
+        customYield: wrappedNativeYield,
+      ),
+      wrapper: GoldenConfig.localizationsWrapper(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        "You have successfully deposited into ETH/ETH Pool at ${wrappedNativeYield.protocol.name} on ${wrappedNativeYield.network.label}",
+        findRichText: true,
+      ),
+      findsOne,
+    );
+  });
+
+  zGoldenTest(
+      """When passing depositedWithNative to true, the modal should use the native token images in the tokenavatars
+      (if the token0 or token1 are wrapped natives)""", (tester) async {
+    final wrappedNativeYield = YieldDto.fixture().copyWith(
+      network: Networks.sepolia,
+      token0: Networks.sepolia.wrappedNative!,
+      token1: Networks.sepolia.wrappedNative!,
+    );
+
+    await tester.pumpDeviceBuilder(
+      await goldenBuilder(
+        depositedWithNative: true,
+        customYield: wrappedNativeYield,
+      ),
+      wrapper: GoldenConfig.localizationsWrapper(),
+    );
+    await tester.pumpAndSettle();
+
+    final tokenAvatars = find.byType(TokenAvatar).evaluate();
+    final token0Avatar = tokenAvatars.first.widget as TokenAvatar;
+    final token1Avatar = tokenAvatars.last.widget as TokenAvatar;
+
+    expect(token0Avatar.asset, wrappedNativeYield.maybeNativeToken0(permitNative: true));
+    expect(token1Avatar.asset, wrappedNativeYield.maybeNativeToken1(permitNative: true));
   });
 }

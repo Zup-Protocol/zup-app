@@ -69,7 +69,7 @@ Future<void> setupInjections() async {
   );
   inject.registerLazySingleton<ZupHolder>(() => ZupHolder());
   inject.registerLazySingleton<Erc20>(() => Erc20());
-  inject.registerLazySingleton<GlobalKey<ScaffoldMessengerState>>(() => GlobalKey<ScaffoldMessengerState>());
+  inject.registerLazySingleton<GlobalKey<NavigatorState>>(() => GlobalKey<NavigatorState>());
   inject.registerLazySingleton<UniswapPositionManager>(() => UniswapPositionManager());
   inject.registerLazySingleton<ZupSingletonCache>(() => ZupSingletonCache.shared);
   inject.registerFactory<ZupLinks>(() => ZupLinks());

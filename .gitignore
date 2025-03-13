@@ -17,6 +17,7 @@ coverage/
 # Generated code
 lib/**/**.g.dart
 lib/**/**.freezed.dart
+lib/**/**.route.dart
 
 # IntelliJ related
 *.iml

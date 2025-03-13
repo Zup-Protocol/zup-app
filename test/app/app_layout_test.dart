@@ -13,7 +13,7 @@ import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
-import 'package:zup_app/routes.g.dart';
+import 'package:zup_app/zup_app.dart';
 
 import '../golden_config.dart';
 import '../mocks.dart';

@@ -5,19 +5,22 @@ import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
-import 'package:zup_app/routes.g.dart';
 import 'package:zup_app/theme/theme.dart';
 
+import 'zup_app.route.dart';
+
+part 'zup_app.g.dart';
+
+@Main("lib/app")
 class ZupApp extends StatelessWidget {
   ZupApp({super.key});
 
-  final scaffoldMessengerKey = inject<GlobalKey<ScaffoldMessengerState>>();
+  final navigatorKey = inject<GlobalKey<NavigatorState>>();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: "Zup | Liquidity Pools Aggregator",
-      scaffoldMessengerKey: scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -28,6 +31,7 @@ class ZupApp extends StatelessWidget {
       routerConfig: Routefly.routerConfig(
         routes: routes,
         initialPath: ZupNavigatorPaths.initial.path,
+        navigatorKey: navigatorKey,
         routeBuilder: (_, settings, child) {
           return PageRouteBuilder(
             settings: settings,

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
-import 'package:zup_app/routes.g.dart';
+import 'package:zup_app/zup_app.dart';
 
 void main() {
   test("Zup navigator paths `initial` path should be create", () {

@@ -37,11 +37,13 @@ class GoldenConfig {
   static final mobileDevice = [const Device(size: Size(375, 812), name: "mobile")];
 
   static final scrollController = ScrollController();
+  static final navigatorKey = GlobalKey<NavigatorState>();
 
   static Future<Widget> builder(Widget child) async {
     await loadAppFonts();
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
