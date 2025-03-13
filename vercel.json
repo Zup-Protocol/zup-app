@@ -1,5 +1,5 @@
 {
-    "buildCommand": "flutter/bin/dart run build_runner build --delete-conflicting-outputs && flutter/bin/dart run web3kit:generate_abis && flutter/bin/flutter build web --release",
+    "buildCommand": "flutter/bin/dart run build_runner build && flutter/bin/dart run web3kit:generate_abis && flutter/bin/flutter build web --release",
     "outputDirectory": "build/web",
     "installCommand": "git clone https://github.com/flutter/flutter.git -b stable && ls && cd flutter && git checkout 3.27.3 && cd .. && flutter/bin/flutter doctor && flutter/bin/flutter clean && flutter/bin/flutter pub get",
     "rewrites": [
