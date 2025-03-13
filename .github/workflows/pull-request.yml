@@ -5,9 +5,9 @@ on:
         branches:
             - main
         paths:
-            - "./lib/"
-            - "./test/"
-            - "./assets/"
+            - "lib/**"
+            - "test/**"
+            - "assets/**"
 jobs:
     run-tests:
         runs-on: macos-latest
