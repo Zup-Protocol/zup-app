@@ -853,6 +853,26 @@ abstract class S {
   /// **'on'**
   String get depositSuccessModalDescriptionPart3;
 
+  /// No description provided for @previewDepositModalCubitDepositingSnackBarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Depositing into {token0Symbol}/{token1Symbol} Pool...'**
+  String previewDepositModalCubitDepositingSnackBarMessage(
+      {required String token0Symbol, required String token1Symbol});
+
+  /// No description provided for @previewDepositModalCubitApprovingSnackBarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Approving...'**
+  String get previewDepositModalCubitApprovingSnackBarMessage;
+
+  /// No description provided for @previewDepositModalCubitApprovedSnackBarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully approved {tokenSymbol}'**
+  String previewDepositModalCubitApprovedSnackBarMessage(
+      {required String tokenSymbol});
+
   /// No description provided for @depositSuccessModalViewPositionOnDEX.
   ///
   /// In en, this message translates to:

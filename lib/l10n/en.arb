@@ -261,6 +261,26 @@
     "depositSuccessModalDescriptionPart1": "You have successfully deposited into",
     "depositSuccessModalDescriptionPart2": "Pool at",
     "depositSuccessModalDescriptionPart3": "on",
+    "previewDepositModalCubitDepositingSnackBarMessage": "Depositing into {token0Symbol}/{token1Symbol} Pool...",
+    "@previewDepositModalCubitDepositingSnackBarMessage": {
+        "placeholders": {
+            "token0Symbol": {
+                "type": "String"
+            },
+            "token1Symbol": {
+                "type": "String"
+            }
+        }
+    },
+    "previewDepositModalCubitApprovingSnackBarMessage": "Approving...",
+    "previewDepositModalCubitApprovedSnackBarMessage": "Successfully approved {tokenSymbol}",
+    "@previewDepositModalCubitApprovedSnackBarMessage": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
     "depositSuccessModalViewPositionOnDEX": "View Position on {dexName}",
     "@depositSuccessModalViewPositionOnDEX": {
         "placeholders": {

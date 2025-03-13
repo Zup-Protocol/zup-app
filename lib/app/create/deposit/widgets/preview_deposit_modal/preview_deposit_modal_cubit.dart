@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:clock/clock.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
@@ -9,16 +10,20 @@ import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/l10n/gen/app_localizations.dart';
+import 'package:zup_core/mixins/device_info_mixin.dart';
+import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 part "preview_deposit_modal_cubit.freezed.dart";
 part "preview_deposit_modal_state.dart";
 
-class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3PoolConversorsMixin {
+class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3PoolConversorsMixin, DeviceInfoMixin {
   PreviewDepositModalCubit({
     required BigInt initialPoolTick,
     required UniswapV3Pool uniswapV3Pool,
@@ -26,6 +31,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     required Erc20 erc20,
     required Wallet wallet,
     required UniswapPositionManager uniswapPositionManager,
+    required GlobalKey<NavigatorState> navigatorKey,
     required bool depositWithNative,
   })  : _yield = currentYield,
         _uniswapV3Pool = uniswapV3Pool,
@@ -33,6 +39,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
         _wallet = wallet,
         _uniswapPositionManager = uniswapPositionManager,
         _latestPoolTick = initialPoolTick,
+        _navigatorKey = navigatorKey,
+        _depositWithNative = depositWithNative,
         super(const PreviewDepositModalState.loading());
 
   final UniswapV3Pool _uniswapV3Pool;
@@ -40,6 +48,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
   final YieldDto _yield;
   final Wallet _wallet;
   final UniswapPositionManager _uniswapPositionManager;
+  final GlobalKey<NavigatorState> _navigatorKey;
+  final bool _depositWithNative;
 
   final StreamController<BigInt> _poolTickStreamController = StreamController<BigInt>.broadcast();
 
@@ -80,7 +90,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       final contract = _erc20.fromSigner(contractAddress: token.address, signer: _wallet.signer!);
       final tx = await contract.approve(spender: _yield.protocol.positionManager, value: value);
 
-      emit(PreviewDepositModalState.waitingTransaction(txId: tx.hash));
+      emit(PreviewDepositModalState.waitingTransaction(txId: tx.hash, type: WaitingTransactionType.approve));
 
       await tx.waitConfirmation();
 
@@ -111,7 +121,6 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     required bool isReversed,
     required Slippage slippage,
     required Duration deadline,
-    required bool depositWithNative,
   }) async {
     try {
       emit(const PreviewDepositModalState.depositing());
@@ -166,7 +175,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       final amount1Min = slippage.calculateTokenAmountFromSlippage(amount1Desired);
 
       final TransactionResponse tx = await () async {
-        if (depositWithNative) {
+        if (_depositWithNative) {
           final mintCalldata = _uniswapPositionManager.getMintCalldata(
             params: (
               amount0Desired: amount0Desired,
@@ -186,14 +195,14 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
           return await positionManagerContract.multicall(
               data: [
                 mintCalldata,
-                if (depositWithNative) _uniswapPositionManager.getRefundETHCalldata(),
+                if (_depositWithNative) _uniswapPositionManager.getRefundETHCalldata(),
               ],
               ethValue: () {
-                if (depositWithNative && _yield.isToken0WrappedNative) {
+                if (_depositWithNative && _yield.isToken0WrappedNative) {
                   return amount0Desired;
                 }
 
-                if (depositWithNative && _yield.isToken1WrappedNative) {
+                if (_depositWithNative && _yield.isToken1WrappedNative) {
                   return amount1Desired;
                 }
 
@@ -218,8 +227,10 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
         );
       }.call();
 
-      emit(PreviewDepositModalState.waitingTransaction(txId: tx.hash));
+      emit(PreviewDepositModalState.waitingTransaction(txId: tx.hash, type: WaitingTransactionType.deposit));
+
       await tx.waitConfirmation();
+
       emit(PreviewDepositModalState.depositSuccess(txId: tx.hash));
     } catch (e) {
       if (e is UserRejectedAction) {
@@ -291,9 +302,88 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     }
   }
 
+  void _waitTransactionFinishBeforeClosing() {
+    final context = _navigatorKey.currentContext!;
+    final stateAsWaitingTransaction = state as _WaitingTransaction;
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      ScaffoldMessenger.of(context).showSnackBar(() {
+        return switch (stateAsWaitingTransaction.type) {
+          WaitingTransactionType.deposit => ZupSnackBar(
+              context,
+              message: "${S.of(context).previewDepositModalCubitDepositingSnackBarMessage(
+                    token0Symbol: _yield.maybeNativeToken0(permitNative: _depositWithNative).symbol,
+                    token1Symbol: _yield.maybeNativeToken1(permitNative: _depositWithNative).symbol,
+                  )} ",
+              customIcon: const ZupCircularLoadingIndicator(size: 20),
+              type: ZupSnackBarType.info,
+              maxWidth: 500,
+              snackDuration: const Duration(days: 10),
+              helperButton: (
+                title: S.of(context).previewDepositModalWaitingTransactionSnackBarHelperButtonTitle,
+                onButtonTap: () => _yield.network.openTx(stateAsWaitingTransaction.txId),
+              ),
+            ),
+          WaitingTransactionType.approve => ZupSnackBar(
+              context,
+              message: "${S.of(context).previewDepositModalCubitApprovingSnackBarMessage} ",
+              type: ZupSnackBarType.info,
+              maxWidth: 400,
+              helperButton: (
+                title: S.of(context).previewDepositModalWaitingTransactionSnackBarHelperButtonTitle,
+                onButtonTap: () => _yield.network.openTx(stateAsWaitingTransaction.txId)
+              ),
+              customIcon: const ZupCircularLoadingIndicator(size: 20),
+              snackDuration: const Duration(minutes: 10),
+            )
+        };
+      }.call());
+    });
+
+    stream.listen((state) async {
+      await state.maybeWhen(
+        approveSuccess: (txId, symbol) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(
+              ZupSnackBar(
+                context,
+                message: S.of(context).previewDepositModalCubitApprovedSnackBarMessage(tokenSymbol: symbol),
+                maxWidth: 400,
+                type: ZupSnackBarType.success,
+                snackDuration: const Duration(seconds: 5),
+              ),
+            );
+          });
+        },
+        depositSuccess: (txId) async {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) async => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+          );
+
+          DepositSuccessModal.show(
+            context,
+            depositedYield: _yield,
+            showAsBottomSheet: isMobileSize(context),
+            depositedWithNative: _depositWithNative,
+          );
+        },
+        orElse: () async {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        },
+      );
+
+      close();
+    });
+  }
+
   @override
   Future<void> close() async {
+    if (state is _WaitingTransaction) {
+      return _waitTransactionFinishBeforeClosing();
+    }
+
     await _poolTickStreamController.close();
-    return super.close();
+    super.close();
   }
 }

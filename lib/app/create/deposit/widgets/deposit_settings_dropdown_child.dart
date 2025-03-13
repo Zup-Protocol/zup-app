@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
@@ -30,8 +29,6 @@ class DepositSettingsDropdownChild extends StatefulWidget {
 class _DepositSettingsDropdownChildState extends State<DepositSettingsDropdownChild> {
   final TextEditingController slippageTextController = TextEditingController();
   final TextEditingController deadlineTextController = TextEditingController();
-
-  final scaffoldMessengerKey = inject<GlobalKey<ScaffoldMessengerState>>();
 
   late Slippage selectedSlippage = widget.selectedSlippage;
   late Duration deadline = widget.selectedDeadline;

@@ -1,6 +1,9 @@
 import 'package:clock/clock.dart';
+import 'package:confetti/confetti.dart';
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/core/core.dart';
 import 'package:web3kit/core/dtos/transaction_receipt.dart';
@@ -13,9 +16,12 @@ import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/widgets/zup_cached_image.dart';
 
+import '../../../../../golden_config.dart';
 import '../../../../../matchers.dart';
 import '../../../../../mocks.dart';
 import '../../../../../wrappers.dart';
@@ -55,6 +61,7 @@ void main() {
       wallet: wallet,
       depositWithNative: false,
       uniswapPositionManager: uniswapPositionManager,
+      navigatorKey: GlobalKey(),
     );
 
     registerFallbackValue(const ChainInfo(hexChainId: "0x1"));
@@ -128,6 +135,28 @@ void main() {
 
     when(() => uniswapPositionManager.getMintCalldata(params: any(named: "params"))).thenReturn("0x");
   });
+
+  void sutCopyWith({
+    bool? customDepositWithNative,
+    BigInt? customInitialPoolTick,
+    UniswapV3Pool? customUniswapV3Pool,
+    Erc20? customErc20,
+    Wallet? customWallet,
+    UniswapPositionManager? customUniswapPositionManager,
+    YieldDto? customYield,
+    GlobalKey<NavigatorState>? customNavigatorKey,
+  }) {
+    sut = PreviewDepositModalCubit(
+      initialPoolTick: customInitialPoolTick ?? initialPoolTick,
+      uniswapV3Pool: customUniswapV3Pool ?? uniswapV3Pool,
+      currentYield: customYield ?? currentYield,
+      erc20: customErc20 ?? erc20,
+      wallet: customWallet ?? wallet,
+      depositWithNative: customDepositWithNative ?? false,
+      uniswapPositionManager: customUniswapPositionManager ?? uniswapPositionManager,
+      navigatorKey: customNavigatorKey ?? GlobalKey(),
+    );
+  }
 
   test("The initial state of the cubit should be loading", () {
     expect(sut.state, const PreviewDepositModalState.loading());
@@ -228,6 +257,7 @@ void main() {
         erc20: erc20,
         wallet: wallet,
         depositWithNative: false,
+        navigatorKey: GlobalKey(),
       );
 
       final token0Contract = Erc20ImplMock();
@@ -278,6 +308,7 @@ void main() {
       final customYield = YieldDto.fixture().copyWith(network: yieldNetwork);
 
       sut = PreviewDepositModalCubit(
+        navigatorKey: GlobalKey(),
         initialPoolTick: initialPoolTick,
         uniswapV3Pool: uniswapV3Pool,
         currentYield: customYield,
@@ -305,6 +336,7 @@ void main() {
       final customYield = YieldDto.fixture().copyWith(network: yieldNetwork);
 
       sut = PreviewDepositModalCubit(
+        navigatorKey: GlobalKey(),
         uniswapPositionManager: uniswapPositionManager,
         initialPoolTick: initialPoolTick,
         uniswapV3Pool: uniswapV3Pool,
@@ -355,7 +387,12 @@ void main() {
       (_) async {
         const txId = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
         when(() => transactionResponse.hash).thenReturn(txId);
-        expectLater(sut.stream, emits(const PreviewDepositModalState.waitingTransaction(txId: txId)));
+        expectLater(
+          sut.stream,
+          emits(
+            const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.approve),
+          ),
+        );
 
         callbackCalled = true;
         return transactionResponse;
@@ -378,7 +415,10 @@ void main() {
       when(() => transactionResponse.hash).thenReturn(txId);
 
       when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
-        expect(sut.state, const PreviewDepositModalState.waitingTransaction(txId: txId));
+        expect(
+          sut.state,
+          const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.approve),
+        );
 
         callbackCalled = true;
         return TransactionReceipt(hash: "");
@@ -515,7 +555,6 @@ void main() {
       isMinPriceInfinity: false,
       isMaxPriceInfinity: false,
       isReversed: false,
-      depositWithNative: false,
     );
   });
 
@@ -529,16 +568,16 @@ void main() {
       when(() => wallet.connectedNetwork).thenAnswer((_) async => connectedNetwork);
 
       await sut.deposit(
-          token0Amount: BigInt.one,
-          token1Amount: BigInt.one,
-          deadline: const Duration(minutes: 30),
-          slippage: Slippage.halfPercent,
-          minPrice: 0,
-          maxPrice: 0,
-          isMinPriceInfinity: false,
-          isMaxPriceInfinity: false,
-          isReversed: false,
-          depositWithNative: false);
+        token0Amount: BigInt.one,
+        token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
+        minPrice: 0,
+        maxPrice: 0,
+        isMinPriceInfinity: false,
+        isMaxPriceInfinity: false,
+        isReversed: false,
+      );
 
       verify(() => wallet.switchOrAddNetwork(yieldNetwork)).called(1);
     },
@@ -564,7 +603,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: false,
         isReversed: false,
-        depositWithNative: false,
       );
 
       verifyNever(() => wallet.switchOrAddNetwork(yieldNetwork));
@@ -576,16 +614,16 @@ void main() {
     final token1Amount = BigInt.from(8729889);
 
     await sut.deposit(
-        token0Amount: token0Amount,
-        token1Amount: token1Amount,
-        deadline: const Duration(minutes: 30),
-        slippage: Slippage.halfPercent,
-        minPrice: 1200,
-        maxPrice: 3000,
-        isMinPriceInfinity: false,
-        isMaxPriceInfinity: false,
-        isReversed: false,
-        depositWithNative: false);
+      token0Amount: token0Amount,
+      token1Amount: token1Amount,
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
+      minPrice: 1200,
+      maxPrice: 3000,
+      isMinPriceInfinity: false,
+      isMaxPriceInfinity: false,
+      isReversed: false,
+    );
 
     verify(
       () => uniswapPositionManagerImpl.mint(
@@ -613,6 +651,8 @@ void main() {
 
       when(() => uniswapPositionManager.getMintCalldata(params: any(named: "params"))).thenReturn("");
 
+      sutCopyWith(customDepositWithNative: true);
+
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: token1Amount,
@@ -623,7 +663,6 @@ void main() {
         isMinPriceInfinity: true,
         isMaxPriceInfinity: true,
         isReversed: false,
-        depositWithNative: true,
       );
 
       verify(
@@ -657,6 +696,7 @@ void main() {
       // );
 
       when(() => uniswapPositionManager.getMintCalldata(params: any(named: "params"))).thenReturn("");
+      sutCopyWith(customDepositWithNative: true);
 
       await sut.deposit(
         token0Amount: token0Amount,
@@ -668,7 +708,6 @@ void main() {
         isMinPriceInfinity: true,
         isMaxPriceInfinity: true,
         isReversed: false,
-        depositWithNative: true,
       );
 
       verify(
@@ -695,6 +734,8 @@ void main() {
       const signerAddress = "0x0000000000000000000000000000000000000231";
       when(() => signer.address).thenAnswer((_) async => signerAddress);
 
+      sutCopyWith(customDepositWithNative: true);
+
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
@@ -705,7 +746,6 @@ void main() {
         isMinPriceInfinity: true,
         isMaxPriceInfinity: true,
         isReversed: false,
-        depositWithNative: true,
       );
 
       verify(() => uniswapPositionManager.getMintCalldata(
@@ -719,6 +759,8 @@ void main() {
 
   test("""When calling `deposit` the minPrice is infinity, and is not reversed,
       the tick lower in the depositData should be the min tick (adjusted for the tick spacing)""", () async {
+    sutCopyWith(customDepositWithNative: true);
+
     await sut.deposit(
       token0Amount: BigInt.one,
       token1Amount: BigInt.one,
@@ -729,7 +771,6 @@ void main() {
       isMinPriceInfinity: true,
       isMaxPriceInfinity: false,
       isReversed: false,
-      depositWithNative: true,
     );
 
     verify(
@@ -752,17 +793,19 @@ void main() {
 
   test("""When calling `deposit` with the maxPrice infinity, and reversed,
       the tick lower in the depositData should be the min tick (but adjusted for the tick spacing)""", () async {
+    sutCopyWith(customDepositWithNative: true);
+
     await sut.deposit(
-        token0Amount: BigInt.one,
-        token1Amount: BigInt.one,
-        deadline: const Duration(minutes: 30),
-        slippage: Slippage.halfPercent,
-        minPrice: 1200,
-        maxPrice: 0,
-        isMinPriceInfinity: false,
-        isMaxPriceInfinity: true,
-        isReversed: true,
-        depositWithNative: true);
+      token0Amount: BigInt.one,
+      token1Amount: BigInt.one,
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
+      minPrice: 1200,
+      maxPrice: 0,
+      isMinPriceInfinity: false,
+      isMaxPriceInfinity: true,
+      isReversed: true,
+    );
 
     verify(
       () => uniswapPositionManager.getMintCalldata(
@@ -785,6 +828,8 @@ void main() {
   test(
     "When calling `deposit` with a min price that is not infinity, it should calculate the correct tickLower for the depositData",
     () async {
+      sutCopyWith(customDepositWithNative: true);
+
       const minPrice = 1200.0;
 
       await sut.deposit(
@@ -797,7 +842,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: true,
         isReversed: false,
-        depositWithNative: true,
       );
 
       verify(
@@ -830,6 +874,8 @@ void main() {
     (because it's reversed)
     """,
     () async {
+      sutCopyWith(customDepositWithNative: true);
+
       const maxPrice = 3000.0;
       const isReversed = true;
 
@@ -843,7 +889,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: false,
         isReversed: isReversed,
-        depositWithNative: true,
       );
 
       verify(
@@ -874,6 +919,8 @@ void main() {
     """When calling `deposit` with a max price that is infinity, and it's not reversed,
     the tick upper in the depositData should be the max tick (but adjusted for the tick spacing)""",
     () async {
+      sutCopyWith(customDepositWithNative: true);
+
       await sut.deposit(
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
@@ -884,7 +931,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: true,
         isReversed: false,
-        depositWithNative: true,
       );
 
       verify(
@@ -910,6 +956,8 @@ void main() {
     """When calling `deposit` with a min price that is infinity, and it's reversed,
     the tick upper in the depositData should be the max tick (but adjusted for the tick spacing)""",
     () async {
+      sutCopyWith(customDepositWithNative: true);
+
       const maxPrice = 3000.0;
       const isReversed = true;
 
@@ -923,7 +971,6 @@ void main() {
         isMinPriceInfinity: true,
         isMaxPriceInfinity: false,
         isReversed: isReversed,
-        depositWithNative: true,
       );
 
       verify(
@@ -950,6 +997,8 @@ void main() {
     and it's not reversed, the tick upper in the depositData should be
     calculated based on the max price""",
     () async {
+      sutCopyWith(customDepositWithNative: true);
+
       const maxPrice = 3000.50;
 
       await sut.deposit(
@@ -962,7 +1011,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: false,
         isReversed: false,
-        depositWithNative: true,
       );
 
       verify(
@@ -994,6 +1042,8 @@ void main() {
     and it's reversed, the tick upper in the depositData should be
     calculated based on the min price""",
     () async {
+      sutCopyWith(customDepositWithNative: true);
+
       const minPrice = 50.32;
       const isReversed = true;
 
@@ -1007,7 +1057,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: false,
         isReversed: isReversed,
-        depositWithNative: true,
       );
 
       verify(
@@ -1035,6 +1084,8 @@ void main() {
   );
 
   test("When calling `deposit` the fee in the depositData should be the feeTier of the yield pool", () async {
+    sutCopyWith(customDepositWithNative: true);
+
     await sut.deposit(
       deadline: const Duration(minutes: 30),
       slippage: Slippage.halfPercent,
@@ -1045,7 +1096,6 @@ void main() {
       isMinPriceInfinity: false,
       isMaxPriceInfinity: false,
       isReversed: false,
-      depositWithNative: true,
     );
 
     verify(
@@ -1061,6 +1111,8 @@ void main() {
   });
 
   test("When calling `deposit` the token0 in the depositData should be the token0 of the yield pool", () async {
+    sutCopyWith(customDepositWithNative: true);
+
     await sut.deposit(
       deadline: const Duration(minutes: 30),
       slippage: Slippage.halfPercent,
@@ -1071,7 +1123,6 @@ void main() {
       isMinPriceInfinity: false,
       isMaxPriceInfinity: false,
       isReversed: false,
-      depositWithNative: true,
     );
 
     verify(
@@ -1087,6 +1138,8 @@ void main() {
   });
 
   test("When calling `deposit` the token1 in the depositData should be the token1 of the yield pool", () async {
+    sutCopyWith(customDepositWithNative: true);
+
     await sut.deposit(
       deadline: const Duration(minutes: 30),
       slippage: Slippage.halfPercent,
@@ -1097,7 +1150,6 @@ void main() {
       isMinPriceInfinity: false,
       isMaxPriceInfinity: false,
       isReversed: false,
-      depositWithNative: true,
     );
 
     verify(
@@ -1126,7 +1178,9 @@ void main() {
       ).thenAnswer((_) async {
         expectLater(
           sut.stream,
-          emits(const PreviewDepositModalState.waitingTransaction(txId: txId)),
+          emits(
+            const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.deposit),
+          ),
         );
 
         callbackCalled = true;
@@ -1144,7 +1198,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: false,
         isReversed: false,
-        depositWithNative: false,
       );
 
       // Making sure that the callback above in the thenAnswer is called, which is the real test
@@ -1162,7 +1215,10 @@ void main() {
 
       when(() => transactionResponse.hash).thenReturn(txId);
       when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
-        expect(sut.state, const PreviewDepositModalState.waitingTransaction(txId: txId));
+        expect(
+          sut.state,
+          const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.deposit),
+        );
 
         callbackCalled = true;
 
@@ -1179,7 +1235,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: false,
         isReversed: false,
-        depositWithNative: false,
       );
 
       // Making sure that the callback above in the thenAnswer is called, which is the real test
@@ -1204,7 +1259,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: false,
         isReversed: false,
-        depositWithNative: false,
       );
 
       expect(sut.state, const PreviewDepositModalState.depositSuccess(txId: txId));
@@ -1238,7 +1292,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: false,
         isReversed: false,
-        depositWithNative: false,
       );
     },
   );
@@ -1268,7 +1321,6 @@ void main() {
         isMinPriceInfinity: false,
         isMaxPriceInfinity: false,
         isReversed: false,
-        depositWithNative: false,
       );
     },
   );
@@ -1285,6 +1337,8 @@ void main() {
         when(() => uniswapPositionManagerImpl.multicall(data: any(named: "data")))
             .thenAnswer((_) async => transactionResponse);
 
+        sutCopyWith(customDepositWithNative: true);
+
         await sut.deposit(
           deadline: deadline,
           slippage: Slippage.halfPercent,
@@ -1295,7 +1349,6 @@ void main() {
           isMinPriceInfinity: false,
           isMaxPriceInfinity: false,
           isReversed: false,
-          depositWithNative: true,
         );
 
         verify(
@@ -1309,6 +1362,175 @@ void main() {
           ),
         ).called(1);
       });
+    },
+  );
+
+  group(
+    "Close golden tests",
+    () {
+      setUp(() {
+        final confettiController = ConfettiControllerMock();
+
+        inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
+        inject.registerFactory<ConfettiController>(
+          () => confettiController,
+          instanceName: InjectInstanceNames.confettiController10s,
+        );
+
+        when(() => confettiController.duration).thenReturn(Duration.zero);
+        when(() => confettiController.play()).thenAnswer((_) async {});
+        when(() => confettiController.state).thenReturn(ConfettiControllerState.stoppedAndCleared);
+      });
+
+      tearDown(() => inject.reset());
+
+      zGoldenTest(
+        """When the state is waiting transation from a deposit and the cubit is trying to close,
+      it should show a snackbar about the deposit in progress""",
+        (tester) async {
+          bool tested = false;
+          sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
+
+          await tester.pumpDeviceBuilder(
+            await goldenDeviceBuilder(const SizedBox()),
+            wrapper: GoldenConfig.localizationsWrapper(),
+          );
+
+          when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
+            try {
+              await tester.pumpAndSettle();
+
+              await sut.close();
+              await screenMatchesGolden(tester, "preview_deposit_modal_cubit_close_depositing_snackbar");
+              tested = true; // if it does not reach here, the test have been failed
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+
+            return TransactionReceipt(hash: "");
+          });
+
+          await sut.deposit(
+            deadline: const Duration(minutes: 30),
+            slippage: Slippage.halfPercent,
+            token0Amount: BigInt.one,
+            token1Amount: BigInt.one,
+            minPrice: 1200,
+            maxPrice: 3000.50,
+            isMinPriceInfinity: false,
+            isMaxPriceInfinity: false,
+            isReversed: false,
+          );
+
+          // if waitConfirmation its not called, the test will fail. As the real test is
+          // inside the stub of the waitConfirmation, it should change the `tested` variable
+          expect(tested, true);
+        },
+      );
+
+      zGoldenTest(
+        """When the state is waiting transation from a approval and the cubit is trying to close,
+      it should show a snackbar about the approval in progress""",
+        (tester) async {
+          bool tested = false;
+          sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
+
+          await tester.pumpDeviceBuilder(
+            await goldenDeviceBuilder(const SizedBox()),
+            wrapper: GoldenConfig.localizationsWrapper(),
+          );
+
+          when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
+            try {
+              await sut.close();
+              await tester.pumpAndSettle();
+
+              await screenMatchesGolden(tester, "preview_deposit_modal_cubit_close_approving_snackbar");
+
+              tested = true; // if it does not reach here, the test have been failed
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+            return TransactionReceipt(hash: "");
+          });
+
+          await sut.approveToken(TokenDto.fixture(), BigInt.one);
+
+          // if waitConfirmation its not called, the test will fail. As the real test is
+          // inside the stub of the waitConfirmation, it should change the `tested` variable
+          expect(tested, true);
+        },
+      );
+
+      zGoldenTest(
+        """When the state is waiting transation from a approval, the cubit is trying to close,
+          and the approve succes state is emitted, it should show a snackbar about the approval success
+          and then close the cubit""",
+        goldenFileName: "preview_deposit_modal_cubit_close_approval_success_snackbar",
+        (tester) async {
+          sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
+
+          await tester.pumpDeviceBuilder(
+            await goldenDeviceBuilder(const SizedBox()),
+            wrapper: GoldenConfig.localizationsWrapper(),
+          );
+
+          when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
+            try {
+              await sut.close();
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+            return TransactionReceipt(hash: "");
+          });
+
+          await sut.approveToken(TokenDto.fixture(), BigInt.one);
+          await tester.pumpAndSettle();
+
+          expect(sut.isClosed, true);
+        },
+      );
+
+      zGoldenTest(
+        """When the state is waiting transation from a deposit, the cubit is trying to close,
+          and the deposit succes state is emitted, it should show the deposit success modal
+          and then close the cubit""",
+        goldenFileName: "preview_deposit_modal_cubit_close_deposit_success_modal",
+        (tester) async {
+          sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
+
+          await tester.pumpDeviceBuilder(
+            await goldenDeviceBuilder(const SizedBox()),
+            wrapper: GoldenConfig.localizationsWrapper(),
+          );
+
+          when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
+            try {
+              await sut.close();
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+            return TransactionReceipt(hash: "");
+          });
+
+          await sut.deposit(
+            deadline: const Duration(minutes: 30),
+            slippage: Slippage.halfPercent,
+            token0Amount: BigInt.one,
+            token1Amount: BigInt.one,
+            minPrice: 1200,
+            maxPrice: 3000.50,
+            isMinPriceInfinity: false,
+            isMaxPriceInfinity: false,
+            isReversed: false,
+          );
+
+          await tester.pumpAndSettle();
+          await tester.pumpAndSettle();
+
+          expect(sut.isClosed, true);
+        },
+      );
     },
   );
 }

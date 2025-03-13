@@ -466,6 +466,21 @@ class SEn extends S {
   String get depositSuccessModalDescriptionPart3 => 'on';
 
   @override
+  String previewDepositModalCubitDepositingSnackBarMessage(
+      {required String token0Symbol, required String token1Symbol}) {
+    return 'Depositing into $token0Symbol/$token1Symbol Pool...';
+  }
+
+  @override
+  String get previewDepositModalCubitApprovingSnackBarMessage => 'Approving...';
+
+  @override
+  String previewDepositModalCubitApprovedSnackBarMessage(
+      {required String tokenSymbol}) {
+    return 'Successfully approved $tokenSymbol';
+  }
+
+  @override
   String depositSuccessModalViewPositionOnDEX({required String dexName}) {
     return 'View Position on $dexName';
   }

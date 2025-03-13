@@ -10,7 +10,10 @@ dependencies:
     sdk: flutter
   flutter_gen_runner: ^5.7.0
   flutter_svg: ^2.0.10+1
-  routefly: ^2.0.4
+  routefly:
+    git:
+      url: https://github.com/RyanHolanda/routefly.git # TODO: Pull request sent to the original repo, wait for merge and then update the dependency for the original.
+      ref: hotfix-vercel
   flutter_web_plugins:
     sdk: flutter
   flutter_localizations:

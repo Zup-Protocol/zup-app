@@ -85,6 +85,7 @@ void main() {
       instanceName: InjectInstanceNames.appScrollController,
     );
 
+    inject.registerFactory<GlobalKey<NavigatorState>>(() => GlobalKey());
     inject.registerFactory<ZupNavigator>(() => navigator);
     inject.registerFactory<Wallet>(() => wallet);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());

@@ -16,7 +16,9 @@ coverage/
 
 # Generated code
 lib/**/**.g.dart
+lib/**/**.gen.dart
 lib/**/**.freezed.dart
+!lib/zup_app.g.dart
 
 # IntelliJ related
 *.iml

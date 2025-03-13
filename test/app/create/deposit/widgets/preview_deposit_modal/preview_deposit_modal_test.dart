@@ -67,6 +67,7 @@ void main() {
       () => GoldenConfig.scrollController,
       instanceName: InjectInstanceNames.appScrollController,
     );
+    inject.registerFactory<GlobalKey<NavigatorState>>(() => GlobalKey());
 
     when(() => cubit.setup()).thenAnswer((_) async {});
     when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(V3PoolConstants.maxTick));
@@ -96,7 +97,6 @@ void main() {
         slippage: any(named: "slippage"),
         token0Amount: any(named: "token0Amount"),
         token1Amount: any(named: "token1Amount"),
-        depositWithNative: false,
       ),
     ).thenAnswer((_) async {});
 
@@ -161,9 +161,13 @@ void main() {
     "When the state is waiting transaction, it should show a snackbar",
     goldenFileName: "preview_deposit_modal_waiting_transaction",
     (tester) async {
-      when(() => cubit.state).thenReturn(const PreviewDepositModalState.waitingTransaction(txId: "txID"));
+      when(() => cubit.state).thenReturn(
+        const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit),
+      );
       when(() => cubit.stream).thenAnswer(
-        (_) => Stream.value(const PreviewDepositModalState.waitingTransaction(txId: "txID")),
+        (_) => Stream.value(
+          const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit),
+        ),
       );
 
       await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
@@ -177,9 +181,11 @@ void main() {
     """,
     goldenFileName: "preview_deposit_modal_waiting_transaction_button",
     (tester) async {
-      when(() => cubit.state).thenReturn(const PreviewDepositModalState.waitingTransaction(txId: "txID"));
+      when(() => cubit.state).thenReturn(
+          const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit));
       when(() => cubit.stream).thenAnswer(
-        (_) => Stream.value(const PreviewDepositModalState.waitingTransaction(txId: "txID")),
+        (_) => Stream.value(
+            const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit)),
       );
 
       await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
@@ -197,9 +203,11 @@ void main() {
       const txId = "0xtxID";
       const yieldNetwork = Networks.sepolia;
 
-      when(() => cubit.state).thenReturn(const PreviewDepositModalState.waitingTransaction(txId: "txID"));
+      when(() => cubit.state).thenReturn(
+          const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit));
       when(() => cubit.stream).thenAnswer(
-        (_) => Stream.value(const PreviewDepositModalState.waitingTransaction(txId: txId)),
+        (_) => Stream.value(
+            const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.deposit)),
       );
 
       await tester.pumpDeviceBuilder(
@@ -241,7 +249,10 @@ void main() {
       when(() => cubit.stream).thenAnswer((_) {
         return Stream.fromFutures([
           Future.value(
-            const PreviewDepositModalState.waitingTransaction(txId: ''),
+            const PreviewDepositModalState.waitingTransaction(
+              txId: '',
+              type: WaitingTransactionType.approve,
+            ),
           ), // Assuming that the waiting transaction state will display a snackbar
 
           Future.value(const PreviewDepositModalState.approveSuccess(txId: '', symbol: "TOKE SYM")),
@@ -718,7 +729,6 @@ void main() {
           slippage: slippage,
           token0Amount: deposit0Amount.parseTokenAmount(decimals: currentYield.token0.decimals),
           token1Amount: deposit1Amount.parseTokenAmount(decimals: currentYield.token1.decimals),
-          depositWithNative: false,
         ),
       ).called(1);
     },

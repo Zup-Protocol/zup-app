@@ -1,4 +1,4 @@
-import 'package:zup_app/routes.g.dart';
+import 'package:zup_app/zup_app.dart';
 
 enum ZupNavigatorPaths {
   initial,

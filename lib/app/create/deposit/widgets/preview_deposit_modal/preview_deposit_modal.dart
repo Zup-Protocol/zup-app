@@ -67,6 +67,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
           uniswapV3Pool: inject<UniswapV3Pool>(),
           initialPoolTick: currentPoolTick,
           depositWithNative: depositWithNativeToken,
+          navigatorKey: inject<GlobalKey<NavigatorState>>(),
         ),
         child: PreviewDepositModal(
           deadline: deadline,
@@ -90,7 +91,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
 class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolConversorsMixin, DeviceInfoMixin {
   final zupCachedImage = inject<ZupCachedImage>();
   final navigator = inject<ZupNavigator>();
-  final scaffoldMessengerKey = inject<GlobalKey<ScaffoldMessengerState>>();
+
   final positionsCubit = inject<PositionsCubit>();
   final ScrollController appScrollController = inject<ScrollController>(
     instanceName: InjectInstanceNames.appScrollController,
@@ -193,7 +194,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
         onPressed: null,
         isLoading: true,
       ),
-      waitingTransaction: (txId) => (
+      waitingTransaction: (txId, type) => (
         title: S.of(context).previewDepositModalWaitingTransaction,
         icon: null,
         onPressed: null,
@@ -251,7 +252,6 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                 isMinPriceInfinity: widget.minPrice.isInfinity,
                 isMaxPriceInfinity: widget.maxPrice.isInfinity,
                 isReversed: widget.isReversed,
-                depositWithNative: widget.depositWithNativeToken,
               ),
         );
       },
@@ -309,7 +309,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
     return BlocConsumer<PreviewDepositModalCubit, PreviewDepositModalState>(
       listener: (context, state) {
         state.whenOrNull(
-          waitingTransaction: (txId) => ScaffoldMessenger.of(context).showSnackBar(
+          waitingTransaction: (txId, type) => ScaffoldMessenger.of(context).showSnackBar(
             ZupSnackBar(
               context,
               message: S.of(context).previewDepositModalWaitingTransactionSnackBarMessage,
@@ -340,6 +340,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
             );
           },
           depositSuccess: (txId) async {
+            print("deposited Success");
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             if (context.mounted) Navigator.of(context).pop();
             navigator.navigateToNewPosition();
@@ -348,6 +349,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               context,
               depositedYield: widget.currentYield,
               showAsBottomSheet: isMobileSize(context),
+              depositedWithNative: widget.depositWithNativeToken,
             );
           },
           transactionError: () {
