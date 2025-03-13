@@ -18,7 +18,7 @@ coverage/
 lib/**/**.g.dart
 lib/**/**.gen.dart
 lib/**/**.freezed.dart
-!lib/zup_app.g.dart
+lib/zup_app.route.dart
 
 # IntelliJ related
 *.iml
