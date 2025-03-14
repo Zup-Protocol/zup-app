@@ -16,6 +16,7 @@ class ZupCachedImage {
     double? height,
     double? width,
     double? radius,
+    Widget Function(BuildContext, String)? placeholder,
     Widget Function(BuildContext, String, Object)? errorWidget,
   }) {
     return ClipRRect(
@@ -29,6 +30,7 @@ class ZupCachedImage {
           imageUrl: _parseImageUrl(url),
           height: height,
           width: width,
+          placeholder: placeholder,
           errorWidget: errorWidget ?? (context, url, error) => Container(color: ZupColors.gray5),
         ),
       ),

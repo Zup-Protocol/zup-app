@@ -47,6 +47,7 @@ void main() {
             width: any(named: "width"),
             radius: any(named: "radius"),
             errorWidget: any(named: "errorWidget"),
+            placeholder: any(named: "placeholder"),
           )).called(1);
     },
   );
