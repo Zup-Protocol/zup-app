@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_ui_kit/zup_circular_loading_indicator.dart';
 import 'package:zup_ui_kit/zup_colors.dart';
 
 class TokenAvatar extends StatelessWidget {
@@ -34,6 +36,13 @@ class TokenAvatar extends StatelessWidget {
             width: size,
             radius: 50,
             errorWidget: (_, __, ___) => genericAvatar(),
+            placeholder: (context, url) => Skeleton.ignore(
+              child: ZupCircularLoadingIndicator(
+                size: size,
+                backgroundColor: ZupColors.brand5,
+                indicatorColor: ZupColors.brand,
+              ),
+            ),
           );
   }
 }
