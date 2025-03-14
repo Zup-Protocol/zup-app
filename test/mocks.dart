@@ -139,11 +139,13 @@ T mockHttpImage<T>(T Function() on, {Uint8List? overrideImage}) {
 
 ZupCachedImage mockZupCachedImage() {
   final zupCachedImage = ZupCachedImageMock();
+
   when(() => zupCachedImage.build(
         any(),
         height: any(named: "height"),
         width: any(named: "width"),
         radius: any(named: "radius"),
+        errorWidget: any(named: "errorWidget"),
       )).thenReturn(const SizedBox(child: Text("IMAGE")));
 
   return zupCachedImage;
