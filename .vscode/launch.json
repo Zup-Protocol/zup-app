@@ -7,7 +7,7 @@
             "type": "dart",
             "deviceId": "chrome",
             "program": "./lib/main.dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
         },
         {
             "name": "Zup App (Web) (Debug)",

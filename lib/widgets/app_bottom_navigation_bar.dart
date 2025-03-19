@@ -94,7 +94,7 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
           ClipRect(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.white.withOpacity(0.85)),
+              child: Container(color: Colors.white.withValues(alpha: 0.85)),
             ),
           ),
           Column(

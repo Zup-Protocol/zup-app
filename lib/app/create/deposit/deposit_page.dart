@@ -406,7 +406,7 @@ class _DepositPageState extends State<DepositPage>
     );
   }
 
-  Widget _sectionTitle(String title) => Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600));
+  Widget _sectionTitle(String title) => Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700));
 
   Widget _buildNoYieldsState() => Center(
           child: SizedBox(
@@ -799,7 +799,9 @@ class _DepositPageState extends State<DepositPage>
 
                         if (isBaseTokenAmountUserInput &&
                             !poolTickSnapshot.hasData &&
-                            baseTokenAmountController.text.isNotEmpty) return S.of(context).loading;
+                            baseTokenAmountController.text.isNotEmpty) {
+                          return S.of(context).loading;
+                        }
                       }.call(),
                       onInput: (amount) {
                         setState(() {
@@ -823,6 +825,7 @@ class _DepositPageState extends State<DepositPage>
                             title: S.of(context).connectWallet,
                             icon: Assets.icons.walletBifold.svg(),
                             fixedIcon: true,
+                            alignCenter: true,
                             hoverElevation: 0,
                             backgroundColor: ZupColors.brand7,
                             foregroundColor: ZupColors.brand,
@@ -834,6 +837,7 @@ class _DepositPageState extends State<DepositPage>
                             future: depositButtonState(),
                             builder: (context, stateSnapshot) {
                               return ZupPrimaryButton(
+                                alignCenter: true,
                                 title: stateSnapshot.data?.title ?? "Loading...",
                                 icon: stateSnapshot.data?.icon,
                                 isLoading: stateSnapshot.connectionState == ConnectionState.waiting,

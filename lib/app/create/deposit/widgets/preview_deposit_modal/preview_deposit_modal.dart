@@ -340,7 +340,6 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
             );
           },
           depositSuccess: (txId) async {
-            print("deposited Success");
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             if (context.mounted) Navigator.of(context).pop();
             navigator.navigateToNewPosition();
@@ -555,6 +554,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                     ZupPrimaryButton(
                       key: const Key("deposit-button"),
                       fixedIcon: true,
+                      alignCenter: true,
                       title: depositButtonState.title,
                       onPressed: depositButtonState.onPressed,
                       icon: depositButtonState.icon,
@@ -575,7 +575,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
   Widget rangeInfoCard({required bool isMinPrice}) => Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: ZupColors.brand.withOpacity(0.02),
+          color: ZupColors.brand.withValues(alpha: 0.02),
           border: Border.all(color: ZupColors.brand5, width: 0.5),
           borderRadius: const BorderRadius.all(Radius.circular(12)),
         ),

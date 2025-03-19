@@ -174,7 +174,7 @@ class _DepositSettingsDropdownChildState extends State<DepositSettingsDropdownCh
             const SizedBox(height: 10),
             AnimatedContainer(
               duration: Durations.medium2,
-              height: (double.tryParse(slippageTextController.text) ?? 0) > 1 ? 50 : 0,
+              height: (double.tryParse(slippageTextController.text) ?? 0) > 1 ? 60 : 0,
               width: 280,
               child: Row(
                 mainAxisSize: MainAxisSize.min,

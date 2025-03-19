@@ -135,8 +135,8 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                           gradient: LinearGradient(
                                             colors: [
                                               ZupColors.white,
-                                              ZupColors.white.withOpacity(0.8),
-                                              ZupColors.white.withOpacity(0.0)
+                                              ZupColors.white.withValues(alpha: 0.8),
+                                              ZupColors.white.withValues(alpha: 0.0)
                                             ],
                                             stops: const [0.1, 0.5, 1.0],
                                             begin: Alignment.centerRight,
@@ -155,7 +155,7 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                         height: 50,
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
-                                            colors: [ZupColors.white, ZupColors.white.withOpacity(0.0)],
+                                            colors: [ZupColors.white, ZupColors.white.withValues(alpha: 0.0)],
                                             stops: const [0.5, 1.0],
                                             begin: Alignment.centerLeft,
                                             end: Alignment.centerRight,

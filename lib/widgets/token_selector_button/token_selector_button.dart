@@ -46,10 +46,11 @@ class _TokenSelectorButtonState extends State<TokenSelectorButton> with DeviceIn
               onEnter: (event) => setState(() => isHovering = true),
               onExit: (event) => setState(() => isHovering = false),
               child: MaterialButton(
-                color: selectedToken != null ? ZupColors.gray6.withOpacity(0.6) : ZupColors.brand6,
-                hoverColor: selectedToken != null ? ZupColors.gray6 : ZupColors.gray6.withOpacity(0.2),
-                splashColor:
-                    selectedToken != null ? ZupColors.gray5.withOpacity(0.4) : ZupColors.brand5.withOpacity(0.5),
+                color: selectedToken != null ? ZupColors.gray6.withValues(alpha: 0.6) : ZupColors.brand6,
+                hoverColor: selectedToken != null ? ZupColors.gray6 : ZupColors.gray6.withValues(alpha: 0.2),
+                splashColor: selectedToken != null
+                    ? ZupColors.gray5.withValues(alpha: 0.4)
+                    : ZupColors.brand5.withValues(alpha: 0.5),
                 focusElevation: 0,
                 highlightElevation: 0,
                 elevation: 0,

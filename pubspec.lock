@@ -230,14 +230,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.5"
-  cupertino_icons:
-    dependency: transitive
-    description:
-      name: cupertino_icons
-      sha256: ba631d1c7f7bef6b729a622b7b752645a2d076dba9976925b8f25725a30e1ee6
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.8"
   dart_style:
     dependency: transitive
     description:
@@ -1189,7 +1181,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "1b26e2d59ddfc0a25d2403207764d36b404ed04a"
+      resolved-ref: "10fc6e60104bf83770adf6ec02631bc59df1acc8"
       url: "https://github.com/Zup-Protocol/web3kit.git"
     source: git
     version: "0.0.1"
@@ -1238,7 +1230,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: e0689c6949c20229bf45006b2854caf9c3f1d841
+      resolved-ref: d8a15883960183d5d9cf0117dfa1c863627d8f10
       url: "https://github.com/Zup-Protocol/zup-core.git"
     source: git
     version: "0.0.1"
@@ -1247,7 +1239,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: a0f943133634adee673f199faecadd041073732d
+      resolved-ref: bf5779436e2edeaac2a794b87a503d1784593e14
       url: "https://github.com/Zup-Protocol/zup-ui-kit.git"
     source: git
     version: "0.0.1"
