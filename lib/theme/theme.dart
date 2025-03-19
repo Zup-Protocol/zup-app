@@ -3,7 +3,7 @@ import 'package:zup_app/theme/themes/zup_text_button_theme.dart';
 import 'package:zup_ui_kit/zup_colors.dart';
 
 abstract class ZupTheme {
-  static String get fontFamily => "SN Pro";
+  static String get fontFamily => "SNPro";
 
   static ThemeData get lightTheme => ThemeData(
         fontFamily: ZupTheme.fontFamily,

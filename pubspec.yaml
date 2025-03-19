@@ -84,7 +84,7 @@ flutter:
     - assets/logos/
     - assets/lotties/
   fonts:
-    - family: "SN Pro"
+    - family: "SNPro"
       fonts:
         - asset: assets/fonts/SNPro-Heavy.otf
           weight: 900
