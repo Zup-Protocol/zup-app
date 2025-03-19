@@ -88,7 +88,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 490),
+          constraints: const BoxConstraints(maxWidth: 490, minHeight: 500),
           child: Align(
             alignment: Alignment.topLeft,
             child: Column(

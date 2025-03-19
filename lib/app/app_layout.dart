@@ -46,9 +46,7 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
               ),
               const SliverFillRemaining(
                 hasScrollBody: false,
-                child: RouterOutlet(
-                  key: Key("screen"),
-                ),
+                child: RouterOutlet(key: Key("screen")),
               ),
               SliverToBoxAdapter(
                 child: Padding(

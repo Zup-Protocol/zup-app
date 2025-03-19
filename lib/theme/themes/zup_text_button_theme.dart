@@ -8,7 +8,7 @@ abstract class ZupTextButtonTheme {
           shape: const WidgetStatePropertyAll(RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
           )),
-          overlayColor: WidgetStatePropertyAll(ZupColors.brand.withOpacity(.05)),
+          overlayColor: WidgetStatePropertyAll(ZupColors.brand.withValues(alpha: .05)),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.disabled)) return ZupColors.gray5;
 

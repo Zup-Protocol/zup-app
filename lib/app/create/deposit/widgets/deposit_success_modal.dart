@@ -134,6 +134,7 @@ class _DepositSuccessModalState extends State<DepositSuccessModal> {
         ),
         const Spacer(),
         ZupPrimaryButton(
+          alignCenter: true,
           key: const Key("close-button"),
           title: S.of(context).close,
           width: double.infinity,
