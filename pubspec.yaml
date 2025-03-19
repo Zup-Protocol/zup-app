@@ -83,7 +83,6 @@ flutter:
     - assets/icons/
     - assets/logos/
     - assets/lotties/
-    - assets/fonts/
   fonts:
     - family: "SNPro"
       fonts:
@@ -93,7 +92,7 @@ flutter:
           weight: 800
         - asset: assets/fonts/SNPro-Bold.otf
           weight: 700
-        - asset: assets/fonts/SNPro-SemiBold.otf
+        - asset: assets/fonts/SNPro-Semibold.otf
           weight: 600
         - asset: assets/fonts/SNPro-Medium.otf
           weight: 500

@@ -406,7 +406,7 @@ class _DepositPageState extends State<DepositPage>
     );
   }
 
-  Widget _sectionTitle(String title) => Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700));
+  Widget _sectionTitle(String title) => Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600));
 
   Widget _buildNoYieldsState() => Center(
           child: SizedBox(
@@ -622,7 +622,7 @@ class _DepositPageState extends State<DepositPage>
                         );
 
                         return areTokensReversed ? currentPrice.priceAsQuoteToken : currentPrice.priceAsBaseToken;
-                      }.call().toAmount(useLessThan: true, maxFixedDigits: 4)} ${quoteToken.symbol}",
+                      }.call().formatCurrency(useLessThan: true, maxDecimals: 4, isUSD: false)} ${quoteToken.symbol}",
                       style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500))
                   .redacted(
                 enabled: poolTickSnapshot.data == null,
