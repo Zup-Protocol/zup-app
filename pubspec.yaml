@@ -83,6 +83,7 @@ flutter:
     - assets/icons/
     - assets/logos/
     - assets/lotties/
+    - assets/fonts/
   fonts:
     - family: "SNPro"
       fonts:
