@@ -1,5 +1,5 @@
 name: zup_app
-version: 1.0.1
+publish_to: none
 
 environment:
   sdk: ^3.5.2
