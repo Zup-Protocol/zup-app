@@ -81,38 +81,6 @@
       });
     });
   </script>
-
-  <!-- Clear outdated caches if a new version is available -->
-  <!-- <script>
-    window.addEventListener('load', function() {
-      if ('serviceWorker' in navigator) {
-        const timestamp = new Date().getTime();
-        const xmlhttp = new XMLHttpRequest();
-
-        xmlhttp.open("GET", `/version.json?v=${timestamp}`, true);
-        xmlhttp.addEventListener('load', function() {
-                const buildNumber = xmlhttp.responseText.trim();
-                const currentBuildNumber = localStorage.getItem('buildNumber');
-                if (currentBuildNumber !== buildNumber) {
-                    console.log('Clearing outdated caches...');
-                    caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
-                    localStorage.setItem('buildNumber', buildNumber);
-                  }
-                  launchFlutter();
-              });
-
-        xmlhttp.addEventListener('error', launchFlutter);
-        xmlhttp.addEventListener('abort', launchFlutter);
-        xmlhttp.addEventListener('timeout', launchFlutter);
-        xmlhttp.send();
-        } else {
-            console.log('Service Worker not supported.');
-            launchFlutter();
-          }
-  });
-  </script> -->
-  <!-- Clear outdated caches if a new version is available -->
-
-  <!-- <script src="flutter_bootstrap.js" async></script> -->
+  <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
