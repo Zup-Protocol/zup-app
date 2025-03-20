@@ -1,6 +1,6 @@
 {
-    "name": "zup_app",
-    "short_name": "zup_app",
+    "name": "Zup Protocol App",
+    "short_name": "Zup App",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#7357FF",
