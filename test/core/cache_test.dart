@@ -12,9 +12,6 @@ void main() {
   late Cache sut;
   late SharedPreferencesWithCache sharedPreferencesWithCache;
 
-  const hidingClosedPositionsKey = "HIDING_CLOSED_POSITIONS";
-  const depositSettingsKey = "DEPOSIT_SETTINGS";
-
   setUp(() {
     registerFallbackValue(DepositSettingsDto.fixture());
 
@@ -29,7 +26,7 @@ void main() {
     const status = true;
     await sut.saveHidingClosedPositionsStatus(status: status);
 
-    verify(() => sharedPreferencesWithCache.setBool(hidingClosedPositionsKey, status)).called(1);
+    verify(() => sharedPreferencesWithCache.setBool(CacheKey.hidingClosedPositions.key, status)).called(1);
   });
 
   test("When calling `getHidingClosedPositionsStatus` it should use the correct key and return the correct status",
@@ -42,7 +39,7 @@ void main() {
 
     expect(result, status);
 
-    verify(() => sharedPreferencesWithCache.getBool(hidingClosedPositionsKey)).called(1);
+    verify(() => sharedPreferencesWithCache.getBool(CacheKey.hidingClosedPositions.key)).called(1);
   });
 
   test("When calling `getHidingClosedPositionsStatus` and the shared preferences return null, it should return false",
@@ -62,7 +59,7 @@ void main() {
       when(() => sharedPreferencesWithCache.setString(any(), any())).thenAnswer((_) async => true);
       await sut.saveDepositSettings(settings);
 
-      verify(() => sharedPreferencesWithCache.setString(depositSettingsKey, any())).called(1);
+      verify(() => sharedPreferencesWithCache.setString(CacheKey.depositSettings.key, any())).called(1);
     },
   );
 
@@ -88,7 +85,7 @@ void main() {
 
     sut.getDepositSettings();
 
-    verify(() => sharedPreferencesWithCache.getString(depositSettingsKey)).called(1);
+    verify(() => sharedPreferencesWithCache.getString(CacheKey.depositSettings.key)).called(1);
   });
 
   test("When calling `getDepositSettings` it should convert the returned saved json to a deposit settings dto", () {
@@ -99,5 +96,9 @@ void main() {
     final result = sut.getDepositSettings();
 
     expect(result, settings);
+  });
+
+  test("When calling '.keys' in the cache key enum, it should return all the cache keys as Set", () {
+    expect(CacheKey.keys, CacheKey.values.map((e) => e.key).toSet());
   });
 }

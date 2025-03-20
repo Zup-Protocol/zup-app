@@ -53,7 +53,10 @@ Future<void> setupInjections() async {
   inject.registerLazySingleton<AppCubit>(() => AppCubit(inject<Wallet>()));
   inject.registerLazySingleton<PositionsRepository>(() => PositionsRepository());
   inject.registerSingletonAsync<SharedPreferencesWithCache>(
-      () async => await SharedPreferencesWithCache.create(cacheOptions: const SharedPreferencesWithCacheOptions()));
+    () async => await SharedPreferencesWithCache.create(
+      cacheOptions: SharedPreferencesWithCacheOptions(allowList: CacheKey.keys),
+    ),
+  );
   inject.registerLazySingleton<Cache>(() => Cache(inject<SharedPreferencesWithCache>()));
   inject.registerLazySingleton<ZupCachedImage>(() => ZupCachedImage());
   inject.registerLazySingleton<PositionsCubit>(
