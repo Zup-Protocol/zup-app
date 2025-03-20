@@ -94,8 +94,12 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       await tx.waitConfirmation();
 
-      if (_yield.token0.address == token.address) _token0Allowance = value;
-      if (_yield.token1.address == token.address) _token1Allowance = value;
+      try {
+        await _getTokensAllowance(canThrow: true);
+      } catch (e) {
+        if (_yield.token0.address == token.address) _token0Allowance = value;
+        if (_yield.token1.address == token.address) _token1Allowance = value;
+      }
 
       emit(PreviewDepositModalState.approveSuccess(txId: tx.hash, symbol: token.symbol));
       emit(PreviewDepositModalState.initial(token0Allowance: _token0Allowance, token1Allowance: _token1Allowance));
@@ -257,7 +261,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     }
   }
 
-  Future<void> _getTokensAllowance() async {
+  Future<void> _getTokensAllowance({bool canThrow = false}) async {
     try {
       final token0contract = _erc20.fromRpcProvider(
         contractAddress: _yield.token0.address,
@@ -282,7 +286,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       _token0Allowance = token0Allowance;
       _token1Allowance = token1Allowance;
     } catch (e) {
-      // DO NOTHING
+      if (canThrow) rethrow;
     }
   }
 

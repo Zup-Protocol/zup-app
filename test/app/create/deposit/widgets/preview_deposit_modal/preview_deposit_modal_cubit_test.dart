@@ -436,6 +436,15 @@ void main() {
     () async {
       final expectedToken0Allowance = BigInt.from(12345);
 
+      final token0Erc20Impl = Erc20ImplMock();
+
+      when(() => erc20.fromRpcProvider(contractAddress: currentYield.token0.address, rpcUrl: any(named: "rpcUrl")))
+          .thenReturn(token0Erc20Impl);
+
+      when(() => token0Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
+        (_) async => expectedToken0Allowance,
+      );
+
       await sut.approveToken(currentYield.token0, expectedToken0Allowance);
 
       expect(sut.token0Allowance, expectedToken0Allowance);
@@ -453,6 +462,15 @@ void main() {
     () async {
       final expectedToken1Allowance = BigInt.from(12345);
 
+      final token1Erc20Impl = Erc20ImplMock();
+
+      when(() => erc20.fromRpcProvider(contractAddress: currentYield.token1.address, rpcUrl: any(named: "rpcUrl")))
+          .thenReturn(token1Erc20Impl);
+
+      when(() => token1Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
+        (_) async => expectedToken1Allowance,
+      );
+
       await sut.approveToken(currentYield.token1, expectedToken1Allowance);
 
       expect(sut.token1Allowance, expectedToken1Allowance);
@@ -467,10 +485,18 @@ void main() {
   test(
     """When calling `approveToken` with the token0 and everything is ok,
     it should emit the approve success state and right after,
-    the initial state with the updated allowance
+    the initial state with the updated allowance got from the contract again
     """,
     () async {
       final token0Allowance = BigInt.from(12345);
+      final token0Erc20Impl = Erc20ImplMock();
+
+      when(() => erc20.fromRpcProvider(contractAddress: currentYield.token0.address, rpcUrl: any(named: "rpcUrl")))
+          .thenReturn(token0Erc20Impl);
+
+      when(() => token0Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
+        (_) async => token0Allowance,
+      );
 
       expectLater(
           sut.stream,
@@ -482,16 +508,26 @@ void main() {
           ]));
 
       await sut.approveToken(currentYield.token0, token0Allowance);
+
+      verify(() => token0Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).called(1);
     },
   );
 
   test(
     """When calling `approveToken` with the token1 and everything is ok,
     it should emit the approve success state and right after,
-    the initial state with the updated allowance
+    the initial state with the updated allowance got from the contract again
     """,
     () async {
       final token1Allowance = BigInt.from(12345);
+      final token1Erc20Impl = Erc20ImplMock();
+
+      when(() => erc20.fromRpcProvider(contractAddress: currentYield.token1.address, rpcUrl: any(named: "rpcUrl")))
+          .thenReturn(token1Erc20Impl);
+
+      when(() => token1Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
+        (_) async => token1Allowance,
+      );
 
       expectLater(
           sut.stream,
@@ -503,6 +539,56 @@ void main() {
           ]));
 
       await sut.approveToken(currentYield.token1, token1Allowance);
+
+      verify(() => token1Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).called(1);
+    },
+  );
+
+  test(
+    """When calling `approveToken` with the token1, the approve transaction is ok,
+    but the get allowance from the contract call fail, it should emit the initial
+    state with the allowance value passed to approve
+    """,
+    () async {
+      final token1Allowance = BigInt.from(12345);
+
+      when(() => erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender")))
+          .thenThrow("dale error");
+
+      expectLater(
+          sut.stream,
+          emitsInOrder([
+            anything,
+            anything,
+            anything,
+            PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: token1Allowance),
+          ]));
+
+      await sut.approveToken(currentYield.token1, token1Allowance);
+    },
+  );
+
+  test(
+    """When calling `approveToken` with the token0, the approve transaction is ok,
+    but the get allowance from the contract call fail, it should emit the initial
+    state with the allowance value passed to approve
+    """,
+    () async {
+      final token0Allowance = BigInt.from(439868);
+
+      when(() => erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender")))
+          .thenThrow("dale error");
+
+      expectLater(
+          sut.stream,
+          emitsInOrder([
+            anything,
+            anything,
+            anything,
+            PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: BigInt.zero),
+          ]));
+
+      await sut.approveToken(currentYield.token0, token0Allowance);
     },
   );
 
