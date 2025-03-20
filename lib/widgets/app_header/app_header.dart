@@ -53,7 +53,7 @@ class _AppHeaderState extends State<AppHeader> with DeviceInfoMixin {
           ClipRect(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.orange
+              child: Container(color: Colors.blueGrey
                   // .withValues(alpha: 0.85)
                   ),
             ),
