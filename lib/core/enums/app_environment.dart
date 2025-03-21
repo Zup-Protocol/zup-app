@@ -3,11 +3,13 @@ enum AppEnvironment {
   stage;
 
   static AppEnvironment get current {
-    if (const String.fromEnvironment("env") == AppEnvironment.stage.value) {
+    const env = String.fromEnvironment("env");
+
+    if (env == AppEnvironment.stage.value) {
       return AppEnvironment.stage;
     }
 
-    if (const String.fromEnvironment("env") == AppEnvironment.prod.value) {
+    if (env == AppEnvironment.prod.value) {
       return AppEnvironment.prod;
     }
 
