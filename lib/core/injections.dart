@@ -12,6 +12,7 @@ import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
+import 'package:zup_app/core/enums/app_environment.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
@@ -41,7 +42,7 @@ Future<void> setupInjections() async {
   await inject.reset();
 
   inject.registerLazySingleton<Dio>(
-    () => Dio(BaseOptions(baseUrl: "https://api.zupprotocol.xyz"))
+    () => Dio(BaseOptions(baseUrl: AppEnvironment.current.apiUrl))
       ..interceptors.add(
         LogInterceptor(request: true, requestBody: true, responseBody: true, error: true),
       ),
