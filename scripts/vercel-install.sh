@@ -1,4 +1,4 @@
-FLUTTER_VERSION=$(jq -r '.flutter' .fvmrc) 
+FLUTTER_VERSION=$(grep -o '"flutter": *"[^"]*' .fvmrc | sed 's/"flutter": "//')
 
 git clone https://github.com/flutter/flutter.git -b stable && \
 ls && \
