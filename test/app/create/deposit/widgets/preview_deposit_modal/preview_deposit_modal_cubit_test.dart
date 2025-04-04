@@ -118,7 +118,7 @@ void main() {
       (_) async => TransactionReceipt(hash: transactionHash),
     );
 
-    when(() => wallet.connectedNetwork).thenAnswer((_) async => currentYield.network.chainInfo!);
+    when(() => wallet.connectedNetwork).thenAnswer((_) async => currentYield.network.chainInfo);
 
     when(() => uniswapPositionManager.fromRpcProvider(
         contractAddress: any(named: "contractAddress"),
@@ -319,11 +319,11 @@ void main() {
       );
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
-      when(() => wallet.connectedNetwork).thenAnswer((_) async => Networks.scrollSepolia.chainInfo!);
+      when(() => wallet.connectedNetwork).thenAnswer((_) async => Networks.mainnet.chainInfo);
 
       await sut.approveToken(currentYield.token0, BigInt.from(32761));
 
-      verify(() => wallet.switchOrAddNetwork(yieldNetwork.chainInfo!)).called(1);
+      verify(() => wallet.switchOrAddNetwork(yieldNetwork.chainInfo)).called(1);
     },
   );
 
@@ -347,11 +347,11 @@ void main() {
       );
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
-      when(() => wallet.connectedNetwork).thenAnswer((_) async => yieldNetwork.chainInfo!);
+      when(() => wallet.connectedNetwork).thenAnswer((_) async => yieldNetwork.chainInfo);
 
       await sut.approveToken(currentYield.token0, BigInt.from(121));
 
-      verifyNever(() => wallet.switchOrAddNetwork(yieldNetwork.chainInfo!));
+      verifyNever(() => wallet.switchOrAddNetwork(yieldNetwork.chainInfo));
     },
   );
 
@@ -648,8 +648,8 @@ void main() {
     """When calling `deposit` and the signer connected network is
     different from the yield network, it should ask the user to switch network""",
     () async {
-      final connectedNetwork = Networks.scrollSepolia.chainInfo!;
-      final yieldNetwork = Networks.sepolia.chainInfo!;
+      final connectedNetwork = Networks.mainnet.chainInfo;
+      final yieldNetwork = Networks.sepolia.chainInfo;
 
       when(() => wallet.connectedNetwork).thenAnswer((_) async => connectedNetwork);
 
@@ -674,8 +674,8 @@ void main() {
     the same from the yield network, it should not ask the user
     to switch network""",
     () async {
-      final connectedNetwork = Networks.sepolia.chainInfo!;
-      final yieldNetwork = Networks.sepolia.chainInfo!;
+      final connectedNetwork = Networks.sepolia.chainInfo;
+      final yieldNetwork = Networks.sepolia.chainInfo;
 
       when(() => wallet.connectedNetwork).thenAnswer((_) async => connectedNetwork);
 

@@ -8,6 +8,9 @@
             "deviceId": "chrome",
             "program": "./lib/main.dart",
             "flutterMode": "release",
+            "toolArgs": [
+                "--dart-define=env=local",
+            ]
         },
         {
             "name": "Zup App (Web) (Debug)",
@@ -15,7 +18,10 @@
             "type": "dart",
             "deviceId": "chrome",
             "program": "./lib/main.dart",
-            "flutterMode": "debug"
+            "flutterMode": "debug",
+            "toolArgs": [
+                "--dart-define=env=local",
+            ]
         },
         {
             "name": "Zup App (MacOs)",
@@ -23,6 +29,9 @@
             "type": "dart",
             "deviceId": "macos",
             "program": "./lib/main.dart",
+            "toolArgs": [
+                "--dart-define=env=local",
+            ]
         },
     ]
 }

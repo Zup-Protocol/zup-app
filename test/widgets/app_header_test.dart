@@ -30,9 +30,13 @@ void main() {
 
     when(() => zupNavigator.listenable).thenReturn(listenable);
     when(() => zupNavigator.currentRoute).thenReturn("any");
-    when(() => appCubit.selectedNetwork).thenReturn(Networks.sepolia);
+    when(() => appCubit.selectedNetwork).thenReturn(Networks.mainnet);
+    when(() => appCubit.selectedNetworkStream).thenAnswer((_) => const Stream.empty());
+    when(() => appCubit.isTestnetMode).thenReturn(false);
+    when(() => appCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(() => appCubit.state).thenReturn(const AppState.standard());
     when(() => zupNavigator.navigateToInitial()).thenAnswer((_) => Future.value());
-    when(() => zupNavigator.navigateToMyPositions()).thenAnswer((_) => Future.value());
+
     when(() => zupNavigator.navigateToNewPosition()).thenAnswer((_) => Future.value());
   });
 
@@ -44,13 +48,6 @@ void main() {
       );
 
   zGoldenTest("Zup Header Default", goldenFileName: "zup_header", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenBuilder());
-  });
-
-  zGoldenTest("When the current route is my positions, it should select the my positions button",
-      goldenFileName: "zup_header_my_positions", (tester) async {
-    when(() => zupNavigator.currentRoute).thenReturn(ZupNavigatorPaths.myPositions.path);
-
     await tester.pumpDeviceBuilder(await goldenBuilder());
   });
 
@@ -137,18 +134,6 @@ void main() {
 
   //   verify(() => appCubit.updateAppNetwork(network)).called(1);
   // });
-
-  zGoldenTest(
-      "When an event about the route is emitted, and the new route is My positions, it should select my positions button",
-      goldenFileName: "zup_header_my_positions_event", (tester) async {
-    final changeNotifier = ChangeNotifierMock();
-
-    when(() => zupNavigator.listenable).thenReturn(changeNotifier);
-    await tester.pumpDeviceBuilder(await goldenBuilder());
-
-    when(() => zupNavigator.currentRoute).thenReturn(ZupNavigatorPaths.myPositions.path);
-    changeNotifier.notify();
-  });
 
   zGoldenTest(
       "When an event about the route is emitted, and the new route is New position, it should select New position button",

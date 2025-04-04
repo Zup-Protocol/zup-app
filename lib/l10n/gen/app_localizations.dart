@@ -885,6 +885,18 @@ abstract class S {
   /// **'Close'**
   String get close;
 
+  /// No description provided for @depositPageDepositWithNativeToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit with Native {tokenSymbol}'**
+  String depositPageDepositWithNativeToken({required String tokenSymbol});
+
+  /// No description provided for @appSettingsDropdownTestnetMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Testnet Mode'**
+  String get appSettingsDropdownTestnetMode;
+
   /// No description provided for @createPageTitle.
   ///
   /// In en, this message translates to:

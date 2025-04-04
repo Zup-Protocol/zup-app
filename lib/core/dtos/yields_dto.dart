@@ -47,7 +47,7 @@ class YieldsDto with _$YieldsDto {
                 name: "Wrapped Ether",
                 symbol: "WETH",
               ),
-              network: Networks.scrollSepolia,
+              network: Networks.sepolia,
               poolAddress: "0x4040CE732c1A538A4Ac3157FDC35179D73ea76cd",
               tickSpacing: 10,
               yearlyYield: 1732.42,

@@ -42,7 +42,7 @@ void main() {
       it should return the native token for the yield network""", () {
     const network = Networks.sepolia;
     final sut = YieldDto.fixture().copyWith(
-      token1: TokenDto(address: network.wrappedNativeTokenAddress!),
+      token1: TokenDto(address: network.wrappedNativeTokenAddress),
       network: network,
     );
 
@@ -52,10 +52,10 @@ void main() {
         token,
         TokenDto(
           address: EthereumConstants.zeroAddress,
-          decimals: network.chainInfo!.nativeCurrency!.decimals,
-          logoUrl: network.chainInfo!.nativeCurrency!.logoUrl,
-          symbol: network.chainInfo!.nativeCurrency!.symbol,
-          name: network.chainInfo!.nativeCurrency!.name,
+          decimals: network.chainInfo.nativeCurrency!.decimals,
+          logoUrl: network.chainInfo.nativeCurrency!.logoUrl,
+          symbol: network.chainInfo.nativeCurrency!.symbol,
+          name: network.chainInfo.nativeCurrency!.name,
         ));
   });
 
@@ -64,7 +64,7 @@ void main() {
       it should return the native token for the yield network""", () {
     const network = Networks.sepolia;
     final sut = YieldDto.fixture().copyWith(
-      token0: TokenDto(address: network.wrappedNativeTokenAddress!),
+      token0: TokenDto(address: network.wrappedNativeTokenAddress),
       network: network,
     );
 
@@ -74,10 +74,10 @@ void main() {
         token,
         TokenDto(
           address: EthereumConstants.zeroAddress,
-          decimals: network.chainInfo!.nativeCurrency!.decimals,
-          logoUrl: network.chainInfo!.nativeCurrency!.logoUrl,
-          symbol: network.chainInfo!.nativeCurrency!.symbol,
-          name: network.chainInfo!.nativeCurrency!.name,
+          decimals: network.chainInfo.nativeCurrency!.decimals,
+          logoUrl: network.chainInfo.nativeCurrency!.logoUrl,
+          symbol: network.chainInfo.nativeCurrency!.symbol,
+          name: network.chainInfo.nativeCurrency!.name,
         ));
   });
 }

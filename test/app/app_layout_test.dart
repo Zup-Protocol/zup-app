@@ -34,7 +34,10 @@ void main() {
       instanceName: InjectInstanceNames.appScrollController,
     );
 
-    when(() => appCubit.selectedNetwork).thenReturn(Networks.sepolia);
+    when(() => appCubit.selectedNetwork).thenReturn(Networks.mainnet);
+    when(() => appCubit.state).thenReturn(const AppState.standard());
+    when(() => appCubit.isTestnetMode).thenReturn(false);
+    when(() => appCubit.stream).thenAnswer((_) => const Stream.empty());
   });
 
   Future<DeviceBuilder> goldenBuilder({bool isMobile = false}) async => await goldenDeviceBuilder(
