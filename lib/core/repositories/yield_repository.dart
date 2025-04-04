@@ -14,8 +14,8 @@ class YieldRepository {
     required Networks network,
   }) async {
     final response = await _zupAPIDio.get("/pools", queryParameters: {
-      "token0": token0Address != EthereumConstants.zeroAddress ? token0Address : network.wrappedNative!.address,
-      "token1": token1Address != EthereumConstants.zeroAddress ? token1Address : network.wrappedNative!.address,
+      "token0": token0Address != EthereumConstants.zeroAddress ? token0Address : network.wrappedNative.address,
+      "token1": token1Address != EthereumConstants.zeroAddress ? token1Address : network.wrappedNative.address,
       "network": network.name,
     });
 

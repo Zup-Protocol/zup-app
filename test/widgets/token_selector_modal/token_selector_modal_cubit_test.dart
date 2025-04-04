@@ -70,7 +70,7 @@ void main() {
 
     const tokenList2 = TokenListDto();
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList2);
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.scrollSepolia);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.mainnet);
 
     await sut.fetchTokenList();
 
@@ -89,7 +89,7 @@ void main() {
 
     const tokenList2 = TokenListDto();
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => tokenList2);
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.scrollSepolia);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.mainnet);
 
     await sut.fetchTokenList();
 

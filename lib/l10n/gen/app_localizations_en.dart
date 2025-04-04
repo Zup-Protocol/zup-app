@@ -489,6 +489,14 @@ class SEn extends S {
   String get close => 'Close';
 
   @override
+  String depositPageDepositWithNativeToken({required String tokenSymbol}) {
+    return 'Deposit with Native $tokenSymbol';
+  }
+
+  @override
+  String get appSettingsDropdownTestnetMode => 'Testnet Mode';
+
+  @override
   String get createPageTitle => 'New Position';
 
   @override

@@ -5,4 +5,5 @@ class AppState {
   const factory AppState.standard() = _Standard;
 
   const factory AppState.networkChanged(Networks newNetwork) = _NetworkChanged;
+  const factory AppState.testnetModeChanged(bool isTestnetMode) = _TestnetModeChanged;
 }

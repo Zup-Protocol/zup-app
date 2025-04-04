@@ -738,26 +738,15 @@ class _DepositPageState extends State<DepositPage>
                         _sectionTitle(S.of(context).depositPageDepositSectionTitle),
                         const Spacer(),
                         Text(
-                          "Deposit with Native ${_cubit.selectedYield?.network.chainInfo!.nativeCurrency!.symbol}",
+                          S.of(context).depositPageDepositWithNativeToken(
+                                tokenSymbol: _cubit.selectedYield?.network.chainInfo.nativeCurrency!.symbol ?? "",
+                              ),
                           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(width: 10),
-                        SizedBox(
-                          height: 32,
-                          child: FittedBox(
-                            child: Switch(
-                              value: depositWithNativeToken,
-                              onChanged: (value) {
-                                setState(() => depositWithNativeToken = value);
-                              },
-                              trackOutlineWidth: const WidgetStatePropertyAll(0),
-                              trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
-                              activeTrackColor: ZupColors.brand,
-                              inactiveThumbColor: ZupColors.brand,
-                              inactiveTrackColor: ZupColors.gray5,
-                              padding: const EdgeInsets.all(0),
-                            ),
-                          ),
+                        ZupSwitch(
+                          value: depositWithNativeToken,
+                          onChanged: (value) => setState(() => depositWithNativeToken = value),
                         ),
                       ],
                     ),

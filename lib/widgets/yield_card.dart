@@ -52,40 +52,6 @@ class _YieldCardState extends State<YieldCard> {
           width: double.maxFinite,
           child: Stack(
             children: [
-              if (appCubit.selectedNetwork.isAll)
-                Positioned(
-                  right: 2,
-                  top: 2,
-                  child: ZupTooltip(
-                    message: S.of(context).yieldCardThisPoolIsAtNetwork(network: widget.yield.network.label),
-                    trailingIcon: widget.yield.network.icon,
-                    child: AnimatedContainer(
-                      duration: selectionAnimationDuration,
-                      height: 40,
-                      padding: const EdgeInsets.all(6),
-                      width: 40,
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            blurStyle: BlurStyle.inner,
-                            color: widget.isSelected ? ZupColors.brand5 : ZupColors.gray5,
-                            blurRadius: 2,
-                            spreadRadius: -2,
-                            offset: const Offset(0, 0),
-                          ),
-                          BoxShadow(
-                            color: widget.isSelected ? ZupColors.brand7 : ZupColors.white,
-                            blurRadius: 5,
-                            spreadRadius: -1,
-                            offset: const Offset(2, -2),
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: widget.yield.network.icon,
-                    ),
-                  ),
-                ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
