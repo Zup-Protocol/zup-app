@@ -101,4 +101,23 @@ void main() {
   test("When calling '.keys' in the cache key enum, it should return all the cache keys as Set", () {
     expect(CacheKey.keys, CacheKey.values.map((e) => e.key).toSet());
   });
+
+  test("when calling `saveTestnetMode` it should save under the correct key", () async {
+    when(() => sharedPreferencesWithCache.setBool(any(), any())).thenAnswer((_) async => true);
+
+    const isTestnetMode = true;
+    await sut.saveTestnetMode(isTestnetMode: isTestnetMode);
+
+    verify(() => sharedPreferencesWithCache.setBool(CacheKey.isTestnetMode.key, isTestnetMode)).called(1);
+  });
+
+  test("when calling `getTestnetMode` it should get under the correct key", () async {
+    when(() => sharedPreferencesWithCache.getBool(any())).thenReturn(true);
+
+    final result = sut.getTestnetMode();
+
+    expect(result, true);
+
+    verify(() => sharedPreferencesWithCache.getBool(CacheKey.isTestnetMode.key)).called(1);
+  });
 }

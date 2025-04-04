@@ -121,8 +121,8 @@ void main() {
   if the token0 or token1 are wrapped natives""", (tester) async {
     final wrappedNativeYield = YieldDto.fixture().copyWith(
       network: Networks.sepolia,
-      token0: Networks.sepolia.wrappedNative!,
-      token1: Networks.sepolia.wrappedNative!,
+      token0: Networks.sepolia.wrappedNative,
+      token1: Networks.sepolia.wrappedNative,
     );
 
     await tester.pumpDeviceBuilder(
@@ -148,8 +148,8 @@ void main() {
       (if the token0 or token1 are wrapped natives)""", (tester) async {
     final wrappedNativeYield = YieldDto.fixture().copyWith(
       network: Networks.sepolia,
-      token0: Networks.sepolia.wrappedNative!,
-      token1: Networks.sepolia.wrappedNative!,
+      token0: Networks.sepolia.wrappedNative,
+      token1: Networks.sepolia.wrappedNative,
     );
 
     await tester.pumpDeviceBuilder(

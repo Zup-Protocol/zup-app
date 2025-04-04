@@ -26,11 +26,12 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
   final navigator = inject<ZupNavigator>();
 
   late final token0SelectorController = TokenSelectorButtonController(
-    initialSelectedToken: appCubit.selectedNetwork.nativeCurrency,
+    initialSelectedToken: appCubit.selectedNetwork.nativeCurrencyTokenDto,
   );
   final token1SelectorController = TokenSelectorButtonController(initialSelectedToken: null);
   StreamSubscription? _token0SelectorStreamSubscription;
   StreamSubscription? _token1SelectorStreamSubscription;
+  StreamSubscription? _selectedNetworkStreamSubscription;
 
   bool areTokensEqual(TokenDto? token0, TokenDto? token1) {
     if (token0 == null || token1 == null) return false;
@@ -38,14 +39,14 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
 
     // Note: If implementing all networks feature, this check should be refactored to work with all networks,
     //as all networks network does not have a native token or a wrapped native token
-    if (token0.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative!.address.toLowerCase()) &&
+    if (token0.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative.address.toLowerCase()) &&
         token1.address.lowercasedEquals(EthereumConstants.zeroAddress)) {
       return true;
     }
 
     // Note: If implementing all networks feature, this check should be refactored to work with all networks,
     //as all networks network does not have a native token or a wrapped native token
-    if (token1.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative!.address.toLowerCase()) &&
+    if (token1.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative.address.toLowerCase()) &&
         token0.address.lowercasedEquals(EthereumConstants.zeroAddress)) {
       return true;
     }
@@ -55,6 +56,11 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
 
   @override
   void initState() {
+    _selectedNetworkStreamSubscription = appCubit.selectedNetworkStream.listen((network) {
+      token0SelectorController.changeToken(network.nativeCurrencyTokenDto);
+      token1SelectorController.changeToken(null);
+    });
+
     _token0SelectorStreamSubscription = token0SelectorController.selectedTokenStream.listen((token) {
       if (areTokensEqual(token, token1SelectorController.selectedToken)) {
         return token1SelectorController.changeToken(null);
@@ -73,6 +79,8 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
   void dispose() {
     _token0SelectorStreamSubscription?.cancel();
     _token1SelectorStreamSubscription?.cancel();
+    _selectedNetworkStreamSubscription?.cancel();
+
     super.dispose();
   }
 

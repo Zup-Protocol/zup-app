@@ -20,15 +20,6 @@ void main() {
     ),
   );
 
-  testWidgets("When calling `navigateToMyPositions` it should use routefly to navigate to the my positions page",
-      (tester) async {
-    await tester.pumpWidget(material);
-
-    await ZupNavigator().navigateToMyPositions();
-
-    expect(Routefly.currentUri.path, ZupNavigatorPaths.myPositions.path);
-  });
-
   testWidgets("When calling `navigateToNewPosition` it should use routefly to navigate to the new position page",
       (tester) async {
     await tester.pumpWidget(material);

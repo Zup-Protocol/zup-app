@@ -40,35 +40,6 @@ void main() {
   );
 
   zGoldenTest(
-    "When initializing the widget, and the current route is my positions, it should selected the my positions tab",
-    goldenFileName: "app_bottom_navigation_bar_initial_my_positions",
-    (tester) async {
-      when(() => navigator.currentRoute).thenReturn(ZupNavigatorPaths.myPositions.path);
-
-      await tester.pumpDeviceBuilder(await goldenBuilder());
-    },
-  );
-
-  zGoldenTest(
-    """When the new position tab is selected, but the listener notify a new route change,
-    and the new selected route is my positions, the new selected tab should be my positions""",
-    goldenFileName: "app_bottom_navigation_bar_new_position_to_my_positions_listener",
-    (tester) async {
-      final routeListener = ChangeNotifierMock();
-
-      when(() => navigator.listenable).thenReturn(routeListener);
-      when(() => navigator.currentRoute).thenReturn(ZupNavigatorPaths.newPosition.path);
-
-      await tester.pumpDeviceBuilder(await goldenBuilder());
-
-      when(() => navigator.currentRoute).thenReturn(ZupNavigatorPaths.myPositions.path);
-      routeListener.notify();
-
-      await tester.pumpAndSettle();
-    },
-  );
-
-  zGoldenTest(
     "When clicking the new position tab, it should navigate to the new position page",
     (tester) async {
       when(() => navigator.navigateToNewPosition()).thenAnswer((_) => Future.value());
@@ -79,22 +50,6 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(() => navigator.navigateToNewPosition()).called(1);
-    },
-  );
-
-  zGoldenTest(
-    """When clicking the my positions tab it SHOULD NOT navigate to the my positions page
-    (it's not done yet. Soon as we launch the my positions page, this test can be deleted)
-    """,
-    (tester) async {
-      when(() => navigator.navigateToMyPositions()).thenAnswer((_) => Future.value());
-
-      await tester.pumpDeviceBuilder(await goldenBuilder());
-
-      await tester.tap(find.byKey(Key(ZupNavigatorPaths.myPositions.path)));
-      await tester.pumpAndSettle();
-
-      verifyNever(() => navigator.navigateToMyPositions());
     },
   );
 }

@@ -48,13 +48,13 @@ class YieldDto with _$YieldDto {
   }) = _YieldDto;
 
   TokenDto maybeNativeToken0({required bool permitNative}) {
-    if (permitNative && token0.address.lowercasedEquals(network.wrappedNative!.address)) {
+    if (permitNative && token0.address.lowercasedEquals(network.wrappedNative.address)) {
       return TokenDto(
         address: EthereumConstants.zeroAddress,
-        decimals: network.chainInfo!.nativeCurrency!.decimals,
-        logoUrl: network.chainInfo!.nativeCurrency!.logoUrl,
-        symbol: network.chainInfo!.nativeCurrency!.symbol,
-        name: network.chainInfo!.nativeCurrency!.name,
+        decimals: network.chainInfo.nativeCurrency!.decimals,
+        logoUrl: network.chainInfo.nativeCurrency!.logoUrl,
+        symbol: network.chainInfo.nativeCurrency!.symbol,
+        name: network.chainInfo.nativeCurrency!.name,
       );
     }
 
@@ -62,21 +62,21 @@ class YieldDto with _$YieldDto {
   }
 
   TokenDto maybeNativeToken1({required bool permitNative}) {
-    if (permitNative && token1.address.lowercasedEquals(network.wrappedNative!.address)) {
+    if (permitNative && token1.address.lowercasedEquals(network.wrappedNative.address)) {
       return TokenDto(
         address: EthereumConstants.zeroAddress,
-        decimals: network.chainInfo!.nativeCurrency!.decimals,
-        logoUrl: network.chainInfo!.nativeCurrency!.logoUrl,
-        symbol: network.chainInfo!.nativeCurrency!.symbol,
-        name: network.chainInfo!.nativeCurrency!.name,
+        decimals: network.chainInfo.nativeCurrency!.decimals,
+        logoUrl: network.chainInfo.nativeCurrency!.logoUrl,
+        symbol: network.chainInfo.nativeCurrency!.symbol,
+        name: network.chainInfo.nativeCurrency!.name,
       );
     }
 
     return token1;
   }
 
-  bool get isToken0WrappedNative => token0.address.lowercasedEquals(network.wrappedNativeTokenAddress!);
-  bool get isToken1WrappedNative => token1.address.lowercasedEquals(network.wrappedNativeTokenAddress!);
+  bool get isToken0WrappedNative => token0.address.lowercasedEquals(network.wrappedNativeTokenAddress);
+  bool get isToken1WrappedNative => token1.address.lowercasedEquals(network.wrappedNativeTokenAddress);
 
   factory YieldDto.fromJson(Map<String, dynamic> json) => _$YieldDtoFromJson(json);
 

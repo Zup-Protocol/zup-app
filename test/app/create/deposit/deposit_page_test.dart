@@ -15,7 +15,6 @@ import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_page.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
-import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_by_timeframe_dto.dart';
@@ -37,7 +36,7 @@ void main() {
   late Wallet wallet;
   late ZupNavigator navigator;
   late AppCubit appCubit;
-  late PositionsCubit positionsCubit;
+
   late UniswapV3Pool uniswapV3pool;
   late Erc20 erc20;
 
@@ -50,7 +49,6 @@ void main() {
     wallet = WalletMock();
     navigator = ZupNavigatorMock();
     appCubit = AppCubitMock();
-    positionsCubit = PositionsCubitMock();
     uniswapV3pool = UniswapV3PoolMock();
     erc20 = Erc20Mock();
 
@@ -92,7 +90,6 @@ void main() {
     inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerFactory<ZupSingletonCache>(() => ZupSingletonCache.shared);
     inject.registerFactory<GlobalKey<ScaffoldMessengerState>>(() => GlobalKey());
-    inject.registerFactory<PositionsCubit>(() => positionsCubit);
     inject.registerFactory<UniswapV3Pool>(() => uniswapV3pool);
     inject.registerFactory<Erc20>(() => erc20);
     inject.registerFactory<UniswapPositionManager>(() => UniswapPositionManagerMock());

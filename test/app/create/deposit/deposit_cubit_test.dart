@@ -257,7 +257,7 @@ void main() {
     verify(
       () => uniswapV3Pool.fromRpcProvider(
         contractAddress: selectedYield.poolAddress,
-        rpcUrl: selectedYield.network.rpcUrl!,
+        rpcUrl: selectedYield.network.rpcUrl,
       ),
     ).called(2); // 2 because of the `selectYield` and the `getSelectedPoolTick`
   });
@@ -312,7 +312,7 @@ void main() {
     await sut.selectYield(yieldA); // assuming that select yield will call `getSelectedPoolTick`
 
     verify(
-      () => uniswapV3Pool.fromRpcProvider(contractAddress: yieldBPoolAddress, rpcUrl: yieldB.network.rpcUrl!),
+      () => uniswapV3Pool.fromRpcProvider(contractAddress: yieldBPoolAddress, rpcUrl: yieldB.network.rpcUrl),
     ).called(2); // 2 because of the check in the `getSelectedPoolTick` that will re-call, and the selection
 
     expect(sut.latestPoolTick, expectedYieldBTick);

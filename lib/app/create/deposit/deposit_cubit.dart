@@ -91,7 +91,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
     final uniswapV3Pool = _uniswapV3Pool.fromRpcProvider(
       contractAddress: selectedYieldBeforeCall!.poolAddress,
-      rpcUrl: selectedYieldBeforeCall.network.rpcUrl ?? "",
+      rpcUrl: selectedYieldBeforeCall.network.rpcUrl,
     );
 
     final slot0 = await uniswapV3Pool.slot0();

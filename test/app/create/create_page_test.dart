@@ -22,6 +22,7 @@ void main() {
     inject.registerFactory<ZupNavigator>(() => ZupNavigatorMock());
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
+    when(() => appCubit.selectedNetworkStream).thenAnswer((_) => const Stream.empty());
   });
 
   tearDown(() => inject.reset());

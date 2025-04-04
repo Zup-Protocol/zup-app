@@ -50,7 +50,7 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
     ),
     _AppBottomNavigationBarItem(
       label: S.of(context).appBottomNavigationBarMyPositions,
-      path: ZupNavigatorPaths.myPositions.path,
+      path: "",
       icon: Assets.icons.waterWaves.svg(
         colorFilter: const ColorFilter.mode(ZupColors.gray5, BlendMode.srcIn),
         height: 16,

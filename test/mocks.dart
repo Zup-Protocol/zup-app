@@ -16,7 +16,6 @@ import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
-import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
@@ -48,8 +47,6 @@ class Erc20Mock extends Mock implements Erc20 {}
 class ImageProviderMock extends Mock implements ImageProvider {}
 
 class ListenableMock extends Mock implements Listenable {}
-
-class PositionsCubitMock extends Mock implements PositionsCubit {}
 
 class PositionsRepositoryMock extends Mock implements PositionsRepository {}
 

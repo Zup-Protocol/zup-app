@@ -9,12 +9,6 @@ void main() {
 
   test("Zup navigator paths `path` extension should use routefly generated paths", () {
     expect(
-      ZupNavigatorPaths.myPositions.path,
-      routePaths.positions,
-      reason: "My positions path does not match routefly path",
-    );
-
-    expect(
       ZupNavigatorPaths.newPosition.path,
       routePaths.create.path,
       reason: "New position path does not match routefly path",

@@ -5,7 +5,8 @@ import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 
 enum CacheKey {
   hidingClosedPositions,
-  depositSettings;
+  depositSettings,
+  isTestnetMode;
 
   String get key => name;
 
@@ -33,5 +34,13 @@ class Cache {
     final cache = _cache.getString(CacheKey.depositSettings.key) ?? "{}";
 
     return DepositSettingsDto.fromJson(jsonDecode(cache));
+  }
+
+  Future<void> saveTestnetMode({required bool isTestnetMode}) async {
+    await _cache.setBool(CacheKey.isTestnetMode.key, isTestnetMode);
+  }
+
+  bool getTestnetMode() {
+    return _cache.getBool(CacheKey.isTestnetMode.key) ?? false;
   }
 }

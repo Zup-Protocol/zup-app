@@ -10,8 +10,6 @@ class ZupNavigator {
 
   Future<void> back(BuildContext context) async => Routefly.pop(context);
 
-  Future<void> navigateToMyPositions() async => await Routefly.navigate(ZupNavigatorPaths.myPositions.path);
-
   Future<void> navigateToNewPosition() async => await Routefly.navigate(ZupNavigatorPaths.newPosition.path);
 
   Future<void> navigateToDeposit(String token0, String token1) async {

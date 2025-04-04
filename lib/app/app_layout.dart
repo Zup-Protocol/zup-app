@@ -14,7 +14,7 @@ class AppPage extends StatefulWidget {
 }
 
 class _AppPageState extends State<AppPage> with DeviceInfoMixin {
-  bool get shouldShowBottomNavigationBar => isMobileSize(context);
+  bool get shouldShowBottomNavigationBar => isTabletSize(context);
 
   final double appBarHeight = 85;
 
