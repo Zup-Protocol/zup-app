@@ -143,7 +143,7 @@ ZupCachedImage mockZupCachedImage() {
         width: any(named: "width"),
         radius: any(named: "radius"),
         errorWidget: any(named: "errorWidget"),
-        placeholder: any(named: "placeholder"),
+        loadingBuilder: any(named: "loadingBuilder"),
       )).thenReturn(const SizedBox(child: Text("IMAGE")));
 
   return zupCachedImage;

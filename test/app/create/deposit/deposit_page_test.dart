@@ -1738,7 +1738,7 @@ void main() {
       when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
-      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.tap(find.byKey(const Key("deposit-settings-button")));
       await tester.pumpAndSettle();
 
@@ -1760,7 +1760,7 @@ void main() {
       when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
-      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.tap(find.byKey(const Key("deposit-settings-button")));
       await tester.pumpAndSettle();
 
@@ -1778,7 +1778,7 @@ void main() {
       when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
-      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.tap(find.byKey(const Key("deposit-settings-button")));
       await tester.pumpAndSettle();
 
@@ -1787,7 +1787,6 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
-
   zGoldenTest(
     """When the selected slippage value is lower than 1%,
     the deposit settings button should be gray-styled with
@@ -1797,7 +1796,7 @@ void main() {
       when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
-      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.tap(find.byKey(const Key("deposit-settings-button")));
       await tester.pumpAndSettle();
 
@@ -1816,7 +1815,7 @@ void main() {
       when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
-      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.tap(find.byKey(const Key("deposit-settings-button")));
       await tester.pumpAndSettle();
 
@@ -1836,7 +1835,7 @@ void main() {
       when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
-      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.tap(find.byKey(const Key("deposit-settings-button")));
       await tester.pumpAndSettle();
 
@@ -1860,7 +1859,7 @@ void main() {
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
       when(() => cubit.depositSettings).thenReturn(expectedDepositSettings);
 
-      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.tap(find.byKey(const Key("deposit-settings-button")));
       await tester.pumpAndSettle();
     },
@@ -1874,7 +1873,7 @@ void main() {
       when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => () {});
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
-      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.tap(find.byKey(const Key("deposit-settings-button")));
       await tester.pumpAndSettle();
 
