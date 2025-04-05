@@ -8,7 +8,7 @@ Zup App repository is the repository containing the Zup Protocol Web Application
 
 - **Flutter/FVM**
 
-  - To run the app, you will need to have Flutter installed on your computer. The current version of Flutter used by Zup App is `3.27.3`.
+  - To run the app, you will need to have Flutter installed on your computer. The current version of Flutter used by Zup App is `3.29.2`.
   - You can check if Flutter is installed, or the Flutter version by running `flutter --version` on your terminal, you should see a response like `Flutter X.XX.X`.
   - If the Flutter is not installed, or the version differs from the version used by Zup App, you can install Flutter from FVM (To allow you have multiple Flutter versions in your computer)
   - [How to install FVM](https://fvm.app/documentation/getting-started/installation)

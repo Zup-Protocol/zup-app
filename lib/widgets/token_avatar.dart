@@ -36,13 +36,17 @@ class TokenAvatar extends StatelessWidget {
             width: size,
             radius: 50,
             errorWidget: (_, __, ___) => genericAvatar(),
-            placeholder: (context, url) => Skeleton.ignore(
-              child: ZupCircularLoadingIndicator(
-                size: size,
-                backgroundColor: ZupColors.brand5,
-                indicatorColor: ZupColors.brand,
-              ),
-            ),
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+
+              return Skeleton.ignore(
+                child: ZupCircularLoadingIndicator(
+                  size: size,
+                  backgroundColor: ZupColors.brand5,
+                  indicatorColor: ZupColors.brand,
+                ),
+              );
+            },
           );
   }
 }

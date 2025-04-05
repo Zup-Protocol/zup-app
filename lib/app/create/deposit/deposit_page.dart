@@ -362,6 +362,7 @@ class _DepositPageState extends State<DepositPage>
                                           )
                                       : null,
                                   onPressed: (buttonContext) => ZupDropdown.show(
+                                    offset: const Offset(0, 100),
                                     showBelowContext: buttonContext,
                                     child: DepositSettingsDropdownChild(
                                       context,
