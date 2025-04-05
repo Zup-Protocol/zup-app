@@ -237,6 +237,13 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       emit(PreviewDepositModalState.depositSuccess(txId: tx.hash));
     } catch (e) {
+      if (e.toString().toLowerCase().contains("slippage")) {
+        emit(const PreviewDepositModalState.slippageCheckError());
+        emit(PreviewDepositModalState.initial(token0Allowance: _token0Allowance, token1Allowance: _token1Allowance));
+
+        return;
+      }
+
       if (e is UserRejectedAction) {
         return emit(
           PreviewDepositModalState.initial(

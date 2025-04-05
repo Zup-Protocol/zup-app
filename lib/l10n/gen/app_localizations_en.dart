@@ -497,6 +497,10 @@ class SEn extends S {
   String get appSettingsDropdownTestnetMode => 'Testnet Mode';
 
   @override
+  String get previewDepositModalSlippageCheckErrorMessage =>
+      'Slippage Check! Please try increasing your slippage for this transaction';
+
+  @override
   String get createPageTitle => 'New Position';
 
   @override
