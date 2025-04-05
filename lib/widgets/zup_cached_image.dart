@@ -19,6 +19,7 @@ class ZupCachedImage {
     ImageErrorWidgetBuilder? errorWidget,
   }) {
     return ClipRRect(
+      key: Key(url),
       borderRadius: BorderRadius.circular(radius ?? 0),
       child: Container(
         decoration: BoxDecoration(
