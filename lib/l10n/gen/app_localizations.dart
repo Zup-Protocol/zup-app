@@ -897,6 +897,12 @@ abstract class S {
   /// **'Testnet Mode'**
   String get appSettingsDropdownTestnetMode;
 
+  /// No description provided for @previewDepositModalSlippageCheckErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Slippage Check! Please try increasing your slippage for this transaction'**
+  String get previewDepositModalSlippageCheckErrorMessage;
+
   /// No description provided for @createPageTitle.
   ///
   /// In en, this message translates to:

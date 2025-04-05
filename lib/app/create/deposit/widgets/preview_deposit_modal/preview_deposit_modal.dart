@@ -349,6 +349,17 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               depositedWithNative: widget.depositWithNativeToken,
             );
           },
+          slippageCheckError: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+            return ScaffoldMessenger.of(context).showSnackBar(
+              ZupSnackBar(
+                context,
+                message: S.of(context).previewDepositModalSlippageCheckErrorMessage,
+                type: ZupSnackBarType.error,
+              ),
+            );
+          },
           transactionError: () {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
 

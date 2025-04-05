@@ -1009,4 +1009,22 @@ void main() {
       verify(() => navigator.navigateToNewPosition()).called(1);
     },
   );
+
+  zGoldenTest(
+    "When the state is slippage check error, it should show an error snack bar saying to change the slippage",
+    goldenFileName: "preview_deposit_modal_slippage_check_error",
+    (tester) async {
+      when(() => cubit.state).thenReturn(const PreviewDepositModalState.slippageCheckError());
+      when(() => cubit.stream).thenAnswer((_) {
+        return Stream.value(const PreviewDepositModalState.slippageCheckError());
+      });
+
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(),
+        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
+      );
+
+      await tester.pumpAndSettle();
+    },
+  );
 }

@@ -299,6 +299,7 @@
         }
     },
     "appSettingsDropdownTestnetMode": "Testnet Mode",
+    "previewDepositModalSlippageCheckErrorMessage": "Slippage Check! Please try increasing your slippage for this transaction",
     "createPageTitle": "New Position",
     "createPageShowMeTheMoney": "Show me the money!",
     "createPageDescription": "Ready to dive in? First, pick the dynamic duo of tokens you want to team up in the pool. Just choose your pair right below and you’re set to make some magic!",

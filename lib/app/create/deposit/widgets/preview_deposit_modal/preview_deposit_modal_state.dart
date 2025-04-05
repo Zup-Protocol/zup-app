@@ -18,6 +18,7 @@ class PreviewDepositModalState with _$PreviewDepositModalState {
   const factory PreviewDepositModalState.approveSuccess({required String txId, required String symbol}) =
       _ApproveSuccess;
   const factory PreviewDepositModalState.transactionError() = _TransactionError;
+  const factory PreviewDepositModalState.slippageCheckError() = _SlippageCheckError;
   const factory PreviewDepositModalState.approvingToken(String symbol) = _ApprovingToken;
   const factory PreviewDepositModalState.depositing() = _Depositing;
 }

@@ -1619,4 +1619,35 @@ void main() {
       );
     },
   );
+
+  test(
+    """When calling `deposit` and an error with `slippage` text in its body occur while depositing,
+    it should emit the slippage check error state and the initial state""",
+    () async {
+      when(
+        () => uniswapPositionManagerImpl.mint(params: any(named: "params")),
+      ).thenThrow("SLIPPAGE_ERROR");
+
+      expectLater(
+        sut.stream,
+        emitsInOrder([
+          anything,
+          const PreviewDepositModalState.slippageCheckError(),
+          PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero),
+        ]),
+      );
+
+      await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
+        token0Amount: BigInt.one,
+        token1Amount: BigInt.one,
+        minPrice: 1200,
+        maxPrice: 3000.50,
+        isMinPriceInfinity: false,
+        isMaxPriceInfinity: false,
+        isReversed: false,
+      );
+    },
+  );
 }
