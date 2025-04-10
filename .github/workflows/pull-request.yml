@@ -1,27 +1,26 @@
 name: "Pull Request"
 
 on:
-    pull_request:
-        branches:
-            - main
-        paths:
-            - "lib/**"
-            - "test/**"
-            - "assets/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "lib/**"
+      - "test/**"
+      - "assets/**"
 jobs:
-    run-tests:
-        runs-on: macos-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: dart-lang/setup-dart@v1
-              with:
-                sdk: 3.7.2
-            - uses: subosito/flutter-action@v2
-              with:
-                channel: "stable"
-                flutter-version: 3.29.2
-            - name: Install dependencies
-              run: make install
-            - name: Run tests
-              run: flutter test --test-randomize-ordering-seed=random
-            
+  run-tests:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.7.2
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: 3.29.2
+      - name: Install dependencies
+        run: flutter pub get && make gen
+      - name: Run tests
+        run: flutter test --test-randomize-ordering-seed=random
