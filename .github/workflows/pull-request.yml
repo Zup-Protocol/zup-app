@@ -21,6 +21,6 @@ jobs:
           channel: "stable"
           flutter-version: 3.29.2
       - name: Install dependencies
-        run: flutter pub get && make gen
+        run: flutter pub get && dart run build_runner build --delete-conflicting-outputs && flutter gen-l10n && dart run routefly && dart run web3kit:generate_abis
       - name: Run tests
         run: flutter test --test-randomize-ordering-seed=random
