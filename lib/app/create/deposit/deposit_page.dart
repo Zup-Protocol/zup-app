@@ -2,6 +2,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web3kit/web3kit.dart';
@@ -328,7 +329,9 @@ class _DepositPageState extends State<DepositPage>
         builder: (context, state) {
           return state.maybeWhen(
             orElse: () => _buildLoadingState(),
-            noYields: () => _buildNoYieldsState(),
+            noYields: (minLiquiditySearchedUSD) => _buildNoYieldsState(
+              minLiquiditySearchedUSD: minLiquiditySearchedUSD,
+            ),
             error: () => _buildErrorState(),
             success: (yields) => StreamBuilder<YieldDto?>(
                 stream: _cubit.selectedYieldStream,
@@ -409,19 +412,72 @@ class _DepositPageState extends State<DepositPage>
 
   Widget _sectionTitle(String title) => Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600));
 
-  Widget _buildNoYieldsState() => Center(
-          child: SizedBox(
-        width: 400,
-        child: ZupInfoState(
-          icon: Transform.scale(scale: 3, child: lottieEmpty),
-          iconSize: 120,
-          title: S.of(context).depositPageEmptyStateTitle,
-          description: S.of(context).depositPageEmptyStateDescription,
-          helpButtonTitle: S.of(context).depositPageEmptyStateHelpButtonTitle,
-          helpButtonIcon: Assets.icons.arrowLeft.svg(),
-          onHelpButtonTap: () => _navigator.back(context),
+  Widget _buildNoYieldsState({required num minLiquiditySearchedUSD}) => Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 60),
+            SizedBox(
+              width: 400,
+              child: ZupInfoState(
+                icon: Transform.scale(scale: 3, child: lottieEmpty),
+                iconSize: 120,
+                title: S.of(context).depositPageEmptyStateTitle,
+                description: S.of(context).depositPageEmptyStateDescription,
+                helpButtonTitle: S.of(context).depositPageEmptyStateHelpButtonTitle,
+                helpButtonIcon: Assets.icons.arrowLeft.svg(),
+                onHelpButtonTap: () => _navigator.back(context),
+              ),
+            ),
+            const SizedBox(height: 60),
+            if (minLiquiditySearchedUSD > 0)
+              Text.rich(
+                TextSpan(
+                  children: [
+                    WidgetSpan(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: Assets.icons.infoCircle.svg(
+                          colorFilter: const ColorFilter.mode(ZupColors.gray, BlendMode.srcIn),
+                        ),
+                      ),
+                    ),
+                    TextSpan(
+                      text: S.of(context).depositPageMinLiquiditySearchAlert(
+                            minLiquidity: NumberFormat.compactSimpleCurrency().format(
+                              _cubit.poolSearchSettings.minLiquidityUSD,
+                            ),
+                          ),
+                      style: const TextStyle(color: ZupColors.gray, fontSize: 14),
+                    ),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Transform.translate(
+                        offset: const Offset(-2, 0),
+                        child: TextButton(
+                          key: const Key("search-all-pools-button"),
+                          onPressed: () => _cubit.getBestPools(
+                            token0Address: token0Address,
+                            token1Address: token1Address,
+                            ignoreMinLiquidity: true,
+                          ),
+                          style: ButtonStyle(
+                            padding: WidgetStateProperty.all(const EdgeInsets.all(6)),
+                          ),
+                          child: Text(
+                            S.of(context).depositPageTrySearchAllPools,
+                            style: const TextStyle(color: ZupColors.brand, fontSize: 14, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              )
+          ],
         ),
-      ));
+      );
 
   Widget _buildErrorState() => Center(
         child: SizedBox(
@@ -540,6 +596,55 @@ class _DepositPageState extends State<DepositPage>
                 if (x is YieldCard) return Expanded(child: x);
                 return x;
               }).toList()),
+        const SizedBox(height: 10),
+        if (_cubit.poolSearchSettings.minLiquidityUSD > 0)
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Assets.icons.infoCircle.svg(
+                    height: 14,
+                    colorFilter: const ColorFilter.mode(ZupColors.gray, BlendMode.srcIn),
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Text(
+                      yields.minLiquidityUSD > 0
+                          ? "${S.of(context).depositPageShowingOnlyPoolsWithMoreThan(minLiquidity: NumberFormat.compactSimpleCurrency().format(_cubit.poolSearchSettings.minLiquidityUSD))} "
+                          : "${S.of(context).depositPageShowingAllPools} ",
+                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: ZupColors.gray),
+                    ),
+                  ),
+                ],
+              ),
+              Transform.translate(
+                offset: const Offset(-6, 0),
+                child: TextButton(
+                  key: const Key("hide-show-all-pools-button"),
+                  onPressed: () => _cubit.getBestPools(
+                    token0Address: token0Address,
+                    token1Address: token1Address,
+                    ignoreMinLiquidity: yields.minLiquidityUSD > 0,
+                  ),
+                  style: ButtonStyle(
+                    padding: WidgetStateProperty.all(const EdgeInsets.all(6)),
+                  ),
+                  child: Text(
+                    yields.minLiquidityUSD > 0
+                        ? S.of(context).depositPageSearchAllPools
+                        : S.of(context).depositPageSearchOnlyForPoolsWithMorethan(
+                              minLiquidity: NumberFormat.compactSimpleCurrency()
+                                  .format(_cubit.poolSearchSettings.minLiquidityUSD),
+                            ),
+                    style: const TextStyle(color: ZupColors.brand, fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+          ),
         if (_cubit.selectedYield == null) ...[
           const SizedBox(height: 60),
           Center(

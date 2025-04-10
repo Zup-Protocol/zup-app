@@ -15,6 +15,7 @@ class YieldsDto with _$YieldsDto {
   @JsonSerializable(explicitToJson: true)
   const factory YieldsDto({
     @JsonKey(name: "bestYieldsByFrame") required YieldsByTimeframeDto timeframedYields,
+    @Default(0) @JsonKey(name: "minTvlUSD") num minLiquidityUSD,
   }) = _YieldsDto;
 
   bool get isEmpty =>

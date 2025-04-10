@@ -6,6 +6,33 @@
     "appFooterContactUs": "Contact Us",
     "appFooterDocs": "Docs",
     "appFooterFAQ": "FAQ",
+    "depositPageShowingOnlyPoolsWithMoreThan": "Showing only liquidity pools with more than {minLiquidity}.",
+    "@depositPageShowingOnlyPoolsWithMoreThan": {
+        "placeholders": {
+            "minLiquidity": {
+                "type": "String"
+            }
+        }
+    },
+    "depositPageShowingAllPools": "Showing all liquidity pools.",
+    "depositPageSearchAllPools": "Search all pools?",
+    "depositPageSearchOnlyForPoolsWithMorethan": "Search only for pools with more than {minLiquidity}?",
+    "@depositPageSearchOnlyForPoolsWithMorethan": {
+        "placeholders": {
+            "minLiquidity": {
+                "type": "String"
+            }
+        }
+    },
+    "depositPageMinLiquiditySearchAlert": "Searched only for pools with more than {minLiquidity} TVL.",
+    "depositPageTrySearchAllPools": "Try search all pools?",
+    "@depositPageMinLiquiditySearchAlert": {
+        "placeholders": {
+            "minLiquidity": {
+                "type": "String"
+            }
+        }
+    },
     "slippageExplanation": "Slippage protects you by reverting the transaction if the price changes unfavorably beyond the percentage. This is necessary to prevent losses while adding liquidity",
     "month": "Month",
     "minutes": "Minutes",
@@ -298,9 +325,13 @@
             }
         }
     },
+    "createPageSettingsDropdownMinimumLiquidity": "Minimum Pool Liquidity",
+    "createPageSettingsDropdownMinimumLiquidityExplanation": "Filter pools by minimum liquidity. We’ll exclude pools with less liquidity than specified, as low Liquidity can lead to misleading yields. This helps you find more reliable opportunities",
+    "createPageSettingsDropdownMiniumLiquidityLowWarning": "Low minimum TVL can lead to misleading yields.",
     "appSettingsDropdownTestnetMode": "Testnet Mode",
     "previewDepositModalSlippageCheckErrorMessage": "Slippage Check! Please try increasing your slippage for this transaction",
     "createPageTitle": "New Position",
+    "tvl": "TVL",
     "createPageShowMeTheMoney": "Show me the money!",
     "createPageDescription": "Ready to dive in? First, pick the dynamic duo of tokens you want to team up in the pool. Just choose your pair right below and you’re set to make some magic!",
     "letsGiveItAnotherGo": "Let’s give it another go, because why not?",

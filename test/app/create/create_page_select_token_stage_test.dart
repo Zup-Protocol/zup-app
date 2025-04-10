@@ -7,7 +7,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/create_page_select_tokens_stage.dart';
+import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
+import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/token_list_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
@@ -25,6 +27,7 @@ void main() {
   late AppCubit appCubit;
   late TokensRepository tokensRepository;
   late Wallet wallet;
+  late Cache cache;
 
   setUp(() {
     appCubit = AppCubitMock();
@@ -33,14 +36,17 @@ void main() {
 
     registerFallbackValue(Networks.sepolia);
 
+    cache = CacheMock();
     inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<Debouncer>(() => Debouncer(milliseconds: 0));
     inject.registerFactory<ZupNavigator>(() => ZupNavigatorMock());
+    inject.registerFactory<Cache>(() => cache);
+
     inject.registerLazySingleton<TokenSelectorModalCubit>(
       () => TokenSelectorModalCubit(tokensRepository, appCubit, wallet),
     );
-
+    when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto.fixture());
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
     when(() => appCubit.selectedNetworkStream).thenAnswer((_) => const Stream.empty());
     when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
@@ -195,4 +201,66 @@ void main() {
 
     networkStream.add(Networks.mainnet);
   });
+
+  zGoldenTest(
+    "When the saved pool search settings are not the default ones, a badge should be shown in the config button",
+    goldenFileName: "create_page_select_tokens_stage_pool_search_settings_not_default",
+    (tester) async {
+      when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 129793782.32));
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+    },
+  );
+
+  zGoldenTest(
+    "When the saved pool search settings are the default ones, a badge should not be shown in the config button",
+    goldenFileName: "create_page_select_tokens_stage_pool_search_settings_default",
+    (tester) async {
+      when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto());
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+    },
+  );
+
+  zGoldenTest(
+    "When clicking the settings button, the pool search settings dropdown should be opened",
+    goldenFileName: "create_page_select_tokens_stage_pool_search_settings_open",
+    (tester) async {
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+      await tester.tap(find.byKey(const Key("pool-search-settings-button"))); // open the dropdown
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When opening the pool search settings dropdown,
+  changing the search settings for the default one, and closing it,
+  the badge should be removed from the button""",
+    goldenFileName: "create_page_select_tokens_stage_pool_search_settings_remove_badge",
+    (tester) async {
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+      await tester.tap(find.byKey(const Key("pool-search-settings-button"))); // open the dropdown
+      await tester.pumpAndSettle();
+
+      when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto());
+
+      await tester.tap(find.byKey(const Key("pool-search-settings-button"))); // close the dropdown
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    """When opening the pool search settings dropdown,
+  changing the search settings from the default to a custom one,
+  and closing it, the badge should be added to the button""",
+    goldenFileName: "create_page_select_tokens_stage_pool_search_settings_add_badge",
+    (tester) async {
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+      await tester.tap(find.byKey(const Key("pool-search-settings-button"))); // open the dropdown
+      await tester.pumpAndSettle();
+
+      when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 821567152.21));
+
+      await tester.tap(find.byKey(const Key("pool-search-settings-button"))); // close the dropdown
+      await tester.pumpAndSettle();
+    },
+  );
 }
