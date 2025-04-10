@@ -129,6 +129,44 @@ abstract class S {
   /// **'FAQ'**
   String get appFooterFAQ;
 
+  /// No description provided for @depositPageShowingOnlyPoolsWithMoreThan.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing only liquidity pools with more than {minLiquidity}.'**
+  String depositPageShowingOnlyPoolsWithMoreThan(
+      {required String minLiquidity});
+
+  /// No description provided for @depositPageShowingAllPools.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing all liquidity pools.'**
+  String get depositPageShowingAllPools;
+
+  /// No description provided for @depositPageSearchAllPools.
+  ///
+  /// In en, this message translates to:
+  /// **'Search all pools?'**
+  String get depositPageSearchAllPools;
+
+  /// No description provided for @depositPageSearchOnlyForPoolsWithMorethan.
+  ///
+  /// In en, this message translates to:
+  /// **'Search only for pools with more than {minLiquidity}?'**
+  String depositPageSearchOnlyForPoolsWithMorethan(
+      {required String minLiquidity});
+
+  /// No description provided for @depositPageMinLiquiditySearchAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Searched only for pools with more than {minLiquidity} TVL.'**
+  String depositPageMinLiquiditySearchAlert({required String minLiquidity});
+
+  /// No description provided for @depositPageTrySearchAllPools.
+  ///
+  /// In en, this message translates to:
+  /// **'Try search all pools?'**
+  String get depositPageTrySearchAllPools;
+
   /// No description provided for @slippageExplanation.
   ///
   /// In en, this message translates to:
@@ -891,6 +929,24 @@ abstract class S {
   /// **'Deposit with Native {tokenSymbol}'**
   String depositPageDepositWithNativeToken({required String tokenSymbol});
 
+  /// No description provided for @createPageSettingsDropdownMinimumLiquidity.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum Pool Liquidity'**
+  String get createPageSettingsDropdownMinimumLiquidity;
+
+  /// No description provided for @createPageSettingsDropdownMinimumLiquidityExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter pools by minimum liquidity. We’ll exclude pools with less liquidity than specified, as low Liquidity can lead to misleading yields. This helps you find more reliable opportunities'**
+  String get createPageSettingsDropdownMinimumLiquidityExplanation;
+
+  /// No description provided for @createPageSettingsDropdownMiniumLiquidityLowWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Low minimum TVL can lead to misleading yields.'**
+  String get createPageSettingsDropdownMiniumLiquidityLowWarning;
+
   /// No description provided for @appSettingsDropdownTestnetMode.
   ///
   /// In en, this message translates to:
@@ -908,6 +964,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'New Position'**
   String get createPageTitle;
+
+  /// No description provided for @tvl.
+  ///
+  /// In en, this message translates to:
+  /// **'TVL'**
+  String get tvl;
 
   /// No description provided for @createPageShowMeTheMoney.
   ///

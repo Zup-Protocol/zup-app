@@ -44,6 +44,7 @@ class YieldDto with _$YieldDto {
     required ProtocolDto protocol,
     required int feeTier,
     @JsonKey(name: "yield") required num yearlyYield,
+    @Default(0) num totalValueLockedUSD,
     required Networks network,
   }) = _YieldDto;
 

@@ -8,7 +8,9 @@ import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
+import 'package:zup_app/core/dtos/yields_by_timeframe_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
@@ -44,7 +46,7 @@ void main() {
     sut = DepositCubit(yieldRepository, zupSingletonCache, wallet, uniswapV3Pool, cache, appCubit);
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
-
+    when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto.fixture());
     when(
       () => uniswapV3Pool.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")),
     ).thenReturn(uniswapV3PoolImpl);
@@ -149,6 +151,7 @@ void main() {
     when(() => yieldRepository.getYields(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
+        minTvlUsd: any(named: "minTvlUsd"),
         network: any(named: "network"))).thenAnswer(
       (_) async => YieldsDto.fixture(),
     );
@@ -161,19 +164,30 @@ void main() {
     verify(() => yieldRepository.getYields(
           token0Address: token0Address,
           token1Address: token1Address,
+          minTvlUsd: any(named: "minTvlUsd"),
           network: any(named: "network"),
         )).called(1);
   });
 
-  test("When calling `getBestPools` and receiving an empty list of pools, it should emit the noYields state", () async {
+  test("""When calling `getBestPools` and receiving an empty list of pools,
+  it should emit the noYields state with the min liquidity searched returned
+  from the repository""", () async {
+    const minLiquidityUSD = 123;
+
     when(() => yieldRepository.getYields(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
+        minTvlUsd: any(named: "minTvlUsd"),
         network: any(named: "network"))).thenAnswer(
-      (_) async => YieldsDto.empty(),
+      (_) async => YieldsDto(timeframedYields: YieldsByTimeframeDto.empty(), minLiquidityUSD: minLiquidityUSD),
     );
 
-    expectLater(sut.stream, emitsInOrder([const DepositState.loading(), const DepositState.noYields()]));
+    expectLater(
+        sut.stream,
+        emitsInOrder([
+          const DepositState.loading(),
+          const DepositState.noYields(minLiquiditySearched: minLiquidityUSD),
+        ]));
 
     await sut.getBestPools(token0Address: "", token1Address: "");
   });
@@ -184,6 +198,7 @@ void main() {
     when(() => yieldRepository.getYields(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
+        minTvlUsd: any(named: "minTvlUsd"),
         network: any(named: "network"))).thenAnswer((_) async => pools);
 
     expectLater(sut.stream, emitsInOrder([const DepositState.loading(), DepositState.success(pools)]));
@@ -195,6 +210,7 @@ void main() {
     when(() => yieldRepository.getYields(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
+        minTvlUsd: any(named: "minTvlUsd"),
         network: any(named: "network"))).thenThrow(Exception());
 
     expectLater(sut.stream, emitsInOrder([const DepositState.loading(), const DepositState.error()]));
@@ -520,4 +536,56 @@ void main() {
       expect(actualDepositSettings, expectedDepositSettings);
     },
   );
+
+  test("When calling 'poolSearchSettings' it should get the pool search settings from the cache", () {
+    final expectedPoolSearchSettings = PoolSearchSettingsDto(minLiquidityUSD: 129816);
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(expectedPoolSearchSettings);
+    final actualPoolSearchSettings = sut.poolSearchSettings;
+
+    expect(actualPoolSearchSettings, expectedPoolSearchSettings);
+  });
+
+  test("""When calling 'getBestPools' with the param 'ignoreMinLiquidity' true,
+  it should pass the minLiquidityUSD as 0 to the repository""", () async {
+    when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 129816));
+
+    when(() => yieldRepository.getYields(
+          token0Address: any(named: "token0Address"),
+          token1Address: any(named: "token1Address"),
+          network: any(named: "network"),
+          minTvlUsd: any(named: "minTvlUsd"),
+        )).thenAnswer((_) async => YieldsDto.fixture());
+
+    await sut.getBestPools(token0Address: "0x", token1Address: "0x", ignoreMinLiquidity: true);
+
+    verify(() => yieldRepository.getYields(
+          token0Address: any(named: "token0Address"),
+          token1Address: any(named: "token1Address"),
+          network: any(named: "network"),
+          minTvlUsd: 0,
+        )).called(1);
+  });
+
+  test("""When calling 'getBestPools' with the param 'ignoreMinLiquidity' false,
+  it should pass the minLiquidityUSD as the saved value to the repository""", () async {
+    const minLiquiditySaved = 129816;
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: minLiquiditySaved));
+    when(() => yieldRepository.getYields(
+          token0Address: any(named: "token0Address"),
+          token1Address: any(named: "token1Address"),
+          network: any(named: "network"),
+          minTvlUsd: any(named: "minTvlUsd"),
+        )).thenAnswer((_) async => YieldsDto.fixture());
+
+    await sut.getBestPools(token0Address: "0x", token1Address: "0x", ignoreMinLiquidity: false);
+
+    verify(() => yieldRepository.getYields(
+          token0Address: any(named: "token0Address"),
+          token1Address: any(named: "token1Address"),
+          network: any(named: "network"),
+          minTvlUsd: minLiquiditySaved,
+        )).called(1);
+  });
 }

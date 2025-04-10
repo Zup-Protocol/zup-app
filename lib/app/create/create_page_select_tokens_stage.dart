@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:web3kit/core/core.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
+import 'package:zup_app/app/create/widgets/create_page_settings_dropdown.dart';
+import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
@@ -24,6 +26,7 @@ class CreatePageSelectTokensStage extends StatefulWidget {
 class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInfoMixin {
   final appCubit = inject<AppCubit>();
   final navigator = inject<ZupNavigator>();
+  final cache = inject<Cache>();
 
   late final token0SelectorController = TokenSelectorButtonController(
     initialSelectedToken: appCubit.selectedNetwork.nativeCurrencyTokenDto,
@@ -108,13 +111,40 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                   style: const TextStyle(fontSize: 14, color: ZupColors.gray),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  S.of(context).token0,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    color: ZupColors.gray,
-                  ),
+                Row(
+                  children: [
+                    Transform.translate(
+                      offset: const Offset(0, 8),
+                      child: Text(
+                        S.of(context).token0,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: ZupColors.gray,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    StatefulBuilder(builder: (context, localSetState) {
+                      return Badge(
+                        alignment: const Alignment(0.8, -0.8),
+                        smallSize: cache.getPoolSearchSettings().isDefault ? 0 : 6,
+                        child: ZupIconButton(
+                          key: const Key("pool-search-settings-button"),
+                          backgroundColor: Colors.transparent,
+                          icon: Assets.icons.gear.svg(height: 18),
+                          padding: const EdgeInsets.all(10),
+                          iconColor: ZupColors.brand,
+                          onPressed: (buttonContext) => CreatePageSettingsDropdown.show(
+                            buttonContext,
+                            onClose: () {
+                              if (mounted) WidgetsBinding.instance.addPostFrameCallback((_) => localSetState(() {}));
+                            },
+                          ),
+                        ),
+                      );
+                    })
+                  ],
                 ),
                 const SizedBox(height: 5),
                 TokenSelectorButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
@@ -68,7 +69,15 @@ class _YieldCardState extends State<YieldCard> {
                     widget.yield.yearlyYield.formatPercent,
                     style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 5),
+                  Text(
+                    "${NumberFormat.compactSimpleCurrency(decimalDigits: 2).format(widget.yield.totalValueLockedUSD)} ${S.of(context).tvl}",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1,
+                      color: ZupColors.gray,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
