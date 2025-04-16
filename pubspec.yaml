@@ -86,7 +86,7 @@ flutter:
     - assets/icons/
     - assets/logos/
     - assets/lotties/
-    - .env
+    - env
   fonts:
     - family: "SNPro"
       fonts:

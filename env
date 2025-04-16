@@ -1,0 +1,8 @@
+# Firebase Related
+FIREBASE_WEB_API_KEY="AIzaSyBIhRKfk0DEfCBBrpS8us_Gam3-YvseX4s"
+FIREBASE_WEB_APP_ID="1:1005974760424:web:74e2e092f728efc165d25d"
+FIREBASE_WEB_MESSAGING_SENDER_ID="1005974760424"
+FIREBASE_WEB_PROJECT_ID="zup-protocol-development"
+FIREBASE_WEB_AUTH_DOMAIN="zup-protocol-development.firebaseapp.com"
+FIREBASE_WEB_STORAGE_BUCKET="zup-protocol-development.firebasestorage.app"
+FIREBASE_WEB_MEASUREMENT_ID="G-E48X47FM7Z"

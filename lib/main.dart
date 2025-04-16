@@ -10,7 +10,7 @@ import 'package:zup_app/zup_app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load();
+  await dotenv.load(fileName: "env");
   await Web3Kit.initialize();
   await setupInjections();
 
