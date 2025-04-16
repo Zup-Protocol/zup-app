@@ -13,10 +13,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: SpicyPizza/create-envfile@v2.0.3
-        with:
-          file_name: "env"
-          fail_on_empty: false
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: 3.5.2

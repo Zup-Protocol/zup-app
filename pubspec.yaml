@@ -52,8 +52,8 @@ dependencies:
   clock: ^1.1.1
   confetti: ^0.8.0
   firebase_core: ^3.13.0
-  flutter_dotenv: ^5.2.1
   firebase_analytics: ^11.4.5
+  envied: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +67,7 @@ dev_dependencies:
   json_serializable: ^6.8.0
   url_launcher_platform_interface: ^2.3.2
   plugin_platform_interface: ^2.1.8
+  envied_generator: ^1.1.1
 
 flutter_gen:
   output: lib/gen/
@@ -86,7 +87,7 @@ flutter:
     - assets/icons/
     - assets/logos/
     - assets/lotties/
-    - env
+
   fonts:
     - family: "SNPro"
       fonts:
