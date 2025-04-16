@@ -13,7 +13,7 @@
 migrate_working_dir/
 test/**/failures/
 coverage/
-.env
+env
 
 # Generated code
 lib/**/**.g.dart
