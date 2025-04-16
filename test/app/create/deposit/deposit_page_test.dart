@@ -24,6 +24,7 @@ import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/slippage.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
@@ -85,6 +86,7 @@ void main() {
       instanceName: InjectInstanceNames.appScrollController,
     );
 
+    inject.registerFactory<ZupAnalytics>(() => ZupAnalyticsMock());
     inject.registerFactory<GlobalKey<NavigatorState>>(() => GlobalKey());
     inject.registerFactory<ZupNavigator>(() => navigator);
     inject.registerFactory<Wallet>(() => wallet);

@@ -51,6 +51,9 @@ dependencies:
   flutter_animate: ^4.5.0
   clock: ^1.1.1
   confetti: ^0.8.0
+  firebase_core: ^3.13.0
+  flutter_dotenv: ^5.2.1
+  firebase_analytics: ^11.4.5
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +86,7 @@ flutter:
     - assets/icons/
     - assets/logos/
     - assets/lotties/
+    - .env
   fonts:
     - family: "SNPro"
       fonts:

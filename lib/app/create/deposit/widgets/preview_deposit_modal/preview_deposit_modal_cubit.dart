@@ -16,6 +16,7 @@ import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_core/mixins/device_info_mixin.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
@@ -33,6 +34,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     required UniswapPositionManager uniswapPositionManager,
     required GlobalKey<NavigatorState> navigatorKey,
     required bool depositWithNative,
+    required ZupAnalytics zupAnalytics,
   })  : _yield = currentYield,
         _uniswapV3Pool = uniswapV3Pool,
         _erc20 = erc20,
@@ -41,6 +43,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
         _latestPoolTick = initialPoolTick,
         _navigatorKey = navigatorKey,
         _depositWithNative = depositWithNative,
+        _zupAnalytics = zupAnalytics,
         super(const PreviewDepositModalState.loading());
 
   final UniswapV3Pool _uniswapV3Pool;
@@ -50,6 +53,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
   final UniswapPositionManager _uniswapPositionManager;
   final GlobalKey<NavigatorState> _navigatorKey;
   final bool _depositWithNative;
+  final ZupAnalytics _zupAnalytics;
 
   final StreamController<BigInt> _poolTickStreamController = StreamController<BigInt>.broadcast();
 
@@ -177,6 +181,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       final amount1Desired = token1Amount;
       final amount0Min = slippage.calculateTokenAmountFromSlippage(amount0Desired);
       final amount1Min = slippage.calculateTokenAmountFromSlippage(amount1Desired);
+      final recipient = await _wallet.signer!.address;
 
       final TransactionResponse tx = await () async {
         if (_depositWithNative) {
@@ -187,7 +192,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
               deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
               amount0Min: amount0Min,
               amount1Min: amount1Min,
-              recipient: await _wallet.signer!.address,
+              recipient: recipient,
               tickLower: tickLower(),
               tickUpper: tickUpper(),
               fee: BigInt.from(_yield.feeTier),
@@ -221,7 +226,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
             deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
             amount0Min: amount0Min,
             amount1Min: amount1Min,
-            recipient: await _wallet.signer!.address,
+            recipient: recipient,
             tickLower: tickLower(),
             tickUpper: tickUpper(),
             fee: BigInt.from(_yield.feeTier),
@@ -236,6 +241,12 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       await tx.waitConfirmation();
 
       emit(PreviewDepositModalState.depositSuccess(txId: tx.hash));
+      _zupAnalytics.logDeposit(
+        depositedYield: _yield,
+        amount0: amount0Desired.parseTokenAmount(decimals: _yield.token0.decimals),
+        amount1: amount1Desired.parseTokenAmount(decimals: _yield.token1.decimals),
+        walletAddress: recipient,
+      );
     } catch (e) {
       if (e is UserRejectedAction) {
         return emit(
