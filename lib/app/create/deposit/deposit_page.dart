@@ -28,6 +28,7 @@ import 'package:zup_app/core/mixins/v3_pool_liquidity_calculations_mixin.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
@@ -50,6 +51,7 @@ Route routeBuilder(BuildContext context, RouteSettings settings) {
         inject<UniswapV3Pool>(),
         inject<Cache>(),
         inject<AppCubit>(),
+        inject<ZupAnalytics>(),
       ),
       child: const DepositPage(),
     ),

@@ -1,5 +1,6 @@
 import 'package:confetti/confetti.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
@@ -15,6 +16,7 @@ import 'package:zup_app/core/enums/app_environment.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
@@ -68,6 +70,8 @@ Future<void> setupInjections() async {
   inject.registerLazySingleton<YieldRepository>(
     () => YieldRepository(inject<Dio>(instanceName: InjectInstanceNames.zupAPIDio)),
   );
+  inject.registerLazySingleton<FirebaseAnalytics>(() => FirebaseAnalytics.instance);
+  inject.registerLazySingleton<ZupAnalytics>(() => ZupAnalytics(inject<FirebaseAnalytics>()));
   inject.registerLazySingleton<ZupHolder>(() => ZupHolder());
   inject.registerLazySingleton<Erc20>(() => Erc20());
   inject.registerLazySingleton<GlobalKey<NavigatorState>>(() => GlobalKey<NavigatorState>());

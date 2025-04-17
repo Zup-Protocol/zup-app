@@ -16,6 +16,7 @@ import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
@@ -59,6 +60,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
       padding: EdgeInsets.only(left: paddingSize).copyWith(top: 5),
       content: BlocProvider(
         create: (context) => PreviewDepositModalCubit(
+          zupAnalytics: inject<ZupAnalytics>(),
           currentYield: currentYield,
           uniswapPositionManager: inject<UniswapPositionManager>(),
           erc20: inject<Erc20>(),

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:confetti/confetti.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:mocktail_image_network/mocktail_image_network.dart';
@@ -21,6 +22,7 @@ import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
@@ -86,9 +88,13 @@ class DioMock extends Mock implements Dio {}
 
 class ConfettiControllerMock extends Mock implements ConfettiController {}
 
+class FirebaseAnalyticsMock extends Mock implements FirebaseAnalytics {}
+
 class ChangeNotifierMock extends Mock with ChangeNotifier {
   void notify() => notifyListeners();
 }
+
+class ZupAnalyticsMock extends Mock implements ZupAnalytics {}
 
 class UrlLauncherPlatformCustomMock extends UrlLauncherPlatform {
   static String? lastLaunchedUrl;

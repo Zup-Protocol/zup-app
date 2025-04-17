@@ -15,6 +15,7 @@ import 'package:zup_app/core/mixins/keys_mixin.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/slippage.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_core/zup_core.dart';
 
 part 'deposit_cubit.freezed.dart';
@@ -28,6 +29,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     this._uniswapV3Pool,
     this._cache,
     this._appCubit,
+    this._zupAnalytics,
   ) : super(const DepositState.initial());
 
   final YieldRepository _yieldRepository;
@@ -36,6 +38,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
   final UniswapV3Pool _uniswapV3Pool;
   final Cache _cache;
   final AppCubit _appCubit;
+  final ZupAnalytics _zupAnalytics;
 
   final StreamController<BigInt?> _pooltickStreamController = StreamController.broadcast();
   final StreamController<YieldDto?> _selectedYieldStreamController = StreamController.broadcast();
@@ -65,6 +68,12 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     bool ignoreMinLiquidity = false,
   }) async {
     try {
+      _zupAnalytics.logSearch(
+        token0: token0Address,
+        token1: token1Address,
+        network: _appCubit.selectedNetwork.label,
+      );
+
       emit(const DepositState.loading());
       final yields = await _yieldRepository.getYields(
         token0Address: token0Address,

@@ -19,6 +19,7 @@ import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
@@ -51,6 +52,7 @@ void main() {
       () => confettiController,
       instanceName: InjectInstanceNames.confettiController10s,
     );
+    inject.registerFactory<ZupAnalytics>(() => ZupAnalyticsMock());
     inject.registerFactory<UniswapV3Pool>(() => UniswapV3PoolMock());
     inject.registerFactory<Erc20>(() => Erc20Mock());
     inject.registerFactory<UniswapPositionManager>(() => UniswapPositionManagerMock());

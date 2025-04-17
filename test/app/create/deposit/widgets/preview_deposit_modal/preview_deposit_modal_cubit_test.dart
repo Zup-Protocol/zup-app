@@ -19,6 +19,7 @@ import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 
 import '../../../../../golden_config.dart';
@@ -41,6 +42,7 @@ void main() {
   late TransactionResponse transactionResponse;
   late UniswapPositionManager uniswapPositionManager;
   late UniswapPositionManagerImpl uniswapPositionManagerImpl;
+  late ZupAnalytics zupAnalytics;
 
   setUp(() {
     uniswapV3Pool = UniswapV3PoolMock();
@@ -52,6 +54,7 @@ void main() {
     transactionResponse = TransactionResponseMock();
     uniswapPositionManager = UniswapPositionManagerMock();
     uniswapPositionManagerImpl = UniswapPositionManagerImplMock();
+    zupAnalytics = ZupAnalyticsMock();
 
     sut = PreviewDepositModalCubit(
       initialPoolTick: initialPoolTick,
@@ -62,12 +65,14 @@ void main() {
       depositWithNative: false,
       uniswapPositionManager: uniswapPositionManager,
       navigatorKey: GlobalKey(),
+      zupAnalytics: zupAnalytics,
     );
 
     registerFallbackValue(const ChainInfo(hexChainId: "0x1"));
     registerFallbackValue(signer);
     registerFallbackValue(BigInt.one);
     registerFallbackValue((amount: BigInt.from(1), token: ""));
+    registerFallbackValue(YieldDto.fixture());
     registerFallbackValue((
       amount0Desired: BigInt.zero,
       amount0Min: BigInt.zero,
@@ -81,6 +86,14 @@ void main() {
       token0: "",
       token1: "",
     ));
+
+    when(
+      () => zupAnalytics.logDeposit(
+          depositedYield: any(named: "depositedYield"),
+          amount0: any(named: "amount0"),
+          amount1: any(named: "amount1"),
+          walletAddress: any(named: "walletAddress")),
+    ).thenAnswer((_) async {});
 
     when(() => wallet.signer).thenReturn(signer);
 
@@ -155,6 +168,7 @@ void main() {
       depositWithNative: customDepositWithNative ?? false,
       uniswapPositionManager: customUniswapPositionManager ?? uniswapPositionManager,
       navigatorKey: customNavigatorKey ?? GlobalKey(),
+      zupAnalytics: zupAnalytics,
     );
   }
 
@@ -250,15 +264,15 @@ void main() {
       );
 
       sut = PreviewDepositModalCubit(
-        uniswapPositionManager: uniswapPositionManager,
-        initialPoolTick: initialPoolTick,
-        uniswapV3Pool: uniswapV3Pool,
-        currentYield: customYield,
-        erc20: erc20,
-        wallet: wallet,
-        depositWithNative: false,
-        navigatorKey: GlobalKey(),
-      );
+          uniswapPositionManager: uniswapPositionManager,
+          initialPoolTick: initialPoolTick,
+          uniswapV3Pool: uniswapV3Pool,
+          currentYield: customYield,
+          erc20: erc20,
+          wallet: wallet,
+          depositWithNative: false,
+          navigatorKey: GlobalKey(),
+          zupAnalytics: zupAnalytics);
 
       final token0Contract = Erc20ImplMock();
       final token1Contract = Erc20ImplMock();
@@ -308,15 +322,15 @@ void main() {
       final customYield = YieldDto.fixture().copyWith(network: yieldNetwork);
 
       sut = PreviewDepositModalCubit(
-        navigatorKey: GlobalKey(),
-        initialPoolTick: initialPoolTick,
-        uniswapV3Pool: uniswapV3Pool,
-        currentYield: customYield,
-        erc20: erc20,
-        wallet: wallet,
-        depositWithNative: false,
-        uniswapPositionManager: uniswapPositionManager,
-      );
+          navigatorKey: GlobalKey(),
+          initialPoolTick: initialPoolTick,
+          uniswapV3Pool: uniswapV3Pool,
+          currentYield: customYield,
+          erc20: erc20,
+          wallet: wallet,
+          depositWithNative: false,
+          uniswapPositionManager: uniswapPositionManager,
+          zupAnalytics: zupAnalytics);
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
       when(() => wallet.connectedNetwork).thenAnswer((_) async => Networks.mainnet.chainInfo);
@@ -336,15 +350,15 @@ void main() {
       final customYield = YieldDto.fixture().copyWith(network: yieldNetwork);
 
       sut = PreviewDepositModalCubit(
-        navigatorKey: GlobalKey(),
-        uniswapPositionManager: uniswapPositionManager,
-        initialPoolTick: initialPoolTick,
-        uniswapV3Pool: uniswapV3Pool,
-        currentYield: customYield,
-        erc20: erc20,
-        wallet: wallet,
-        depositWithNative: false,
-      );
+          navigatorKey: GlobalKey(),
+          uniswapPositionManager: uniswapPositionManager,
+          initialPoolTick: initialPoolTick,
+          uniswapV3Pool: uniswapV3Pool,
+          currentYield: customYield,
+          erc20: erc20,
+          wallet: wallet,
+          depositWithNative: false,
+          zupAnalytics: zupAnalytics);
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
       when(() => wallet.connectedNetwork).thenAnswer((_) async => yieldNetwork.chainInfo);
@@ -1648,6 +1662,60 @@ void main() {
         isMaxPriceInfinity: false,
         isReversed: false,
       );
+    },
+  );
+
+  test(
+    "When calling `deposit` and it succeeds, it should log the deposit event in the analytics with the correct params",
+    () async {
+      final token0amount = 187732.parseTokenAmount(decimals: 18);
+      final token1amount = 9082.parseTokenAmount(decimals: 6);
+      final userAddress = await signer.address;
+
+      await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
+        token0Amount: token0amount,
+        token1Amount: token1amount,
+        minPrice: 1200,
+        maxPrice: 3000.50,
+        isMinPriceInfinity: false,
+        isMaxPriceInfinity: false,
+        isReversed: false,
+      );
+
+      verify(() => zupAnalytics.logDeposit(
+            depositedYield: currentYield,
+            amount0: token0amount.parseTokenAmount(decimals: currentYield.token0.decimals),
+            amount1: token1amount.parseTokenAmount(decimals: currentYield.token1.decimals),
+            walletAddress: userAddress,
+          )).called(1);
+    },
+  );
+
+  test(
+    "When calling `deposit` and it don't succeed, it should not log the any deposit event ",
+    () async {
+      when(() => transactionResponse.waitConfirmation()).thenThrow(Exception());
+
+      await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
+        token0Amount: BigInt.one,
+        token1Amount: BigInt.one,
+        minPrice: 1200,
+        maxPrice: 3000.50,
+        isMinPriceInfinity: false,
+        isMaxPriceInfinity: false,
+        isReversed: false,
+      );
+
+      verifyNever(() => zupAnalytics.logDeposit(
+            depositedYield: any(named: "depositedYield"),
+            amount0: any(named: "amount0"),
+            amount1: any(named: "amount1"),
+            walletAddress: any(named: "walletAddress"),
+          ));
     },
   );
 }

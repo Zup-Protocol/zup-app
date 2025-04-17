@@ -27,8 +27,9 @@ Zup App repository is the repository containing the Zup Protocol Web Application
 ## Installation
 
 1. Clone the repository: `git clone https://github.com/Zup-Protocol/zup-app.git`
-2. Run `make install`
-3. Nothing else to do! You are ready to go!
+2. Set a `.env` file in the root of the repository, following the example from [.env.example](.env.example).
+3. Run `make install`
+4. Nothing else to do! You are ready to go!
 
 ## Running Tests
 
