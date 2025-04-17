@@ -13,6 +13,7 @@ import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/slippage.dart';
+import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_core/zup_singleton_cache.dart';
 
 import '../../../mocks.dart';
@@ -26,6 +27,7 @@ void main() {
   late DepositCubit sut;
   late Cache cache;
   late AppCubit appCubit;
+  late ZupAnalytics zupAnalytics;
 
   final poolTick = BigInt.from(31276567121);
 
@@ -40,14 +42,31 @@ void main() {
     uniswapV3PoolImpl = UniswapV3PoolImplMock();
     cache = CacheMock();
     appCubit = AppCubitMock();
+    zupAnalytics = ZupAnalyticsMock();
 
-    sut = DepositCubit(yieldRepository, zupSingletonCache, wallet, uniswapV3Pool, cache, appCubit);
+    sut = DepositCubit(
+      yieldRepository,
+      zupSingletonCache,
+      wallet,
+      uniswapV3Pool,
+      cache,
+      appCubit,
+      zupAnalytics,
+    );
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
 
     when(
       () => uniswapV3Pool.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")),
     ).thenReturn(uniswapV3PoolImpl);
+
+    when(
+      () => zupAnalytics.logSearch(
+        network: any(named: "network"),
+        token0: any(named: "token0"),
+        token1: any(named: "token1"),
+      ),
+    ).thenAnswer((_) async {});
 
     when(() => uniswapV3PoolImpl.slot0()).thenAnswer((_) async => (
           feeProtocol: BigInt.zero,
@@ -518,6 +537,22 @@ void main() {
       final actualDepositSettings = sut.depositSettings;
 
       expect(actualDepositSettings, expectedDepositSettings);
+    },
+  );
+
+  test(
+    "when calling `getBestPools` it should log the search on analytics with the correct events",
+    () {
+      const token0Address = "0x123";
+      const token1Address = "0x456";
+      const network = Networks.sepolia;
+
+      when(() => appCubit.selectedNetwork).thenReturn(network);
+
+      sut.getBestPools(token0Address: token0Address, token1Address: token1Address);
+
+      verify(() => zupAnalytics.logSearch(token0: token0Address, token1: token1Address, network: network.label))
+          .called(1);
     },
   );
 }

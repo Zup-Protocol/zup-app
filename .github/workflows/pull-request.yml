@@ -1,27 +1,36 @@
 name: "Pull Request"
 
 on:
-    pull_request:
-        branches:
-            - main
-        paths:
-            - "lib/**"
-            - "test/**"
-            - "assets/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "lib/**"
+      - "test/**"
+      - "assets/**"
 jobs:
-    run-tests:
-        runs-on: macos-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: dart-lang/setup-dart@v1
-              with:
-                sdk: 3.5.2
-            - uses: subosito/flutter-action@v2
-              with:
-                channel: "stable"
-                flutter-version: 3.27.3
-            - name: Install dependencies
-              run: make install
-            - name: Run tests
-              run: flutter test --test-randomize-ordering-seed=random
-            
+  run-tests:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: SpicyPizza/create-envfile@v2.0.3
+        with:
+          envkey_FIREBASE_WEB_API_KEY: ""
+          envkey_FIREBASE_WEB_APP_ID: ""
+          envkey_FIREBASE_WEB_MESSAGING_SENDER_ID: ""
+          envkey_FIREBASE_WEB_PROJECT_ID: ""
+          envkey_FIREBASE_WEB_AUTH_DOMAIN: ""
+          envkey_FIREBASE_WEB_STORAGE_BUCKET: ""
+          envkey_FIREBASE_WEB_MEASUREMENT_ID: ""
+          fail_on_empty: false
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.5.2
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: 3.27.3
+      - name: Install dependencies
+        run: make install
+      - name: Run tests
+        run: flutter test --test-randomize-ordering-seed=random
