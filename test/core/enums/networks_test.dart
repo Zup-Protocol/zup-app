@@ -21,6 +21,7 @@ void main() {
   test("Label extension should match for all networks", () {
     expect(Networks.sepolia.label, "Sepolia", reason: "Sepolia Label should match");
     expect(Networks.mainnet.label, "Ethereum", reason: "Ethereum Label should match");
+    expect(Networks.scroll.label, "Scroll", reason: "Scroll Label should match");
   });
 
   test("`testnets` method should return all testnets in the enum", () {
@@ -28,7 +29,7 @@ void main() {
   });
 
   test("`testnets` method should return all testnets in the enum", () {
-    expect(Networks.mainnets, [Networks.mainnet]);
+    expect(Networks.mainnets, [Networks.mainnet, Networks.scroll]);
   });
 
   test("`isTestnet` method should return true for sepolia", () {
@@ -37,6 +38,10 @@ void main() {
 
   test("`isTestnet` method should return false for mainnet", () {
     expect(Networks.mainnet.isTestnet, false);
+  });
+
+  test("`isTestnet` method should return false for Scroll", () {
+    expect(Networks.scroll.isTestnet, false);
   });
 
   test("Chain info extension should match for all networks", () {
@@ -62,6 +67,18 @@ void main() {
         rpcUrls: const ["https://ethereum-rpc.publicnode.com"],
       ),
     );
+
+    expect(
+      Networks.scroll.chainInfo,
+      ChainInfo(
+        hexChainId: "0x82750",
+        chainName: "Scroll",
+        blockExplorerUrls: const ["https://scrollscan.com"],
+        nativeCurrency: NativeCurrencies.eth.currencyInfo,
+        rpcUrls: const ["https://scroll-rpc.publicnode.com"],
+      ),
+      reason: "Scroll ChainInfo should match",
+    );
   });
 
   test("wrapped native token address should match for all networks", () {
@@ -75,6 +92,12 @@ void main() {
       Networks.mainnet.wrappedNativeTokenAddress,
       "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
       reason: "Ethereum wrapped native token address should match",
+    );
+
+    expect(
+      Networks.scroll.wrappedNativeTokenAddress,
+      "0x5300000000000000000000000000000000000004",
+      reason: "Scroll wrapped native token address should match",
     );
   });
 
@@ -102,6 +125,19 @@ void main() {
       ),
       reason: "Ethereum default token should match",
     );
+
+    expect(
+      Networks.scroll.wrappedNative,
+      const TokenDto(
+        address: "0x5300000000000000000000000000000000000004",
+        name: "Wrapped Ether",
+        decimals: 18,
+        symbol: "WETH",
+        logoUrl:
+            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x5300000000000000000000000000000000000004/logo.png",
+      ),
+      reason: "Scroll default token should match",
+    );
   });
 
   test("RpcUrl extension should return the correct rpc url", () {
@@ -115,6 +151,12 @@ void main() {
       Networks.mainnet.rpcUrl,
       "https://ethereum-rpc.publicnode.com",
       reason: "Ethereum rpc url should match",
+    );
+
+    expect(
+      Networks.scroll.rpcUrl,
+      "https://scroll-rpc.publicnode.com",
+      reason: "Scroll rpc url should match",
     );
   });
 
@@ -157,6 +199,20 @@ void main() {
         logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
       ),
       reason: "Ethereum native currency should match",
+    );
+  });
+
+  test("'nativeCurrency' should return the correct currency for scroll network", () {
+    expect(
+      Networks.scroll.nativeCurrencyTokenDto,
+      TokenDto(
+        address: EthereumConstants.zeroAddress,
+        name: NativeCurrencies.eth.currencyInfo.name,
+        decimals: NativeCurrencies.eth.currencyInfo.decimals,
+        symbol: NativeCurrencies.eth.currencyInfo.symbol,
+        logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
+      ),
+      reason: "Scroll native currency should match",
     );
   });
 
