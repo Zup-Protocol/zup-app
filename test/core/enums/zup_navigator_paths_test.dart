@@ -15,10 +15,10 @@ void main() {
     );
   });
 
-  test("The route params name for deposit page, should be `token0` and `token1`", () {
+  test("The route params name for deposit page, should be `token0`, `token1` and network", () {
     expect(
       ZupNavigatorPaths.deposit.routeParamsName,
-      (param0: "token0", param1: "token1"),
+      (param0: "token0", param1: "token1", param3: "network"),
     );
   });
 }

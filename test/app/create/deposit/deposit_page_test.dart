@@ -2087,4 +2087,28 @@ void main() {
       });
     },
   );
+
+  zGoldenTest(
+    "When loading the screen, and the network in the path param is different from the selected one, it should switch the network",
+    (tester) async {
+      when(() => navigator.getParam(any())).thenAnswer((_) => Networks.scroll.name);
+
+      await tester.runAsync(() async => await tester.pumpDeviceBuilder(await goldenBuilder()));
+      await tester.pumpAndSettle();
+
+      verify(() => appCubit.updateAppNetwork(Networks.scroll)).called(1);
+    },
+  );
+
+  zGoldenTest(
+    "When loading the screen, and the network in the path param is equal from the selected one, it should not switch the network",
+    (tester) async {
+      when(() => navigator.getParam(any())).thenAnswer((_) => appCubit.selectedNetwork.name);
+
+      await tester.runAsync(() async => await tester.pumpDeviceBuilder(await goldenBuilder()));
+      await tester.pumpAndSettle();
+
+      verifyNever(() => appCubit.updateAppNetwork(any()));
+    },
+  );
 }

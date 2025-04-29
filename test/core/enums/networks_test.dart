@@ -18,6 +18,12 @@ void main() {
     UrlLauncherPlatform.instance = urlLauncherPlatform;
   });
 
+  test("When calling 'fromValue' it should get a network from a string value", () {
+    expect(Networks.fromValue("sepolia"), Networks.sepolia);
+    expect(Networks.fromValue("mainnet"), Networks.mainnet);
+    expect(Networks.fromValue("scroll"), Networks.scroll);
+  });
+
   test("Label extension should match for all networks", () {
     expect(Networks.sepolia.label, "Sepolia", reason: "Sepolia Label should match");
     expect(Networks.mainnet.label, "Ethereum", reason: "Ethereum Label should match");

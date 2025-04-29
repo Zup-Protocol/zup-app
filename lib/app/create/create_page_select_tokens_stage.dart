@@ -184,6 +184,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                                 ? () => navigator.navigateToDeposit(
                                       token0SelectorController.selectedToken!.address,
                                       token1SelectorController.selectedToken!.address,
+                                      appCubit.selectedNetwork,
                                     )
                                 : null,
                             mainAxisSize: MainAxisSize.max,

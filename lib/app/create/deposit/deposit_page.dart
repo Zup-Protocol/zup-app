@@ -18,6 +18,7 @@ import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
+import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/extensions/string_extension.dart';
@@ -84,6 +85,7 @@ class _DepositPageState extends State<DepositPage>
 
   ZupNavigator get _navigator => inject<ZupNavigator>();
   DepositCubit get _cubit => context.read<DepositCubit>();
+  AppCubit get _appCubit => inject<AppCubit>();
   String get token0Address => _navigator.getParam(ZupNavigatorPaths.deposit.routeParamsName?.param0 ?? "") ?? "";
   String get token1Address => _navigator.getParam(ZupNavigatorPaths.deposit.routeParamsName?.param1 ?? "") ?? "";
   TokenDto get baseToken {
@@ -317,9 +319,19 @@ class _DepositPageState extends State<DepositPage>
   void initState() {
     _cubit.setup();
 
+    final currentNetworkFromUrl = _navigator.getParam(ZupNavigatorPaths.deposit.routeParamsName?.param3 ?? "");
+
+    if (currentNetworkFromUrl?.isNotEmpty ?? false) {
+      final currentNetwork = Networks.fromValue(currentNetworkFromUrl!);
+      if (currentNetwork != null && currentNetwork != _appCubit.selectedNetwork) {
+        _appCubit.updateAppNetwork(currentNetwork);
+      }
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _cubit.getBestPools(token0Address: token0Address, token1Address: token1Address);
     });
+
     super.initState();
   }
 

@@ -11,9 +11,9 @@ enum ZupNavigatorPaths {
         deposit => routePaths.create.deposit,
       };
 
-  ({String param0, String param1})? get routeParamsName => switch (this) {
+  ({String param0, String param1, String param3})? get routeParamsName => switch (this) {
         initial => null,
         newPosition => null,
-        deposit => (param0: "token0", param1: "token1"),
+        deposit => (param0: "token0", param1: "token1", param3: "network"),
       };
 }

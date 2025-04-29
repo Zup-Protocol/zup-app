@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web3kit/web3kit.dart';
@@ -11,6 +12,7 @@ enum Networks {
 
   static List<Networks> get testnets => Networks.values.where((network) => network.isTestnet).toList();
   static List<Networks> get mainnets => Networks.values.where((network) => !network.isTestnet).toList();
+  static Networks? fromValue(String value) => Networks.values.firstWhereOrNull((network) => network.name == value);
 
   bool get isTestnet => switch (this) {
         mainnet => false,
