@@ -71,6 +71,18 @@ void main() {
     expect(UrlLauncherPlatformCustomMock.lastLaunchedUrl, ZupLinks.zupDocs);
   });
 
+  test("`launchTermsOfUse` should launch the correct link", () {
+    ZupLinks().launchTermsOfUse();
+
+    expect(UrlLauncherPlatformCustomMock.lastLaunchedUrl, ZupLinks.zupTermsOfUse);
+  });
+
+  test("`launchPrivacyPolicy` should launch the correct link", () {
+    ZupLinks().launchPrivacyPolicy();
+
+    expect(UrlLauncherPlatformCustomMock.lastLaunchedUrl, ZupLinks.zupPrivacyPolicy);
+  });
+
   test("`launchZupFAQ` should launch the correct link", () {
     ZupLinks().launchZupFAQ();
 
