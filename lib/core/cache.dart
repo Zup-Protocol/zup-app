@@ -2,10 +2,13 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 
 enum CacheKey {
   hidingClosedPositions,
-  depositSettings;
+  depositSettings,
+  poolSearchSettings,
+  isTestnetMode;
 
   String get key => name;
 
@@ -33,5 +36,23 @@ class Cache {
     final cache = _cache.getString(CacheKey.depositSettings.key) ?? "{}";
 
     return DepositSettingsDto.fromJson(jsonDecode(cache));
+  }
+
+  Future<void> saveTestnetMode({required bool isTestnetMode}) async {
+    await _cache.setBool(CacheKey.isTestnetMode.key, isTestnetMode);
+  }
+
+  bool getTestnetMode() {
+    return _cache.getBool(CacheKey.isTestnetMode.key) ?? false;
+  }
+
+  Future<void> savePoolSearchSettings({required PoolSearchSettingsDto settings}) async {
+    await _cache.setString(CacheKey.poolSearchSettings.key, jsonEncode(settings.toJson()));
+  }
+
+  PoolSearchSettingsDto getPoolSearchSettings() {
+    final cache = _cache.getString(CacheKey.poolSearchSettings.key) ?? "{}";
+
+    return PoolSearchSettingsDto.fromJson(jsonDecode(cache));
   }
 }

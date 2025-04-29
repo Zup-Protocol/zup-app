@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:web3kit/core/core.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
+import 'package:zup_app/app/create/widgets/create_page_settings_dropdown.dart';
+import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
@@ -24,13 +26,15 @@ class CreatePageSelectTokensStage extends StatefulWidget {
 class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInfoMixin {
   final appCubit = inject<AppCubit>();
   final navigator = inject<ZupNavigator>();
+  final cache = inject<Cache>();
 
   late final token0SelectorController = TokenSelectorButtonController(
-    initialSelectedToken: appCubit.selectedNetwork.nativeCurrency,
+    initialSelectedToken: appCubit.selectedNetwork.nativeCurrencyTokenDto,
   );
   final token1SelectorController = TokenSelectorButtonController(initialSelectedToken: null);
   StreamSubscription? _token0SelectorStreamSubscription;
   StreamSubscription? _token1SelectorStreamSubscription;
+  StreamSubscription? _selectedNetworkStreamSubscription;
 
   bool areTokensEqual(TokenDto? token0, TokenDto? token1) {
     if (token0 == null || token1 == null) return false;
@@ -38,14 +42,14 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
 
     // Note: If implementing all networks feature, this check should be refactored to work with all networks,
     //as all networks network does not have a native token or a wrapped native token
-    if (token0.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative!.address.toLowerCase()) &&
+    if (token0.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative.address.toLowerCase()) &&
         token1.address.lowercasedEquals(EthereumConstants.zeroAddress)) {
       return true;
     }
 
     // Note: If implementing all networks feature, this check should be refactored to work with all networks,
     //as all networks network does not have a native token or a wrapped native token
-    if (token1.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative!.address.toLowerCase()) &&
+    if (token1.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative.address.toLowerCase()) &&
         token0.address.lowercasedEquals(EthereumConstants.zeroAddress)) {
       return true;
     }
@@ -55,6 +59,11 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
 
   @override
   void initState() {
+    _selectedNetworkStreamSubscription = appCubit.selectedNetworkStream.listen((network) {
+      token0SelectorController.changeToken(network.nativeCurrencyTokenDto);
+      token1SelectorController.changeToken(null);
+    });
+
     _token0SelectorStreamSubscription = token0SelectorController.selectedTokenStream.listen((token) {
       if (areTokensEqual(token, token1SelectorController.selectedToken)) {
         return token1SelectorController.changeToken(null);
@@ -73,6 +82,8 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
   void dispose() {
     _token0SelectorStreamSubscription?.cancel();
     _token1SelectorStreamSubscription?.cancel();
+    _selectedNetworkStreamSubscription?.cancel();
+
     super.dispose();
   }
 
@@ -100,13 +111,40 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                   style: const TextStyle(fontSize: 14, color: ZupColors.gray),
                 ),
                 const SizedBox(height: 20),
-                Text(
-                  S.of(context).token0,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
-                    color: ZupColors.gray,
-                  ),
+                Row(
+                  children: [
+                    Transform.translate(
+                      offset: const Offset(0, 8),
+                      child: Text(
+                        S.of(context).token0,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: ZupColors.gray,
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    StatefulBuilder(builder: (context, localSetState) {
+                      return Badge(
+                        alignment: const Alignment(0.8, -0.8),
+                        smallSize: cache.getPoolSearchSettings().isDefault ? 0 : 6,
+                        child: ZupIconButton(
+                          key: const Key("pool-search-settings-button"),
+                          backgroundColor: Colors.transparent,
+                          icon: Assets.icons.gear.svg(height: 18),
+                          padding: const EdgeInsets.all(10),
+                          iconColor: ZupColors.brand,
+                          onPressed: (buttonContext) => CreatePageSettingsDropdown.show(
+                            buttonContext,
+                            onClose: () {
+                              if (mounted) WidgetsBinding.instance.addPostFrameCallback((_) => localSetState(() {}));
+                            },
+                          ),
+                        ),
+                      );
+                    })
+                  ],
                 ),
                 const SizedBox(height: 5),
                 TokenSelectorButton(
@@ -146,6 +184,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                                 ? () => navigator.navigateToDeposit(
                                       token0SelectorController.selectedToken!.address,
                                       token1SelectorController.selectedToken!.address,
+                                      appCubit.selectedNetwork,
                                     )
                                 : null,
                             mainAxisSize: MainAxisSize.max,

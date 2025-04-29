@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
@@ -52,40 +53,6 @@ class _YieldCardState extends State<YieldCard> {
           width: double.maxFinite,
           child: Stack(
             children: [
-              if (appCubit.selectedNetwork.isAll)
-                Positioned(
-                  right: 2,
-                  top: 2,
-                  child: ZupTooltip(
-                    message: S.of(context).yieldCardThisPoolIsAtNetwork(network: widget.yield.network.label),
-                    trailingIcon: widget.yield.network.icon,
-                    child: AnimatedContainer(
-                      duration: selectionAnimationDuration,
-                      height: 40,
-                      padding: const EdgeInsets.all(6),
-                      width: 40,
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            blurStyle: BlurStyle.inner,
-                            color: widget.isSelected ? ZupColors.brand5 : ZupColors.gray5,
-                            blurRadius: 2,
-                            spreadRadius: -2,
-                            offset: const Offset(0, 0),
-                          ),
-                          BoxShadow(
-                            color: widget.isSelected ? ZupColors.brand7 : ZupColors.white,
-                            blurRadius: 5,
-                            spreadRadius: -1,
-                            offset: const Offset(2, -2),
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: widget.yield.network.icon,
-                    ),
-                  ),
-                ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -102,7 +69,15 @@ class _YieldCardState extends State<YieldCard> {
                     widget.yield.yearlyYield.formatPercent,
                     style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(height: 5),
+                  Text(
+                    "${NumberFormat.compactSimpleCurrency(decimalDigits: 2).format(widget.yield.totalValueLockedUSD)} ${S.of(context).tvl}",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1,
+                      color: ZupColors.gray,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

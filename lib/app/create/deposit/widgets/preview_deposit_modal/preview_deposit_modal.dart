@@ -9,7 +9,6 @@ import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
-import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
@@ -94,7 +93,6 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
   final zupCachedImage = inject<ZupCachedImage>();
   final navigator = inject<ZupNavigator>();
 
-  final positionsCubit = inject<PositionsCubit>();
   final ScrollController appScrollController = inject<ScrollController>(
     instanceName: InjectInstanceNames.appScrollController,
   );
@@ -351,6 +349,17 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               depositedYield: widget.currentYield,
               showAsBottomSheet: isMobileSize(context),
               depositedWithNative: widget.depositWithNativeToken,
+            );
+          },
+          slippageCheckError: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+            return ScaffoldMessenger.of(context).showSnackBar(
+              ZupSnackBar(
+                context,
+                message: S.of(context).previewDepositModalSlippageCheckErrorMessage,
+                type: ZupSnackBarType.error,
+              ),
             );
           },
           transactionError: () {

@@ -131,7 +131,7 @@ void main() {
       (_) async => TransactionReceipt(hash: transactionHash),
     );
 
-    when(() => wallet.connectedNetwork).thenAnswer((_) async => currentYield.network.chainInfo!);
+    when(() => wallet.connectedNetwork).thenAnswer((_) async => currentYield.network.chainInfo);
 
     when(() => uniswapPositionManager.fromRpcProvider(
         contractAddress: any(named: "contractAddress"),
@@ -333,11 +333,11 @@ void main() {
           zupAnalytics: zupAnalytics);
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
-      when(() => wallet.connectedNetwork).thenAnswer((_) async => Networks.scrollSepolia.chainInfo!);
+      when(() => wallet.connectedNetwork).thenAnswer((_) async => Networks.mainnet.chainInfo);
 
       await sut.approveToken(currentYield.token0, BigInt.from(32761));
 
-      verify(() => wallet.switchOrAddNetwork(yieldNetwork.chainInfo!)).called(1);
+      verify(() => wallet.switchOrAddNetwork(yieldNetwork.chainInfo)).called(1);
     },
   );
 
@@ -361,11 +361,11 @@ void main() {
           zupAnalytics: zupAnalytics);
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
-      when(() => wallet.connectedNetwork).thenAnswer((_) async => yieldNetwork.chainInfo!);
+      when(() => wallet.connectedNetwork).thenAnswer((_) async => yieldNetwork.chainInfo);
 
       await sut.approveToken(currentYield.token0, BigInt.from(121));
 
-      verifyNever(() => wallet.switchOrAddNetwork(yieldNetwork.chainInfo!));
+      verifyNever(() => wallet.switchOrAddNetwork(yieldNetwork.chainInfo));
     },
   );
 
@@ -662,8 +662,8 @@ void main() {
     """When calling `deposit` and the signer connected network is
     different from the yield network, it should ask the user to switch network""",
     () async {
-      final connectedNetwork = Networks.scrollSepolia.chainInfo!;
-      final yieldNetwork = Networks.sepolia.chainInfo!;
+      final connectedNetwork = Networks.mainnet.chainInfo;
+      final yieldNetwork = Networks.sepolia.chainInfo;
 
       when(() => wallet.connectedNetwork).thenAnswer((_) async => connectedNetwork);
 
@@ -688,8 +688,8 @@ void main() {
     the same from the yield network, it should not ask the user
     to switch network""",
     () async {
-      final connectedNetwork = Networks.sepolia.chainInfo!;
-      final yieldNetwork = Networks.sepolia.chainInfo!;
+      final connectedNetwork = Networks.sepolia.chainInfo;
+      final yieldNetwork = Networks.sepolia.chainInfo;
 
       when(() => wallet.connectedNetwork).thenAnswer((_) async => connectedNetwork);
 
@@ -1630,6 +1630,37 @@ void main() {
 
           expect(sut.isClosed, true);
         },
+      );
+    },
+  );
+
+  test(
+    """When calling `deposit` and an error with `slippage` text in its body occur while depositing,
+    it should emit the slippage check error state and the initial state""",
+    () async {
+      when(
+        () => uniswapPositionManagerImpl.mint(params: any(named: "params")),
+      ).thenThrow("SLIPPAGE_ERROR");
+
+      expectLater(
+        sut.stream,
+        emitsInOrder([
+          anything,
+          const PreviewDepositModalState.slippageCheckError(),
+          PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero),
+        ]),
+      );
+
+      await sut.deposit(
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
+        token0Amount: BigInt.one,
+        token1Amount: BigInt.one,
+        minPrice: 1200,
+        maxPrice: 3000.50,
+        isMinPriceInfinity: false,
+        isMaxPriceInfinity: false,
+        isReversed: false,
       );
     },
   );

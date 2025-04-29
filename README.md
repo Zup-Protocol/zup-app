@@ -2,13 +2,21 @@
 
 Zup App repository is the repository containing the Zup Protocol Web Application.
 
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [Installation](#installation)
+- [Running Tests](#running-tests)
+- [Deploying](#deploying)
+- [Adding New Networks](#adding-new-networks)
+
 # Getting Started
 
 ## Dependencies
 
 - **Flutter/FVM**
 
-  - To run the app, you will need to have Flutter installed on your computer. The current version of Flutter used by Zup App is `3.27.3`.
+  - To run the app, you will need to have Flutter installed on your computer. The current version of Flutter used by Zup App is `3.29.2`.
   - You can check if Flutter is installed, or the Flutter version by running `flutter --version` on your terminal, you should see a response like `Flutter X.XX.X`.
   - If the Flutter is not installed, or the version differs from the version used by Zup App, you can install Flutter from FVM (To allow you have multiple Flutter versions in your computer)
   - [How to install FVM](https://fvm.app/documentation/getting-started/installation)
@@ -49,3 +57,9 @@ Before making a deployment to production, that are a few steps that you need to 
    +flutter_bootstrap.js?v=2
    ```
 2. That's it! You're ready to deploy to production!
+
+# Adding New Networks
+
+You can add any new network that is EVM by simply adding it to the networks enum in [networks.dart](lib/core/enums/networks.dart). After doing it and populating all the necessary fields, simply run `make gen` in your terminal at the root of the repository.
+
+_Now everything is ready to go! the new network will be available in the app, and should be 100% functional._

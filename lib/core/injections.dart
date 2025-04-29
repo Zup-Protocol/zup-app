@@ -10,7 +10,6 @@ import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
-import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/enums/app_environment.dart';
@@ -51,19 +50,17 @@ Future<void> setupInjections() async {
     instanceName: InjectInstanceNames.zupAPIDio,
   );
 
-  inject.registerLazySingleton<ZupNavigator>(() => ZupNavigator());
-  inject.registerLazySingleton<Wallet>(() => Wallet.shared);
-  inject.registerLazySingleton<AppCubit>(() => AppCubit(inject<Wallet>()));
-  inject.registerLazySingleton<PositionsRepository>(() => PositionsRepository());
   inject.registerSingletonAsync<SharedPreferencesWithCache>(
     () async => await SharedPreferencesWithCache.create(
       cacheOptions: SharedPreferencesWithCacheOptions(allowList: CacheKey.keys),
     ),
   );
   inject.registerLazySingleton<Cache>(() => Cache(inject<SharedPreferencesWithCache>()));
+  inject.registerLazySingleton<ZupNavigator>(() => ZupNavigator());
+  inject.registerLazySingleton<Wallet>(() => Wallet.shared);
+  inject.registerLazySingleton<AppCubit>(() => AppCubit(inject<Wallet>(), inject<Cache>()));
+  inject.registerLazySingleton<PositionsRepository>(() => PositionsRepository());
   inject.registerLazySingleton<ZupCachedImage>(() => ZupCachedImage());
-  inject.registerLazySingleton<PositionsCubit>(
-      () => PositionsCubit(inject<Wallet>(), inject<PositionsRepository>(), inject<AppCubit>(), inject<Cache>()));
   inject.registerLazySingleton<TokensRepository>(
       () => TokensRepository(inject<Dio>(instanceName: InjectInstanceNames.zupAPIDio)));
   inject.registerLazySingleton<TokenSelectorModalCubit>(

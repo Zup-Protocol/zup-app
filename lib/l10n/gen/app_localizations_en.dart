@@ -27,6 +27,32 @@ class SEn extends S {
   String get appFooterFAQ => 'FAQ';
 
   @override
+  String depositPageShowingOnlyPoolsWithMoreThan(
+      {required String minLiquidity}) {
+    return 'Showing only liquidity pools with more than $minLiquidity.';
+  }
+
+  @override
+  String get depositPageShowingAllPools => 'Showing all liquidity pools.';
+
+  @override
+  String get depositPageSearchAllPools => 'Search all pools?';
+
+  @override
+  String depositPageSearchOnlyForPoolsWithMorethan(
+      {required String minLiquidity}) {
+    return 'Search only for pools with more than $minLiquidity?';
+  }
+
+  @override
+  String depositPageMinLiquiditySearchAlert({required String minLiquidity}) {
+    return 'Searched only for pools with more than $minLiquidity TVL.';
+  }
+
+  @override
+  String get depositPageTrySearchAllPools => 'Try search all pools?';
+
+  @override
   String get slippageExplanation =>
       'Slippage protects you by reverting the transaction if the price changes unfavorably beyond the percentage. This is necessary to prevent losses while adding liquidity';
 
@@ -489,7 +515,34 @@ class SEn extends S {
   String get close => 'Close';
 
   @override
+  String depositPageDepositWithNativeToken({required String tokenSymbol}) {
+    return 'Deposit with Native $tokenSymbol';
+  }
+
+  @override
+  String get createPageSettingsDropdownMinimumLiquidity =>
+      'Minimum Pool Liquidity';
+
+  @override
+  String get createPageSettingsDropdownMinimumLiquidityExplanation =>
+      'Filter pools by minimum liquidity. We’ll exclude pools with less liquidity than specified, as low Liquidity can lead to misleading yields. This helps you find more reliable opportunities';
+
+  @override
+  String get createPageSettingsDropdownMiniumLiquidityLowWarning =>
+      'Low minimum TVL can lead to misleading yields.';
+
+  @override
+  String get appSettingsDropdownTestnetMode => 'Testnet Mode';
+
+  @override
+  String get previewDepositModalSlippageCheckErrorMessage =>
+      'Slippage Check! Please try increasing your slippage for this transaction';
+
+  @override
   String get createPageTitle => 'New Position';
+
+  @override
+  String get tvl => 'TVL';
 
   @override
   String get createPageShowMeTheMoney => 'Show me the money!';

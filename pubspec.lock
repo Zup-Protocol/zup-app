@@ -238,6 +238,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.5"
+  currency_text_input_formatter:
+    dependency: "direct main"
+    description:
+      name: currency_text_input_formatter
+      sha256: "7ca90006337241559caea445699b4b32f4e198676728541604fa9521d0d4f75a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
   dart_style:
     dependency: transitive
     description:
@@ -1253,7 +1261,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "3a1c7161ae116da62273b5a706828d9385e0bc88"
+      resolved-ref: "3157929242110d0f12644d5bc4afa8a6cd181eab"
       url: "https://github.com/Zup-Protocol/web3kit.git"
     source: git
     version: "0.0.1"
@@ -1302,7 +1310,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: d8a15883960183d5d9cf0117dfa1c863627d8f10
+      resolved-ref: "2fb18c6a9212718d0bb72d13f255436800d34c4a"
       url: "https://github.com/Zup-Protocol/zup-core.git"
     source: git
     version: "0.0.1"
@@ -1311,10 +1319,10 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "3826970f2c8847b484f95c0c425a66d0900671dc"
+      resolved-ref: "075dd0601cfbd4304ad52476fd77f47724daa989"
       url: "https://github.com/Zup-Protocol/zup-ui-kit.git"
     source: git
     version: "0.0.1"
 sdks:
   dart: ">=3.7.0-0 <4.0.0"
-  flutter: ">=3.27.3"
+  flutter: ">=3.29.2"

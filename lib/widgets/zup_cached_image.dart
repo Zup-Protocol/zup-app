@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
@@ -16,22 +15,26 @@ class ZupCachedImage {
     double? height,
     double? width,
     double? radius,
-    Widget Function(BuildContext, String)? placeholder,
-    Widget Function(BuildContext, String, Object)? errorWidget,
+    ImageLoadingBuilder? loadingBuilder,
+    ImageErrorWidgetBuilder? errorWidget,
   }) {
     return ClipRRect(
+      key: Key(url),
       borderRadius: BorderRadius.circular(radius ?? 0),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(radius ?? 0),
           border: Border.all(width: 0.5, color: ZupColors.gray5),
         ),
-        child: CachedNetworkImage(
-          imageUrl: _parseImageUrl(url),
+        // cache not implemented yet because of web issue rendering images from other domains
+        child: Image.network(
+          _parseImageUrl(url),
           height: height,
           width: width,
-          placeholder: placeholder,
-          errorWidget: errorWidget ?? (context, url, error) => Container(color: ZupColors.gray5),
+          fit: BoxFit.cover,
+          errorBuilder: errorWidget,
+          loadingBuilder: loadingBuilder,
+          webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
         ),
       ),
     );

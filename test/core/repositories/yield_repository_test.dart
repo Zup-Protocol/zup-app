@@ -30,13 +30,20 @@ void main() {
     const token0Address = "0x123";
     const token1Address = "0x456";
     const network = Networks.sepolia;
+    const minTvlUsd = 1213;
 
-    await sut.getYields(token0Address: token0Address, token1Address: token1Address, network: network);
+    await sut.getYields(
+      token0Address: token0Address,
+      token1Address: token1Address,
+      network: network,
+      minTvlUsd: minTvlUsd,
+    );
 
     verify(() => dio.get("/pools", queryParameters: {
           "token0": token0Address,
           "token1": token1Address,
           "network": network.name,
+          "minTvlUsd": minTvlUsd
         })).called(1);
   });
 
@@ -55,7 +62,12 @@ void main() {
     const token1Address = "0x456";
     const network = Networks.sepolia;
 
-    final response = await sut.getYields(token0Address: token0Address, token1Address: token1Address, network: network);
+    final response = await sut.getYields(
+      token0Address: token0Address,
+      token1Address: token1Address,
+      network: network,
+      minTvlUsd: 0,
+    );
 
     expect(response, yields);
   });

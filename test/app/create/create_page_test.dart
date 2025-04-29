@@ -3,6 +3,8 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/create_page.dart';
+import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
@@ -13,15 +15,20 @@ import '../../mocks.dart';
 
 void main() {
   late AppCubit appCubit;
+  late Cache cache;
 
   setUp(() {
     appCubit = AppCubitMock();
+    cache = CacheMock();
 
+    inject.registerFactory<Cache>(() => cache);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerFactory<ZupNavigator>(() => ZupNavigatorMock());
 
+    when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto.fixture());
     when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
+    when(() => appCubit.selectedNetworkStream).thenAnswer((_) => const Stream.empty());
   });
 
   tearDown(() => inject.reset());

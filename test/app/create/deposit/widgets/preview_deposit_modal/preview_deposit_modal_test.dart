@@ -13,7 +13,6 @@ import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
-import 'package:zup_app/app/positions/positions_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
@@ -32,7 +31,6 @@ import '../../../../../wrappers.dart';
 void main() {
   late PreviewDepositModalCubit cubit;
   late ZupNavigator navigator;
-  late PositionsCubit positionsCubit;
   late UrlLauncherPlatform urlLauncherPlatform;
   late ConfettiController confettiController;
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -41,7 +39,6 @@ void main() {
   setUp(() {
     navigator = ZupNavigatorMock();
     cubit = PreviewDepositModalCubitMock();
-    positionsCubit = PositionsCubitMock();
     urlLauncherPlatform = UrlLauncherPlatformCustomMock();
     confettiController = ConfettiControllerMock();
 
@@ -64,7 +61,6 @@ void main() {
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<ZupNavigator>(() => navigator);
     inject.registerFactory<GlobalKey<ScaffoldMessengerState>>(() => scaffoldMessengerKey);
-    inject.registerFactory<PositionsCubit>(() => positionsCubit);
     inject.registerFactory<ScrollController>(
       () => GoldenConfig.scrollController,
       instanceName: InjectInstanceNames.appScrollController,
@@ -222,7 +218,7 @@ void main() {
 
       expect(
         UrlLauncherPlatformCustomMock.lastLaunchedUrl,
-        "${yieldNetwork.chainInfo!.blockExplorerUrls!.first}/tx/$txId",
+        "${yieldNetwork.chainInfo.blockExplorerUrls!.first}/tx/$txId",
       );
     },
   );
@@ -303,7 +299,7 @@ void main() {
           await goldenBuilder(
             depositWithNativeToken: true,
             customYield: currentYield.copyWith(
-              token0: TokenDto.fixture().copyWith(address: currentYield.network.wrappedNative!.address),
+              token0: TokenDto.fixture().copyWith(address: currentYield.network.wrappedNative.address),
               token1: TokenDto.fixture().copyWith(address: "0x21"),
             ),
           ),
@@ -1013,6 +1009,24 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(() => navigator.navigateToNewPosition()).called(1);
+    },
+  );
+
+  zGoldenTest(
+    "When the state is slippage check error, it should show an error snack bar saying to change the slippage",
+    goldenFileName: "preview_deposit_modal_slippage_check_error",
+    (tester) async {
+      when(() => cubit.state).thenReturn(const PreviewDepositModalState.slippageCheckError());
+      when(() => cubit.stream).thenAnswer((_) {
+        return Stream.value(const PreviewDepositModalState.slippageCheckError());
+      });
+
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(),
+        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
+      );
+
+      await tester.pumpAndSettle();
     },
   );
 }

@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 
 import '../mocks.dart';
 
@@ -100,5 +101,47 @@ void main() {
 
   test("When calling '.keys' in the cache key enum, it should return all the cache keys as Set", () {
     expect(CacheKey.keys, CacheKey.values.map((e) => e.key).toSet());
+  });
+
+  test("when calling `saveTestnetMode` it should save under the correct key", () async {
+    when(() => sharedPreferencesWithCache.setBool(any(), any())).thenAnswer((_) async => true);
+
+    const isTestnetMode = true;
+    await sut.saveTestnetMode(isTestnetMode: isTestnetMode);
+
+    verify(() => sharedPreferencesWithCache.setBool(CacheKey.isTestnetMode.key, isTestnetMode)).called(1);
+  });
+
+  test("when calling `getTestnetMode` it should get under the correct key", () async {
+    when(() => sharedPreferencesWithCache.getBool(any())).thenReturn(true);
+
+    final result = sut.getTestnetMode();
+
+    expect(result, true);
+
+    verify(() => sharedPreferencesWithCache.getBool(CacheKey.isTestnetMode.key)).called(1);
+  });
+
+  test("when calling 'savePoolSearchSettings' it should save under the correct key", () {
+    when(() => sharedPreferencesWithCache.setString(any(), any())).thenAnswer((_) async => true);
+
+    final settings = PoolSearchSettingsDto(
+      minLiquidityUSD: 12786,
+    );
+    sut.savePoolSearchSettings(settings: settings);
+
+    verify(() => sharedPreferencesWithCache.setString(
+          CacheKey.poolSearchSettings.key,
+          jsonEncode(settings.toJson()),
+        )).called(1);
+  });
+
+  test("when calling 'getPoolSearchSettings' it should get under the correct key", () {
+    final result = sut.getPoolSearchSettings();
+
+    when(() => sharedPreferencesWithCache.getString(any())).thenReturn(jsonEncode(result.toJson()));
+
+    expect(result, result);
+    verify(() => sharedPreferencesWithCache.getString(CacheKey.poolSearchSettings.key)).called(1);
   });
 }

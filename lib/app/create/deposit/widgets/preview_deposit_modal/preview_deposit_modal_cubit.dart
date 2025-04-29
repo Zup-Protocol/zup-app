@@ -248,6 +248,13 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
         walletAddress: recipient,
       );
     } catch (e) {
+      if (e.toString().toLowerCase().contains("slippage")) {
+        emit(const PreviewDepositModalState.slippageCheckError());
+        emit(PreviewDepositModalState.initial(token0Allowance: _token0Allowance, token1Allowance: _token1Allowance));
+
+        return;
+      }
+
       if (e is UserRejectedAction) {
         return emit(
           PreviewDepositModalState.initial(
@@ -264,9 +271,9 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
   Future<void> _maybeSwitchNetwork() async {
     try {
-      if ((await _wallet.connectedNetwork).hexChainId == _yield.network.chainInfo!.hexChainId) return;
+      if ((await _wallet.connectedNetwork).hexChainId == _yield.network.chainInfo.hexChainId) return;
 
-      await _wallet.switchOrAddNetwork(_yield.network.chainInfo!);
+      await _wallet.switchOrAddNetwork(_yield.network.chainInfo);
     } catch (e) {
       rethrow;
     }
@@ -276,12 +283,12 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     try {
       final token0contract = _erc20.fromRpcProvider(
         contractAddress: _yield.token0.address,
-        rpcUrl: _yield.network.rpcUrl!,
+        rpcUrl: _yield.network.rpcUrl,
       );
 
       final token1contract = _erc20.fromRpcProvider(
         contractAddress: _yield.token1.address,
-        rpcUrl: _yield.network.rpcUrl!,
+        rpcUrl: _yield.network.rpcUrl,
       );
 
       final token0Allowance = await token0contract.allowance(
@@ -304,7 +311,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
   void _updateTick() {
     final uniswapV3PoolContract = _uniswapV3Pool.fromRpcProvider(
       contractAddress: _yield.poolAddress,
-      rpcUrl: _yield.network.rpcUrl ?? "",
+      rpcUrl: _yield.network.rpcUrl,
     );
 
     try {

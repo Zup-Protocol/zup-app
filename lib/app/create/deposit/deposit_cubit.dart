@@ -7,6 +7,7 @@ import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
@@ -51,6 +52,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
   YieldDto? get selectedYield => _selectedYield;
   BigInt? get latestPoolTick => _latestPoolTick;
   DepositSettingsDto get depositSettings => _cache.getDepositSettings();
+  PoolSearchSettingsDto get poolSearchSettings => _cache.getPoolSearchSettings();
 
   void setup() async {
     Timer.periodic(const Duration(minutes: 1), (timer) {
@@ -60,7 +62,11 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     });
   }
 
-  Future<void> getBestPools({required String token0Address, required String token1Address}) async {
+  Future<void> getBestPools({
+    required String token0Address,
+    required String token1Address,
+    bool ignoreMinLiquidity = false,
+  }) async {
     try {
       _zupAnalytics.logSearch(
         token0: token0Address,
@@ -73,9 +79,14 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
         token0Address: token0Address,
         token1Address: token1Address,
         network: _appCubit.selectedNetwork,
+        minTvlUsd: ignoreMinLiquidity ? 0 : poolSearchSettings.minLiquidityUSD,
       );
 
-      if (yields.isEmpty) return emit(const DepositState.noYields());
+      if (yields.isEmpty) {
+        return emit(
+          DepositState.noYields(minLiquiditySearched: yields.minLiquidityUSD),
+        );
+      }
 
       emit(DepositState.success(yields));
     } catch (e) {
@@ -100,7 +111,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
     final uniswapV3Pool = _uniswapV3Pool.fromRpcProvider(
       contractAddress: selectedYieldBeforeCall!.poolAddress,
-      rpcUrl: selectedYieldBeforeCall.network.rpcUrl ?? "",
+      rpcUrl: selectedYieldBeforeCall.network.rpcUrl,
     );
 
     final slot0 = await uniswapV3Pool.slot0();

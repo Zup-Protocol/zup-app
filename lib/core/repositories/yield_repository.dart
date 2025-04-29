@@ -12,11 +12,13 @@ class YieldRepository {
     required String token0Address,
     required String token1Address,
     required Networks network,
+    required num minTvlUsd,
   }) async {
     final response = await _zupAPIDio.get("/pools", queryParameters: {
-      "token0": token0Address != EthereumConstants.zeroAddress ? token0Address : network.wrappedNative!.address,
-      "token1": token1Address != EthereumConstants.zeroAddress ? token1Address : network.wrappedNative!.address,
+      "token0": token0Address != EthereumConstants.zeroAddress ? token0Address : network.wrappedNative.address,
+      "token1": token1Address != EthereumConstants.zeroAddress ? token1Address : network.wrappedNative.address,
       "network": network.name,
+      "minTvlUsd": minTvlUsd
     });
 
     return YieldsDto.fromJson(response.data["bestYields"]);

@@ -9,22 +9,16 @@ void main() {
 
   test("Zup navigator paths `path` extension should use routefly generated paths", () {
     expect(
-      ZupNavigatorPaths.myPositions.path,
-      routePaths.positions,
-      reason: "My positions path does not match routefly path",
-    );
-
-    expect(
       ZupNavigatorPaths.newPosition.path,
       routePaths.create.path,
       reason: "New position path does not match routefly path",
     );
   });
 
-  test("The route params name for deposit page, should be `token0` and `token1`", () {
+  test("The route params name for deposit page, should be `token0`, `token1` and network", () {
     expect(
       ZupNavigatorPaths.deposit.routeParamsName,
-      (param0: "token0", param1: "token1"),
+      (param0: "token0", param1: "token1", param3: "network"),
     );
   });
 }

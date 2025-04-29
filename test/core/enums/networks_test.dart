@@ -18,19 +18,39 @@ void main() {
     UrlLauncherPlatform.instance = urlLauncherPlatform;
   });
 
+  test("When calling 'fromValue' it should get a network from a string value", () {
+    expect(Networks.fromValue("sepolia"), Networks.sepolia);
+    expect(Networks.fromValue("mainnet"), Networks.mainnet);
+    expect(Networks.fromValue("scroll"), Networks.scroll);
+  });
+
   test("Label extension should match for all networks", () {
-    expect(Networks.all.label, "All Networks", reason: "All networks's Label should match");
-    expect(Networks.scrollSepolia.label, "Scroll Sepolia", reason: "Scroll Sepolia Label should match");
     expect(Networks.sepolia.label, "Sepolia", reason: "Sepolia Label should match");
+    expect(Networks.mainnet.label, "Ethereum", reason: "Ethereum Label should match");
+    expect(Networks.scroll.label, "Scroll", reason: "Scroll Label should match");
+  });
+
+  test("`testnets` method should return all testnets in the enum", () {
+    expect(Networks.testnets, [Networks.sepolia]);
+  });
+
+  test("`testnets` method should return all testnets in the enum", () {
+    expect(Networks.mainnets, [Networks.mainnet, Networks.scroll]);
+  });
+
+  test("`isTestnet` method should return true for sepolia", () {
+    expect(Networks.sepolia.isTestnet, true);
+  });
+
+  test("`isTestnet` method should return false for mainnet", () {
+    expect(Networks.mainnet.isTestnet, false);
+  });
+
+  test("`isTestnet` method should return false for Scroll", () {
+    expect(Networks.scroll.isTestnet, false);
   });
 
   test("Chain info extension should match for all networks", () {
-    expect(
-      Networks.all.chainInfo,
-      null,
-      reason: "All networks's ChainInfo should be null",
-    );
-
     expect(
       Networks.sepolia.chainInfo,
       ChainInfo(
@@ -44,24 +64,30 @@ void main() {
     );
 
     expect(
-      Networks.scrollSepolia.chainInfo,
+      Networks.mainnet.chainInfo,
       ChainInfo(
-        hexChainId: "0x8274f",
-        chainName: "Scroll Sepolia",
-        blockExplorerUrls: const ["https://sepolia.scrollscan.com"],
+        hexChainId: "0x1",
+        chainName: "Ethereum",
+        blockExplorerUrls: const ["https://etherscan.io"],
         nativeCurrency: NativeCurrencies.eth.currencyInfo,
-        rpcUrls: const ["https://scroll-sepolia-rpc.publicnode.com"],
+        rpcUrls: const ["https://ethereum-rpc.publicnode.com"],
       ),
+    );
+
+    expect(
+      Networks.scroll.chainInfo,
+      ChainInfo(
+        hexChainId: "0x82750",
+        chainName: "Scroll",
+        blockExplorerUrls: const ["https://scrollscan.com"],
+        nativeCurrency: NativeCurrencies.eth.currencyInfo,
+        rpcUrls: const ["https://scroll-rpc.publicnode.com"],
+      ),
+      reason: "Scroll ChainInfo should match",
     );
   });
 
   test("wrapped native token address should match for all networks", () {
-    expect(
-      Networks.all.wrappedNativeTokenAddress,
-      null,
-      reason: "All networks's wrapped native token address should be null",
-    );
-
     expect(
       Networks.sepolia.wrappedNativeTokenAddress,
       "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
@@ -69,19 +95,19 @@ void main() {
     );
 
     expect(
-      Networks.scrollSepolia.wrappedNativeTokenAddress,
+      Networks.mainnet.wrappedNativeTokenAddress,
+      "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      reason: "Ethereum wrapped native token address should match",
+    );
+
+    expect(
+      Networks.scroll.wrappedNativeTokenAddress,
       "0x5300000000000000000000000000000000000004",
-      reason: "Scroll sepolia wrapped native token address should match",
+      reason: "Scroll wrapped native token address should match",
     );
   });
 
   test("wrapped native token should match for all networks", () {
-    expect(
-      Networks.all.wrappedNative,
-      null,
-      reason: "All networks's default token should be null",
-    );
-
     expect(
       Networks.sepolia.wrappedNative,
       const TokenDto(
@@ -95,29 +121,32 @@ void main() {
     );
 
     expect(
-      Networks.scrollSepolia.wrappedNative,
+      Networks.mainnet.wrappedNative,
       const TokenDto(
-        address: "0x5300000000000000000000000000000000000004",
+        address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
         name: "Wrapped Ether",
         decimals: 18,
         symbol: "WETH",
         logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
       ),
-      reason: "Scroll Sepolia default token should match",
+      reason: "Ethereum default token should match",
+    );
+
+    expect(
+      Networks.scroll.wrappedNative,
+      const TokenDto(
+        address: "0x5300000000000000000000000000000000000004",
+        name: "Wrapped Ether",
+        decimals: 18,
+        symbol: "WETH",
+        logoUrl:
+            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x5300000000000000000000000000000000000004/logo.png",
+      ),
+      reason: "Scroll default token should match",
     );
   });
 
-  test("When calling `isAll` it should return true if the network is All", () {
-    expect(Networks.all.isAll, true);
-  });
-
-  test("When calling `isAll` it should return false if the network is not All", () {
-    expect(Networks.sepolia.isAll, false);
-  });
-
   test("RpcUrl extension should return the correct rpc url", () {
-    expect(Networks.all.rpcUrl, null, reason: "All networks's rpc url should be null");
-
     expect(
       Networks.sepolia.rpcUrl,
       "https://ethereum-sepolia-rpc.publicnode.com",
@@ -125,41 +154,15 @@ void main() {
     );
 
     expect(
-      Networks.scrollSepolia.rpcUrl,
-      "https://scroll-sepolia-rpc.publicnode.com",
-      reason: "Scroll Sepolia rpc url should match",
-    );
-  });
-
-  test("ZupRouterAddress extension should return the correct zup router address", () async {
-    expect(Networks.all.zupRouterAddress, null, reason: "All networks's zup router address should be null");
-
-    expect(
-      Networks.sepolia.zupRouterAddress,
-      "0xCd84aE98e975c4C1A82C0D9Debf992d3eeb7d6AD",
-      reason: "Sepolia zup router address should match",
+      Networks.mainnet.rpcUrl,
+      "https://ethereum-rpc.publicnode.com",
+      reason: "Ethereum rpc url should match",
     );
 
     expect(
-      Networks.scrollSepolia.zupRouterAddress,
-      "0x1f8A0f1FFB3047744279530Ea2635E5524D10436",
-      reason: "Scroll Sepolia zup router address should match",
-    );
-  });
-
-  test("FeeControllerAddress extension should return the correct fee controller address", () async {
-    expect(Networks.all.feeControllerAddress, null, reason: "All networks's fee controller address should be null");
-
-    expect(
-      Networks.sepolia.feeControllerAddress,
-      "0xFBFEfD600fFC1Ae6EabD66Bb8C90F25a314Ff3Cf",
-      reason: "Sepolia fee controller address should match",
-    );
-
-    expect(
-      Networks.scrollSepolia.feeControllerAddress,
-      "0x63f02Ae6B29AacFC7555E48ef129f4269B4Fe591",
-      reason: "Scroll Sepolia fee controller address should match",
+      Networks.scroll.rpcUrl,
+      "https://scroll-rpc.publicnode.com",
+      reason: "Scroll rpc url should match",
     );
   });
 
@@ -167,28 +170,19 @@ void main() {
     const txHash = "0x1271892718912u198haisghsg7223617";
 
     for (final network in Networks.values) {
-      if (network.isAll) continue;
-
       await network.openTx(txHash);
 
       expect(
         UrlLauncherPlatformCustomMock.lastLaunchedUrl,
-        "${network.chainInfo?.blockExplorerUrls?.first}/tx/$txHash",
+        "${network.chainInfo.blockExplorerUrls?.first}/tx/$txHash",
         reason: "${network.name} should open the correct url",
       );
     }
   });
 
-  test("'nativeCurrency' should throw an error for all networks network", () {
-    expect(
-      () => Networks.all.nativeCurrency,
-      throwsUnsupportedError,
-    );
-  });
-
   test("'nativeCurrency' should return the correct currency for sepolia network", () {
     expect(
-      Networks.sepolia.nativeCurrency,
+      Networks.sepolia.nativeCurrencyTokenDto,
       TokenDto(
         address: EthereumConstants.zeroAddress,
         name: NativeCurrencies.eth.currencyInfo.name,
@@ -200,9 +194,9 @@ void main() {
     );
   });
 
-  test("'nativeCurrency' should return the correct currency for scroll sepolia network", () {
+  test("'nativeCurrency' should return the correct currency for ethereum network", () {
     expect(
-      Networks.scrollSepolia.nativeCurrency,
+      Networks.mainnet.nativeCurrencyTokenDto,
       TokenDto(
         address: EthereumConstants.zeroAddress,
         name: NativeCurrencies.eth.currencyInfo.name,
@@ -210,15 +204,22 @@ void main() {
         symbol: NativeCurrencies.eth.currencyInfo.symbol,
         logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
       ),
-      reason: "Scroll Sepolia native currency should match",
+      reason: "Ethereum native currency should match",
     );
   });
 
-  zGoldenTest("All networks icon should match", goldenFileName: "all_networks_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      Networks.all.icon,
-      device: GoldenDevice.square,
-    ));
+  test("'nativeCurrency' should return the correct currency for scroll network", () {
+    expect(
+      Networks.scroll.nativeCurrencyTokenDto,
+      TokenDto(
+        address: EthereumConstants.zeroAddress,
+        name: NativeCurrencies.eth.currencyInfo.name,
+        decimals: NativeCurrencies.eth.currencyInfo.decimals,
+        symbol: NativeCurrencies.eth.currencyInfo.symbol,
+        logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
+      ),
+      reason: "Scroll native currency should match",
+    );
   });
 
   zGoldenTest("Sepolia network icon should match", goldenFileName: "sepolia_network_icon", (tester) async {
@@ -228,10 +229,9 @@ void main() {
     ));
   });
 
-  zGoldenTest("Scroll Sepolia network icon should match", goldenFileName: "scroll_sepolia_network_icon",
-      (tester) async {
+  zGoldenTest("Ethereum network icon should match", goldenFileName: "ethereum_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      Networks.scrollSepolia.icon,
+      Networks.mainnet.icon,
       device: GoldenDevice.square,
     ));
   });
