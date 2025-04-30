@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:routefly/routefly.dart';
+import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/widgets/app_bottom_navigation_bar.dart';
+import 'package:zup_app/widgets/app_cookies_consent_widget.dart';
 import 'package:zup_app/widgets/app_footer.dart';
 import 'package:zup_app/widgets/app_header/app_header.dart';
 import 'package:zup_core/mixins/device_info_mixin.dart';
@@ -17,10 +19,37 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
   bool get shouldShowBottomNavigationBar => isTabletSize(context);
 
   final double appBarHeight = 85;
+  final cache = inject<Cache>();
 
   final ScrollController appScrollController = inject<ScrollController>(
     instanceName: InjectInstanceNames.appScrollController,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      late OverlayEntry overlayEntry;
+
+      overlayEntry = OverlayEntry(
+        builder: (context) {
+          return Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: SelectionArea(
+                child: AppCookieConsentWidget(
+                  onAccept: () => overlayEntry.remove(),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+
+      if (cache.getCookiesConsentStatus() == null) Overlay.of(context).insert(overlayEntry);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

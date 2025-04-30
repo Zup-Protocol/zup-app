@@ -105,17 +105,23 @@ abstract class S {
   /// **'Terms of Use'**
   String get appFooterTermsOfUse;
 
-  /// No description provided for @appFooterPrivacyPolicy.
+  /// No description provided for @privacyPolicy.
   ///
   /// In en, this message translates to:
   /// **'Privacy Policy'**
-  String get appFooterPrivacyPolicy;
+  String get privacyPolicy;
 
   /// No description provided for @appFooterContactUs.
   ///
   /// In en, this message translates to:
   /// **'Contact Us'**
   String get appFooterContactUs;
+
+  /// No description provided for @appCookiesConsentWidgetDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'We use cookies to ensure that we give you the best experience on our app. By continuing to use Zup Protocol, you agree to our'**
+  String get appCookiesConsentWidgetDescription;
 
   /// No description provided for @appFooterDocs.
   ///
@@ -128,6 +134,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'FAQ'**
   String get appFooterFAQ;
+
+  /// No description provided for @understood.
+  ///
+  /// In en, this message translates to:
+  /// **'Understood'**
+  String get understood;
 
   /// No description provided for @depositPageShowingOnlyPoolsWithMoreThan.
   ///

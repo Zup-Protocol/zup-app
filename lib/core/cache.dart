@@ -8,6 +8,7 @@ enum CacheKey {
   hidingClosedPositions,
   depositSettings,
   poolSearchSettings,
+  areCookiesConsented,
   isTestnetMode;
 
   String get key => name;
@@ -48,6 +49,14 @@ class Cache {
 
   Future<void> savePoolSearchSettings({required PoolSearchSettingsDto settings}) async {
     await _cache.setString(CacheKey.poolSearchSettings.key, jsonEncode(settings.toJson()));
+  }
+
+  Future<void> saveCookiesConsentStatus({required bool status}) async {
+    await _cache.setBool(CacheKey.areCookiesConsented.key, status);
+  }
+
+  bool? getCookiesConsentStatus() {
+    return _cache.getBool(CacheKey.areCookiesConsented.key);
   }
 
   PoolSearchSettingsDto getPoolSearchSettings() {

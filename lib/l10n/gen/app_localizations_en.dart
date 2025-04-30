@@ -15,16 +15,23 @@ class SEn extends S {
   String get appFooterTermsOfUse => 'Terms of Use';
 
   @override
-  String get appFooterPrivacyPolicy => 'Privacy Policy';
+  String get privacyPolicy => 'Privacy Policy';
 
   @override
   String get appFooterContactUs => 'Contact Us';
+
+  @override
+  String get appCookiesConsentWidgetDescription =>
+      'We use cookies to ensure that we give you the best experience on our app. By continuing to use Zup Protocol, you agree to our';
 
   @override
   String get appFooterDocs => 'Docs';
 
   @override
   String get appFooterFAQ => 'FAQ';
+
+  @override
+  String get understood => 'Understood';
 
   @override
   String depositPageShowingOnlyPoolsWithMoreThan(

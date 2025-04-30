@@ -144,4 +144,22 @@ void main() {
     expect(result, result);
     verify(() => sharedPreferencesWithCache.getString(CacheKey.poolSearchSettings.key)).called(1);
   });
+
+  test("when calling 'saveCookiesConsentStatus' it should save under the correct key", () {
+    when(() => sharedPreferencesWithCache.setBool(any(), any())).thenAnswer((_) async => true);
+
+    const status = true;
+    sut.saveCookiesConsentStatus(status: status);
+
+    verify(() => sharedPreferencesWithCache.setBool(CacheKey.areCookiesConsented.key, status)).called(1);
+  });
+
+  test("when calling 'getCookiesConsentStatus' it should get under the correct key", () {
+    when(() => sharedPreferencesWithCache.getBool(any())).thenReturn(true);
+
+    final result = sut.getCookiesConsentStatus();
+
+    expect(result, true);
+    verify(() => sharedPreferencesWithCache.getBool(CacheKey.areCookiesConsented.key)).called(1);
+  });
 }

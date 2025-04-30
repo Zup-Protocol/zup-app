@@ -32,7 +32,7 @@ enum _AppFooterButton {
         _AppFooterButton.twitter => "",
         _AppFooterButton.telegram => "",
         _AppFooterButton.termsOfUse => S.of(context).appFooterTermsOfUse,
-        _AppFooterButton.privacyPolicy => S.of(context).appFooterPrivacyPolicy,
+        _AppFooterButton.privacyPolicy => S.of(context).privacyPolicy,
         _AppFooterButton.docs => S.of(context).appFooterDocs,
         _AppFooterButton.faq => S.of(context).appFooterFAQ,
         _AppFooterButton.contactUs => S.of(context).appFooterContactUs
