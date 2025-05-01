@@ -2,10 +2,12 @@
     "@@locale": "en",
     "twentyFourHours": "24h",
     "appFooterTermsOfUse": "Terms of Use",
-    "appFooterPrivacyPolicy": "Privacy Policy",
+    "privacyPolicy": "Privacy Policy",
     "appFooterContactUs": "Contact Us",
+    "appCookiesConsentWidgetDescription": "We use cookies to ensure that we give you the best experience on our app. By continuing to use Zup Protocol, you agree to our",
     "appFooterDocs": "Docs",
     "appFooterFAQ": "FAQ",
+    "understood": "Understood",
     "depositPageShowingOnlyPoolsWithMoreThan": "Showing only liquidity pools with more than {minLiquidity}.",
     "@depositPageShowingOnlyPoolsWithMoreThan": {
         "placeholders": {

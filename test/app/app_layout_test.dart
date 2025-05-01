@@ -7,6 +7,7 @@ import 'package:routefly/routefly.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/app_layout.dart';
+import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/injections.dart';
@@ -20,15 +21,18 @@ import '../mocks.dart';
 
 void main() {
   late AppCubit appCubit;
+  late Cache cache;
 
   setUp(() async {
     await Web3Kit.initializeForTest();
 
     appCubit = AppCubitMock();
+    cache = CacheMock();
 
     inject.registerFactory<ZupLinks>(() => ZupLinksMock());
     inject.registerFactory<ZupNavigator>(() => ZupNavigator());
     inject.registerFactory<AppCubit>(() => appCubit);
+    inject.registerFactory<Cache>(() => cache);
     inject.registerFactory<ScrollController>(
       () => ScrollController(),
       instanceName: InjectInstanceNames.appScrollController,
@@ -38,6 +42,7 @@ void main() {
     when(() => appCubit.state).thenReturn(const AppState.standard());
     when(() => appCubit.isTestnetMode).thenReturn(false);
     when(() => appCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(() => cache.getCookiesConsentStatus()).thenReturn(true);
   });
 
   Future<DeviceBuilder> goldenBuilder({bool isMobile = false}) async => await goldenDeviceBuilder(
@@ -84,4 +89,22 @@ void main() {
 
     await tester.drag(find.byKey(const Key("screen")).first, const Offset(0, -500));
   });
+
+  zGoldenTest(
+    "When initializing, and the cookies consent is not saved in the cache, it should display a cookie consent overlay",
+    goldenFileName: "app_layout_cookie_consent_null",
+    (tester) async {
+      when(() => cache.getCookiesConsentStatus()).thenReturn(null);
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+    },
+  );
+
+  zGoldenTest(
+    "When initializing, and a cookies consent is saved in the cache (either true or false), it should not display a cookie consent overlay",
+    goldenFileName: "app_layout_cookie_consent_not_null",
+    (tester) async {
+      when(() => cache.getCookiesConsentStatus()).thenReturn(false);
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+    },
+  );
 }
