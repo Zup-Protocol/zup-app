@@ -41,7 +41,7 @@ void main() {
   Future<DeviceBuilder> goldenBuilder({
     Key? key,
     TextEditingController? controller,
-    Networks network = Networks.sepolia,
+    AppNetworks network = AppNetworks.sepolia,
     Function(double)? onInput,
     TokenDto? token,
     String? disabledText,
@@ -201,7 +201,10 @@ void main() {
     (tester) async {
       const key = Key("token-amount-card");
       const newTokenAddress = "0xN3W_T0K3N";
-      final newToken = TokenDto.fixture().copyWith(address: newTokenAddress, symbol: "NEW_TOKEN");
+      final newToken = TokenDto.fixture().copyWith(
+        addresses: {AppNetworks.sepolia.chainId: newTokenAddress},
+        symbol: "NEW_TOKEN",
+      );
 
       await tester.pumpDeviceBuilder(await goldenBuilder(key: key));
       await tester.pumpDeviceBuilder(await goldenBuilder(key: key, token: newToken));

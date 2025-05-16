@@ -30,7 +30,7 @@ void main() {
 
     when(() => zupNavigator.listenable).thenReturn(listenable);
     when(() => zupNavigator.currentRoute).thenReturn("any");
-    when(() => appCubit.selectedNetwork).thenReturn(Networks.mainnet);
+    when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.mainnet);
     when(() => appCubit.selectedNetworkStream).thenAnswer((_) => const Stream.empty());
     when(() => appCubit.isTestnetMode).thenReturn(false);
     when(() => appCubit.stream).thenAnswer((_) => const Stream.empty());

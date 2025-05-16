@@ -22,14 +22,16 @@ class TokenAmountInputCard extends StatefulWidget {
     this.disabledText,
     required this.network,
     this.onRefreshBalance,
+    this.isNative = false,
   });
 
   final TokenDto token;
-  final Networks network;
+  final AppNetworks network;
   final TextEditingController controller;
   final Function(double value) onInput;
   final String? disabledText;
   final VoidCallback? onRefreshBalance;
+  final bool isNative;
 
   @override
   State<TokenAmountInputCard> createState() => _TokenAmountInputCardState();
@@ -41,9 +43,9 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
   Wallet get wallet => inject<Wallet>();
   ZupSingletonCache get zupSingletonCache => inject<ZupSingletonCache>();
 
-  late final TokenAmountCardUserBalanceCubit userBalanceCubit = TokenAmountCardUserBalanceCubit(
+  late TokenAmountCardUserBalanceCubit userBalanceCubit = TokenAmountCardUserBalanceCubit(
     wallet,
-    widget.token.address,
+    widget.token.addresses[widget.network.chainId]!,
     widget.network,
     zupSingletonCache,
     widget.onRefreshBalance,
@@ -56,16 +58,23 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
     refreshBalanceAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
 
     WidgetsBinding.instance.addPostFrameCallback((tester) {
-      if (wallet.signer != null) userBalanceCubit.getUserTokenAmount();
+      if (wallet.signer != null) userBalanceCubit.getUserTokenAmount(isNative: widget.isNative);
     });
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant TokenAmountInputCard oldWidget) {
+    if (widget.isNative != oldWidget.isNative) {
+      WidgetsBinding.instance
+          .addPostFrameCallback((_) => userBalanceCubit.getUserTokenAmount(isNative: widget.isNative));
+
+      return super.didUpdateWidget(oldWidget);
+    }
+
     if (widget.token != oldWidget.token) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        userBalanceCubit.updateToken(widget.token.address);
+        userBalanceCubit.updateTokenAndNetwork(widget.token.addresses[widget.network.chainId]!, widget.network);
       });
 
       super.didUpdateWidget(oldWidget);
@@ -240,9 +249,11 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                           onPressed: () async => state.mapOrNull(
                                             error: (_) async => await userBalanceCubit.getUserTokenAmount(
                                               ignoreCache: true,
+                                              isNative: widget.isNative,
                                             ),
                                             showUserBalance: (_) async => await userBalanceCubit.getUserTokenAmount(
                                               ignoreCache: true,
+                                              isNative: widget.isNative,
                                             ),
                                           ),
                                         ),

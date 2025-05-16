@@ -29,7 +29,7 @@ void main() {
 
   test("When calling the `selectedNetwork` after initializing the cubit, it should return the initial selected network",
       () {
-    expect(sut.selectedNetwork, Networks.mainnet);
+    expect(sut.selectedNetwork, AppNetworks.allNetworks);
   });
 
   test("""When an event is emitted that the signer changed,
@@ -45,7 +45,7 @@ void main() {
     when(() => wallet0.connectedNetwork).thenAnswer((_) async => const ChainInfo(hexChainId: signerNetwork));
     when(() => wallet0.switchOrAddNetwork(any())).thenAnswer((_) async {});
 
-    final sut0 = AppCubit(wallet0, cache)..updateAppNetwork(Networks.sepolia);
+    final sut0 = AppCubit(wallet0, cache)..updateAppNetwork(AppNetworks.sepolia);
 
     signerStreamController.add(signer);
 
@@ -72,13 +72,13 @@ void main() {
     final signerStreamController = StreamController<Signer?>.broadcast();
     final signerStream = signerStreamController.stream;
     final signer = SignerMock();
-    final signerNetwork = Networks.sepolia.chainInfo.hexChainId;
+    final signerNetwork = AppNetworks.sepolia.chainInfo.hexChainId;
 
     when(() => wallet0.signerStream).thenAnswer((_) => signerStream);
     when(() => wallet0.connectedNetwork).thenAnswer((_) async => ChainInfo(hexChainId: signerNetwork));
     when(() => wallet0.switchOrAddNetwork(any())).thenAnswer((_) async {});
 
-    AppCubit(wallet0, cache).updateAppNetwork(Networks.sepolia);
+    AppCubit(wallet0, cache).updateAppNetwork(AppNetworks.sepolia);
 
     signerStreamController.add(signer);
 
@@ -97,7 +97,7 @@ void main() {
     when(() => wallet0.connectedNetwork).thenAnswer((_) async => const ChainInfo(hexChainId: ""));
     when(() => wallet0.switchOrAddNetwork(any())).thenAnswer((_) async {});
 
-    AppCubit(wallet0, cache).updateAppNetwork(Networks.sepolia);
+    AppCubit(wallet0, cache).updateAppNetwork(AppNetworks.sepolia);
 
     signerStreamController.add(null);
 
@@ -107,14 +107,14 @@ void main() {
   });
 
   test("When calling `updateAppNetwork` it should update the selected network variable", () async {
-    sut.updateAppNetwork(Networks.sepolia);
+    sut.updateAppNetwork(AppNetworks.sepolia);
 
-    expect(sut.selectedNetwork, Networks.sepolia);
+    expect(sut.selectedNetwork, AppNetworks.sepolia);
   });
 
   test("""When calling `updateAppNetwork` it should emit the state `networkChanged` with the new network
       but it should finish with the event `standard` """, () async {
-    const network = Networks.sepolia;
+    const network = AppNetworks.sepolia;
 
     expectLater(sut.stream, emitsInOrder([const AppState.networkChanged(network), const AppState.standard()]));
 
@@ -124,7 +124,7 @@ void main() {
   });
 
   test("When changing the network, it should add an event to the network stream", () {
-    const network = Networks.sepolia;
+    const network = AppNetworks.sepolia;
 
     expectLater(sut.selectedNetworkStream, emits(network));
 
@@ -149,7 +149,7 @@ void main() {
     when(() => cache.getTestnetMode()).thenReturn(true);
     final sut0 = AppCubit(wallet, cache);
 
-    expect(sut0.selectedNetwork, Networks.sepolia);
+    expect(sut0.selectedNetwork, AppNetworks.sepolia);
   });
 
   test("If the cached testnet mode is true when initializing the cubit, the state testnetModeChanged should be emitted",
@@ -172,17 +172,17 @@ void main() {
     expectLater(
       sut.stream,
       emitsInOrder(
-        [const AppState.networkChanged(Networks.sepolia), const AppState.standard()],
+        [const AppState.networkChanged(AppNetworks.sepolia), const AppState.standard()],
       ),
     );
 
     await sut.toggleTestnetMode(); // assuming it starts by default as false
 
-    expect(sut.selectedNetwork, Networks.sepolia);
+    expect(sut.selectedNetwork, AppNetworks.sepolia);
   });
 
-  test("""When calling `toggleTestnetMode` for true it should emit a `networkChanged`
-  for the mainnet network and update the selected network variable""", () async {
+  test("""When calling `toggleTestnetMode` for false it should emit a `networkChanged`
+  for a mainnet network and update the selected network variable""", () async {
     when(() => cache.getTestnetMode()).thenReturn(true);
 
     final sut0 = AppCubit(wallet, cache);
@@ -190,13 +190,13 @@ void main() {
     expectLater(
       sut0.stream,
       emitsInOrder(
-        [const AppState.networkChanged(Networks.mainnet), const AppState.standard()],
+        [const AppState.networkChanged(AppNetworks.allNetworks), const AppState.standard()],
       ),
     );
 
     await sut0.toggleTestnetMode();
 
-    expect(sut0.selectedNetwork, Networks.mainnet);
+    expect(sut0.selectedNetwork, AppNetworks.allNetworks);
   });
 
   test("When calling `toggleTestnetMode` it should save the `isTestnetMode` variable in the cache after toggling",
@@ -218,23 +218,7 @@ void main() {
 
     await sut.toggleTestnetMode(); // assuming it starts by default as false
 
-    verify(() => wallet.switchOrAddNetwork(Networks.sepolia.chainInfo)).called(1);
-  });
-
-  test("""When calling `toggleTestnetMode` for true and there is a signer with a different connected
-  network, it should try to switch the wallet network for the default mainnet network""", () async {
-    final signer = SignerMock();
-
-    when(() => cache.getTestnetMode()).thenReturn(true);
-    when(() => wallet.signer).thenReturn(signer);
-    when(() => wallet.connectedNetwork).thenAnswer((_) async => const ChainInfo(
-          hexChainId: "0x32",
-        ));
-
-    final sut0 = AppCubit(wallet, cache);
-    await sut0.toggleTestnetMode();
-
-    verify(() => wallet.switchOrAddNetwork(Networks.mainnet.chainInfo)).called(1);
+    verify(() => wallet.switchOrAddNetwork(AppNetworks.sepolia.chainInfo)).called(1);
   });
 
   test(
@@ -266,5 +250,11 @@ void main() {
         ]));
 
     await sut0.toggleTestnetMode();
+  });
+
+  test("When calling `currentChainId` it should get exactly the chain id of the current selected network in the cubit",
+      () async {
+    sut.updateAppNetwork(AppNetworks.scroll);
+    expect(sut.currentChainId, AppNetworks.scroll.chainId);
   });
 }

@@ -46,7 +46,7 @@ void main() {
       final sut0 = TokenAmountCardUserBalanceCubit(
         wallet,
         tokenAddress,
-        Networks.sepolia,
+        AppNetworks.sepolia,
         ZupSingletonCache.shared,
         () {},
       );
@@ -78,7 +78,7 @@ void main() {
       final sut0 = TokenAmountCardUserBalanceCubit(
         wallet,
         tokenAddress,
-        Networks.sepolia,
+        AppNetworks.sepolia,
         ZupSingletonCache.shared,
         () {},
       );
@@ -103,7 +103,7 @@ void main() {
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
-      Networks.sepolia,
+      AppNetworks.sepolia,
       ZupSingletonCache.shared,
       () {},
     );
@@ -127,7 +127,7 @@ void main() {
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
-      Networks.sepolia,
+      AppNetworks.sepolia,
       ZupSingletonCache.shared,
       () {},
     );
@@ -153,7 +153,7 @@ void main() {
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
-      Networks.sepolia,
+      AppNetworks.sepolia,
       ZupSingletonCache.shared,
       () {},
     );
@@ -189,7 +189,7 @@ void main() {
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
-      Networks.sepolia,
+      AppNetworks.sepolia,
       ZupSingletonCache.shared,
       () {},
     );
@@ -227,7 +227,7 @@ void main() {
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
-      Networks.sepolia,
+      AppNetworks.sepolia,
       ZupSingletonCache.shared,
       () {},
     );
@@ -259,14 +259,14 @@ void main() {
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
-      Networks.sepolia,
+      AppNetworks.sepolia,
       ZupSingletonCache.shared,
       () {},
     );
 
     await Future.delayed(const Duration(seconds: 0));
 
-    await sut0.updateToken(newTokenAddress);
+    await sut0.updateTokenAndNetwork(newTokenAddress, AppNetworks.sepolia);
 
     verify(() => wallet.nativeOrTokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
   });
@@ -282,12 +282,12 @@ void main() {
     final sut0 = TokenAmountCardUserBalanceCubit(
       wallet,
       tokenAddress,
-      Networks.sepolia,
+      AppNetworks.sepolia,
       ZupSingletonCache.shared,
       () {},
     );
 
-    await sut0.updateToken(newTokenAddress);
+    await sut0.updateTokenAndNetwork(newTokenAddress, AppNetworks.sepolia);
 
     verifyNever(() => wallet.nativeOrTokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl")));
   });

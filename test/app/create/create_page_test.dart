@@ -27,7 +27,7 @@ void main() {
     inject.registerFactory<ZupNavigator>(() => ZupNavigatorMock());
 
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto.fixture());
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
     when(() => appCubit.selectedNetworkStream).thenAnswer((_) => const Stream.empty());
   });
 

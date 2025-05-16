@@ -1,5 +1,13 @@
 {
     "@@locale": "en",
+    "yieldCardNetworkTooltipDescription": "This pool is at {network}",
+    "@yieldCardNetworkTooltipDescription": {
+        "placeholders": {
+            "network": {
+                "type": "String"
+            }
+        }
+    },
     "twentyFourHours": "24h",
     "appFooterTermsOfUse": "Terms of Use",
     "privacyPolicy": "Privacy Policy",

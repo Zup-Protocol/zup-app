@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:zup_app/core/enums/networks.dart';
 
 part 'token_dto.freezed.dart';
 part 'token_dto.g.dart';
@@ -7,10 +8,11 @@ part 'token_dto.g.dart';
 class TokenDto with _$TokenDto {
   @JsonSerializable(explicitToJson: true)
   const factory TokenDto({
+    @JsonKey(name: "id") String? internalId,
     @Default("") String symbol,
     @Default("") String name,
-    @Default("") String address,
     @Default("") String logoUrl,
+    @Default({}) Map<int, String?> addresses,
     @Default(0) int decimals,
   }) = _TokenDto;
 
@@ -18,10 +20,10 @@ class TokenDto with _$TokenDto {
 
   factory TokenDto.empty() => const TokenDto();
 
-  factory TokenDto.fixture() => const TokenDto(
+  factory TokenDto.fixture() => TokenDto(
         symbol: 'WETH',
         name: 'Wrapped Ether',
-        address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+        addresses: {AppNetworks.sepolia.chainId: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"},
         logoUrl:
             'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png',
       );

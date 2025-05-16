@@ -9,6 +9,11 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String yieldCardNetworkTooltipDescription({required String network}) {
+    return 'This pool is at $network';
+  }
+
+  @override
   String get twentyFourHours => '24h';
 
   @override

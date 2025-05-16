@@ -36,8 +36,8 @@ void main() {
       () => firebaseAnalytics.logEvent(
         name: "user_deposited",
         parameters: {
-          "token0_address": "hex:${depositedYield.token0.address}",
-          "token1_address": "hex:${depositedYield.token1.address}",
+          "token0_address": "hex:${depositedYield.token0.addresses[depositedYield.network.chainId]!}",
+          "token1_address": "hex:${depositedYield.token1.addresses[depositedYield.network.chainId]!}",
           "amount0": amount0,
           "amount1": amount1,
           "network": depositedYield.network.label,

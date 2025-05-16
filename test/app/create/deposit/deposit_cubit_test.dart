@@ -10,7 +10,6 @@ import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
-import 'package:zup_app/core/dtos/yields_by_timeframe_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
@@ -35,7 +34,7 @@ void main() {
 
   setUp(() {
     registerFallbackValue(DepositSettingsDto.fixture());
-    registerFallbackValue(Networks.sepolia);
+    registerFallbackValue(AppNetworks.sepolia);
 
     yieldRepository = YieldRepositoryMock();
     zupSingletonCache = ZupSingletonCache.shared;
@@ -56,7 +55,15 @@ void main() {
       zupAnalytics,
     );
 
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
+    when(() => appCubit.isTestnetMode).thenReturn(false);
+
+    when(() => yieldRepository.getAllNetworksYield(
+        token0InternalId: any(named: "token0InternalId"),
+        token1InternalId: any(named: "token1InternalId"),
+        minTvlUsd: any(named: "minTvlUsd"),
+        testnetMode: any(named: "testnetMode"))).thenAnswer((_) async => YieldsDto.fixture());
+
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto.fixture());
     when(
       () => uniswapV3Pool.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")),
@@ -79,6 +86,8 @@ void main() {
           tick: poolTick,
           unlocked: true
         ));
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 129816));
   });
 
   tearDown(() async {
@@ -92,7 +101,8 @@ void main() {
       const minutesPassed = 3;
 
       final selectedYield = YieldDto.fixture();
-      await sut.selectYield(selectedYield);
+      const selectedTimeframe = YieldTimeFrame.day;
+      await sut.selectYield(selectedYield, selectedTimeframe);
 
       fakeAsync((async) {
         sut.setup();
@@ -120,7 +130,7 @@ void main() {
       int eventsCounter = 0;
       const minutesPassed = 3;
 
-      await sut.selectYield(null);
+      await sut.selectYield(null, null);
 
       fakeAsync((async) {
         sut.setup();
@@ -141,7 +151,7 @@ void main() {
          it should not execute the task to get the pool tick
         and cancel the periodic task""", () async {
       final selectedYield = YieldDto.fixture();
-      await sut.selectYield(selectedYield);
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
       int eventCount = 0;
 
       fakeAsync((async) {
@@ -163,11 +173,11 @@ void main() {
   test("When calling `getBestPools` it should emit the loading state", () async {
     expectLater(sut.stream, emits(const DepositState.loading()));
 
-    await sut.getBestPools(token0Address: "", token1Address: "");
+    await sut.getBestPools(token0AddressOrId: "", token1AddressOrId: "");
   });
 
   test("When calling `getBestPools` it should call the yield repository to get the best pools", () async {
-    when(() => yieldRepository.getYields(
+    when(() => yieldRepository.getSingleNetworkYield(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
         minTvlUsd: any(named: "minTvlUsd"),
@@ -178,9 +188,9 @@ void main() {
     const token0Address = "token0Address";
     const token1Address = "token1Address";
 
-    await sut.getBestPools(token0Address: token0Address, token1Address: token1Address);
+    await sut.getBestPools(token0AddressOrId: token0Address, token1AddressOrId: token1Address);
 
-    verify(() => yieldRepository.getYields(
+    verify(() => yieldRepository.getSingleNetworkYield(
           token0Address: token0Address,
           token1Address: token1Address,
           minTvlUsd: any(named: "minTvlUsd"),
@@ -193,12 +203,12 @@ void main() {
   from the repository""", () async {
     const minLiquidityUSD = 123;
 
-    when(() => yieldRepository.getYields(
+    when(() => yieldRepository.getSingleNetworkYield(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
         minTvlUsd: any(named: "minTvlUsd"),
         network: any(named: "network"))).thenAnswer(
-      (_) async => YieldsDto(timeframedYields: YieldsByTimeframeDto.empty(), minLiquidityUSD: minLiquidityUSD),
+      (_) async => const YieldsDto(pools: [], minLiquidityUSD: minLiquidityUSD),
     );
 
     expectLater(
@@ -208,13 +218,13 @@ void main() {
           const DepositState.noYields(minLiquiditySearched: minLiquidityUSD),
         ]));
 
-    await sut.getBestPools(token0Address: "", token1Address: "");
+    await sut.getBestPools(token0AddressOrId: "", token1AddressOrId: "");
   });
 
   test("When calling `getBestPools` and receiving a list of pools it should emit success state", () async {
     final pools = YieldsDto.fixture();
 
-    when(() => yieldRepository.getYields(
+    when(() => yieldRepository.getSingleNetworkYield(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
         minTvlUsd: any(named: "minTvlUsd"),
@@ -222,11 +232,11 @@ void main() {
 
     expectLater(sut.stream, emitsInOrder([const DepositState.loading(), DepositState.success(pools)]));
 
-    await sut.getBestPools(token0Address: "", token1Address: "");
+    await sut.getBestPools(token0AddressOrId: "", token1AddressOrId: "");
   });
 
   test("When calling `getBestPools` and receiving an error, it should emit the error state", () async {
-    when(() => yieldRepository.getYields(
+    when(() => yieldRepository.getSingleNetworkYield(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
         minTvlUsd: any(named: "minTvlUsd"),
@@ -234,13 +244,13 @@ void main() {
 
     expectLater(sut.stream, emitsInOrder([const DepositState.loading(), const DepositState.error()]));
 
-    await sut.getBestPools(token0Address: "", token1Address: "");
+    await sut.getBestPools(token0AddressOrId: "", token1AddressOrId: "");
   });
 
   test("When calling `selectYield` it should save the selected yield in a variable", () async {
     final selectedYield = YieldDto.fixture();
 
-    await sut.selectYield(selectedYield);
+    await sut.selectYield(selectedYield, YieldTimeFrame.day);
 
     expect(sut.selectedYield, selectedYield);
   });
@@ -250,19 +260,19 @@ void main() {
 
     expectLater(sut.selectedYieldStream, emits(selectedYield));
 
-    await sut.selectYield(selectedYield);
+    await sut.selectYield(selectedYield, YieldTimeFrame.day);
   });
 
   test("When calling `selectYield` with a non-empty yield it should get the pool tick", () async {
     final selectedYield = YieldDto.fixture();
 
-    await sut.selectYield(selectedYield);
+    await sut.selectYield(selectedYield, YieldTimeFrame.day);
 
     verify(() => uniswapV3PoolImpl.slot0()).called(1);
   });
 
   test("When calling `selectYield` but the yield is null, it should not get the pool tick", () async {
-    await sut.selectYield(null);
+    await sut.selectYield(null, null);
 
     verifyNever(() => uniswapV3PoolImpl.slot0());
   });
@@ -270,14 +280,14 @@ void main() {
   test("When calling `getSelectedPoolTick` it should set the latest pool tick to null", () async {
     expectLater(sut.latestPoolTick, null);
 
-    await sut.selectYield(YieldDto.fixture());
+    await sut.selectYield(YieldDto.fixture(), YieldTimeFrame.day);
     await sut.getSelectedPoolTick();
   });
 
   test("When calling `getSelectedPoolTick` it should emit a null pool tick before getting the pool tick", () async {
     expectLater(sut.poolTickStream, emits(null));
 
-    await sut.selectYield(YieldDto.fixture());
+    await sut.selectYield(YieldDto.fixture(), YieldTimeFrame.day);
     await sut.getSelectedPoolTick();
   });
 
@@ -286,7 +296,7 @@ void main() {
   pool""", () async {
     final selectedYield = YieldDto.fixture();
 
-    await sut.selectYield(YieldDto.fixture());
+    await sut.selectYield(YieldDto.fixture(), YieldTimeFrame.day);
     await sut.getSelectedPoolTick();
 
     verify(
@@ -298,7 +308,7 @@ void main() {
   });
 
   test("When calling `getSelectedPoolTick` it should use the slot0 from the UniswapV3Pool contract", () async {
-    await sut.selectYield(YieldDto.fixture());
+    await sut.selectYield(YieldDto.fixture(), YieldTimeFrame.day);
     await sut.getSelectedPoolTick();
 
     verify(() => uniswapV3PoolImpl.slot0()).called(2); // 2 because of the `selectYield` and the `getSelectedPoolTick`
@@ -331,7 +341,7 @@ void main() {
         );
       });
 
-      await sut.selectYield(yieldB);
+      await sut.selectYield(yieldB, YieldTimeFrame.day);
 
       return (
         feeProtocol: BigInt.zero,
@@ -344,7 +354,7 @@ void main() {
       );
     });
 
-    await sut.selectYield(yieldA); // assuming that select yield will call `getSelectedPoolTick`
+    await sut.selectYield(yieldA, YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
 
     verify(
       () => uniswapV3Pool.fromRpcProvider(contractAddress: yieldBPoolAddress, rpcUrl: yieldB.network.rpcUrl),
@@ -368,7 +378,8 @@ void main() {
 
     expectLater(sut.poolTickStream, emitsInOrder([null, expectedPoolTick]));
 
-    await sut.selectYield(YieldDto.fixture()); // assuming that select yield will call `getSelectedPoolTick`
+    await sut.selectYield(
+        YieldDto.fixture(), YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
   });
 
   test("When calling `getSelectedPoolTick` it should save the pool tick in the cubit", () async {
@@ -384,7 +395,8 @@ void main() {
           unlocked: true
         ));
 
-    await sut.selectYield(YieldDto.fixture()); // assuming that select yield will call `getSelectedPoolTick`
+    await sut.selectYield(
+        YieldDto.fixture(), YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
 
     expect(sut.latestPoolTick, expectedPoolTick);
   });
@@ -403,13 +415,14 @@ void main() {
         ));
 
     expectLater(sut.poolTickStream, emitsInOrder([null, expectedPoolTick]));
-    await sut.selectYield(YieldDto.fixture()); // assuming that select yield will call `getSelectedPoolTick`
+    await sut.selectYield(
+        YieldDto.fixture(), YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
 
     expect(sut.latestPoolTick, expectedPoolTick);
   });
 
   test("when closing the cubit, it should close the pool tick stream", () async {
-    await sut.selectYield(YieldDto.fixture());
+    await sut.selectYield(YieldDto.fixture(), YieldTimeFrame.day);
     await sut.close();
 
     expect(
@@ -422,13 +435,13 @@ void main() {
     await sut.close();
 
     expect(
-      () async => await sut.selectYield(YieldDto.fixture()),
+      () async => await sut.selectYield(YieldDto.fixture(), YieldTimeFrame.day),
       throwsA(isA<StateError>()),
     );
   });
 
   test("When calling `getWalletTokenAmount` and there's no connected signer, it should return 0", () async {
-    final tokenAmount = await sut.getWalletTokenAmount("", network: Networks.sepolia);
+    final tokenAmount = await sut.getWalletTokenAmount("", network: AppNetworks.sepolia);
 
     expect(tokenAmount, 0);
   });
@@ -437,7 +450,7 @@ void main() {
       () async {
     final signer = SignerMock();
     const tokenAddress = "0x0";
-    const network = Networks.sepolia;
+    const network = AppNetworks.sepolia;
     const expectedTokenBalance = 1243.542;
 
     when(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) async => 1243.542);
@@ -455,7 +468,7 @@ void main() {
       () async {
     const tokenAddress = "0x0";
     final signer = SignerMock();
-    const network = Networks.sepolia;
+    const network = AppNetworks.sepolia;
     const expectedTokenBalance = 1243.542;
     const notExpectedTokenBalance = 498361387.42;
 
@@ -481,7 +494,7 @@ void main() {
       () async {
     const tokenAddress = "0x0";
     final signer = SignerMock();
-    const network = Networks.sepolia;
+    const network = AppNetworks.sepolia;
     const expectedTokenBalance = 1243.542;
     const notExpectedTokenBalance = 498361387.42;
 
@@ -510,7 +523,7 @@ void main() {
       () async {
     final signer = SignerMock();
     const tokenAddress = "0x0";
-    const network = Networks.sepolia;
+    const network = AppNetworks.sepolia;
 
     when(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).thenThrow(Exception());
     when(() => wallet.signer).thenReturn(signer);
@@ -569,16 +582,16 @@ void main() {
   it should pass the minLiquidityUSD as 0 to the repository""", () async {
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 129816));
 
-    when(() => yieldRepository.getYields(
+    when(() => yieldRepository.getSingleNetworkYield(
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
           minTvlUsd: any(named: "minTvlUsd"),
         )).thenAnswer((_) async => YieldsDto.fixture());
 
-    await sut.getBestPools(token0Address: "0x", token1Address: "0x", ignoreMinLiquidity: true);
+    await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x", ignoreMinLiquidity: true);
 
-    verify(() => yieldRepository.getYields(
+    verify(() => yieldRepository.getSingleNetworkYield(
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
@@ -591,16 +604,16 @@ void main() {
     const minLiquiditySaved = 129816;
 
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: minLiquiditySaved));
-    when(() => yieldRepository.getYields(
+    when(() => yieldRepository.getSingleNetworkYield(
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
           minTvlUsd: any(named: "minTvlUsd"),
         )).thenAnswer((_) async => YieldsDto.fixture());
 
-    await sut.getBestPools(token0Address: "0x", token1Address: "0x", ignoreMinLiquidity: false);
+    await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x", ignoreMinLiquidity: false);
 
-    verify(() => yieldRepository.getYields(
+    verify(() => yieldRepository.getSingleNetworkYield(
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
@@ -613,14 +626,40 @@ void main() {
     () {
       const token0Address = "0x123";
       const token1Address = "0x456";
-      const network = Networks.sepolia;
+      const network = AppNetworks.sepolia;
 
       when(() => appCubit.selectedNetwork).thenReturn(network);
 
-      sut.getBestPools(token0Address: token0Address, token1Address: token1Address);
+      sut.getBestPools(token0AddressOrId: token0Address, token1AddressOrId: token1Address);
 
       verify(() => zupAnalytics.logSearch(token0: token0Address, token1: token1Address, network: network.label))
           .called(1);
     },
   );
+
+  test(
+      "When calling `getBestPools` and the network is all networks, it should call the endpoint to search in all networks",
+      () async {
+    const token0Address = "0x123";
+    const token1Address = "0x456";
+
+    when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.allNetworks);
+
+    await sut.getBestPools(token0AddressOrId: token0Address, token1AddressOrId: token1Address);
+
+    verify(() => yieldRepository.getAllNetworksYield(
+          token0InternalId: token0Address,
+          token1InternalId: token1Address,
+          minTvlUsd: any(named: "minTvlUsd"),
+        )).called(1);
+  });
+
+  test("When calling 'selectYield' it should update the selected time frame as well to the one passed", () async {
+    final selectedYield = YieldDto.fixture();
+    const selectedYieldTimeFrame = YieldTimeFrame.day;
+
+    await sut.selectYield(selectedYield, selectedYieldTimeFrame);
+
+    expect(sut.selectedYieldTimeframe, selectedYieldTimeFrame);
+  });
 }

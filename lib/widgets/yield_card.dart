@@ -11,13 +11,13 @@ import 'package:zup_ui_kit/zup_ui_kit.dart';
 class YieldCard extends StatefulWidget {
   const YieldCard({
     super.key,
-    required this.yield,
+    required this.currentYield,
     required this.onChangeSelection,
     required this.isSelected,
     required this.timeFrame,
   });
 
-  final YieldDto yield;
+  final YieldDto currentYield;
   final bool isSelected;
   final Function(YieldDto? yield) onChangeSelection;
   final YieldTimeFrame timeFrame;
@@ -31,6 +31,18 @@ class _YieldCardState extends State<YieldCard> {
   final appCubit = inject<AppCubit>();
 
   final selectionAnimationDuration = const Duration(milliseconds: 150);
+
+  String get yieldTimeFramed {
+    if (widget.timeFrame.isDay) {
+      return widget.currentYield.yield24h.formatPercent;
+    }
+
+    if (widget.timeFrame.isMonth) {
+      return widget.currentYield.yield30d.formatPercent;
+    }
+
+    return widget.currentYield.yield90d.formatPercent;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,29 +60,61 @@ class _YieldCardState extends State<YieldCard> {
         ZupSelectableCard(
           isSelected: widget.isSelected,
           selectionAnimationDuration: selectionAnimationDuration,
-          onPressed: () => widget.onChangeSelection(widget.isSelected ? null : widget.yield),
+          onPressed: () => widget.onChangeSelection(widget.isSelected ? null : widget.currentYield),
           padding: const EdgeInsets.all(10).copyWith(right: 0, top: 0),
           width: double.maxFinite,
           child: Stack(
             children: [
+              if (appCubit.selectedNetwork.isAllNetworks)
+                Positioned(
+                  right: 2,
+                  top: 2,
+                  child: ZupTooltip(
+                    message: S.of(context).yieldCardThisPoolIsAtNetwork(network: widget.currentYield.network.label),
+                    trailingIcon: widget.currentYield.network.icon,
+                    child: AnimatedContainer(
+                      duration: selectionAnimationDuration,
+                      height: 40,
+                      padding: const EdgeInsets.all(6),
+                      width: 40,
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            blurStyle: BlurStyle.inner,
+                            color: widget.isSelected ? ZupColors.brand5 : ZupColors.gray5,
+                            blurRadius: 2,
+                            spreadRadius: -2,
+                            offset: const Offset(0, 0),
+                          ),
+                          BoxShadow(
+                            color: widget.isSelected ? ZupColors.brand7 : ZupColors.white,
+                            blurRadius: 5,
+                            spreadRadius: -1,
+                            offset: const Offset(2, -2),
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: widget.currentYield.network.icon,
+                    ),
+                  ),
+                ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: Text(
-                      widget.timeFrame.isDay
-                          ? S.of(context).yieldCardYieldYearly
-                          : S.of(context).yieldCardAverageYieldYearly,
+                      S.of(context).yieldCardYieldYearly,
                       style: const TextStyle(fontSize: 14),
                     ),
                   ),
                   Text(
-                    widget.yield.yearlyYield.formatPercent,
+                    yieldTimeFramed,
                     style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600),
                   ),
                   Text(
-                    "${NumberFormat.compactSimpleCurrency(decimalDigits: 2).format(widget.yield.totalValueLockedUSD)} ${S.of(context).tvl}",
+                    "${NumberFormat.compactSimpleCurrency(decimalDigits: 2).format(widget.currentYield.totalValueLockedUSD)} ${S.of(context).tvl}",
                     style: const TextStyle(
                       fontSize: 14,
                       height: 1,
@@ -81,16 +125,16 @@ class _YieldCardState extends State<YieldCard> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (widget.yield.protocol.logo.isNotEmpty)
+                      if (widget.currentYield.protocol.logo.isNotEmpty)
                         zupCachedImage.build(
-                          widget.yield.protocol.logo,
+                          widget.currentYield.protocol.logo,
                           height: 25,
                           width: 25,
                           radius: 50,
                         ),
                       const SizedBox(width: 5),
                       Text(
-                        widget.yield.protocol.name,
+                        widget.currentYield.protocol.name,
                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                       ),
                     ],

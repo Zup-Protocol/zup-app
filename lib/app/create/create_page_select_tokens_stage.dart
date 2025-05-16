@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:web3kit/core/core.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/widgets/create_page_settings_dropdown.dart';
 import 'package:zup_app/core/cache.dart';
@@ -28,9 +27,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
   final navigator = inject<ZupNavigator>();
   final cache = inject<Cache>();
 
-  late final token0SelectorController = TokenSelectorButtonController(
-    initialSelectedToken: appCubit.selectedNetwork.nativeCurrencyTokenDto,
-  );
+  late final token0SelectorController = TokenSelectorButtonController(initialSelectedToken: null);
   final token1SelectorController = TokenSelectorButtonController(initialSelectedToken: null);
   StreamSubscription? _token0SelectorStreamSubscription;
   StreamSubscription? _token1SelectorStreamSubscription;
@@ -38,19 +35,10 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
 
   bool areTokensEqual(TokenDto? token0, TokenDto? token1) {
     if (token0 == null || token1 == null) return false;
-    if (token0.address == token1.address) return true;
 
-    // Note: If implementing all networks feature, this check should be refactored to work with all networks,
-    //as all networks network does not have a native token or a wrapped native token
-    if (token0.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative.address.toLowerCase()) &&
-        token1.address.lowercasedEquals(EthereumConstants.zeroAddress)) {
-      return true;
-    }
+    if (appCubit.selectedNetwork.isAllNetworks) return token0.internalId == token1.internalId;
 
-    // Note: If implementing all networks feature, this check should be refactored to work with all networks,
-    //as all networks network does not have a native token or a wrapped native token
-    if (token1.address.lowercasedEquals(appCubit.selectedNetwork.wrappedNative.address.toLowerCase()) &&
-        token0.address.lowercasedEquals(EthereumConstants.zeroAddress)) {
+    if (token0.addresses[appCubit.currentChainId] == token1.addresses[appCubit.currentChainId]) {
       return true;
     }
 
@@ -60,8 +48,20 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
   @override
   void initState() {
     _selectedNetworkStreamSubscription = appCubit.selectedNetworkStream.listen((network) {
-      token0SelectorController.changeToken(network.nativeCurrencyTokenDto);
-      token1SelectorController.changeToken(null);
+      if (network.isAllNetworks) {
+        if (token0SelectorController.selectedToken?.internalId == null) token0SelectorController.changeToken(null);
+        if (token1SelectorController.selectedToken?.internalId == null) token1SelectorController.changeToken(null);
+
+        return;
+      }
+
+      if (token0SelectorController.selectedToken?.addresses[network.chainId] == null) {
+        token0SelectorController.changeToken(null);
+      }
+
+      if (token1SelectorController.selectedToken?.addresses[network.chainId] == null) {
+        token1SelectorController.changeToken(null);
+      }
     });
 
     _token0SelectorStreamSubscription = token0SelectorController.selectedTokenStream.listen((token) {
@@ -75,6 +75,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
         return token0SelectorController.changeToken(null);
       }
     });
+
     super.initState();
   }
 
@@ -173,6 +174,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                         stream: token1SelectorController.selectedTokenStream,
                         builder: (context, _) {
                           return ZupPrimaryButton(
+                            key: const Key("search-button"),
                             height: 50,
                             fixedIcon: true,
                             alignCenter: true,
@@ -181,11 +183,17 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                             icon: Assets.icons.sparkleMagnifyingglass.svg(),
                             onPressed: token0SelectorController.selectedToken != null &&
                                     token1SelectorController.selectedToken != null
-                                ? () => navigator.navigateToDeposit(
-                                      token0SelectorController.selectedToken!.address,
-                                      token1SelectorController.selectedToken!.address,
+                                ? () {
+                                    return navigator.navigateToDeposit(
+                                      appCubit.selectedNetwork.isAllNetworks
+                                          ? token0SelectorController.selectedToken!.internalId!
+                                          : token0SelectorController.selectedToken!.addresses[appCubit.currentChainId]!,
+                                      appCubit.selectedNetwork.isAllNetworks
+                                          ? token1SelectorController.selectedToken!.internalId!
+                                          : token1SelectorController.selectedToken!.addresses[appCubit.currentChainId]!,
                                       appCubit.selectedNetwork,
-                                    )
+                                    );
+                                  }
                                 : null,
                             mainAxisSize: MainAxisSize.max,
                           );

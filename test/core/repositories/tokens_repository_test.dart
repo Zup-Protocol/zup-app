@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
-import 'package:zup_app/core/dtos/token_list_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 
@@ -17,66 +16,9 @@ void main() {
     sut = TokensRepository(dio);
   });
 
-  test("When calling `getTokenList` it should call the correct endpoint", () async {
-    when(() => dio.get(any(), queryParameters: any(named: "queryParameters"))).thenAnswer(
-      (_) async => Response(
-        data: TokenListDto.fixture().toJson(),
-        statusCode: 200,
-        requestOptions: RequestOptions(),
-      ),
-    );
-
-    await sut.getTokenList(Networks.sepolia);
-
-    verify(() => dio.get(
-          "/tokens",
-          queryParameters: {
-            "network": Networks.sepolia.name,
-          },
-        ));
-  });
-
-  test("When calling `getTokenList passing a user address, it should include the user address in the request",
-      () async {
-    const userAddress = "0x123";
-    when(() => dio.get(any(), queryParameters: any(named: "queryParameters"))).thenAnswer(
-      (_) async => Response(
-        data: TokenListDto.fixture().toJson(),
-        statusCode: 200,
-        requestOptions: RequestOptions(),
-      ),
-    );
-
-    await sut.getTokenList(Networks.sepolia, userAddress: userAddress);
-
-    verify(() => dio.get(
-          "/tokens",
-          queryParameters: {
-            "network": Networks.sepolia.name,
-            "userAddress": userAddress,
-          },
-        ));
-  });
-
-  test("When calling `getTokenList` it should correctly parse the response", () async {
-    final tokens = TokenListDto.fixture();
-
-    when(() => dio.get(any(), queryParameters: any(named: "queryParameters"))).thenAnswer(
-      (_) async => Response(
-        data: tokens.toJson(),
-        statusCode: 200,
-        requestOptions: RequestOptions(),
-      ),
-    );
-
-    final response = await sut.getTokenList(Networks.sepolia);
-
-    expect(response, tokens);
-  });
-
   test("When calling `searchToken` it should call the correct endpoint", () async {
     const query = "dale";
-    const network = Networks.sepolia;
+    const network = AppNetworks.sepolia;
 
     when(() => dio.get(any(), queryParameters: any(named: "queryParameters"), cancelToken: any(named: "cancelToken")))
         .thenAnswer(
@@ -93,7 +35,30 @@ void main() {
           "/tokens/search",
           cancelToken: any(named: "cancelToken"),
           queryParameters: {
-            "network": network.name,
+            "chainId": network.chainId,
+            "query": query,
+          },
+        ));
+  });
+
+  test("When calling 'searchToken' and the network is all networks, it should not pass the chainId param", () async {
+    const query = "dale";
+
+    when(() => dio.get(any(), queryParameters: any(named: "queryParameters"), cancelToken: any(named: "cancelToken")))
+        .thenAnswer(
+      (_) async => Response(
+        data: [TokenDto.fixture().toJson()],
+        statusCode: 200,
+        requestOptions: RequestOptions(),
+      ),
+    );
+
+    await sut.searchToken(query, AppNetworks.allNetworks);
+
+    verify(() => dio.get(
+          "/tokens/search",
+          cancelToken: any(named: "cancelToken"),
+          queryParameters: {
             "query": query,
           },
         ));
@@ -119,8 +84,43 @@ void main() {
       ),
     );
 
-    final response = await sut.searchToken("query", Networks.sepolia);
+    final response = await sut.searchToken("query", AppNetworks.sepolia);
 
     expect(response, tokens);
+  });
+
+  test("When calling `getPopularTokens` and the passed network is all networks, it should not pass the chainId param",
+      () async {
+    when(() => dio.get(any(), queryParameters: any(named: "queryParameters"))).thenAnswer(
+      (_) async => Response(
+        data: [TokenDto.fixture().toJson()],
+        statusCode: 200,
+        requestOptions: RequestOptions(),
+      ),
+    );
+
+    await sut.getPopularTokens(AppNetworks.allNetworks);
+
+    verify(() => dio.get("/tokens/popular", queryParameters: {})).called(1);
+  });
+
+  test(
+      "When calling `getPopularTokens` and the passed network is not all networks, it should not the correct chainId param",
+      () async {
+    const network = AppNetworks.scroll;
+
+    when(() => dio.get(any(), queryParameters: any(named: "queryParameters"))).thenAnswer(
+      (_) async => Response(
+        data: [TokenDto.fixture().toJson()],
+        statusCode: 200,
+        requestOptions: RequestOptions(),
+      ),
+    );
+
+    await sut.getPopularTokens(AppNetworks.scroll);
+
+    verify(() => dio.get("/tokens/popular", queryParameters: {
+          "chainId": network.chainId,
+        })).called(1);
   });
 }

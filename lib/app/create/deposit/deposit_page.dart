@@ -35,9 +35,7 @@ import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/yield_card.dart';
 import 'package:zup_app/widgets/zup_page_title.dart';
-import 'package:zup_core/extensions/extensions.dart';
-import 'package:zup_core/mixins/device_info_mixin.dart';
-import 'package:zup_core/zup_singleton_cache.dart';
+import 'package:zup_core/zup_core.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 Route routeBuilder(BuildContext context, RouteSettings settings) {
@@ -106,8 +104,9 @@ class _DepositPageState extends State<DepositPage>
   bool isBaseTokenAmountUserInput = false;
   double minPrice = 0;
   double maxPrice = 0;
-  late bool depositWithNativeToken =
-      token0Address == EthereumConstants.zeroAddress || token1Address == EthereumConstants.zeroAddress;
+
+  late bool depositWithNativeToken = true;
+
   late Slippage selectedSlippage = _cubit.depositSettings.slippage;
   late Duration selectedDeadline = _cubit.depositSettings.deadline;
 
@@ -155,8 +154,8 @@ class _DepositPageState extends State<DepositPage>
     calculateDepositTokensAmount();
   }
 
-  void selectYield(YieldDto? yieldDto) async {
-    _cubit.selectYield(yieldDto).then((_) => calculateDepositTokensAmount());
+  void selectYield(YieldDto? yieldDto, YieldTimeFrame? yieldTimeFrame) async {
+    _cubit.selectYield(yieldDto, yieldTimeFrame).then((_) => calculateDepositTokensAmount());
 
     if (yieldDto != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -243,12 +242,12 @@ class _DepositPageState extends State<DepositPage>
 
   Future<({String title, Widget? icon, Function()? onPressed})> depositButtonState() async {
     final userWalletBaseTokenAmount = await _cubit.getWalletTokenAmount(
-      baseToken.address,
+      baseToken.addresses[_cubit.selectedYield!.network.chainId]!,
       network: _cubit.selectedYield!.network,
     );
 
     final userWalletQuoteTokenAmount = await _cubit.getWalletTokenAmount(
-      quoteToken.address,
+      quoteToken.addresses[_cubit.selectedYield!.network.chainId]!,
       network: _cubit.selectedYield!.network,
     );
 
@@ -292,6 +291,7 @@ class _DepositPageState extends State<DepositPage>
       onPressed: () {
         PreviewDepositModal(
           key: const Key("preview-deposit-modal"),
+          yieldTimeFrame: _cubit.selectedYieldTimeframe!,
           depositWithNativeToken: depositWithNativeToken,
           deadline: selectedDeadline,
           maxSlippage: selectedSlippage,
@@ -322,14 +322,14 @@ class _DepositPageState extends State<DepositPage>
     final currentNetworkFromUrl = _navigator.getParam(ZupNavigatorPaths.deposit.routeParamsName?.param3 ?? "");
 
     if (currentNetworkFromUrl?.isNotEmpty ?? false) {
-      final currentNetwork = Networks.fromValue(currentNetworkFromUrl!);
+      final currentNetwork = AppNetworks.fromValue(currentNetworkFromUrl!);
       if (currentNetwork != null && currentNetwork != _appCubit.selectedNetwork) {
         _appCubit.updateAppNetwork(currentNetwork);
       }
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _cubit.getBestPools(token0Address: token0Address, token1Address: token1Address);
+      _cubit.getBestPools(token0AddressOrId: token0Address, token1AddressOrId: token1Address);
     });
 
     super.initState();
@@ -472,8 +472,8 @@ class _DepositPageState extends State<DepositPage>
                         child: TextButton(
                           key: const Key("search-all-pools-button"),
                           onPressed: () => _cubit.getBestPools(
-                            token0Address: token0Address,
-                            token1Address: token1Address,
+                            token0AddressOrId: token0Address,
+                            token1AddressOrId: token1Address,
                             ignoreMinLiquidity: true,
                           ),
                           style: ButtonStyle(
@@ -503,8 +503,8 @@ class _DepositPageState extends State<DepositPage>
             helpButtonTitle: S.of(context).letsGiveItAnotherShot,
             helpButtonIcon: Assets.icons.arrowClockwise.svg(),
             onHelpButtonTap: () => _cubit.getBestPools(
-              token0Address: token0Address,
-              token1Address: token1Address,
+              token0AddressOrId: token0Address,
+              token1AddressOrId: token1Address,
             ),
           ),
         ),
@@ -539,43 +539,40 @@ class _DepositPageState extends State<DepositPage>
       );
 
   Widget _buildYieldSelectionSector(YieldsDto yields) {
-    final best24hYield = yields.timeframedYields.best24hYields.firstOrNull;
-    final best30dYield = yields.timeframedYields.best30dYields.firstOrNull;
-    final best90dYield = yields.timeframedYields.best90dYields.firstOrNull;
+    final best30dYield = yields.best30dYield;
+    final best24hYield = yields.best24hYield;
+    final best90dYield = yields.best90dYield;
 
     final List<Widget> yieldCards = [
-      if (best24hYield != null)
-        YieldCard(
-          key: const Key("yield-card-24h"),
-          yield: best24hYield,
-          onChangeSelection: (yield) {
-            selectYield(yield);
-          },
-          isSelected: _cubit.selectedYield.equals(best24hYield),
-          timeFrame: YieldTimeFrame.day,
-        ),
+      YieldCard(
+        key: const Key("yield-card-24h"),
+        currentYield: best24hYield,
+        onChangeSelection: (yield) {
+          selectYield(yield, YieldTimeFrame.day);
+        },
+        isSelected: _cubit.selectedYield.equals(best24hYield) && (_cubit.selectedYieldTimeframe?.isDay ?? false),
+        timeFrame: YieldTimeFrame.day,
+      ),
       const SizedBox(width: 8, height: 20),
-      if (best30dYield != null)
-        YieldCard(
-          key: const Key("yield-card-30d"),
-          yield: best30dYield,
-          onChangeSelection: (yield) {
-            selectYield(yield);
-          },
-          isSelected: _cubit.selectedYield.equals(best30dYield),
-          timeFrame: YieldTimeFrame.month,
-        ),
+      YieldCard(
+        key: const Key("yield-card-30d"),
+        currentYield: best30dYield,
+        onChangeSelection: (yield) {
+          selectYield(yield, YieldTimeFrame.month);
+        },
+        isSelected: _cubit.selectedYield.equals(best30dYield) && (_cubit.selectedYieldTimeframe?.isMonth ?? false),
+        timeFrame: YieldTimeFrame.month,
+      ),
       const SizedBox(width: 8, height: 20),
-      if (best90dYield != null)
-        YieldCard(
-          key: const Key("yield-card-90d"),
-          yield: best90dYield,
-          onChangeSelection: (yield) {
-            selectYield(yield);
-          },
-          isSelected: _cubit.selectedYield.equals(best90dYield),
-          timeFrame: YieldTimeFrame.threeMonth,
-        ),
+      YieldCard(
+        key: const Key("yield-card-90d"),
+        currentYield: best90dYield,
+        onChangeSelection: (yield) {
+          selectYield(yield, YieldTimeFrame.threeMonth);
+        },
+        isSelected: _cubit.selectedYield.equals(best90dYield) && (_cubit.selectedYieldTimeframe?.isThreeMonth ?? false),
+        timeFrame: YieldTimeFrame.threeMonth,
+      ),
     ];
 
     return Column(
@@ -639,8 +636,8 @@ class _DepositPageState extends State<DepositPage>
                 child: TextButton(
                   key: const Key("hide-show-all-pools-button"),
                   onPressed: () => _cubit.getBestPools(
-                    token0Address: token0Address,
-                    token1Address: token1Address,
+                    token0AddressOrId: token0Address,
+                    token1AddressOrId: token1Address,
                     ignoreMinLiquidity: yields.minLiquidityUSD > 0,
                   ),
                   style: ButtonStyle(
@@ -853,27 +850,35 @@ class _DepositPageState extends State<DepositPage>
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        _sectionTitle(S.of(context).depositPageDepositSectionTitle),
-                        const Spacer(),
-                        Text(
-                          S.of(context).depositPageDepositWithNativeToken(
-                                tokenSymbol: _cubit.selectedYield?.network.chainInfo.nativeCurrency!.symbol ?? "",
-                              ),
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(width: 10),
-                        ZupSwitch(
-                          value: depositWithNativeToken,
-                          onChanged: (value) => setState(() => depositWithNativeToken = value),
-                        ),
-                      ],
-                    ),
+                    if (baseToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(_cubit
+                            .selectedYield!.network.wrappedNative.addresses[_cubit.selectedYield!.network.chainId]!) ||
+                        quoteToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(
+                          _cubit.selectedYield!.network.wrappedNative.addresses[_cubit.selectedYield!.network.chainId]!,
+                        ))
+                      Row(
+                        children: [
+                          _sectionTitle(S.of(context).depositPageDepositSectionTitle),
+                          const Spacer(),
+                          Text(
+                            S.of(context).depositPageDepositWithNativeToken(
+                                  tokenSymbol: _cubit.selectedYield?.network.chainInfo.nativeCurrency!.symbol ?? "",
+                                ),
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(width: 10),
+                          ZupSwitch(
+                            value: depositWithNativeToken,
+                            onChanged: (value) => setState(() => depositWithNativeToken = value),
+                          ),
+                        ],
+                      ),
                     const SizedBox(height: 12),
                     TokenAmountInputCard(
                       key: const Key("base-token-input-card"),
                       token: baseToken,
+                      isNative: depositWithNativeToken &&
+                          baseToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(_cubit
+                              .selectedYield!.network.wrappedNative.addresses[_cubit.selectedYield!.network.chainId]!),
                       onRefreshBalance: () => setState(() {}),
                       disabledText: () {
                         if (!isBaseTokenNeeded) {
@@ -900,6 +905,9 @@ class _DepositPageState extends State<DepositPage>
                     TokenAmountInputCard(
                       key: const Key("quote-token-input-card"),
                       token: quoteToken,
+                      isNative: depositWithNativeToken &&
+                          quoteToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(_cubit
+                              .selectedYield!.network.wrappedNative.addresses[_cubit.selectedYield!.network.chainId]!),
                       onRefreshBalance: () => setState(() {}),
                       disabledText: () {
                         if (!isQuoteTokenNeeded) {

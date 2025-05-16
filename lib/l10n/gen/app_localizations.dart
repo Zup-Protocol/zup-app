@@ -93,6 +93,12 @@ abstract class S {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
+  /// No description provided for @yieldCardNetworkTooltipDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This pool is at {network}'**
+  String yieldCardNetworkTooltipDescription({required String network});
+
   /// No description provided for @twentyFourHours.
   ///
   /// In en, this message translates to:

@@ -11,7 +11,6 @@ import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
-import 'package:zup_app/core/dtos/token_list_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
@@ -28,28 +27,33 @@ void main() {
   late TokensRepository tokensRepository;
   late Wallet wallet;
   late Cache cache;
+  late ZupNavigator zupNavigator;
 
   setUp(() {
     appCubit = AppCubitMock();
     tokensRepository = TokensRepositoryMock();
     wallet = WalletMock();
+    zupNavigator = ZupNavigatorMock();
 
-    registerFallbackValue(Networks.sepolia);
+    registerFallbackValue(AppNetworks.sepolia);
 
     cache = CacheMock();
     inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<Debouncer>(() => Debouncer(milliseconds: 0));
-    inject.registerFactory<ZupNavigator>(() => ZupNavigatorMock());
+    inject.registerFactory<ZupNavigator>(() => zupNavigator);
     inject.registerFactory<Cache>(() => cache);
 
     inject.registerLazySingleton<TokenSelectorModalCubit>(
       () => TokenSelectorModalCubit(tokensRepository, appCubit, wallet),
     );
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto.fixture());
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
     when(() => appCubit.selectedNetworkStream).thenAnswer((_) => const Stream.empty());
-    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
+    when(() => tokensRepository.getPopularTokens(any())).thenAnswer((_) async => [
+          TokenDto.fixture(),
+          TokenDto.fixture(),
+        ]);
   });
 
   tearDown(() => inject.reset());
@@ -62,7 +66,7 @@ void main() {
   zGoldenTest(
       "When loading the page, it should select only the A token as the default token for the selected network (the token B should not be selected)",
       goldenFileName: "create_page_select_tokens_stage_default_a_token", (tester) async {
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
     await tester.pumpAndSettle();
@@ -70,7 +74,7 @@ void main() {
 
   zGoldenTest("When the device is mobile, it should have a horizontal padding, and less padding on the top",
       goldenFileName: "create_page_select_tokens_stage_mobile", (tester) async {
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
 
     await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true));
     await tester.pumpAndSettle();
@@ -79,15 +83,11 @@ void main() {
   zGoldenTest(
       "When selecting the B token with the same address as A token, it should change the A token to null, and the B token to the selected token",
       goldenFileName: "create_page_select_tokens_stage_change_b_token_to_same_token_as_a", (tester) async {
-    const selectedNetwork = Networks.sepolia;
+    const selectedNetwork = AppNetworks.sepolia;
     final token0 = selectedNetwork.wrappedNative;
 
-    when(() => tokensRepository.getTokenList(any())).thenAnswer(
-      (_) async => TokenListDto.fixture().copyWith(
-        mostUsedTokens: [token0],
-        popularTokens: [token0],
-        userTokens: [token0],
-      ),
+    when(() => tokensRepository.getPopularTokens(any())).thenAnswer(
+      (_) async => [token0],
     );
 
     when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
@@ -103,15 +103,12 @@ void main() {
   zGoldenTest(
       "When selecting the A token with the same address as B token, it should change the B token to null and the A token to the selected token",
       goldenFileName: "create_page_select_tokens_stage_change_a_token_to_same_token_as_b", (tester) async {
-    const selectedNetwork = Networks.sepolia;
+    const selectedNetwork = AppNetworks.sepolia;
     final token0 = selectedNetwork.wrappedNative;
 
-    when(() => tokensRepository.getTokenList(any())).thenAnswer(
-      (_) async => TokenListDto.fixture().copyWith(
-        mostUsedTokens: [token0],
-        popularTokens: [token0],
-        userTokens: [token0],
-      ),
+    when(() => appCubit.currentChainId).thenReturn(selectedNetwork.chainId);
+    when(() => tokensRepository.getPopularTokens(any())).thenAnswer(
+      (_) async => [token0],
     );
 
     when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
@@ -136,7 +133,7 @@ void main() {
 
   zGoldenTest("When the token A is selected, but the token B is not, the button to find liquidity should be disabled",
       goldenFileName: "create_page_select_tokens_stage_token_a_selected_disabled_button", (tester) async {
-    const selectedNetwork = Networks.sepolia;
+    const selectedNetwork = AppNetworks.sepolia;
 
     when(() => appCubit.selectedNetwork).thenReturn(selectedNetwork);
 
@@ -154,9 +151,12 @@ void main() {
     const token0Name = "Token1";
     const token1Name = "Token2";
 
-    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => const TokenListDto(popularTokens: [
-          TokenDto(address: "token1", name: "Token1"),
-          TokenDto(address: "token2", name: "Token2"),
+    when(() => appCubit.currentChainId).thenAnswer((_) => appCubit.selectedNetwork.chainId);
+    when(() => tokensRepository.getPopularTokens(any())).thenAnswer((_) async => ([
+          TokenDto(addresses: {appCubit.selectedNetwork.chainId: "token1"}, name: "Token1"),
+          TokenDto(addresses: {
+            appCubit.selectedNetwork.chainId: "token2",
+          }, name: "Token2"),
         ]));
 
     await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
@@ -175,17 +175,18 @@ void main() {
   zGoldenTest("""When tokens are selected, but the app cubit notify about the app network change,
   it should reset the tokens.""", goldenFileName: "create_page_select_tokens_stage_reset_tokens_from_network",
       (tester) async {
-    final networkStream = StreamController<Networks>();
+    final networkStream = StreamController<AppNetworks>();
 
     when(() => appCubit.selectedNetworkStream).thenAnswer((_) => networkStream.stream);
+    when(() => appCubit.currentChainId).thenAnswer((_) => appCubit.selectedNetwork.chainId);
 
     const token0Name = "Token1";
     const token1Name = "Token2";
 
-    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => const TokenListDto(popularTokens: [
-          TokenDto(address: "token1", name: "Token1"),
-          TokenDto(address: "token2", name: "Token2"),
-        ]));
+    when(() => tokensRepository.getPopularTokens(any())).thenAnswer((_) async => [
+          TokenDto(addresses: {appCubit.selectedNetwork.chainId: "token1"}, name: "Token1"),
+          TokenDto(addresses: {appCubit.selectedNetwork.chainId: "token2"}, name: "Token2"),
+        ]);
 
     await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
 
@@ -199,7 +200,7 @@ void main() {
     await tester.tap(find.text(token1Name));
     await tester.pumpAndSettle();
 
-    networkStream.add(Networks.mainnet);
+    networkStream.add(AppNetworks.mainnet);
   });
 
   zGoldenTest(
@@ -261,6 +262,42 @@ void main() {
 
       await tester.tap(find.byKey(const Key("pool-search-settings-button"))); // close the dropdown
       await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    "When the network is all networks, clicking the search button should pass the internal ids as token ids to the next stage",
+    (tester) async {
+      const token0Id = "32";
+      const token1Id = "87";
+
+      final tokens = [
+        TokenDto.fixture()
+            .copyWith(name: "TokenA", internalId: token0Id, addresses: {appCubit.selectedNetwork.chainId: token0Id}),
+        TokenDto.fixture()
+            .copyWith(name: "TokenB", internalId: token1Id, addresses: {appCubit.selectedNetwork.chainId: token1Id}),
+      ];
+
+      when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.allNetworks);
+      when(() => tokensRepository.getPopularTokens(any())).thenAnswer((_) async => tokens);
+      when(() => zupNavigator.navigateToDeposit(any(), any(), any())).thenAnswer((_) async {});
+
+      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+
+      await tester.tap(find.byKey(const Key("token-a-selector")));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(tokens[0].name).first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("token-b-selector")));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(tokens[1].name).first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("search-button")));
+      await tester.pumpAndSettle();
+
+      verify(() => zupNavigator.navigateToDeposit(token0Id, token1Id, AppNetworks.allNetworks));
     },
   );
 }
