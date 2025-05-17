@@ -29,6 +29,7 @@ void main() {
     inject.registerFactory<TokenSelectorModalCubit>(() => cubit);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<Debouncer>(() => Debouncer(milliseconds: 0));
+    inject.registerFactory<AppCubit>(() => appCubit);
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
     when(() => tokensRepository.getPopularTokens(any())).thenAnswer((_) async => [TokenDto.fixture()]);
@@ -220,5 +221,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(selectedToken.hashCode, tokenList.first.hashCode);
+  });
+
+  zGoldenTest(
+      "When the network is all networks, it should show an alert about only being able to search by name or symbol",
+      goldenFileName: "token_selector_modal_all_networks", (tester) async {
+    when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.allNetworks);
+    when(() => cubit.state).thenReturn(TokenSelectorModalState.success([TokenDto.fixture()]));
+
+    await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+    await tester.pumpAndSettle();
   });
 }

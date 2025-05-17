@@ -354,6 +354,14 @@ class SEn extends S {
   String get tokenSelectorModalSearchTitle => 'Search token or paste address';
 
   @override
+  String get tokenSelectorModalSearchTitleAllNetworks =>
+      'Search token by symbol or name';
+
+  @override
+  String get tokenSelectorModalSearchAlertForAllNetworks =>
+      'When ‘All Networks’ is selected, you can only search by name or symbol. To search by address as well, please select a specific network';
+
+  @override
   String get tokenSelectorModalErrorDescription =>
       'We hit a snag loading your token list. Give it another go, and if it keeps happening, feel free to reach us';
 

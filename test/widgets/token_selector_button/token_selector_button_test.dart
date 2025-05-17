@@ -35,6 +35,7 @@ void main() {
     inject.registerLazySingleton<TokenSelectorModalCubit>(
       () => TokenSelectorModalCubit(tokensRepository, appCubit, wallet),
     );
+    inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerLazySingleton<Debouncer>(() => Debouncer(milliseconds: 0));
 
     when(() => tokensRepository.getPopularTokens(any())).thenAnswer((_) async => [TokenDto.fixture()]);

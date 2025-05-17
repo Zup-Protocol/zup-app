@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
@@ -45,6 +46,7 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
 
   final _debouncer = inject<Debouncer>();
   final _cubit = inject<TokenSelectorModalCubit>();
+  final _appCubit = inject<AppCubit>();
 
   void _selectToken(TokenDto token) {
     widget.onSelectToken(token);
@@ -86,20 +88,34 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
                 backgroundColor: Colors.white,
                 surfaceTintColor: Colors.white,
                 titleSpacing: 20,
-                toolbarHeight: 60,
+                toolbarHeight: _appCubit.selectedNetwork.isAllNetworks ? 100 : 60,
                 automaticallyImplyLeading: false,
                 leadingWidth: 0,
                 floating: true,
                 snap: true,
-                title: ZupTextField(
-                  key: const Key("search-token-field"),
-                  hintText: S.of(context).tokenSelectorModalSearchTitle,
-                  onChanged: (query) {
-                    _debouncer.run(() async {
-                      if (query.isEmpty) return _cubit.fetchTokenList();
-                      _cubit.searchToken(query);
-                    });
-                  },
+                title: Column(
+                  children: [
+                    ZupTextField(
+                      key: const Key("search-token-field"),
+                      hintText: _appCubit.selectedNetwork.isAllNetworks
+                          ? S.of(context).tokenSelectorModalSearchTitleAllNetworks
+                          : S.of(context).tokenSelectorModalSearchTitle,
+                      onChanged: (query) {
+                        _debouncer.run(() async {
+                          if (query.isEmpty) return _cubit.fetchTokenList();
+                          _cubit.searchToken(query);
+                        });
+                      },
+                    ),
+                    if (_appCubit.selectedNetwork.isAllNetworks) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        maxLines: 4,
+                        S.of(context).tokenSelectorModalSearchAlertForAllNetworks,
+                        style: const TextStyle(color: ZupColors.gray, fontSize: 12),
+                      )
+                    ]
+                  ],
                 ),
               ),
               ...state.maybeWhen(
@@ -229,6 +245,18 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 20),
           sliver: state.whenOrNull(
+            loading: () => ZupSkeletonizer(
+              child: SliverList(
+                  delegate: SliverChildListDelegate(
+                List.generate(
+                  4,
+                  (index) => Padding(
+                    padding: _paddingBetweenListItems,
+                    child: TokenCard(asset: TokenDto.fixture(), onClick: () {}),
+                  ),
+                ),
+              )),
+            ).sliver(),
             success: (popularTokens) => SliverList.builder(
               itemCount: popularTokens.length,
               itemBuilder: (context, index) {

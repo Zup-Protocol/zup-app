@@ -263,4 +263,46 @@ void main() {
 
     verify(() => tokensRepository.getPopularTokens(any())).called(3);
   });
+
+  test(
+      "When callling 'searchToken' with a valid ethereum address, and the network is all networks, it should emit the search not found state",
+      () async {
+    when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.allNetworks);
+
+    const address = "0x0000000000000000000000000000000000000000";
+    await sut.searchToken(address);
+
+    expect(sut.state, const TokenSelectorModalState.searchNotFound(address));
+    verifyNever(() => tokensRepository.searchToken(any(), any()));
+  });
+
+  test("""When calling 'searchToken' and all the tokens in the list returned does not have name and symbol,
+  it should emit the search not found state""", () async {
+    final returnedList = [
+      const TokenDto(name: "", symbol: "", decimals: 0, logoUrl: "", addresses: {}),
+      const TokenDto(name: "", symbol: "", decimals: 0, logoUrl: "", addresses: {}),
+    ];
+
+    when(() => tokensRepository.searchToken(any(), any())).thenAnswer((_) async => returnedList);
+
+    await sut.searchToken("dale");
+
+    expect(sut.state, const TokenSelectorModalState.searchNotFound("dale"));
+  });
+
+  test("""When calling 'searchToken' and one token in the list returned has symbol and name,
+  it should emit the search sucesss state, without the tokens without name and symbol""", () async {
+    final namedToken = TokenDto.fixture();
+    final returnedList = [
+      const TokenDto(name: "", symbol: "", decimals: 0, logoUrl: "", addresses: {}),
+      const TokenDto(name: "", symbol: "", decimals: 0, logoUrl: "", addresses: {}),
+      namedToken,
+    ];
+
+    when(() => tokensRepository.searchToken(any(), any())).thenAnswer((_) async => returnedList);
+
+    await sut.searchToken("dale");
+
+    expect(sut.state, TokenSelectorModalState.searchSuccess([namedToken]));
+  });
 }

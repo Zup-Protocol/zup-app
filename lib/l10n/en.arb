@@ -215,6 +215,8 @@
     "tokenSelectorModalTitle": "Select a token",
     "tokenSelectorModalDescription": "Pick a token from our list or search by symbol or address to build your ideal liquidity pool!",
     "tokenSelectorModalSearchTitle": "Search token or paste address",
+    "tokenSelectorModalSearchTitleAllNetworks": "Search token by symbol or name",
+    "tokenSelectorModalSearchAlertForAllNetworks": "When ‘All Networks’ is selected, you can only search by name or symbol. To search by address as well, please select a specific network",
     "tokenSelectorModalErrorDescription": "We hit a snag loading your token list. Give it another go, and if it keeps happening, feel free to reach us",
     "tokenSelectorModalSearchErrorDescription": "We hit a snag while searching for a token matching {searchedTerm}. Give it another go, and if it keeps happening, feel free to reach us",
     "noResultsFor": "No results for",

@@ -664,6 +664,18 @@ abstract class S {
   /// **'Search token or paste address'**
   String get tokenSelectorModalSearchTitle;
 
+  /// No description provided for @tokenSelectorModalSearchTitleAllNetworks.
+  ///
+  /// In en, this message translates to:
+  /// **'Search token by symbol or name'**
+  String get tokenSelectorModalSearchTitleAllNetworks;
+
+  /// No description provided for @tokenSelectorModalSearchAlertForAllNetworks.
+  ///
+  /// In en, this message translates to:
+  /// **'When ‘All Networks’ is selected, you can only search by name or symbol. To search by address as well, please select a specific network'**
+  String get tokenSelectorModalSearchAlertForAllNetworks;
+
   /// No description provided for @tokenSelectorModalErrorDescription.
   ///
   /// In en, this message translates to:

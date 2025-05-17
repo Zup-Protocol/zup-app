@@ -54,9 +54,14 @@ class TokenSelectorModalCubit extends Cubit<TokenSelectorModalState> {
   }
 
   Future<void> searchToken(String query) async {
+    if (query.isEthereumAddress() && _appCubit.selectedNetwork.isAllNetworks) {
+      return emit(TokenSelectorModalState.searchNotFound(query));
+    }
+
     try {
       emit(const TokenSelectorModalState.searchLoading());
       final tokensList = await _tokensRepository.searchToken(query, _appCubit.selectedNetwork);
+      tokensList.removeWhere((token) => token.name.isEmpty && token.symbol.isEmpty);
 
       if (_shouldDiscardSearchState) return;
 
