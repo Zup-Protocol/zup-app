@@ -36,11 +36,11 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
     });
   }
 
-  Future<void> updateTokenAndNetwork(String tokenAddress, AppNetworks network) async {
+  Future<void> updateTokenAndNetwork(String tokenAddress, AppNetworks network, {required bool asNativeToken}) async {
     _tokenAddress = tokenAddress;
     _network = network;
 
-    if (_wallet.signer != null) await getUserTokenAmount();
+    if (_wallet.signer != null) await getUserTokenAmount(isNative: asNativeToken);
   }
 
   Future<void> getUserTokenAmount({bool ignoreCache = false, bool isNative = false}) async {

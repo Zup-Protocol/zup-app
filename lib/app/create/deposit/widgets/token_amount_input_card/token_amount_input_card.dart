@@ -74,7 +74,11 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
 
     if (widget.token != oldWidget.token) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        userBalanceCubit.updateTokenAndNetwork(widget.token.addresses[widget.network.chainId]!, widget.network);
+        userBalanceCubit.updateTokenAndNetwork(
+          widget.token.addresses[widget.network.chainId]!,
+          widget.network,
+          asNativeToken: widget.isNative,
+        );
       });
 
       super.didUpdateWidget(oldWidget);
