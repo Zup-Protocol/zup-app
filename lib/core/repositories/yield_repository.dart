@@ -8,19 +8,37 @@ class YieldRepository {
 
   final Dio _zupAPIDio;
 
-  Future<YieldsDto> getYields({
+  Future<YieldsDto> getSingleNetworkYield({
     required String token0Address,
     required String token1Address,
-    required Networks network,
-    required num minTvlUsd,
+    required AppNetworks network,
+    num? minTvlUsd,
   }) async {
-    final response = await _zupAPIDio.get("/pools", queryParameters: {
-      "token0": token0Address != EthereumConstants.zeroAddress ? token0Address : network.wrappedNative.address,
-      "token1": token1Address != EthereumConstants.zeroAddress ? token1Address : network.wrappedNative.address,
-      "network": network.name,
-      "minTvlUsd": minTvlUsd
+    final response = await _zupAPIDio.get("/pools/search/${network.chainId}", queryParameters: {
+      "token0Address": token0Address != EthereumConstants.zeroAddress
+          ? token0Address
+          : network.wrappedNative.addresses[network.chainId]!,
+      "token1Address": token1Address != EthereumConstants.zeroAddress
+          ? token1Address
+          : network.wrappedNative.addresses[network.chainId]!,
+      if (minTvlUsd != null) "minTvlUsd": minTvlUsd
     });
 
-    return YieldsDto.fromJson(response.data["bestYields"]);
+    return YieldsDto.fromJson(response.data);
+  }
+
+  Future<YieldsDto> getAllNetworksYield(
+      {required String token0InternalId,
+      required String token1InternalId,
+      num? minTvlUsd,
+      bool testnetMode = false}) async {
+    final response = await _zupAPIDio.get("/pools/search/all", queryParameters: {
+      "token0Id": token0InternalId,
+      "token1Id": token1InternalId,
+      "testnetMode": testnetMode,
+      if (minTvlUsd != null) "minTvlUsd": minTvlUsd,
+    });
+
+    return YieldsDto.fromJson(response.data);
   }
 }

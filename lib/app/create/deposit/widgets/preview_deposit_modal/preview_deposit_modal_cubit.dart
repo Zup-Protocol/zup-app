@@ -87,12 +87,16 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
   Future<void> approveToken(TokenDto token, BigInt value) async {
     try {
+      final tokenAddressInNetwork = token.addresses[_yield.network.chainId]!;
       emit(PreviewDepositModalState.approvingToken(token.symbol));
 
       await _maybeSwitchNetwork();
 
-      final contract = _erc20.fromSigner(contractAddress: token.address, signer: _wallet.signer!);
-      final tx = await contract.approve(spender: _yield.protocol.positionManager, value: value);
+      final contract = _erc20.fromSigner(
+        contractAddress: tokenAddressInNetwork,
+        signer: _wallet.signer!,
+      );
+      final tx = await contract.approve(spender: _yield.positionManagerAddress, value: value);
 
       emit(PreviewDepositModalState.waitingTransaction(txId: tx.hash, type: WaitingTransactionType.approve));
 
@@ -101,8 +105,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       try {
         await _getTokensAllowance(canThrow: true);
       } catch (e) {
-        if (_yield.token0.address == token.address) _token0Allowance = value;
-        if (_yield.token1.address == token.address) _token1Allowance = value;
+        if (_yield.token0.addresses[_yield.network.chainId] == tokenAddressInNetwork) _token0Allowance = value;
+        if (_yield.token1.addresses[_yield.network.chainId] == tokenAddressInNetwork) _token1Allowance = value;
       }
 
       emit(PreviewDepositModalState.approveSuccess(txId: tx.hash, symbol: token.symbol));
@@ -135,7 +139,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       await _maybeSwitchNetwork();
 
       final positionManagerContract = _uniswapPositionManager.fromSigner(
-        contractAddress: _yield.protocol.positionManager,
+        contractAddress: _yield.positionManagerAddress,
         signer: _wallet.signer!,
       );
 
@@ -196,8 +200,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
               tickLower: tickLower(),
               tickUpper: tickUpper(),
               fee: BigInt.from(_yield.feeTier),
-              token0: _yield.token0.address,
-              token1: _yield.token1.address,
+              token0: _yield.token0.addresses[_yield.network.chainId]!,
+              token1: _yield.token1.addresses[_yield.network.chainId]!,
             ),
           );
 
@@ -230,8 +234,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
             tickLower: tickLower(),
             tickUpper: tickUpper(),
             fee: BigInt.from(_yield.feeTier),
-            token0: _yield.token0.address,
-            token1: _yield.token1.address,
+            token0: _yield.token0.addresses[_yield.network.chainId]!,
+            token1: _yield.token1.addresses[_yield.network.chainId]!,
           ),
         );
       }.call();
@@ -282,23 +286,23 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
   Future<void> _getTokensAllowance({bool canThrow = false}) async {
     try {
       final token0contract = _erc20.fromRpcProvider(
-        contractAddress: _yield.token0.address,
+        contractAddress: _yield.token0.addresses[_yield.network.chainId]!,
         rpcUrl: _yield.network.rpcUrl,
       );
 
       final token1contract = _erc20.fromRpcProvider(
-        contractAddress: _yield.token1.address,
+        contractAddress: _yield.token1.addresses[_yield.network.chainId]!,
         rpcUrl: _yield.network.rpcUrl,
       );
 
       final token0Allowance = await token0contract.allowance(
         owner: await _wallet.signer!.address,
-        spender: _yield.protocol.positionManager,
+        spender: _yield.positionManagerAddress,
       );
 
       final token1Allowance = await token1contract.allowance(
         owner: await _wallet.signer!.address,
-        spender: _yield.protocol.positionManager,
+        spender: _yield.positionManagerAddress,
       );
 
       _token0Allowance = token0Allowance;

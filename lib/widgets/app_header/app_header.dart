@@ -28,8 +28,8 @@ class _AppHeaderState extends State<AppHeader> with DeviceInfoMixin {
   final ZupNavigator navigator = inject<ZupNavigator>();
   final appCubit = inject<AppCubit>();
 
-  List<Networks> get currentModeNetworks {
-    return appCubit.isTestnetMode ? Networks.testnets : Networks.mainnets;
+  List<AppNetworks> get currentModeNetworks {
+    return appCubit.isTestnetMode ? AppNetworks.testnets : AppNetworks.mainnets;
   }
 
   Function() onRouteChange = () {};
@@ -128,7 +128,8 @@ class _AppHeaderState extends State<AppHeader> with DeviceInfoMixin {
                       (index) => NetworkSwitcherItem(
                         title: currentModeNetworks[index].label,
                         icon: currentModeNetworks[index].icon,
-                        chainInfo: currentModeNetworks[index].chainInfo,
+                        chainInfo:
+                            currentModeNetworks[index].isAllNetworks ? null : currentModeNetworks[index].chainInfo,
                       ),
                     ),
                   ),

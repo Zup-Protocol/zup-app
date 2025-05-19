@@ -120,9 +120,9 @@ void main() {
       """When passing depositedWithNative to true, the modal should use the native token symbol in the description
   if the token0 or token1 are wrapped natives""", (tester) async {
     final wrappedNativeYield = YieldDto.fixture().copyWith(
-      network: Networks.sepolia,
-      token0: Networks.sepolia.wrappedNative,
-      token1: Networks.sepolia.wrappedNative,
+      chainId: AppNetworks.sepolia.chainId,
+      token0: AppNetworks.sepolia.wrappedNative,
+      token1: AppNetworks.sepolia.wrappedNative,
     );
 
     await tester.pumpDeviceBuilder(
@@ -147,9 +147,9 @@ void main() {
       """When passing depositedWithNative to true, the modal should use the native token images in the tokenavatars
       (if the token0 or token1 are wrapped natives)""", (tester) async {
     final wrappedNativeYield = YieldDto.fixture().copyWith(
-      network: Networks.sepolia,
-      token0: Networks.sepolia.wrappedNative,
-      token1: Networks.sepolia.wrappedNative,
+      chainId: AppNetworks.sepolia.chainId,
+      token0: AppNetworks.sepolia.wrappedNative,
+      token1: AppNetworks.sepolia.wrappedNative,
     );
 
     await tester.pumpDeviceBuilder(

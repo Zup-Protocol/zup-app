@@ -6,7 +6,6 @@ import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
-import 'package:zup_app/core/dtos/token_list_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
@@ -30,17 +29,18 @@ void main() {
     appCubit = AppCubitMock();
     wallet = WalletMock();
 
-    registerFallbackValue(Networks.sepolia);
+    registerFallbackValue(AppNetworks.sepolia);
 
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerLazySingleton<TokenSelectorModalCubit>(
       () => TokenSelectorModalCubit(tokensRepository, appCubit, wallet),
     );
+    inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerLazySingleton<Debouncer>(() => Debouncer(milliseconds: 0));
 
-    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
+    when(() => tokensRepository.getPopularTokens(any())).thenAnswer((_) async => [TokenDto.fixture()]);
 
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
   });
 
   tearDown(() => inject.reset());

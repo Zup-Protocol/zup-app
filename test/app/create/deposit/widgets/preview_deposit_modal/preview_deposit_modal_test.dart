@@ -128,6 +128,7 @@ void main() {
                 content: BlocProvider.value(
                   value: cubit,
                   child: PreviewDepositModal(
+                    yieldTimeFrame: YieldTimeFrame.day,
                     depositWithNativeToken: depositWithNativeToken,
                     deadline: deadline,
                     maxSlippage: slippage,
@@ -199,7 +200,7 @@ void main() {
     it should open the transaction in the yield network's explorer""",
     (tester) async {
       const txId = "0xtxID";
-      const yieldNetwork = Networks.sepolia;
+      const yieldNetwork = AppNetworks.sepolia;
 
       when(() => cubit.state).thenReturn(
           const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit));
@@ -209,7 +210,7 @@ void main() {
       );
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(customYield: YieldDto.fixture().copyWith(network: yieldNetwork)),
+        await goldenBuilder(customYield: YieldDto.fixture().copyWith(chainId: yieldNetwork.chainId)),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -299,8 +300,12 @@ void main() {
           await goldenBuilder(
             depositWithNativeToken: true,
             customYield: currentYield.copyWith(
-              token0: TokenDto.fixture().copyWith(address: currentYield.network.wrappedNative.address),
-              token1: TokenDto.fixture().copyWith(address: "0x21"),
+              token0: TokenDto.fixture().copyWith(addresses: {
+                currentYield.network.chainId: currentYield.network.wrappedNative.addresses[currentYield.network.chainId]
+              }),
+              token1: TokenDto.fixture().copyWith(addresses: {
+                currentYield.network.chainId: currentYield.network.wrappedNative.addresses[currentYield.network.chainId]
+              }),
             ),
           ),
           wrapper: GoldenConfig.localizationsWrapper());
@@ -934,6 +939,7 @@ void main() {
             Builder(builder: (context) {
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 PreviewDepositModal(
+                  yieldTimeFrame: YieldTimeFrame.day,
                   depositWithNativeToken: false,
                   currentYield: currentYield,
                   isReversed: true,
@@ -967,6 +973,7 @@ void main() {
             Builder(builder: (context) {
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 PreviewDepositModal(
+                  yieldTimeFrame: YieldTimeFrame.day,
                   depositWithNativeToken: false,
                   currentYield: currentYield,
                   isReversed: true,

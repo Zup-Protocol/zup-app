@@ -45,11 +45,13 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
   BigInt? _latestPoolTick;
   YieldDto? _selectedYield;
+  YieldTimeFrame? _selectedYieldTimeframe;
 
   late final Stream<YieldDto?> selectedYieldStream = _selectedYieldStreamController.stream;
   late final Stream<BigInt?> poolTickStream = _pooltickStreamController.stream;
 
   YieldDto? get selectedYield => _selectedYield;
+  YieldTimeFrame? get selectedYieldTimeframe => _selectedYieldTimeframe;
   BigInt? get latestPoolTick => _latestPoolTick;
   DepositSettingsDto get depositSettings => _cache.getDepositSettings();
   PoolSearchSettingsDto get poolSearchSettings => _cache.getPoolSearchSettings();
@@ -63,24 +65,31 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
   }
 
   Future<void> getBestPools({
-    required String token0Address,
-    required String token1Address,
+    required String token0AddressOrId,
+    required String token1AddressOrId,
     bool ignoreMinLiquidity = false,
   }) async {
     try {
       _zupAnalytics.logSearch(
-        token0: token0Address,
-        token1: token1Address,
+        token0: token0AddressOrId,
+        token1: token1AddressOrId,
         network: _appCubit.selectedNetwork.label,
       );
 
       emit(const DepositState.loading());
-      final yields = await _yieldRepository.getYields(
-        token0Address: token0Address,
-        token1Address: token1Address,
-        network: _appCubit.selectedNetwork,
-        minTvlUsd: ignoreMinLiquidity ? 0 : poolSearchSettings.minLiquidityUSD,
-      );
+      final yields = _appCubit.selectedNetwork.isAllNetworks
+          ? await _yieldRepository.getAllNetworksYield(
+              token0InternalId: token0AddressOrId,
+              token1InternalId: token1AddressOrId,
+              minTvlUsd: ignoreMinLiquidity ? 0 : poolSearchSettings.minLiquidityUSD,
+              testnetMode: _appCubit.isTestnetMode,
+            )
+          : await _yieldRepository.getSingleNetworkYield(
+              token0Address: token0AddressOrId,
+              token1Address: token1AddressOrId,
+              network: _appCubit.selectedNetwork,
+              minTvlUsd: ignoreMinLiquidity ? 0 : poolSearchSettings.minLiquidityUSD,
+            );
 
       if (yields.isEmpty) {
         return emit(
@@ -94,8 +103,9 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     }
   }
 
-  Future<void> selectYield(YieldDto? yieldDto) async {
+  Future<void> selectYield(YieldDto? yieldDto, YieldTimeFrame? yieldTimeFrame) async {
     _selectedYield = yieldDto;
+    _selectedYieldTimeframe = yieldTimeFrame;
     _selectedYieldStreamController.add(selectedYield);
 
     if (selectedYield != null) await getSelectedPoolTick();
@@ -121,7 +131,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     _latestPoolTick = slot0.tick;
   }
 
-  Future<double> getWalletTokenAmount(String tokenAddress, {required Networks network}) async {
+  Future<double> getWalletTokenAmount(String tokenAddress, {required AppNetworks network}) async {
     if (_wallet.signer == null) return 0.0;
 
     final walletAddress = await _wallet.signer!.address;

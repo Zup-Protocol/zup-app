@@ -38,7 +38,7 @@ void main() {
       instanceName: InjectInstanceNames.appScrollController,
     );
 
-    when(() => appCubit.selectedNetwork).thenReturn(Networks.mainnet);
+    when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.mainnet);
     when(() => appCubit.state).thenReturn(const AppState.standard());
     when(() => appCubit.isTestnetMode).thenReturn(false);
     when(() => appCubit.stream).thenAnswer((_) => const Stream.empty());

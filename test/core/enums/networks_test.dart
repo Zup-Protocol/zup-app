@@ -3,7 +3,6 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/core/dtos/chain_info.dart';
 import 'package:web3kit/core/enums/native_currencies.dart';
-import 'package:web3kit/core/ethereum_constants.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
@@ -19,40 +18,40 @@ void main() {
   });
 
   test("When calling 'fromValue' it should get a network from a string value", () {
-    expect(Networks.fromValue("sepolia"), Networks.sepolia);
-    expect(Networks.fromValue("mainnet"), Networks.mainnet);
-    expect(Networks.fromValue("scroll"), Networks.scroll);
+    expect(AppNetworks.fromValue("sepolia"), AppNetworks.sepolia);
+    expect(AppNetworks.fromValue("mainnet"), AppNetworks.mainnet);
+    expect(AppNetworks.fromValue("scroll"), AppNetworks.scroll);
   });
 
   test("Label extension should match for all networks", () {
-    expect(Networks.sepolia.label, "Sepolia", reason: "Sepolia Label should match");
-    expect(Networks.mainnet.label, "Ethereum", reason: "Ethereum Label should match");
-    expect(Networks.scroll.label, "Scroll", reason: "Scroll Label should match");
+    expect(AppNetworks.sepolia.label, "Sepolia", reason: "Sepolia Label should match");
+    expect(AppNetworks.mainnet.label, "Ethereum", reason: "Ethereum Label should match");
+    expect(AppNetworks.scroll.label, "Scroll", reason: "Scroll Label should match");
   });
 
-  test("`testnets` method should return all testnets in the enum", () {
-    expect(Networks.testnets, [Networks.sepolia]);
+  test("`testnets` method should return all testnets in the enum, excluding the 'all networks'", () {
+    expect(AppNetworks.testnets, [AppNetworks.sepolia]);
   });
 
-  test("`testnets` method should return all testnets in the enum", () {
-    expect(Networks.mainnets, [Networks.mainnet, Networks.scroll]);
+  test("`mainnets` method should return all mainnets in the enum, including the 'all networks'", () {
+    expect(AppNetworks.mainnets, [AppNetworks.allNetworks, AppNetworks.mainnet, AppNetworks.scroll]);
   });
 
   test("`isTestnet` method should return true for sepolia", () {
-    expect(Networks.sepolia.isTestnet, true);
+    expect(AppNetworks.sepolia.isTestnet, true);
   });
 
   test("`isTestnet` method should return false for mainnet", () {
-    expect(Networks.mainnet.isTestnet, false);
+    expect(AppNetworks.mainnet.isTestnet, false);
   });
 
   test("`isTestnet` method should return false for Scroll", () {
-    expect(Networks.scroll.isTestnet, false);
+    expect(AppNetworks.scroll.isTestnet, false);
   });
 
   test("Chain info extension should match for all networks", () {
     expect(
-      Networks.sepolia.chainInfo,
+      AppNetworks.sepolia.chainInfo,
       ChainInfo(
         hexChainId: "0xaa36a7",
         chainName: "Sepolia",
@@ -64,7 +63,7 @@ void main() {
     );
 
     expect(
-      Networks.mainnet.chainInfo,
+      AppNetworks.mainnet.chainInfo,
       ChainInfo(
         hexChainId: "0x1",
         chainName: "Ethereum",
@@ -75,7 +74,7 @@ void main() {
     );
 
     expect(
-      Networks.scroll.chainInfo,
+      AppNetworks.scroll.chainInfo,
       ChainInfo(
         hexChainId: "0x82750",
         chainName: "Scroll",
@@ -89,19 +88,19 @@ void main() {
 
   test("wrapped native token address should match for all networks", () {
     expect(
-      Networks.sepolia.wrappedNativeTokenAddress,
+      AppNetworks.sepolia.wrappedNativeTokenAddress,
       "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
       reason: "Sepolia wrapped native token address should match",
     );
 
     expect(
-      Networks.mainnet.wrappedNativeTokenAddress,
+      AppNetworks.mainnet.wrappedNativeTokenAddress,
       "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
       reason: "Ethereum wrapped native token address should match",
     );
 
     expect(
-      Networks.scroll.wrappedNativeTokenAddress,
+      AppNetworks.scroll.wrappedNativeTokenAddress,
       "0x5300000000000000000000000000000000000004",
       reason: "Scroll wrapped native token address should match",
     );
@@ -109,9 +108,11 @@ void main() {
 
   test("wrapped native token should match for all networks", () {
     expect(
-      Networks.sepolia.wrappedNative,
-      const TokenDto(
-        address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      AppNetworks.sepolia.wrappedNative,
+      TokenDto(
+        addresses: {
+          AppNetworks.sepolia.chainId: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+        },
         name: "Wrapped Ether",
         decimals: 18,
         symbol: "WETH",
@@ -121,9 +122,11 @@ void main() {
     );
 
     expect(
-      Networks.mainnet.wrappedNative,
-      const TokenDto(
-        address: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      AppNetworks.mainnet.wrappedNative,
+      TokenDto(
+        addresses: {
+          AppNetworks.mainnet.chainId: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+        },
         name: "Wrapped Ether",
         decimals: 18,
         symbol: "WETH",
@@ -133,9 +136,11 @@ void main() {
     );
 
     expect(
-      Networks.scroll.wrappedNative,
-      const TokenDto(
-        address: "0x5300000000000000000000000000000000000004",
+      AppNetworks.scroll.wrappedNative,
+      TokenDto(
+        addresses: {
+          AppNetworks.scroll.chainId: "0x5300000000000000000000000000000000000004",
+        },
         name: "Wrapped Ether",
         decimals: 18,
         symbol: "WETH",
@@ -148,19 +153,19 @@ void main() {
 
   test("RpcUrl extension should return the correct rpc url", () {
     expect(
-      Networks.sepolia.rpcUrl,
+      AppNetworks.sepolia.rpcUrl,
       "https://ethereum-sepolia-rpc.publicnode.com",
       reason: "Sepolia rpc url should match",
     );
 
     expect(
-      Networks.mainnet.rpcUrl,
+      AppNetworks.mainnet.rpcUrl,
       "https://ethereum-rpc.publicnode.com",
       reason: "Ethereum rpc url should match",
     );
 
     expect(
-      Networks.scroll.rpcUrl,
+      AppNetworks.scroll.rpcUrl,
       "https://scroll-rpc.publicnode.com",
       reason: "Scroll rpc url should match",
     );
@@ -169,7 +174,9 @@ void main() {
   test("openTx should open the correct url for each network", () async {
     const txHash = "0x1271892718912u198haisghsg7223617";
 
-    for (final network in Networks.values) {
+    for (final network in AppNetworks.values) {
+      if (network.isAllNetworks) continue;
+
       await network.openTx(txHash);
 
       expect(
@@ -182,9 +189,9 @@ void main() {
 
   test("'nativeCurrency' should return the correct currency for sepolia network", () {
     expect(
-      Networks.sepolia.nativeCurrencyTokenDto,
+      AppNetworks.sepolia.nativeCurrencyTokenDto,
       TokenDto(
-        address: EthereumConstants.zeroAddress,
+        addresses: {},
         name: NativeCurrencies.eth.currencyInfo.name,
         decimals: NativeCurrencies.eth.currencyInfo.decimals,
         symbol: NativeCurrencies.eth.currencyInfo.symbol,
@@ -196,9 +203,9 @@ void main() {
 
   test("'nativeCurrency' should return the correct currency for ethereum network", () {
     expect(
-      Networks.mainnet.nativeCurrencyTokenDto,
+      AppNetworks.mainnet.nativeCurrencyTokenDto,
       TokenDto(
-        address: EthereumConstants.zeroAddress,
+        addresses: {},
         name: NativeCurrencies.eth.currencyInfo.name,
         decimals: NativeCurrencies.eth.currencyInfo.decimals,
         symbol: NativeCurrencies.eth.currencyInfo.symbol,
@@ -210,9 +217,9 @@ void main() {
 
   test("'nativeCurrency' should return the correct currency for scroll network", () {
     expect(
-      Networks.scroll.nativeCurrencyTokenDto,
+      AppNetworks.scroll.nativeCurrencyTokenDto,
       TokenDto(
-        address: EthereumConstants.zeroAddress,
+        addresses: {},
         name: NativeCurrencies.eth.currencyInfo.name,
         decimals: NativeCurrencies.eth.currencyInfo.decimals,
         symbol: NativeCurrencies.eth.currencyInfo.symbol,
@@ -222,16 +229,44 @@ void main() {
     );
   });
 
+  test("'fromChainId' should return the correct network from the chain id", () {
+    for (final network in AppNetworks.values) {
+      if (network.isAllNetworks) continue;
+
+      expect(
+        AppNetworks.fromChainId(network.chainId),
+        network,
+        reason: "Network from chain id should match ${network.name}",
+      );
+    }
+  });
+
+  test("'isAllNetworks' should return true if the network is all networks", () {
+    expect(AppNetworks.allNetworks.isAllNetworks, true);
+  });
+
+  test("'isAllNetworks' should return false if the network is not all networks", () {
+    expect(AppNetworks.scroll.isAllNetworks, false);
+  });
+
+  test("'chainId' should return the correct chain id for each network", () {
+    for (final network in AppNetworks.values) {
+      if (network.isAllNetworks) continue;
+
+      expect(network.chainId, int.parse(network.chainInfo.hexChainId), reason: "Chain id should match ${network.name}");
+    }
+  });
+
   zGoldenTest("Sepolia network icon should match", goldenFileName: "sepolia_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      Networks.sepolia.icon,
+      AppNetworks.sepolia.icon,
       device: GoldenDevice.square,
     ));
   });
 
   zGoldenTest("Ethereum network icon should match", goldenFileName: "ethereum_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      Networks.mainnet.icon,
+      AppNetworks.mainnet.icon,
       device: GoldenDevice.square,
     ));
   });

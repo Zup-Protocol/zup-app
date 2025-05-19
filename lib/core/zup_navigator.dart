@@ -13,7 +13,7 @@ class ZupNavigator {
 
   Future<void> navigateToNewPosition() async => await Routefly.navigate(ZupNavigatorPaths.newPosition.path);
 
-  Future<void> navigateToDeposit(String token0, String token1, Networks network) async {
+  Future<void> navigateToDeposit(String token0, String token1, AppNetworks network) async {
     const depositPath = ZupNavigatorPaths.deposit;
 
     await Routefly.pushNavigate(

@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
-import 'package:zup_app/core/dtos/token_list_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
 class TokensRepository {
@@ -10,19 +9,18 @@ class TokensRepository {
   bool isSearchingTokens = false;
   CancelToken? _searchTokenLastCancelToken;
 
-  Future<TokenListDto> getTokenList(Networks network, {String? userAddress}) async {
+  Future<List<TokenDto>> getPopularTokens(AppNetworks network) async {
     final request = await _zupAPIDio.get(
-      "/tokens",
+      "/tokens/popular",
       queryParameters: {
-        "network": network.name,
-        if (userAddress != null) "userAddress": userAddress,
+        if (!network.isAllNetworks) "chainId": int.parse(network.chainInfo.hexChainId),
       },
     );
 
-    return TokenListDto.fromJson(request.data);
+    return request.data.map<TokenDto>((token) => TokenDto.fromJson(token)).toList();
   }
 
-  Future<List<TokenDto>> searchToken(String query, Networks network) async {
+  Future<List<TokenDto>> searchToken(String query, AppNetworks network) async {
     if (_searchTokenLastCancelToken != null) {
       _searchTokenLastCancelToken!.cancel();
     }
@@ -30,7 +28,7 @@ class TokensRepository {
     _searchTokenLastCancelToken = CancelToken();
 
     final response = await _zupAPIDio.get("/tokens/search", cancelToken: _searchTokenLastCancelToken, queryParameters: {
-      "network": network.name,
+      if (!network.isAllNetworks) "chainId": network.chainId,
       "query": query,
     });
 

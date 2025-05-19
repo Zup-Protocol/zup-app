@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
@@ -7,7 +8,6 @@ import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/token_card.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
-import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_app/widgets/zup_skeletonizer.dart';
 import 'package:zup_core/mixins/device_info_mixin.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
@@ -44,9 +44,9 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
   final double _horizontalPadding = 20;
   final EdgeInsetsGeometry _paddingBetweenListItems = const EdgeInsets.symmetric(vertical: 5);
 
-  final _zupCachedImage = inject<ZupCachedImage>();
   final _debouncer = inject<Debouncer>();
   final _cubit = inject<TokenSelectorModalCubit>();
+  final _appCubit = inject<AppCubit>();
 
   void _selectToken(TokenDto token) {
     widget.onSelectToken(token);
@@ -88,20 +88,34 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
                 backgroundColor: Colors.white,
                 surfaceTintColor: Colors.white,
                 titleSpacing: 20,
-                toolbarHeight: 60,
+                toolbarHeight: _appCubit.selectedNetwork.isAllNetworks ? 100 : 60,
                 automaticallyImplyLeading: false,
                 leadingWidth: 0,
                 floating: true,
                 snap: true,
-                title: ZupTextField(
-                  key: const Key("search-token-field"),
-                  hintText: S.of(context).tokenSelectorModalSearchTitle,
-                  onChanged: (query) {
-                    _debouncer.run(() async {
-                      if (query.isEmpty) return _cubit.fetchTokenList();
-                      _cubit.searchToken(query);
-                    });
-                  },
+                title: Column(
+                  children: [
+                    ZupTextField(
+                      key: const Key("search-token-field"),
+                      hintText: _appCubit.selectedNetwork.isAllNetworks
+                          ? S.of(context).tokenSelectorModalSearchTitleAllNetworks
+                          : S.of(context).tokenSelectorModalSearchTitle,
+                      onChanged: (query) {
+                        _debouncer.run(() async {
+                          if (query.isEmpty) return _cubit.fetchTokenList();
+                          _cubit.searchToken(query);
+                        });
+                      },
+                    ),
+                    if (_appCubit.selectedNetwork.isAllNetworks) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        maxLines: 4,
+                        S.of(context).tokenSelectorModalSearchAlertForAllNetworks,
+                        style: const TextStyle(color: ZupColors.gray, fontSize: 12),
+                      )
+                    ]
+                  ],
                 ),
               ),
               ...state.maybeWhen(
@@ -224,115 +238,29 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
       ];
 
   List<Widget> _buildSuccessOrLoadingSlivers(TokenSelectorModalState state) => [
-        ZupSkeletonizer(
-          enabled: state.maybeWhen(orElse: () => false, loading: () => true),
-          child: SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: _horizontalPadding).copyWith(top: 10),
-              child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: state.maybeWhen(
-                  orElse: () => const [],
-                  loading: () => [
-                    ZupMiniButton(title: "loading", onPressed: () {}),
-                    ZupMiniButton(title: "loading", onPressed: () {}),
-                    ZupMiniButton(title: "loading", onPressed: () {}),
-                    ZupMiniButton(title: "loading", onPressed: () {}),
-                    ZupMiniButton(title: "loading", onPressed: () {}),
-                  ],
-                  success: (tokenList) => List.generate(
-                    tokenList.mostUsedTokens.length,
-                    (index) {
-                      final mostUsedToken = tokenList.mostUsedTokens[index];
-
-                      return ZupMiniButton(
-                        key: Key("most-used-token-$index"),
-                        iconSize: 18,
-                        onPressed: () => _selectToken(mostUsedToken),
-                        title: mostUsedToken.symbol,
-                        icon: _zupCachedImage.build(mostUsedToken.logoUrl, radius: 50),
-                      );
-                    },
-                  ).toList(),
-                ),
-              ),
-            ),
-          ),
-        ).sliver(),
-        ZupSkeletonizer(
-          enabled: state.maybeWhen(orElse: () => false, loading: () => true),
-          child: state.maybeWhen(
-            orElse: () => const SliverToBoxAdapter(),
-            loading: () => _buildSliverSectionTitle("Loading..."),
-            success: (tokenList) {
-              return tokenList.userTokens.isEmpty
-                  ? const SliverToBoxAdapter()
-                  : SliverToBoxAdapter(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildSectionTitle("My Tokens", topPadding: 0),
-                          const Spacer(),
-                          ZupRefreshButton(
-                              key: const Key("refresh-token-list"),
-                              size: 20,
-                              onPressed: () async {
-                                await Future.delayed(const Duration(milliseconds: 500));
-                                await _cubit.fetchTokenList(forceRefresh: true);
-                              }),
-                          SizedBox(
-                            width: _horizontalPadding,
-                          )
-                        ],
-                      ),
-                    );
-            },
-          ),
-        ).sliver(),
-        ZupSkeletonizer(
-          enabled: state.maybeWhen(orElse: () => false, loading: () => true),
-          child: SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: _horizontalPadding),
-              sliver: state.whenOrNull(
-                loading: () => SliverList(
-                    delegate: SliverChildListDelegate(
-                  List.generate(
-                    3,
-                    (index) => Padding(
-                      padding: _paddingBetweenListItems,
-                      child: TokenCard(asset: TokenDto.fixture(), onClick: () {}),
-                    ),
-                  ),
-                )),
-                success: (tokenList) => SliverList.builder(
-                  itemCount: tokenList.userTokens.length,
-                  itemBuilder: (context, index) {
-                    final userToken = tokenList.userTokens[index];
-
-                    return Padding(
-                      padding: _paddingBetweenListItems,
-                      child: TokenCard(
-                        key: Key("user-token-$index"),
-                        asset: userToken,
-                        onClick: () => _selectToken(userToken),
-                      ),
-                    );
-                  },
-                ),
-              )),
-        ).sliver(),
         state.maybeWhen(
-          success: (tokenList) => _buildSliverSectionTitle(S.of(context).popularTokens),
+          success: (popularTokens) => _buildSliverSectionTitle(S.of(context).popularTokens),
           orElse: () => const SliverToBoxAdapter(),
         ),
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 20),
           sliver: state.whenOrNull(
-            success: (tokenList) => SliverList.builder(
-              itemCount: tokenList.popularTokens.length,
+            loading: () => ZupSkeletonizer(
+              child: SliverList(
+                  delegate: SliverChildListDelegate(
+                List.generate(
+                  4,
+                  (index) => Padding(
+                    padding: _paddingBetweenListItems,
+                    child: TokenCard(asset: TokenDto.fixture(), onClick: () {}),
+                  ),
+                ),
+              )),
+            ).sliver(),
+            success: (popularTokens) => SliverList.builder(
+              itemCount: popularTokens.length,
               itemBuilder: (context, index) {
-                final popularToken = tokenList.popularTokens[index];
+                final popularToken = popularTokens[index];
 
                 return Padding(
                   padding: _paddingBetweenListItems,

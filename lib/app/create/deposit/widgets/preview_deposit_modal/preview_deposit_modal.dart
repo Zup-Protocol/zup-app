@@ -37,9 +37,11 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
     required this.deadline,
     required this.maxSlippage,
     required this.depositWithNativeToken,
+    required this.yieldTimeFrame,
   });
 
   final YieldDto currentYield;
+  final YieldTimeFrame yieldTimeFrame;
   final bool isReversed;
   final ({double price, bool isInfinity}) minPrice;
   final ({double price, bool isInfinity}) maxPrice;
@@ -80,6 +82,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
           maxPrice: maxPrice,
           currentYield: currentYield,
           isReversed: isReversed,
+          yieldTimeFrame: yieldTimeFrame,
         ),
       ),
     );
@@ -173,6 +176,18 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
         );
 
     return isReversedLocal ? price().priceAsQuoteToken : price().priceAsBaseToken;
+  }
+
+  num get yieldTimeframed {
+    if (widget.yieldTimeFrame.isDay) {
+      return widget.currentYield.yield24h;
+    }
+
+    if (widget.yieldTimeFrame.isMonth) {
+      return widget.currentYield.yield30d;
+    }
+
+    return widget.currentYield.yield90d;
   }
 
   ({bool minPrice, bool maxPrice, bool any}) get isOutOfRange {
@@ -547,8 +562,9 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                     const SizedBox(height: 20),
                     _fieldColumn(
                       spacing: 0,
-                      title: S.of(context).previewDepositModalYearlyYield,
-                      value: widget.currentYield.yearlyYield.formatPercent,
+                      title:
+                          "${S.of(context).previewDepositModalYearlyYield} (${widget.yieldTimeFrame.label(context)})",
+                      value: yieldTimeframed.formatPercent,
                     ),
                     const SizedBox(height: 10),
                     const ZupDivider(),

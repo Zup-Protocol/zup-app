@@ -93,6 +93,12 @@ abstract class S {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
 
+  /// No description provided for @yieldCardNetworkTooltipDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This pool is at {network}'**
+  String yieldCardNetworkTooltipDescription({required String network});
+
   /// No description provided for @twentyFourHours.
   ///
   /// In en, this message translates to:
@@ -657,6 +663,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Search token or paste address'**
   String get tokenSelectorModalSearchTitle;
+
+  /// No description provided for @tokenSelectorModalSearchTitleAllNetworks.
+  ///
+  /// In en, this message translates to:
+  /// **'Search token by symbol or name'**
+  String get tokenSelectorModalSearchTitleAllNetworks;
+
+  /// No description provided for @tokenSelectorModalSearchAlertForAllNetworks.
+  ///
+  /// In en, this message translates to:
+  /// **'When ‘All Networks’ is selected, you can only search by name or symbol. To search by address as well, please select a specific network'**
+  String get tokenSelectorModalSearchAlertForAllNetworks;
 
   /// No description provided for @tokenSelectorModalErrorDescription.
   ///

@@ -9,6 +9,11 @@ class SEn extends S {
   SEn([String locale = 'en']) : super(locale);
 
   @override
+  String yieldCardNetworkTooltipDescription({required String network}) {
+    return 'This pool is at $network';
+  }
+
+  @override
   String get twentyFourHours => '24h';
 
   @override
@@ -347,6 +352,14 @@ class SEn extends S {
 
   @override
   String get tokenSelectorModalSearchTitle => 'Search token or paste address';
+
+  @override
+  String get tokenSelectorModalSearchTitleAllNetworks =>
+      'Search token by symbol or name';
+
+  @override
+  String get tokenSelectorModalSearchAlertForAllNetworks =>
+      'When ‘All Networks’ is selected, you can only search by name or symbol. To search by address as well, please select a specific network';
 
   @override
   String get tokenSelectorModalErrorDescription =>

@@ -5,7 +5,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
-import 'package:zup_app/core/dtos/token_list_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
@@ -24,15 +23,16 @@ void main() {
   setUp(() {
     appCubit = AppCubitMock();
     tokensRepository = TokensRepositoryMock();
-    registerFallbackValue(Networks.sepolia);
+    registerFallbackValue(AppNetworks.sepolia);
     cubit = TokenSelectorModalCubitMock();
 
     inject.registerFactory<TokenSelectorModalCubit>(() => cubit);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<Debouncer>(() => Debouncer(milliseconds: 0));
+    inject.registerFactory<AppCubit>(() => appCubit);
 
-    when(() => appCubit.selectedNetwork).thenAnswer((_) => Networks.sepolia);
-    when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto.fixture());
+    when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
+    when(() => tokensRepository.getPopularTokens(any())).thenAnswer((_) async => [TokenDto.fixture()]);
     when(() => cubit.stream).thenAnswer((_) => const Stream.empty());
     when(() => cubit.state).thenReturn(const TokenSelectorModalState.initial());
     when(() => cubit.fetchTokenList()).thenAnswer((_) async {});
@@ -192,7 +192,7 @@ void main() {
 
   zGoldenTest("When the state is success, it should show the success state",
       goldenFileName: "token_selector_modal_success", (tester) async {
-    final tokenList = TokenListDto.fixture();
+    final tokenList = [TokenDto.fixture()];
 
     when(() => cubit.state).thenReturn(TokenSelectorModalState.success(tokenList));
 
@@ -200,69 +200,12 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  zGoldenTest("When clicking the mini button, it should callback with selected token", (tester) async {
-    const tokenList = TokenListDto(
-      mostUsedTokens: [TokenDto(address: "addr"), TokenDto()],
-      popularTokens: [TokenDto()],
-      userTokens: [TokenDto()],
-    );
-    TokenDto? selectedToken;
-
-    when(() => cubit.state).thenReturn(const TokenSelectorModalState.success(tokenList));
-
-    await tester.pumpDeviceBuilder(
-        await goldenBuilder(
-          onSelectToken: (token) {
-            return selectedToken = token;
-          },
-        ),
-        wrapper: GoldenConfig.localizationsWrapper());
-
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key("most-used-token-0")));
-    await tester.pumpAndSettle();
-
-    expect(selectedToken.hashCode, tokenList.mostUsedTokens.first.hashCode);
-  });
-
-  zGoldenTest("When clicking the token card in the `My Tokens` section, it should callback with selected token",
-      (tester) async {
-    const tokenList = TokenListDto(
-      mostUsedTokens: [TokenDto(address: "addr"), TokenDto()],
-      popularTokens: [TokenDto()],
-      userTokens: [TokenDto()],
-    );
-    TokenDto? selectedToken;
-
-    when(() => cubit.state).thenReturn(const TokenSelectorModalState.success(tokenList));
-
-    await tester.pumpDeviceBuilder(
-        await goldenBuilder(
-          onSelectToken: (token) {
-            return selectedToken = token;
-          },
-        ),
-        wrapper: GoldenConfig.localizationsWrapper());
-
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byKey(const Key("user-token-0")));
-    await tester.pumpAndSettle();
-
-    expect(selectedToken.hashCode, tokenList.userTokens.first.hashCode);
-  });
-
   zGoldenTest("When clicking the token card in the `Popular Tokens` section, it should callback with selected token",
       (tester) async {
-    const tokenList = TokenListDto(
-      mostUsedTokens: [TokenDto(address: "addr"), TokenDto()],
-      popularTokens: [TokenDto()],
-      userTokens: [TokenDto()],
-    );
+    final tokenList = [TokenDto.fixture()];
     TokenDto? selectedToken;
 
-    when(() => cubit.state).thenReturn(const TokenSelectorModalState.success(tokenList));
+    when(() => cubit.state).thenReturn(TokenSelectorModalState.success(tokenList));
 
     await tester.pumpDeviceBuilder(
         await goldenBuilder(
@@ -277,28 +220,16 @@ void main() {
     await tester.tap(find.byKey(const Key("popular-token-0")));
     await tester.pumpAndSettle();
 
-    expect(selectedToken.hashCode, tokenList.popularTokens.first.hashCode);
+    expect(selectedToken.hashCode, tokenList.first.hashCode);
   });
 
   zGoldenTest(
-    "When clicking the refresh button in the my tokens section, it should refetch the token list ignoring the cache",
-    (tester) async {
-      final tokenList = TokenListDto(
-        mostUsedTokens: [TokenDto.fixture()],
-        popularTokens: [const TokenDto()],
-        userTokens: [TokenDto.fixture()],
-      );
+      "When the network is all networks, it should show an alert about only being able to search by name or symbol",
+      goldenFileName: "token_selector_modal_all_networks", (tester) async {
+    when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.allNetworks);
+    when(() => cubit.state).thenReturn(TokenSelectorModalState.success([TokenDto.fixture()]));
 
-      when(() => cubit.state).thenReturn(TokenSelectorModalState.success(tokenList));
-      when(() => cubit.fetchTokenList(forceRefresh: any(named: "forceRefresh"))).thenAnswer((_) async {});
-
-      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key("refresh-button")));
-      await tester.pumpAndSettle();
-
-      verify(() => cubit.fetchTokenList(forceRefresh: true)).called(1);
-    },
-  );
+    await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+    await tester.pumpAndSettle();
+  });
 }

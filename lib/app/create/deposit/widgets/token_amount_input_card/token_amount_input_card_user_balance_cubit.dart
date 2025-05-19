@@ -19,9 +19,9 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
   }
 
   String _tokenAddress;
+  AppNetworks _network;
 
   final Wallet _wallet;
-  final Networks _network;
   final ZupSingletonCache _zupSingletonCache;
   final VoidCallback? _onRefreshBalance;
 
@@ -36,22 +36,27 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
     });
   }
 
-  Future<void> updateToken(String tokenAddress) async {
+  Future<void> updateTokenAndNetwork(String tokenAddress, AppNetworks network, {required bool asNativeToken}) async {
     _tokenAddress = tokenAddress;
+    _network = network;
 
-    if (_wallet.signer != null) await getUserTokenAmount();
+    if (_wallet.signer != null) await getUserTokenAmount(isNative: asNativeToken);
   }
 
-  Future<void> getUserTokenAmount({bool ignoreCache = false}) async {
+  Future<void> getUserTokenAmount({bool ignoreCache = false, bool isNative = false}) async {
     try {
       emit(const TokenAmountCardUserBalanceState.loadingUserBalance());
 
       userBalance = await _zupSingletonCache.run(() async {
-        return await _wallet.nativeOrTokenBalance(_tokenAddress, rpcUrl: _network.rpcUrl);
+        return await _wallet.nativeOrTokenBalance(
+          isNative ? EthereumConstants.zeroAddress : _tokenAddress,
+          rpcUrl: _network.rpcUrl,
+        );
       },
           key: userTokenBalanceCacheKey(
             tokenAddress: _tokenAddress,
             userAddress: await _wallet.signer!.address,
+            isNative: isNative,
           ),
           ignoreCache: ignoreCache,
           expiration: const Duration(minutes: 10));

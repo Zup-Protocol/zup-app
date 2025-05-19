@@ -259,8 +259,13 @@ void main() {
     and then emit the initial state with the allowance values""",
     () async {
       final customYield = YieldDto.fixture().copyWith(
-        token0: TokenDto.fixture().copyWith(address: "Token 0 Address"),
-        token1: TokenDto.fixture().copyWith(address: "Token 1 Address"),
+        chainId: AppNetworks.sepolia.chainId,
+        token0: TokenDto.fixture().copyWith(addresses: {
+          AppNetworks.sepolia.chainId: "Token 0 Address",
+        }),
+        token1: TokenDto.fixture().copyWith(addresses: {
+          AppNetworks.sepolia.chainId: "Token 1 Address",
+        }),
       );
 
       sut = PreviewDepositModalCubit(
@@ -279,11 +284,13 @@ void main() {
       final token0Allowance = BigInt.from(12345);
       final token1Allowance = BigInt.from(54321);
 
-      when(() => erc20.fromRpcProvider(contractAddress: customYield.token0.address, rpcUrl: any(named: "rpcUrl")))
-          .thenReturn(token0Contract);
+      when(() => erc20.fromRpcProvider(
+          contractAddress: customYield.token0.addresses[customYield.network.chainId]!,
+          rpcUrl: any(named: "rpcUrl"))).thenReturn(token0Contract);
 
-      when(() => erc20.fromRpcProvider(contractAddress: customYield.token1.address, rpcUrl: any(named: "rpcUrl")))
-          .thenReturn(token1Contract);
+      when(() => erc20.fromRpcProvider(
+          contractAddress: customYield.token1.addresses[customYield.network.chainId]!,
+          rpcUrl: any(named: "rpcUrl"))).thenReturn(token1Contract);
 
       when(() => token0Contract.allowance(owner: any(named: "owner"), spender: any(named: "spender")))
           .thenAnswer((_) async => token0Allowance);
@@ -318,8 +325,8 @@ void main() {
     network is not the same as the token network, it should
     ask to switch the network""",
     () async {
-      const yieldNetwork = Networks.sepolia;
-      final customYield = YieldDto.fixture().copyWith(network: yieldNetwork);
+      const yieldNetwork = AppNetworks.sepolia;
+      final customYield = YieldDto.fixture().copyWith(chainId: yieldNetwork.chainId);
 
       sut = PreviewDepositModalCubit(
           navigatorKey: GlobalKey(),
@@ -333,7 +340,7 @@ void main() {
           zupAnalytics: zupAnalytics);
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
-      when(() => wallet.connectedNetwork).thenAnswer((_) async => Networks.mainnet.chainInfo);
+      when(() => wallet.connectedNetwork).thenAnswer((_) async => AppNetworks.mainnet.chainInfo);
 
       await sut.approveToken(currentYield.token0, BigInt.from(32761));
 
@@ -346,8 +353,8 @@ void main() {
     network is the same as the token network, it should not
     ask to switch the network""",
     () async {
-      const yieldNetwork = Networks.sepolia;
-      final customYield = YieldDto.fixture().copyWith(network: yieldNetwork);
+      const yieldNetwork = AppNetworks.sepolia;
+      final customYield = YieldDto.fixture().copyWith(chainId: yieldNetwork.chainId);
 
       sut = PreviewDepositModalCubit(
           navigatorKey: GlobalKey(),
@@ -386,8 +393,8 @@ void main() {
 
       await sut.approveToken(token, tokenAmount);
 
-      verify(() => erc20.fromSigner(contractAddress: token.address, signer: signer)).called(1);
-      verify(() => erc20Impl.approve(spender: currentYield.protocol.positionManager, value: tokenAmount)).called(1);
+      verify(() => erc20.fromSigner(contractAddress: token.addresses[currentYield.chainId]!, signer: signer)).called(1);
+      verify(() => erc20Impl.approve(spender: currentYield.positionManagerAddress, value: tokenAmount)).called(1);
     },
   );
 
@@ -452,8 +459,9 @@ void main() {
 
       final token0Erc20Impl = Erc20ImplMock();
 
-      when(() => erc20.fromRpcProvider(contractAddress: currentYield.token0.address, rpcUrl: any(named: "rpcUrl")))
-          .thenReturn(token0Erc20Impl);
+      when(() => erc20.fromRpcProvider(
+          contractAddress: currentYield.token0.addresses[currentYield.chainId]!,
+          rpcUrl: any(named: "rpcUrl"))).thenReturn(token0Erc20Impl);
 
       when(() => token0Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
         (_) async => expectedToken0Allowance,
@@ -478,8 +486,9 @@ void main() {
 
       final token1Erc20Impl = Erc20ImplMock();
 
-      when(() => erc20.fromRpcProvider(contractAddress: currentYield.token1.address, rpcUrl: any(named: "rpcUrl")))
-          .thenReturn(token1Erc20Impl);
+      when(() => erc20.fromRpcProvider(
+          contractAddress: currentYield.token1.addresses[currentYield.chainId]!,
+          rpcUrl: any(named: "rpcUrl"))).thenReturn(token1Erc20Impl);
 
       when(() => token1Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
         (_) async => expectedToken1Allowance,
@@ -505,8 +514,9 @@ void main() {
       final token0Allowance = BigInt.from(12345);
       final token0Erc20Impl = Erc20ImplMock();
 
-      when(() => erc20.fromRpcProvider(contractAddress: currentYield.token0.address, rpcUrl: any(named: "rpcUrl")))
-          .thenReturn(token0Erc20Impl);
+      when(() => erc20.fromRpcProvider(
+          contractAddress: currentYield.token0.addresses[currentYield.chainId]!,
+          rpcUrl: any(named: "rpcUrl"))).thenReturn(token0Erc20Impl);
 
       when(() => token0Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
         (_) async => token0Allowance,
@@ -536,8 +546,9 @@ void main() {
       final token1Allowance = BigInt.from(12345);
       final token1Erc20Impl = Erc20ImplMock();
 
-      when(() => erc20.fromRpcProvider(contractAddress: currentYield.token1.address, rpcUrl: any(named: "rpcUrl")))
-          .thenReturn(token1Erc20Impl);
+      when(() => erc20.fromRpcProvider(
+          contractAddress: currentYield.token1.addresses[currentYield.chainId]!,
+          rpcUrl: any(named: "rpcUrl"))).thenReturn(token1Erc20Impl);
 
       when(() => token1Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
         (_) async => token1Allowance,
@@ -662,8 +673,8 @@ void main() {
     """When calling `deposit` and the signer connected network is
     different from the yield network, it should ask the user to switch network""",
     () async {
-      final connectedNetwork = Networks.mainnet.chainInfo;
-      final yieldNetwork = Networks.sepolia.chainInfo;
+      final connectedNetwork = AppNetworks.mainnet.chainInfo;
+      final yieldNetwork = AppNetworks.sepolia.chainInfo;
 
       when(() => wallet.connectedNetwork).thenAnswer((_) async => connectedNetwork);
 
@@ -688,8 +699,8 @@ void main() {
     the same from the yield network, it should not ask the user
     to switch network""",
     () async {
-      final connectedNetwork = Networks.sepolia.chainInfo;
-      final yieldNetwork = Networks.sepolia.chainInfo;
+      final connectedNetwork = AppNetworks.sepolia.chainInfo;
+      final yieldNetwork = AppNetworks.sepolia.chainInfo;
 
       when(() => wallet.connectedNetwork).thenAnswer((_) async => connectedNetwork);
 
@@ -733,8 +744,8 @@ void main() {
             expects: (item) {
               expect(item.amount0Desired, token0Amount);
               expect(item.amount1Desired, token1Amount);
-              expect(item.token0, currentYield.token0.address);
-              expect(item.token1, currentYield.token1.address);
+              expect(item.token0, currentYield.token0.addresses[currentYield.network.chainId]!);
+              expect(item.token1, currentYield.token1.addresses[currentYield.network.chainId]!);
             },
           ),
         ),
@@ -1230,7 +1241,7 @@ void main() {
         params: any(
           named: "params",
           that: ExpectedMatcher(
-            expects: (item) => expect(item.token0, currentYield.token0.address),
+            expects: (item) => expect(item.token0, currentYield.token0.addresses[currentYield.network.chainId]!),
           ),
         ),
       ),
@@ -1257,7 +1268,7 @@ void main() {
         params: any(
           named: "params",
           that: ExpectedMatcher(
-            expects: (item) => expect(item.token1, currentYield.token1.address),
+            expects: (item) => expect(item.token1, currentYield.token1.addresses[currentYield.network.chainId]!),
           ),
         ),
       ),

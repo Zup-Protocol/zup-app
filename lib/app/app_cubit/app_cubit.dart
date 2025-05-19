@@ -15,7 +15,7 @@ class AppCubit extends Cubit<AppState> {
     _isTestnetMode = _cache.getTestnetMode();
 
     if (_isTestnetMode) {
-      _selectedNetwork = Networks.sepolia;
+      updateAppNetwork(AppNetworks.sepolia);
       emit(AppState.testnetModeChanged(_isTestnetMode));
     }
   }
@@ -23,14 +23,15 @@ class AppCubit extends Cubit<AppState> {
   final Wallet _wallet;
   final Cache _cache;
 
-  Networks _selectedNetwork = Networks.mainnet;
+  AppNetworks _selectedNetwork = AppNetworks.allNetworks;
   bool _isTestnetMode = false;
 
-  final StreamController<Networks> _selectedNetworkStreamController = StreamController<Networks>.broadcast();
+  final StreamController<AppNetworks> _selectedNetworkStreamController = StreamController<AppNetworks>.broadcast();
 
-  Stream<Networks> get selectedNetworkStream => _selectedNetworkStreamController.stream;
+  Stream<AppNetworks> get selectedNetworkStream => _selectedNetworkStreamController.stream;
 
-  Networks get selectedNetwork => _selectedNetwork;
+  AppNetworks get selectedNetwork => _selectedNetwork;
+  int get currentChainId => _selectedNetwork.chainId;
   bool get isTestnetMode => _isTestnetMode;
 
   void _setupStreams() {
@@ -47,7 +48,7 @@ class AppCubit extends Cubit<AppState> {
     }
   }
 
-  void updateAppNetwork(Networks newNetwork) async {
+  void updateAppNetwork(AppNetworks newNetwork) async {
     if (newNetwork == _selectedNetwork) return;
 
     emit(AppState.networkChanged(newNetwork));
@@ -60,7 +61,7 @@ class AppCubit extends Cubit<AppState> {
 
   Future<void> toggleTestnetMode() async {
     _isTestnetMode = !_isTestnetMode;
-    updateAppNetwork(isTestnetMode ? Networks.sepolia : Networks.mainnet);
+    updateAppNetwork(isTestnetMode ? AppNetworks.sepolia : AppNetworks.allNetworks);
     await _cache.saveTestnetMode(isTestnetMode: _isTestnetMode);
 
     try {

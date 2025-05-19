@@ -15,7 +15,7 @@ class PositionDto with _$PositionDto {
   const factory PositionDto({
     TokenDto? token0,
     TokenDto? token1,
-    @Default(null) Networks? network,
+    @Default(null) AppNetworks? network,
     @Default(PositionStatus.unknown) @JsonKey(unknownEnumValue: PositionStatus.unknown) PositionStatus status,
     @Default(null) ProtocolDto? protocol,
     @Default(0) num minRange,

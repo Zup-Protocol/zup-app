@@ -38,14 +38,14 @@ void main() {
     await inject.reset();
   });
 
-  Future<DeviceBuilder> goldenBuilder({
-    Key? key,
-    TextEditingController? controller,
-    Networks network = Networks.sepolia,
-    Function(double)? onInput,
-    TokenDto? token,
-    String? disabledText,
-  }) async =>
+  Future<DeviceBuilder> goldenBuilder(
+          {Key? key,
+          TextEditingController? controller,
+          AppNetworks network = AppNetworks.sepolia,
+          Function(double)? onInput,
+          TokenDto? token,
+          String? disabledText,
+          bool isNative = false}) async =>
       await goldenDeviceBuilder(
         Center(
           child: Column(
@@ -55,6 +55,7 @@ void main() {
                 width: 500,
                 child: TokenAmountInputCard(
                   key: key,
+                  isNative: isNative,
                   controller: controller ?? TextEditingController(),
                   network: network,
                   onInput: (value) => onInput?.call(value),
@@ -201,12 +202,78 @@ void main() {
     (tester) async {
       const key = Key("token-amount-card");
       const newTokenAddress = "0xN3W_T0K3N";
-      final newToken = TokenDto.fixture().copyWith(address: newTokenAddress, symbol: "NEW_TOKEN");
+      final newToken = TokenDto.fixture().copyWith(
+        addresses: {AppNetworks.sepolia.chainId: newTokenAddress},
+        symbol: "NEW_TOKEN",
+      );
 
       await tester.pumpDeviceBuilder(await goldenBuilder(key: key));
       await tester.pumpDeviceBuilder(await goldenBuilder(key: key, token: newToken));
 
       verify(() => wallet.nativeOrTokenBalance(newTokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
+    },
+  );
+
+  zGoldenTest(
+    "When updating the widget from a native token, for a different native token, it should update the token in the cubit and get the balance again",
+    (tester) async {
+      const key = Key("token-amount-card");
+
+      const oldTokenNetwork = AppNetworks.scroll;
+      const newTokenNetwork = AppNetworks.sepolia;
+
+      final oldTokenAddress = AppNetworks.scroll.wrappedNativeTokenAddress;
+      final oldToken = TokenDto.fixture().copyWith(
+        addresses: {AppNetworks.scroll.chainId: oldTokenAddress},
+        symbol: "OLD_TOKEN",
+      );
+
+      final newTokenAddress = AppNetworks.sepolia.wrappedNativeTokenAddress;
+      final newToken = TokenDto.fixture().copyWith(
+        addresses: {AppNetworks.sepolia.chainId: newTokenAddress},
+        symbol: "NEW_TOKEN",
+      );
+
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(key: key, token: oldToken, isNative: true, network: oldTokenNetwork),
+      );
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(key: key, token: newToken, isNative: true, network: newTokenNetwork),
+      );
+
+      verify(() => wallet.nativeOrTokenBalance(EthereumConstants.zeroAddress, rpcUrl: newTokenNetwork.rpcUrl))
+          .called(1);
+    },
+  );
+
+  zGoldenTest(
+    "When updating the widget from a non-native token, for a different non-native token, it should update the token in the cubit and get the balance again",
+    (tester) async {
+      const key = Key("token-amount-card");
+
+      const oldTokenNetwork = AppNetworks.scroll;
+      const newTokenNetwork = AppNetworks.sepolia;
+
+      final oldTokenAddress = AppNetworks.scroll.wrappedNativeTokenAddress;
+      final oldToken = TokenDto.fixture().copyWith(
+        addresses: {AppNetworks.scroll.chainId: oldTokenAddress},
+        symbol: "OLD_TOKEN",
+      );
+
+      final newTokenAddress = AppNetworks.sepolia.wrappedNativeTokenAddress;
+      final newToken = TokenDto.fixture().copyWith(
+        addresses: {AppNetworks.sepolia.chainId: newTokenAddress},
+        symbol: "NEW_TOKEN",
+      );
+
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(key: key, token: oldToken, isNative: false, network: oldTokenNetwork),
+      );
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(key: key, token: newToken, isNative: false, network: newTokenNetwork),
+      );
+
+      verify(() => wallet.nativeOrTokenBalance(newTokenAddress, rpcUrl: newTokenNetwork.rpcUrl)).called(1);
     },
   );
 
