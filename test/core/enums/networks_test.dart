@@ -18,15 +18,19 @@ void main() {
   });
 
   test("When calling 'fromValue' it should get a network from a string value", () {
-    expect(AppNetworks.fromValue("sepolia"), AppNetworks.sepolia);
-    expect(AppNetworks.fromValue("mainnet"), AppNetworks.mainnet);
-    expect(AppNetworks.fromValue("scroll"), AppNetworks.scroll);
+    expect(AppNetworks.fromValue("sepolia"), AppNetworks.sepolia, reason: "Sepolia should match");
+    expect(AppNetworks.fromValue("mainnet"), AppNetworks.mainnet, reason: "Mainnet should match");
+    expect(AppNetworks.fromValue("scroll"), AppNetworks.scroll, reason: "Scroll should match");
+    expect(AppNetworks.fromValue("allNetworks"), AppNetworks.allNetworks, reason: "All networks should match");
+    expect(AppNetworks.fromValue("base"), AppNetworks.base, reason: "Base should match");
   });
 
   test("Label extension should match for all networks", () {
     expect(AppNetworks.sepolia.label, "Sepolia", reason: "Sepolia Label should match");
     expect(AppNetworks.mainnet.label, "Ethereum", reason: "Ethereum Label should match");
     expect(AppNetworks.scroll.label, "Scroll", reason: "Scroll Label should match");
+    expect(AppNetworks.allNetworks.label, "All Networks", reason: "All Networks Label should match");
+    expect(AppNetworks.base.label, "Base", reason: "Base Label should match");
   });
 
   test("`testnets` method should return all testnets in the enum, excluding the 'all networks'", () {
@@ -34,7 +38,8 @@ void main() {
   });
 
   test("`mainnets` method should return all mainnets in the enum, including the 'all networks'", () {
-    expect(AppNetworks.mainnets, [AppNetworks.allNetworks, AppNetworks.mainnet, AppNetworks.scroll]);
+    expect(AppNetworks.mainnets,
+        containsAll([AppNetworks.allNetworks, AppNetworks.mainnet, AppNetworks.scroll, AppNetworks.base]));
   });
 
   test("`isTestnet` method should return true for sepolia", () {
@@ -47,6 +52,10 @@ void main() {
 
   test("`isTestnet` method should return false for Scroll", () {
     expect(AppNetworks.scroll.isTestnet, false);
+  });
+
+  test("isTestnet` method should return false for base", () {
+    expect(AppNetworks.base.isTestnet, false);
   });
 
   test("Chain info extension should match for all networks", () {
@@ -84,6 +93,18 @@ void main() {
       ),
       reason: "Scroll ChainInfo should match",
     );
+
+    expect(
+      AppNetworks.base.chainInfo,
+      ChainInfo(
+        hexChainId: "0x2105",
+        chainName: "Base",
+        blockExplorerUrls: const ["https://basescan.org"],
+        nativeCurrency: NativeCurrencies.eth.currencyInfo,
+        rpcUrls: const ["https://base-rpc.publicnode.com"],
+      ),
+      reason: "Base ChainInfo should match",
+    );
   });
 
   test("wrapped native token address should match for all networks", () {
@@ -103,6 +124,12 @@ void main() {
       AppNetworks.scroll.wrappedNativeTokenAddress,
       "0x5300000000000000000000000000000000000004",
       reason: "Scroll wrapped native token address should match",
+    );
+
+    expect(
+      AppNetworks.base.wrappedNativeTokenAddress,
+      "0x4200000000000000000000000000000000000006",
+      reason: "Base wrapped native token address should match",
     );
   });
 
@@ -149,6 +176,21 @@ void main() {
       ),
       reason: "Scroll default token should match",
     );
+
+    expect(
+      AppNetworks.base.wrappedNative,
+      TokenDto(
+        addresses: {
+          AppNetworks.base.chainId: "0x4200000000000000000000000000000000000006",
+        },
+        name: "Wrapped Ether",
+        decimals: 18,
+        symbol: "WETH",
+        logoUrl:
+            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x4200000000000000000000000000000000000006/logo.png",
+      ),
+      reason: "Base default token should match",
+    );
   });
 
   test("RpcUrl extension should return the correct rpc url", () {
@@ -169,6 +211,12 @@ void main() {
       "https://scroll-rpc.publicnode.com",
       reason: "Scroll rpc url should match",
     );
+
+    expect(
+      AppNetworks.base.rpcUrl,
+      "https://base-rpc.publicnode.com",
+      reason: "Base rpc url should match",
+    );
   });
 
   test("openTx should open the correct url for each network", () async {
@@ -185,48 +233,6 @@ void main() {
         reason: "${network.name} should open the correct url",
       );
     }
-  });
-
-  test("'nativeCurrency' should return the correct currency for sepolia network", () {
-    expect(
-      AppNetworks.sepolia.nativeCurrencyTokenDto,
-      TokenDto(
-        addresses: {},
-        name: NativeCurrencies.eth.currencyInfo.name,
-        decimals: NativeCurrencies.eth.currencyInfo.decimals,
-        symbol: NativeCurrencies.eth.currencyInfo.symbol,
-        logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
-      ),
-      reason: "Sepolia native currency should match",
-    );
-  });
-
-  test("'nativeCurrency' should return the correct currency for ethereum network", () {
-    expect(
-      AppNetworks.mainnet.nativeCurrencyTokenDto,
-      TokenDto(
-        addresses: {},
-        name: NativeCurrencies.eth.currencyInfo.name,
-        decimals: NativeCurrencies.eth.currencyInfo.decimals,
-        symbol: NativeCurrencies.eth.currencyInfo.symbol,
-        logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
-      ),
-      reason: "Ethereum native currency should match",
-    );
-  });
-
-  test("'nativeCurrency' should return the correct currency for scroll network", () {
-    expect(
-      AppNetworks.scroll.nativeCurrencyTokenDto,
-      TokenDto(
-        addresses: {},
-        name: NativeCurrencies.eth.currencyInfo.name,
-        decimals: NativeCurrencies.eth.currencyInfo.decimals,
-        symbol: NativeCurrencies.eth.currencyInfo.symbol,
-        logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
-      ),
-      reason: "Scroll native currency should match",
-    );
   });
 
   test("'fromChainId' should return the correct network from the chain id", () {
@@ -267,6 +273,20 @@ void main() {
   zGoldenTest("Ethereum network icon should match", goldenFileName: "ethereum_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
       AppNetworks.mainnet.icon,
+      device: GoldenDevice.square,
+    ));
+  });
+
+  zGoldenTest("Base network icon should match", goldenFileName: "base_network_icon", (tester) async {
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+      AppNetworks.base.icon,
+      device: GoldenDevice.square,
+    ));
+  });
+
+  zGoldenTest("Scroll network icon should match", goldenFileName: "scroll_network_icon", (tester) async {
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+      AppNetworks.scroll.icon,
       device: GoldenDevice.square,
     ));
   });
