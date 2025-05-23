@@ -1,7 +1,7 @@
 import 'package:zup_app/core/enums/networks.dart';
 
 mixin KeysMixin {
-  String userTokenBalanceCacheKey({required String userAddress, required String tokenAddress, bool isNative = false}) {
+  String userTokenBalanceCacheKey({required String userAddress, required String tokenAddress, required bool isNative}) {
     return 'userTokenBalance-$userAddress-$tokenAddress-native=$isNative';
   }
 

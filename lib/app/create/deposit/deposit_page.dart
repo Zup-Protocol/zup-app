@@ -98,6 +98,22 @@ class _DepositPageState extends State<DepositPage>
         : _cubit.selectedYield!.maybeNativeToken1(permitNative: depositWithNativeToken);
   }
 
+  bool get isBaseTokenNative {
+    final currentChain = _cubit.selectedYield!.network.chainId;
+
+    return (_cubit.selectedYield!.network.wrappedNative.addresses[currentChain]!
+            .lowercasedEquals(baseToken.addresses[currentChain]!) &&
+        depositWithNativeToken);
+  }
+
+  bool get isQuoteTokenNative {
+    final currentChain = _cubit.selectedYield!.network.chainId;
+
+    return (_cubit.selectedYield!.network.wrappedNative.addresses[currentChain]!
+            .lowercasedEquals(quoteToken.addresses[currentChain]!) &&
+        depositWithNativeToken);
+  }
+
   bool areTokensReversed = false;
   bool isMaxRangeInfinity = true;
   bool isMinRangeInfinity = true;
@@ -242,12 +258,12 @@ class _DepositPageState extends State<DepositPage>
 
   Future<({String title, Widget? icon, Function()? onPressed})> depositButtonState() async {
     final userWalletBaseTokenAmount = await _cubit.getWalletTokenAmount(
-      baseToken.addresses[_cubit.selectedYield!.network.chainId]!,
+      isBaseTokenNative ? EthereumConstants.zeroAddress : baseToken.addresses[_cubit.selectedYield!.network.chainId]!,
       network: _cubit.selectedYield!.network,
     );
 
     final userWalletQuoteTokenAmount = await _cubit.getWalletTokenAmount(
-      quoteToken.addresses[_cubit.selectedYield!.network.chainId]!,
+      isQuoteTokenNative ? EthereumConstants.zeroAddress : quoteToken.addresses[_cubit.selectedYield!.network.chainId]!,
       network: _cubit.selectedYield!.network,
     );
 
@@ -867,6 +883,7 @@ class _DepositPageState extends State<DepositPage>
                           ),
                           const SizedBox(width: 10),
                           ZupSwitch(
+                            key: const Key("deposit-with-native-token-switch"),
                             value: depositWithNativeToken,
                             onChanged: (value) => setState(() => depositWithNativeToken = value),
                           ),

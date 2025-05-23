@@ -35,6 +35,8 @@ void main() {
 
   test("`testnets` method should return all testnets in the enum, excluding the 'all networks'", () {
     expect(AppNetworks.testnets, [AppNetworks.sepolia]);
+  test("`testnets` method should return all testnets in the enum, excluding the 'all networks'", () {
+    expect(AppNetworks.testnets, [AppNetworks.sepolia]);
   });
 
   test("`mainnets` method should return all mainnets in the enum, including the 'all networks'", () {
@@ -43,6 +45,7 @@ void main() {
   });
 
   test("`isTestnet` method should return true for sepolia", () {
+    expect(AppNetworks.sepolia.isTestnet, true);
     expect(AppNetworks.sepolia.isTestnet, true);
   });
 
@@ -60,6 +63,7 @@ void main() {
 
   test("Chain info extension should match for all networks", () {
     expect(
+      AppNetworks.sepolia.chainInfo,
       AppNetworks.sepolia.chainInfo,
       ChainInfo(
         hexChainId: "0xaa36a7",
@@ -263,8 +267,37 @@ void main() {
     }
   });
 
+  test("'fromChainId' should return the correct network from the chain id", () {
+    for (final network in AppNetworks.values) {
+      if (network.isAllNetworks) continue;
+
+      expect(
+        AppNetworks.fromChainId(network.chainId),
+        network,
+        reason: "Network from chain id should match ${network.name}",
+      );
+    }
+  });
+
+  test("'isAllNetworks' should return true if the network is all networks", () {
+    expect(AppNetworks.allNetworks.isAllNetworks, true);
+  });
+
+  test("'isAllNetworks' should return false if the network is not all networks", () {
+    expect(AppNetworks.scroll.isAllNetworks, false);
+  });
+
+  test("'chainId' should return the correct chain id for each network", () {
+    for (final network in AppNetworks.values) {
+      if (network.isAllNetworks) continue;
+
+      expect(network.chainId, int.parse(network.chainInfo.hexChainId), reason: "Chain id should match ${network.name}");
+    }
+  });
+
   zGoldenTest("Sepolia network icon should match", goldenFileName: "sepolia_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+      AppNetworks.sepolia.icon,
       AppNetworks.sepolia.icon,
       device: GoldenDevice.square,
     ));
