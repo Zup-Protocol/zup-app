@@ -453,14 +453,15 @@ void main() {
     const network = AppNetworks.sepolia;
     const expectedTokenBalance = 1243.542;
 
-    when(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) async => 1243.542);
+    when(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl")))
+        .thenAnswer((_) async => 1243.542);
     when(() => wallet.signer).thenReturn(signer);
     when(() => signer.address).thenAnswer((_) async => "0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c");
 
     final actualTokenBalance = await sut.getWalletTokenAmount(tokenAddress, network: network);
 
     expect(actualTokenBalance, expectedTokenBalance);
-    verify(() => wallet.tokenBalance(tokenAddress, rpcUrl: network.rpcUrl)).called(1);
+    verify(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: network.rpcUrl)).called(1);
   });
 
   test(
@@ -472,19 +473,20 @@ void main() {
     const expectedTokenBalance = 1243.542;
     const notExpectedTokenBalance = 498361387.42;
 
-    when(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).thenAnswer((_) async => 1243.542);
+    when(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl")))
+        .thenAnswer((_) async => 1243.542);
     when(() => wallet.signer).thenReturn(signer);
     when(() => signer.address).thenAnswer((_) async => "0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c");
 
     final actualTokenBalance1 = await sut.getWalletTokenAmount(tokenAddress, network: network);
 
-    when(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).thenAnswer(
+    when(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).thenAnswer(
       (_) async => notExpectedTokenBalance,
     );
 
     final actualTokenBalance2 = await sut.getWalletTokenAmount(tokenAddress, network: network);
 
-    verify(() => wallet.tokenBalance(tokenAddress, rpcUrl: network.rpcUrl)).called(1);
+    verify(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: network.rpcUrl)).called(1);
 
     expect(actualTokenBalance1, expectedTokenBalance);
     expect(actualTokenBalance2, expectedTokenBalance);
@@ -498,7 +500,7 @@ void main() {
     const expectedTokenBalance = 1243.542;
     const notExpectedTokenBalance = 498361387.42;
 
-    when(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).thenAnswer(
+    when(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).thenAnswer(
       (_) async => notExpectedTokenBalance,
     );
     when(() => wallet.signer).thenReturn(signer);
@@ -507,12 +509,12 @@ void main() {
     await sut.getWalletTokenAmount(tokenAddress, network: network);
 
     await withClock(Clock(() => DateTime.now().add(const Duration(minutes: 11))), () async {
-      when(() => wallet.tokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl")))
+      when(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl")))
           .thenAnswer((_) async => expectedTokenBalance);
 
       final actualTokenBalance2 = await sut.getWalletTokenAmount(tokenAddress, network: network);
 
-      verify(() => wallet.tokenBalance(tokenAddress, rpcUrl: network.rpcUrl))
+      verify(() => wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: network.rpcUrl))
           .called(2); // it should call the method twice because the cache is expired
 
       expect(actualTokenBalance2, expectedTokenBalance);

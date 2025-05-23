@@ -139,7 +139,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     return await _zupSingletonCache.run(
       () async {
         try {
-          return await _wallet.tokenBalance(tokenAddress, rpcUrl: network.rpcUrl);
+          return await _wallet.nativeOrTokenBalance(tokenAddress, rpcUrl: network.rpcUrl);
         } catch (_) {
           return 0.0;
         }
@@ -147,6 +147,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
       key: userTokenBalanceCacheKey(
         tokenAddress: tokenAddress,
         userAddress: walletAddress,
+        isNative: tokenAddress == EthereumConstants.zeroAddress,
       ),
       expiration: const Duration(minutes: 10),
     );
