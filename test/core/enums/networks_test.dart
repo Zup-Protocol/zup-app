@@ -35,8 +35,6 @@ void main() {
 
   test("`testnets` method should return all testnets in the enum, excluding the 'all networks'", () {
     expect(AppNetworks.testnets, [AppNetworks.sepolia]);
-  test("`testnets` method should return all testnets in the enum, excluding the 'all networks'", () {
-    expect(AppNetworks.testnets, [AppNetworks.sepolia]);
   });
 
   test("`mainnets` method should return all mainnets in the enum, including the 'all networks'", () {
@@ -63,7 +61,6 @@ void main() {
 
   test("Chain info extension should match for all networks", () {
     expect(
-      AppNetworks.sepolia.chainInfo,
       AppNetworks.sepolia.chainInfo,
       ChainInfo(
         hexChainId: "0xaa36a7",
@@ -297,7 +294,6 @@ void main() {
 
   zGoldenTest("Sepolia network icon should match", goldenFileName: "sepolia_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      AppNetworks.sepolia.icon,
       AppNetworks.sepolia.icon,
       device: GoldenDevice.square,
     ));

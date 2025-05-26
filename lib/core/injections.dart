@@ -37,6 +37,7 @@ abstract class InjectInstanceNames {
   static final lottieSearching = Assets.lotties.seaching.path;
   static const zupAPIDio = 'zup_api_dio';
   static const confettiController10s = 'confetti_controller_10s';
+  static const zupHolderFactory = 'zup_holder_factory';
 }
 
 Future<void> setupInjections() async {
@@ -73,6 +74,7 @@ Future<void> setupInjections() async {
   inject.registerLazySingleton<FirebaseAnalytics>(() => FirebaseAnalytics.instance);
   inject.registerLazySingleton<ZupAnalytics>(() => ZupAnalytics(inject<FirebaseAnalytics>()));
   inject.registerLazySingleton<ZupHolder>(() => ZupHolder());
+  inject.registerFactory<ZupHolder>(() => ZupHolder(), instanceName: InjectInstanceNames.zupHolderFactory);
   inject.registerLazySingleton<Erc20>(() => Erc20());
   inject.registerLazySingleton<GlobalKey<NavigatorState>>(() => GlobalKey<NavigatorState>());
   inject.registerLazySingleton<UniswapPositionManager>(() => UniswapPositionManager());

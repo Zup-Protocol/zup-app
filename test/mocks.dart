@@ -28,6 +28,7 @@ import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/zup_holder.dart';
 import 'package:zup_core/zup_singleton_cache.dart';
 
 class $AssetsLottiesGenMock extends Mock implements $AssetsLottiesGen {}
@@ -89,6 +90,8 @@ class DioMock extends Mock implements Dio {}
 class ConfettiControllerMock extends Mock implements ConfettiController {}
 
 class FirebaseAnalyticsMock extends Mock implements FirebaseAnalytics {}
+
+class ZupHolderMock extends Mock implements ZupHolder {}
 
 class ChangeNotifierMock extends Mock with ChangeNotifier {
   void notify() => notifyListeners();

@@ -65,7 +65,6 @@ enum AppNetworks {
 
   ChainInfo get chainInfo => switch (this) {
         allNetworks => throw UnimplementedError("allNetworks is not a valid network"),
-        allNetworks => throw UnimplementedError("allNetworks is not a valid network"),
         sepolia => ChainInfo(
             hexChainId: "0xaa36a7",
             chainName: label,
