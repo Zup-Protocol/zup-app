@@ -9,8 +9,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_page.dart';
@@ -18,13 +19,13 @@ import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
-import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/token_price_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/zup_analytics.dart';
@@ -46,6 +47,8 @@ void main() {
   late Erc20 erc20;
   late TokensRepository tokensRepository;
   late ZupHolder zupHolder;
+  late PoolService poolService;
+  late UniswapPermit2 permit2;
 
   setUp(() async {
     await Web3Kit.initializeForTest();
@@ -61,6 +64,8 @@ void main() {
     cache = CacheMock();
     tokensRepository = TokensRepositoryMock();
     zupHolder = ZupHolder();
+    poolService = PoolServiceMock();
+    permit2 = UniswapPermit2Mock();
 
     registerFallbackValue(BuildContextMock());
     registerFallbackValue(AppNetworks.sepolia);
@@ -104,9 +109,11 @@ void main() {
     inject.registerFactory<GlobalKey<ScaffoldMessengerState>>(() => GlobalKey());
     inject.registerFactory<UniswapV3Pool>(() => uniswapV3pool);
     inject.registerFactory<Erc20>(() => erc20);
-    inject.registerFactory<UniswapPositionManager>(() => UniswapPositionManagerMock());
+    inject.registerFactory<UniswapV3PositionManager>(() => UniswapV3PositionManagerMock());
     inject.registerFactory<TokensRepository>(() => tokensRepository);
     inject.registerFactory<ZupHolder>(() => zupHolder);
+    inject.registerFactory<PoolService>(() => poolService);
+    inject.registerFactory<UniswapPermit2>(() => permit2);
 
     when(() => tokensRepository.getTokenPrice(any(), any())).thenAnswer((_) async => TokenPriceDto.fixture());
     when(() => cubit.stream).thenAnswer((_) => const Stream.empty());
@@ -2209,113 +2216,6 @@ void main() {
 
         expect(previewDepositModal.maxSlippage, expectedSlippage, reason: "maxSlippage should be passed correctly");
         expect(previewDepositModal.deadline, expectedDeadline, reason: "deadline should be passed correctly");
-      });
-    },
-  );
-
-  zGoldenTest(
-    """When the user has not the wrapped native token amount but has the native token amount to deposit,
-    and the switch to deposit with native is enabled, it should allow the user to proceed with the deposit
-    (open the preview modal)""",
-    (tester) async {
-      await tester.runAsync(() async {
-        final selectedYield = YieldsDto.fixture().best24hYield.copyWith(
-              token0: TokenDto(addresses: YieldsDto.fixture().best24hYield.network.wrappedNative.addresses),
-              token1: TokenDto(addresses: YieldsDto.fixture().best24hYield.network.wrappedNative.addresses),
-            );
-
-        final currentPriceAsTick = BigInt.from(174072);
-        final signer = SignerMock();
-
-        when(() => wallet.signer).thenReturn(signer);
-        when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
-        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
-        when(() => cubit.selectedYield).thenReturn(selectedYield);
-        when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
-        when(() => cubit.selectYield(any(), any())).thenAnswer((_) async => () {});
-        when(() => cubit.selectedYieldTimeframe).thenReturn(YieldTimeFrame.day);
-        when(() => cubit.getWalletTokenAmount(EthereumConstants.zeroAddress, network: any(named: "network")))
-            .thenAnswer(
-          (_) => Future.value(32576352673),
-        );
-        when(() => cubit.getWalletTokenAmount(any(that: isNot(EthereumConstants.zeroAddress)),
-            network: any(named: "network"))).thenAnswer((_) => Future.value(0));
-
-        await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(const Key("yield-card-24h")));
-        await tester.pumpAndSettle();
-
-        await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(const Key("deposit-button")));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(PreviewDepositModal), findsOneWidget); // the next step after configuring the pool
-      });
-    },
-  );
-
-  zGoldenTest(
-    """When the user has not the native token amount but has the wrapped native token amount to deposit,
-    and the switch to deposit with native is false, it should allow the user to proceed with the deposit
-    (open the preview modal)""",
-    (tester) async {
-      await tester.runAsync(() async {
-        final selectedYield = YieldsDto.fixture().best24hYield.copyWith(
-              token0: TokenDto.fixture()
-                  .copyWith(addresses: YieldsDto.fixture().best24hYield.network.wrappedNative.addresses),
-              token1: TokenDto.fixture()
-                  .copyWith(addresses: YieldsDto.fixture().best24hYield.network.wrappedNative.addresses),
-            );
-
-        final currentPriceAsTick = BigInt.from(174072);
-        final signer = SignerMock();
-
-        when(() => wallet.signer).thenReturn(signer);
-        when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
-        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
-        when(() => cubit.selectedYield).thenReturn(selectedYield);
-        when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
-        when(() => cubit.selectYield(any(), any())).thenAnswer((_) async => () {});
-        when(() => cubit.selectedYieldTimeframe).thenReturn(YieldTimeFrame.day);
-        when(() => cubit.getWalletTokenAmount(
-            selectedYield.network.wrappedNative.addresses[selectedYield.network.chainId]!,
-            network: any(named: "network"))).thenAnswer(
-          (_) => Future.value(32576352673),
-        );
-
-        when(() => cubit.getWalletTokenAmount(any(that: matches(EthereumConstants.zeroAddress)),
-            network: any(named: "network"))).thenAnswer((_) => Future.value(0));
-
-        await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(const Key("yield-card-24h")));
-        await tester.pumpAndSettle();
-
-        await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(const Key("deposit-with-native-token-switch")));
-        await tester.pumpAndSettle();
-
-        await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(const Key("deposit-button")));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(PreviewDepositModal), findsOneWidget); // the next step after configuring the pool
       });
     },
   );

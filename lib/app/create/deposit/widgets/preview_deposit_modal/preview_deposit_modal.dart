@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
-import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
@@ -14,8 +14,9 @@ import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
@@ -36,7 +37,6 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
     required this.token1DepositAmount,
     required this.deadline,
     required this.maxSlippage,
-    required this.depositWithNativeToken,
     required this.yieldTimeFrame,
   });
 
@@ -49,7 +49,6 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
   final double token1DepositAmount;
   final Duration deadline;
   final Slippage maxSlippage;
-  final bool depositWithNativeToken;
 
   final double paddingSize = 20;
 
@@ -64,17 +63,16 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
         create: (context) => PreviewDepositModalCubit(
           zupAnalytics: inject<ZupAnalytics>(),
           currentYield: currentYield,
-          uniswapPositionManager: inject<UniswapPositionManager>(),
+          uniswapPositionManager: inject<UniswapV3PositionManager>(),
           erc20: inject<Erc20>(),
           wallet: inject<Wallet>(),
-          uniswapV3Pool: inject<UniswapV3Pool>(),
+          poolService: inject<PoolService>(),
+          permit2: inject<UniswapPermit2>(),
           initialPoolTick: currentPoolTick,
-          depositWithNative: depositWithNativeToken,
           navigatorKey: inject<GlobalKey<NavigatorState>>(),
         ),
         child: PreviewDepositModal(
           deadline: deadline,
-          depositWithNativeToken: depositWithNativeToken,
           maxSlippage: maxSlippage,
           token0DepositAmount: token0DepositAmount,
           token1DepositAmount: token1DepositAmount,
@@ -102,18 +100,18 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
 
   TokenDto get baseToken {
     if (isReversedLocal) {
-      return widget.currentYield.maybeNativeToken1(permitNative: widget.depositWithNativeToken);
+      return widget.currentYield.token1;
     }
 
-    return widget.currentYield.maybeNativeToken0(permitNative: widget.depositWithNativeToken);
+    return widget.currentYield.token0;
   }
 
   TokenDto get quoteToken {
     if (isReversedLocal) {
-      return widget.currentYield.maybeNativeToken0(permitNative: widget.depositWithNativeToken);
+      return widget.currentYield.token0;
     }
 
-    return widget.currentYield.maybeNativeToken1(permitNative: widget.depositWithNativeToken);
+    return widget.currentYield.token1;
   }
 
   double get baseTokenAmount => isReversedLocal ? widget.token1DepositAmount : widget.token0DepositAmount;
@@ -138,7 +136,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
 
   double get minPrice {
     BigInt tick() {
-      if (widget.isReversed != isReversedLocal && widget.maxPrice.isInfinity) return V3PoolConstants.minTick;
+      if (widget.isReversed != isReversedLocal && widget.maxPrice.isInfinity) return V3V4PoolConstants.minTick;
 
       return priceToTick(
         price: (widget.isReversed == !isReversedLocal) ? widget.maxPrice.price : widget.minPrice.price,
@@ -159,7 +157,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
 
   double get maxPrice {
     BigInt tick() {
-      if (widget.isReversed != isReversedLocal && widget.minPrice.isInfinity) return V3PoolConstants.minTick;
+      if (widget.isReversed != isReversedLocal && widget.minPrice.isInfinity) return V3V4PoolConstants.minTick;
 
       return priceToTick(
         price: (widget.isReversed == !isReversedLocal) ? widget.minPrice.price : widget.maxPrice.price,
@@ -231,7 +229,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
         isLoading: true,
       ),
       initial: (token0Allowance, token1Allowance) {
-        if (!(widget.depositWithNativeToken && widget.currentYield.isToken0WrappedNative)) {
+        if (!widget.currentYield.isToken0Native) {
           if (token0Allowance < token0DepositAmount) {
             return (
               title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token0.symbol),
@@ -242,7 +240,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
           }
         }
 
-        if (!(widget.depositWithNativeToken && widget.currentYield.isToken1WrappedNative)) {
+        if (!widget.currentYield.isToken1Native) {
           if (token1Allowance < token1DepositAmount) {
             return (
               title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token1.symbol),
@@ -363,7 +361,6 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               context,
               depositedYield: widget.currentYield,
               showAsBottomSheet: isMobileSize(context),
-              depositedWithNative: widget.depositWithNativeToken,
             );
           },
           slippageCheckError: () {
@@ -447,7 +444,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                             child: SizedBox(
                               height: 15,
                               child: Text(
-                                "${widget.currentYield.maybeNativeToken0(permitNative: widget.depositWithNativeToken).symbol} / ${widget.currentYield.maybeNativeToken1(permitNative: widget.depositWithNativeToken).symbol}",
+                                "${widget.currentYield.token0.symbol} / ${widget.currentYield.token1.symbol}",
                                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                               ),
                             ),
@@ -460,7 +457,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                             child: SizedBox(
                               height: 16,
                               child: Text(
-                                "${widget.currentYield.maybeNativeToken1(permitNative: widget.depositWithNativeToken).symbol} / ${widget.currentYield.maybeNativeToken0(permitNative: widget.depositWithNativeToken).symbol}",
+                                "${widget.currentYield.token1.symbol} / ${widget.currentYield.token0.symbol}",
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,

@@ -7,12 +7,16 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v4_state_view.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/enums/app_environment.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
@@ -77,7 +81,7 @@ Future<void> setupInjections() async {
   inject.registerFactory<ZupHolder>(() => ZupHolder(), instanceName: InjectInstanceNames.zupHolderFactory);
   inject.registerLazySingleton<Erc20>(() => Erc20());
   inject.registerLazySingleton<GlobalKey<NavigatorState>>(() => GlobalKey<NavigatorState>());
-  inject.registerLazySingleton<UniswapPositionManager>(() => UniswapPositionManager());
+  inject.registerLazySingleton<UniswapV3PositionManager>(() => UniswapV3PositionManager());
   inject.registerLazySingleton<ZupSingletonCache>(() => ZupSingletonCache.shared);
   inject.registerFactory<ZupLinks>(() => ZupLinks());
 
@@ -104,6 +108,29 @@ Future<void> setupInjections() async {
   inject.registerLazySingleton<LottieBuilder>(
     () => Assets.lotties.seaching.lottie(),
     instanceName: InjectInstanceNames.lottieSearching,
+  );
+  inject.registerLazySingleton<UniswapV4StateView>(
+    () => UniswapV4StateView(),
+  );
+
+  inject.registerLazySingleton<EthereumAbiCoder>(() => EthereumAbiCoder());
+
+  inject.registerLazySingleton<PoolService>(
+    () => PoolService(
+      inject<UniswapV4StateView>(),
+      inject<UniswapV3Pool>(),
+      inject<UniswapV3PositionManager>(),
+      inject<UniswapV4PositionManager>(),
+      inject<EthereumAbiCoder>(),
+    ),
+  );
+
+  inject.registerLazySingleton<UniswapPermit2>(
+    () => UniswapPermit2(),
+  );
+
+  inject.registerLazySingleton<UniswapV4PositionManager>(
+    () => UniswapV4PositionManager(),
   );
 
   // WARNING: this should always be factory following the instructions

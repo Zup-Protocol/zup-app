@@ -23,6 +23,7 @@ void main() {
     expect(AppNetworks.fromValue("scroll"), AppNetworks.scroll, reason: "Scroll should match");
     expect(AppNetworks.fromValue("allNetworks"), AppNetworks.allNetworks, reason: "All networks should match");
     expect(AppNetworks.fromValue("base"), AppNetworks.base, reason: "Base should match");
+    expect(AppNetworks.fromValue("unichain"), AppNetworks.unichain, reason: "Unichain should match");
   });
 
   test("Label extension should match for all networks", () {
@@ -31,6 +32,7 @@ void main() {
     expect(AppNetworks.scroll.label, "Scroll", reason: "Scroll Label should match");
     expect(AppNetworks.allNetworks.label, "All Networks", reason: "All Networks Label should match");
     expect(AppNetworks.base.label, "Base", reason: "Base Label should match");
+    expect(AppNetworks.unichain.label, "Unichain", reason: "Unichain Label should match");
   });
 
   test("`testnets` method should return all testnets in the enum, excluding the 'all networks'", () {
@@ -38,12 +40,19 @@ void main() {
   });
 
   test("`mainnets` method should return all mainnets in the enum, including the 'all networks'", () {
-    expect(AppNetworks.mainnets,
-        containsAll([AppNetworks.allNetworks, AppNetworks.mainnet, AppNetworks.scroll, AppNetworks.base]));
+    expect(
+      AppNetworks.mainnets,
+      containsAll([
+        AppNetworks.allNetworks,
+        AppNetworks.mainnet,
+        AppNetworks.scroll,
+        AppNetworks.base,
+        AppNetworks.unichain,
+      ]),
+    );
   });
 
   test("`isTestnet` method should return true for sepolia", () {
-    expect(AppNetworks.sepolia.isTestnet, true);
     expect(AppNetworks.sepolia.isTestnet, true);
   });
 
@@ -55,8 +64,12 @@ void main() {
     expect(AppNetworks.scroll.isTestnet, false);
   });
 
-  test("isTestnet` method should return false for base", () {
+  test("`isTestnet` method should return false for base", () {
     expect(AppNetworks.base.isTestnet, false);
+  });
+
+  test("`isTestnet` method should return false for unichain", () {
+    expect(AppNetworks.unichain.isTestnet, false);
   });
 
   test("Chain info extension should match for all networks", () {
@@ -106,6 +119,18 @@ void main() {
       ),
       reason: "Base ChainInfo should match",
     );
+
+    expect(
+      AppNetworks.unichain.chainInfo,
+      ChainInfo(
+        hexChainId: "0x82",
+        chainName: "Unichain",
+        blockExplorerUrls: const ["https://uniscan.xyz/"],
+        nativeCurrency: NativeCurrencies.eth.currencyInfo,
+        rpcUrls: const ["https://unichain-rpc.publicnode.com"],
+      ),
+      reason: "Unichain ChainInfo should match",
+    );
   });
 
   test("wrapped native token address should match for all networks", () {
@@ -131,6 +156,12 @@ void main() {
       AppNetworks.base.wrappedNativeTokenAddress,
       "0x4200000000000000000000000000000000000006",
       reason: "Base wrapped native token address should match",
+    );
+
+    expect(
+      AppNetworks.unichain.wrappedNativeTokenAddress,
+      "0x4200000000000000000000000000000000000006",
+      reason: "Unichain wrapped native token address should match",
     );
   });
 
@@ -192,6 +223,20 @@ void main() {
       ),
       reason: "Base default token should match",
     );
+
+    expect(
+      AppNetworks.unichain.wrappedNative,
+      TokenDto(
+        addresses: {
+          AppNetworks.unichain.chainId: "0x4200000000000000000000000000000000000006",
+        },
+        name: "Wrapped Ether",
+        decimals: 18,
+        symbol: "WETH",
+        logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/unichain/logo.png",
+      ),
+      reason: "Unichain default token should match",
+    );
   });
 
   test("RpcUrl extension should return the correct rpc url", () {
@@ -217,6 +262,12 @@ void main() {
       AppNetworks.base.rpcUrl,
       "https://base-rpc.publicnode.com",
       reason: "Base rpc url should match",
+    );
+
+    expect(
+      AppNetworks.unichain.rpcUrl,
+      "https://unichain-rpc.publicnode.com",
+      reason: "Unichain rpc url should match",
     );
   });
 
@@ -254,34 +305,7 @@ void main() {
 
   test("'isAllNetworks' should return false if the network is not all networks", () {
     expect(AppNetworks.scroll.isAllNetworks, false);
-  });
-
-  test("'chainId' should return the correct chain id for each network", () {
-    for (final network in AppNetworks.values) {
-      if (network.isAllNetworks) continue;
-
-      expect(network.chainId, int.parse(network.chainInfo.hexChainId), reason: "Chain id should match ${network.name}");
-    }
-  });
-
-  test("'fromChainId' should return the correct network from the chain id", () {
-    for (final network in AppNetworks.values) {
-      if (network.isAllNetworks) continue;
-
-      expect(
-        AppNetworks.fromChainId(network.chainId),
-        network,
-        reason: "Network from chain id should match ${network.name}",
-      );
-    }
-  });
-
-  test("'isAllNetworks' should return true if the network is all networks", () {
-    expect(AppNetworks.allNetworks.isAllNetworks, true);
-  });
-
-  test("'isAllNetworks' should return false if the network is not all networks", () {
-    expect(AppNetworks.scroll.isAllNetworks, false);
+    expect(AppNetworks.unichain.isAllNetworks, false);
   });
 
   test("'chainId' should return the correct chain id for each network", () {
@@ -316,6 +340,13 @@ void main() {
   zGoldenTest("Scroll network icon should match", goldenFileName: "scroll_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
       AppNetworks.scroll.icon,
+      device: GoldenDevice.square,
+    ));
+  });
+
+  zGoldenTest("Unichain network icon should match", goldenFileName: "unichain_network_icon", (tester) async {
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+      AppNetworks.unichain.icon,
       device: GoldenDevice.square,
     ));
   });

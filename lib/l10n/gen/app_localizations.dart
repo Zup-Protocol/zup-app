@@ -965,6 +965,18 @@ abstract class S {
   /// **'Minimum Pool Liquidity'**
   String get createPageSettingsDropdownMinimumLiquidity;
 
+  /// No description provided for @createPageSettingsDropdownAllowedPoolTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed Pool Types'**
+  String get createPageSettingsDropdownAllowedPoolTypes;
+
+  /// No description provided for @createPageSettingsDropdownAllowedPoolTypesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter the types of liquidity pools to include in your search'**
+  String get createPageSettingsDropdownAllowedPoolTypesDescription;
+
   /// No description provided for @createPageSettingsDropdownMinimumLiquidityExplanation.
   ///
   /// In en, this message translates to:

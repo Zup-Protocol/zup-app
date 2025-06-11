@@ -544,6 +544,13 @@ class SEn extends S {
       'Minimum Pool Liquidity';
 
   @override
+  String get createPageSettingsDropdownAllowedPoolTypes => 'Allowed Pool Types';
+
+  @override
+  String get createPageSettingsDropdownAllowedPoolTypesDescription =>
+      'Filter the types of liquidity pools to include in your search';
+
+  @override
   String get createPageSettingsDropdownMinimumLiquidityExplanation =>
       'Filter pools by minimum liquidity. We’ll exclude pools with less liquidity than specified, as low Liquidity can lead to misleading yields. This helps you find more reliable opportunities';
 

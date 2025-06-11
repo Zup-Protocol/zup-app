@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -8,14 +7,15 @@ import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/core/exceptions/ethers_exceptions.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
-import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_core/mixins/device_info_mixin.dart';
@@ -27,33 +27,32 @@ part "preview_deposit_modal_state.dart";
 class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3PoolConversorsMixin, DeviceInfoMixin {
   PreviewDepositModalCubit({
     required BigInt initialPoolTick,
-    required UniswapV3Pool uniswapV3Pool,
+    required PoolService poolService,
     required YieldDto currentYield,
     required Erc20 erc20,
     required Wallet wallet,
-    required UniswapPositionManager uniswapPositionManager,
+    required UniswapV3PositionManager uniswapPositionManager,
+    required UniswapPermit2 permit2,
     required GlobalKey<NavigatorState> navigatorKey,
-    required bool depositWithNative,
     required ZupAnalytics zupAnalytics,
   })  : _yield = currentYield,
-        _uniswapV3Pool = uniswapV3Pool,
+        _poolRepository = poolService,
         _erc20 = erc20,
         _wallet = wallet,
-        _uniswapPositionManager = uniswapPositionManager,
         _latestPoolTick = initialPoolTick,
         _navigatorKey = navigatorKey,
-        _depositWithNative = depositWithNative,
         _zupAnalytics = zupAnalytics,
+        _permit2 = permit2,
         super(const PreviewDepositModalState.loading());
 
-  final UniswapV3Pool _uniswapV3Pool;
+  final PoolService _poolRepository;
   final Erc20 _erc20;
   final YieldDto _yield;
   final Wallet _wallet;
-  final UniswapPositionManager _uniswapPositionManager;
   final GlobalKey<NavigatorState> _navigatorKey;
-  final bool _depositWithNative;
+
   final ZupAnalytics _zupAnalytics;
+  final UniswapPermit2 _permit2;
 
   final StreamController<BigInt> _poolTickStreamController = StreamController<BigInt>.broadcast();
 
@@ -87,6 +86,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
   Future<void> approveToken(TokenDto token, BigInt value) async {
     try {
+      final spender = _yield.poolType.isV4 ? _yield.permit2! : _yield.positionManagerAddress;
       final tokenAddressInNetwork = token.addresses[_yield.network.chainId]!;
       emit(PreviewDepositModalState.approvingToken(token.symbol));
 
@@ -96,7 +96,10 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
         contractAddress: tokenAddressInNetwork,
         signer: _wallet.signer!,
       );
-      final tx = await contract.approve(spender: _yield.positionManagerAddress, value: value);
+
+      final tx = await contract.approve(spender: spender, value: value);
+
+      if (_yield.poolType.isV4) checkOrApprovePermit2ForV4Pool(value, token);
 
       emit(PreviewDepositModalState.waitingTransaction(txId: tx.hash, type: WaitingTransactionType.approve));
 
@@ -123,6 +126,33 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     }
   }
 
+  Future<void> checkOrApprovePermit2ForV4Pool(BigInt approveValue, TokenDto token) async {
+    final tokenAddressInNetwork = token.addresses[_yield.network.chainId]!;
+
+    final permit2Contract = _permit2.fromSigner(
+      contractAddress: _yield.permit2!,
+      signer: _wallet.signer!,
+    );
+
+    final permit2CurrentAllowance = await permit2Contract.allowance(
+      await _wallet.signer!.address,
+      tokenAddressInNetwork,
+      _yield.positionManagerAddress,
+    );
+
+    if (permit2CurrentAllowance.amount <= approveValue ||
+        permit2CurrentAllowance.expiration < BigInt.from(DateTime.now().millisecondsSinceEpoch / 1000)) {
+      final tx = await permit2Contract.approve(
+        token: tokenAddressInNetwork,
+        spender: _yield.positionManagerAddress,
+        amount: EthereumConstants.uint160Max,
+        expiration: EthereumConstants.uint48Max,
+      );
+
+      await tx.waitConfirmation();
+    }
+  }
+
   Future<void> deposit({
     required BigInt token0Amount,
     required BigInt token1Amount,
@@ -138,15 +168,10 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       emit(const PreviewDepositModalState.depositing());
       await _maybeSwitchNetwork();
 
-      final positionManagerContract = _uniswapPositionManager.fromSigner(
-        contractAddress: _yield.positionManagerAddress,
-        signer: _wallet.signer!,
-      );
-
       BigInt tickLower() {
         BigInt convertPriceToTickLower() {
-          if (isMinPriceInfinity && !isReversed) return V3PoolConstants.minTick;
-          if (isReversed && isMaxPriceInfinity) return V3PoolConstants.minTick;
+          if (isMinPriceInfinity && !isReversed) return V3V4PoolConstants.minTick;
+          if (isReversed && isMaxPriceInfinity) return V3V4PoolConstants.minTick;
 
           return priceToTick(
             price: isReversed ? maxPrice : minPrice,
@@ -164,8 +189,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       BigInt tickUpper() {
         BigInt convertPriceToTickUpper() {
-          if (isMaxPriceInfinity && !isReversed) return V3PoolConstants.maxTick;
-          if (isReversed && isMinPriceInfinity) return V3PoolConstants.maxTick;
+          if (isMaxPriceInfinity && !isReversed) return V3V4PoolConstants.maxTick;
+          if (isReversed && isMinPriceInfinity) return V3V4PoolConstants.maxTick;
 
           return priceToTick(
             price: isReversed ? minPrice : maxPrice,
@@ -183,60 +208,41 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       final amount0Desired = token0Amount;
       final amount1Desired = token1Amount;
-      final amount0Min = slippage.calculateTokenAmountFromSlippage(amount0Desired);
-      final amount1Min = slippage.calculateTokenAmountFromSlippage(amount1Desired);
+      final amount0Min = slippage.calculateMinTokenAmountFromSlippage(amount0Desired);
+      final amount1Min = slippage.calculateMinTokenAmountFromSlippage(amount1Desired);
       final recipient = await _wallet.signer!.address;
 
       final TransactionResponse tx = await () async {
-        if (_depositWithNative) {
-          final mintCalldata = _uniswapPositionManager.getMintCalldata(
-            params: (
-              amount0Desired: amount0Desired,
-              amount1Desired: amount1Desired,
-              deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
-              amount0Min: amount0Min,
-              amount1Min: amount1Min,
-              recipient: recipient,
-              tickLower: tickLower(),
-              tickUpper: tickUpper(),
-              fee: BigInt.from(_yield.feeTier),
-              token0: _yield.token0.addresses[_yield.network.chainId]!,
-              token1: _yield.token1.addresses[_yield.network.chainId]!,
-            ),
-          );
-
-          return await positionManagerContract.multicall(
-              data: [
-                mintCalldata,
-                if (_depositWithNative) _uniswapPositionManager.getRefundETHCalldata(),
-              ],
-              ethValue: () {
-                if (_depositWithNative && _yield.isToken0WrappedNative) {
-                  return amount0Desired;
-                }
-
-                if (_depositWithNative && _yield.isToken1WrappedNative) {
-                  return amount1Desired;
-                }
-
-                return BigInt.zero;
-              }.call());
-        }
-
-        return await positionManagerContract.mint(
-          params: (
+        if (_yield.poolType.isV3) {
+          return await _poolRepository.sendV3PoolDepositTransaction(
+            _yield,
+            _wallet.signer!,
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
-            deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
+            deadline: deadline,
             amount0Min: amount0Min,
             amount1Min: amount1Min,
             recipient: recipient,
             tickLower: tickLower(),
             tickUpper: tickUpper(),
-            fee: BigInt.from(_yield.feeTier),
-            token0: _yield.token0.addresses[_yield.network.chainId]!,
-            token1: _yield.token1.addresses[_yield.network.chainId]!,
-          ),
+          );
+        }
+
+        await checkOrApprovePermit2ForV4Pool(amount0Desired, _yield.token0);
+        await checkOrApprovePermit2ForV4Pool(amount1Desired, _yield.token1);
+
+        return await _poolRepository.sendV4PoolDepositTransaction(
+          _yield,
+          _wallet.signer!,
+          deadline: deadline,
+          tickLower: tickLower(),
+          tickUpper: tickUpper(),
+          amount0toDeposit: amount0Desired,
+          amount1ToDeposit: amount1Desired,
+          maxAmount0ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(amount0Desired),
+          maxAmount1ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(amount1Desired),
+          recipient: recipient,
+          currentPoolTick: _latestPoolTick,
         );
       }.call();
 
@@ -285,43 +291,42 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
   Future<void> _getTokensAllowance({bool canThrow = false}) async {
     try {
-      final token0contract = _erc20.fromRpcProvider(
-        contractAddress: _yield.token0.addresses[_yield.network.chainId]!,
-        rpcUrl: _yield.network.rpcUrl,
-      );
+      final spender = _yield.poolType.isV4 ? _yield.permit2! : _yield.positionManagerAddress;
+      final owner = await _wallet.signer!.address;
 
-      final token1contract = _erc20.fromRpcProvider(
-        contractAddress: _yield.token1.addresses[_yield.network.chainId]!,
-        rpcUrl: _yield.network.rpcUrl,
-      );
+      if (!_yield.isToken0Native) {
+        final token0contract = _erc20.fromRpcProvider(
+          contractAddress: _yield.token0.addresses[_yield.network.chainId]!,
+          rpcUrl: _yield.network.rpcUrl,
+        );
 
-      final token0Allowance = await token0contract.allowance(
-        owner: await _wallet.signer!.address,
-        spender: _yield.positionManagerAddress,
-      );
+        _token0Allowance = await token0contract.allowance(
+          owner: owner,
+          spender: spender,
+        );
+      }
 
-      final token1Allowance = await token1contract.allowance(
-        owner: await _wallet.signer!.address,
-        spender: _yield.positionManagerAddress,
-      );
+      if (!_yield.isToken1Native) {
+        final token1contract = _erc20.fromRpcProvider(
+          contractAddress: _yield.token1.addresses[_yield.network.chainId]!,
+          rpcUrl: _yield.network.rpcUrl,
+        );
 
-      _token0Allowance = token0Allowance;
-      _token1Allowance = token1Allowance;
+        _token1Allowance = await token1contract.allowance(
+          owner: owner,
+          spender: spender,
+        );
+      }
     } catch (e) {
       if (canThrow) rethrow;
     }
   }
 
   void _updateTick() {
-    final uniswapV3PoolContract = _uniswapV3Pool.fromRpcProvider(
-      contractAddress: _yield.poolAddress,
-      rpcUrl: _yield.network.rpcUrl,
-    );
-
     try {
-      uniswapV3PoolContract.slot0().then((slot0) {
-        _poolTickStreamController.add(slot0.tick);
-        _latestPoolTick = slot0.tick;
+      _poolRepository.getPoolTick(_yield).then((tick) {
+        _latestPoolTick = tick;
+        _poolTickStreamController.add(tick);
       });
     } catch (_) {
       // DO NOTHING
@@ -338,8 +343,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
           WaitingTransactionType.deposit => ZupSnackBar(
               context,
               message: "${S.of(context).previewDepositModalCubitDepositingSnackBarMessage(
-                    token0Symbol: _yield.maybeNativeToken0(permitNative: _depositWithNative).symbol,
-                    token1Symbol: _yield.maybeNativeToken1(permitNative: _depositWithNative).symbol,
+                    token0Symbol: _yield.token0.symbol,
+                    token1Symbol: _yield.token1.symbol,
                   )} ",
               customIcon: const ZupCircularLoadingIndicator(size: 20),
               type: ZupSnackBarType.info,
@@ -391,7 +396,6 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
             context,
             depositedYield: _yield,
             showAsBottomSheet: isMobileSize(context),
-            depositedWithNative: _depositWithNative,
           );
         },
         orElse: () async {

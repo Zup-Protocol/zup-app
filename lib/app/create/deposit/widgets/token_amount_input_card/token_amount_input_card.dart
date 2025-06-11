@@ -73,7 +73,8 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
 
   @override
   void didUpdateWidget(TokenAmountInputCard oldWidget) {
-    if (widget.isNative != oldWidget.isNative) {
+    if (widget.isNative != oldWidget.isNative &&
+        (widget.token.addresses[widget.network.chainId] ?? "").lowercasedEquals(EthereumConstants.zeroAddress)) {
       WidgetsBinding.instance
           .addPostFrameCallback((_) => userBalanceCubit.updateNativeTokenAndFetch(isNative: widget.isNative));
 
