@@ -254,7 +254,7 @@ void main() {
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
-            token0: network.wrappedNative.addresses[network.chainId]!,
+            token0: network.wrappedNativeTokenAddress,
             token1: token1Address,
           )),
         ).called(1);

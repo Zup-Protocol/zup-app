@@ -84,7 +84,7 @@ void main() {
       "When selecting the B token with the same address as A token, it should change the A token to null, and the B token to the selected token",
       goldenFileName: "create_page_select_tokens_stage_change_b_token_to_same_token_as_a", (tester) async {
     const selectedNetwork = AppNetworks.sepolia;
-    final token0 = selectedNetwork.wrappedNative;
+    final token0 = TokenDto.fixture();
 
     when(() => tokensRepository.getPopularTokens(any())).thenAnswer(
       (_) async => [token0],
@@ -104,7 +104,7 @@ void main() {
       "When selecting the A token with the same address as B token, it should change the B token to null and the A token to the selected token",
       goldenFileName: "create_page_select_tokens_stage_change_a_token_to_same_token_as_b", (tester) async {
     const selectedNetwork = AppNetworks.sepolia;
-    final token0 = selectedNetwork.wrappedNative;
+    final token0 = TokenDto.fixture();
 
     when(() => appCubit.currentChainId).thenReturn(selectedNetwork.chainId);
     when(() => tokensRepository.getPopularTokens(any())).thenAnswer(
