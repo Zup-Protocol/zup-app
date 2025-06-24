@@ -30,4 +30,16 @@ void main() {
 
     expect(key, 'poolTick-$poolAddress-${network.name}');
   });
+
+  test("`tokenPriceCacheKey` should return correct key", () {
+    const tokenAddress = '0xTokenAddress';
+    const network = AppNetworks.sepolia;
+
+    final key = _KeysMixinWrapper().tokenPriceCacheKey(
+      tokenAddress: tokenAddress,
+      network: network,
+    );
+
+    expect(key, 'tokenPrice-$tokenAddress-${network.name}');
+  });
 }

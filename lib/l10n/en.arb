@@ -338,6 +338,8 @@
         }
     },
     "createPageSettingsDropdownMinimumLiquidity": "Minimum Pool Liquidity",
+    "createPageSettingsDropdownAllowedPoolTypes": "Allowed Pool Types",
+    "createPageSettingsDropdownAllowedPoolTypesDescription": "Filter the types of liquidity pools to include in your search",
     "createPageSettingsDropdownMinimumLiquidityExplanation": "Filter pools by minimum liquidity. We’ll exclude pools with less liquidity than specified, as low Liquidity can lead to misleading yields. This helps you find more reliable opportunities",
     "createPageSettingsDropdownMiniumLiquidityLowWarning": "Low minimum TVL can lead to misleading yields.",
     "appSettingsDropdownTestnetMode": "Testnet Mode",

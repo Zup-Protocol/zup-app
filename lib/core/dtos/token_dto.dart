@@ -23,7 +23,13 @@ class TokenDto with _$TokenDto {
   factory TokenDto.fixture() => TokenDto(
         symbol: 'WETH',
         name: 'Wrapped Ether',
-        addresses: {AppNetworks.sepolia.chainId: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"},
+        addresses: Map.fromEntries(
+          AppNetworks.values.where((network) => !network.isAllNetworks).map(
+            (network) {
+              return MapEntry(network.chainId, "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
+            },
+          ),
+        ),
         logoUrl:
             'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png',
       );

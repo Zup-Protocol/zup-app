@@ -25,6 +25,7 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
   final ZupSingletonCache _zupSingletonCache;
   final VoidCallback? _onRefreshBalance;
 
+  bool _isNative = false;
   StreamSubscription<Signer?>? _signerStreamSubscription;
   double userBalance = 0;
 
@@ -32,7 +33,7 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
     _signerStreamSubscription = _wallet.signerStream.listen((signer) {
       if (signer == null) return emit(const TokenAmountCardUserBalanceState.hideUserBalance());
 
-      getUserTokenAmount();
+      getUserTokenAmount(isNative: _isNative);
     });
   }
 
@@ -41,6 +42,12 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
     _network = network;
 
     if (_wallet.signer != null) await getUserTokenAmount(isNative: asNativeToken);
+  }
+
+  Future<void> updateNativeTokenAndFetch({required bool isNative}) async {
+    _isNative = isNative;
+
+    if (_wallet.signer != null) await getUserTokenAmount(isNative: _isNative);
   }
 
   Future<void> getUserTokenAmount({bool ignoreCache = false, bool isNative = false}) async {

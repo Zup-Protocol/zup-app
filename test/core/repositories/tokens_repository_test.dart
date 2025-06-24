@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
+import 'package:zup_app/core/dtos/token_price_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 
@@ -122,5 +123,46 @@ void main() {
     verify(() => dio.get("/tokens/popular", queryParameters: {
           "chainId": network.chainId,
         })).called(1);
+  });
+
+  test("When calling `getTokenPrice` it should call the correct endpoint with correct params", () async {
+    const address = "0x123";
+    const network = AppNetworks.sepolia;
+
+    when(() => dio.get(any(), queryParameters: any(named: "queryParameters"))).thenAnswer(
+      (_) async => Response(
+        data: TokenPriceDto.fixture().toJson(),
+        statusCode: 200,
+        requestOptions: RequestOptions(),
+      ),
+    );
+
+    await sut.getTokenPrice(address, network);
+
+    verify(() => dio.get(
+          "/tokens/price",
+          queryParameters: {
+            "address": address,
+            "chainId": network.chainId,
+          },
+        )).called(1);
+  });
+
+  test("When calling `getTokenPrice` it should correctly parse the response", () async {
+    const address = "0x123";
+    const network = AppNetworks.sepolia;
+    final tokenPriceDto = TokenPriceDto.fixture();
+
+    when(() => dio.get(any(), queryParameters: any(named: "queryParameters"))).thenAnswer(
+      (_) async => Response(
+        data: tokenPriceDto.toJson(),
+        statusCode: 200,
+        requestOptions: RequestOptions(),
+      ),
+    );
+
+    final response = await sut.getTokenPrice(address, network);
+
+    expect(response, tokenPriceDto);
   });
 }

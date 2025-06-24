@@ -89,33 +89,64 @@ void main() {
     expect(Slippage.zeroPointOnePercent.props, [Slippage.zeroPointOnePercent.value]);
   });
 
-  group("""`calculateTokenAmountFromSlippage` should calculate the token amount with the slippage applied.
+  group("""`calculateMinTokenAmountFromSlippage` should calculate the token amount with the slippage applied.
   basicaly it's the amount - (x)%""", () {
     test("(50% test case)", () {
       expect(
-        Slippage.fromValue(50).calculateTokenAmountFromSlippage(BigInt.from(1000000)),
+        Slippage.fromValue(50).calculateMinTokenAmountFromSlippage(BigInt.from(1000000)),
         BigInt.from(500000),
       );
     });
 
     test("(10% test case)", () {
       expect(
-        Slippage.fromValue(10).calculateTokenAmountFromSlippage(BigInt.from(1000000)),
+        Slippage.fromValue(10).calculateMinTokenAmountFromSlippage(BigInt.from(1000000)),
         BigInt.from(900000),
       );
     });
 
     test("(0% test case)", () {
       expect(
-        Slippage.fromValue(0).calculateTokenAmountFromSlippage(BigInt.from(1000000)),
+        Slippage.fromValue(0).calculateMinTokenAmountFromSlippage(BigInt.from(1000000)),
         BigInt.from(1000000),
       );
     });
 
     test("(100% test case)", () {
       expect(
-        Slippage.fromValue(100).calculateTokenAmountFromSlippage(BigInt.from(1000000)),
+        Slippage.fromValue(100).calculateMinTokenAmountFromSlippage(BigInt.from(1000000)),
         BigInt.from(0),
+      );
+    });
+  });
+
+  group("""`calculateMaxTokenAmountFromSlippage` should calculate the token amount with the slippage applied.
+  basicaly it's the amount + (x)%""", () {
+    test("(50% test case)", () {
+      expect(
+        Slippage.fromValue(50).calculateMaxTokenAmountFromSlippage(BigInt.from(1000000)),
+        BigInt.from(1500000),
+      );
+    });
+
+    test("(10% test case)", () {
+      expect(
+        Slippage.fromValue(10).calculateMaxTokenAmountFromSlippage(BigInt.from(1000000)),
+        BigInt.from(1100000),
+      );
+    });
+
+    test("(0% test case)", () {
+      expect(
+        Slippage.fromValue(0).calculateMaxTokenAmountFromSlippage(BigInt.from(1000000)),
+        BigInt.from(1000000),
+      );
+    });
+
+    test("(100% test case)", () {
+      expect(
+        Slippage.fromValue(100).calculateMaxTokenAmountFromSlippage(BigInt.from(1000000)),
+        BigInt.from(2000000),
       );
     });
   });

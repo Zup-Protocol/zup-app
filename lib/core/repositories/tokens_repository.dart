@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
+import 'package:zup_app/core/dtos/token_price_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
 class TokensRepository {
@@ -34,5 +35,14 @@ class TokensRepository {
 
     _searchTokenLastCancelToken = null;
     return (response.data as List<dynamic>).map((token) => TokenDto.fromJson(token)).toList();
+  }
+
+  Future<TokenPriceDto> getTokenPrice(String address, AppNetworks network) async {
+    final response = await _zupAPIDio.get("/tokens/price", queryParameters: {
+      "address": address,
+      "chainId": network.chainId,
+    });
+
+    return TokenPriceDto.fromJson(response.data);
   }
 }

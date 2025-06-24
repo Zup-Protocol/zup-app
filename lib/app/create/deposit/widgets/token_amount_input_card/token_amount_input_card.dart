@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/app/create/deposit/widgets/token_amount_input_card/token_amount_input_card_cubit.dart';
 import 'package:zup_app/app/create/deposit/widgets/token_amount_input_card/token_amount_input_card_user_balance_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/extensions/widget_extension.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/token_amount_input_formatter.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/position_token.dart';
@@ -42,6 +44,10 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
 
   Wallet get wallet => inject<Wallet>();
   ZupSingletonCache get zupSingletonCache => inject<ZupSingletonCache>();
+  final TokensRepository _tokensRepository = inject<TokensRepository>();
+  final ZupHolder _zupHolder = inject<ZupHolder>();
+
+  TokenAmountInputCardCubit? cubit;
 
   late TokenAmountCardUserBalanceCubit userBalanceCubit = TokenAmountCardUserBalanceCubit(
     wallet,
@@ -55,19 +61,22 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
 
   @override
   void initState() {
+    cubit = TokenAmountInputCardCubit(_tokensRepository, zupSingletonCache, _zupHolder);
     refreshBalanceAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
 
     WidgetsBinding.instance.addPostFrameCallback((tester) {
-      if (wallet.signer != null) userBalanceCubit.getUserTokenAmount(isNative: widget.isNative);
+      userBalanceCubit.updateNativeTokenAndFetch(isNative: widget.isNative);
     });
+
     super.initState();
   }
 
   @override
-  void didUpdateWidget(covariant TokenAmountInputCard oldWidget) {
-    if (widget.isNative != oldWidget.isNative) {
+  void didUpdateWidget(TokenAmountInputCard oldWidget) {
+    if (widget.isNative != oldWidget.isNative &&
+        (widget.token.addresses[widget.network.chainId] ?? "").lowercasedEquals(EthereumConstants.zeroAddress)) {
       WidgetsBinding.instance
-          .addPostFrameCallback((_) => userBalanceCubit.getUserTokenAmount(isNative: widget.isNative));
+          .addPostFrameCallback((_) => userBalanceCubit.updateNativeTokenAndFetch(isNative: widget.isNative));
 
       return super.didUpdateWidget(oldWidget);
     }
@@ -199,12 +208,31 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                       Row(
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(left: paddingValue),
-                            child: const Text(
-                              r"$-",
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: ZupColors.gray),
-                            ),
-                          ),
+                              padding: EdgeInsets.only(left: paddingValue),
+                              child: StreamBuilder<num>(
+                                stream: (() async* {
+                                  yield await cubit!.getTokenPrice(token: widget.token, network: widget.network);
+
+                                  await for (final _ in Stream.periodic(const Duration(seconds: 30))) {
+                                    yield await cubit!.getTokenPrice(token: widget.token, network: widget.network);
+                                  }
+                                })(),
+                                builder: (context, snapshot) {
+                                  if (!snapshot.hasData) return const ZupCircularLoadingIndicator(size: 10);
+
+                                  return Text(
+                                    widget.controller.value.text.isEmpty
+                                        ? "\$-"
+                                        : ((double.tryParse(widget.controller.value.text) ?? 0) * snapshot.data!)
+                                            .formatCurrency(),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: ZupColors.gray,
+                                    ),
+                                  );
+                                },
+                              )),
                           const Spacer(),
                           BlocProvider.value(
                             value: userBalanceCubit,

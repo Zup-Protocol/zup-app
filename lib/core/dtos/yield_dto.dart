@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:web3kit/core/ethereum_constants.dart';
 import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
-import 'package:zup_core/zup_core.dart';
 
 part 'yield_dto.freezed.dart';
 part 'yield_dto.g.dart';
@@ -47,46 +48,18 @@ class YieldDto with _$YieldDto {
     required num yield30d,
     required num yield90d,
     required int chainId,
+    required PoolType poolType,
     @Default(0) num totalValueLockedUSD,
+    @Default(EthereumConstants.zeroAddress) @JsonKey(name: "hooksAddress") String v4Hooks,
+    @JsonKey(name: "poolManagerAddress") String? v4PoolManager,
+    @JsonKey(name: "stateViewAddress") String? v4StateView,
+    @JsonKey(name: "permit2Address") String? permit2,
   }) = _YieldDto;
 
   AppNetworks get network => AppNetworks.fromChainId(chainId)!;
 
-  TokenDto maybeNativeToken0({required bool permitNative}) {
-    if (permitNative &&
-        (token0.addresses[network.chainId]!).lowercasedEquals(network.wrappedNative.addresses[network.chainId]!)) {
-      return TokenDto(
-        addresses: {network.chainId: network.wrappedNative.addresses[network.chainId]!},
-        decimals: network.chainInfo.nativeCurrency!.decimals,
-        logoUrl: network.chainInfo.nativeCurrency!.logoUrl,
-        symbol: network.chainInfo.nativeCurrency!.symbol,
-        name: network.chainInfo.nativeCurrency!.name,
-      );
-    }
-
-    return token0;
-  }
-
-  TokenDto maybeNativeToken1({required bool permitNative}) {
-    if (permitNative &&
-        token1.addresses[network.chainId]!.lowercasedEquals(network.wrappedNative.addresses[network.chainId]!)) {
-      return TokenDto(
-        addresses: {network.chainId: network.wrappedNative.addresses[network.chainId]!},
-        decimals: network.chainInfo.nativeCurrency!.decimals,
-        logoUrl: network.chainInfo.nativeCurrency!.logoUrl,
-        symbol: network.chainInfo.nativeCurrency!.symbol,
-        name: network.chainInfo.nativeCurrency!.name,
-      );
-    }
-
-    return token1;
-  }
-
-  bool get isToken0WrappedNative =>
-      token0.addresses[network.chainId]!.lowercasedEquals(network.wrappedNativeTokenAddress);
-
-  bool get isToken1WrappedNative =>
-      token1.addresses[network.chainId]!.lowercasedEquals(network.wrappedNativeTokenAddress);
+  bool get isToken0Native => token0.addresses[network.chainId] == EthereumConstants.zeroAddress;
+  bool get isToken1Native => token1.addresses[network.chainId] == EthereumConstants.zeroAddress;
 
   factory YieldDto.fromJson(Map<String, dynamic> json) => _$YieldDtoFromJson(json);
 
@@ -97,6 +70,7 @@ class YieldDto with _$YieldDto {
         yield90d: 32.2,
         positionManagerAddress: "0x5Df2f0aFb5b5bB2Df9D1e9C7b6f5f0DD5f9eD5e0",
         poolAddress: "0x5Df2f0aFb5b5bB2Df9D1e9C7b6f5f0DD5f9eD5e0",
+        poolType: PoolType.v3,
         token0: TokenDto.fixture().copyWith(
           symbol: "USDC",
           decimals: 6,

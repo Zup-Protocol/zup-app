@@ -39,7 +39,7 @@ extension NumExtension on num {
 
     if (decimals > maxDecimals && (this > maxDecimalsNumber)) decimalsDigits = maxDecimals;
     if (useLessThan && this < maxDecimalsNumber) return toAmount(useLessThan: true, maxFixedDigits: maxDecimals);
-    if (this < 0.1) return Decimal.parse(toString()).toString();
+    if (this < 0.1) return "${(isUSD ? "\$" : "")}${Decimal.parse(toString()).toString()}";
 
     return NumberFormat.simpleCurrency(
       decimalDigits: decimalsDigits,

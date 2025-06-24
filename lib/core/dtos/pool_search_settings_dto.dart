@@ -10,6 +10,8 @@ class PoolSearchSettingsDto with _$PoolSearchSettingsDto {
   @JsonSerializable(explicitToJson: true)
   factory PoolSearchSettingsDto({
     @Default(PoolSearchSettingsDto.defaultMinLiquidityUSD) @JsonKey(name: 'min_liquidity_usd') num minLiquidityUSD,
+    @Default(true) bool allowV4Search,
+    @Default(true) bool allowV3Search,
   }) = _PoolSearchSettingsDto;
 
   const PoolSearchSettingsDto._();

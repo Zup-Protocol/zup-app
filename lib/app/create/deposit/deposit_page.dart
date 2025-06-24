@@ -6,7 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web3kit/web3kit.dart';
-import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/widgets/deposit_settings_dropdown_child.dart';
@@ -26,9 +25,10 @@ import 'package:zup_app/core/extensions/widget_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/mixins/v3_pool_liquidity_calculations_mixin.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
@@ -47,10 +47,10 @@ Route routeBuilder(BuildContext context, RouteSettings settings) {
         inject<YieldRepository>(),
         inject<ZupSingletonCache>(),
         inject<Wallet>(),
-        inject<UniswapV3Pool>(),
         inject<Cache>(),
         inject<AppCubit>(),
         inject<ZupAnalytics>(),
+        inject<PoolService>(),
       ),
       child: const DepositPage(),
     ),
@@ -87,31 +87,11 @@ class _DepositPageState extends State<DepositPage>
   String get token0Address => _navigator.getParam(ZupNavigatorPaths.deposit.routeParamsName?.param0 ?? "") ?? "";
   String get token1Address => _navigator.getParam(ZupNavigatorPaths.deposit.routeParamsName?.param1 ?? "") ?? "";
   TokenDto get baseToken {
-    return areTokensReversed
-        ? _cubit.selectedYield!.maybeNativeToken1(permitNative: depositWithNativeToken)
-        : _cubit.selectedYield!.maybeNativeToken0(permitNative: depositWithNativeToken);
+    return areTokensReversed ? _cubit.selectedYield!.token1 : _cubit.selectedYield!.token0;
   }
 
   TokenDto get quoteToken {
-    return areTokensReversed
-        ? _cubit.selectedYield!.maybeNativeToken0(permitNative: depositWithNativeToken)
-        : _cubit.selectedYield!.maybeNativeToken1(permitNative: depositWithNativeToken);
-  }
-
-  bool get isBaseTokenNative {
-    final currentChain = _cubit.selectedYield!.network.chainId;
-
-    return (_cubit.selectedYield!.network.wrappedNative.addresses[currentChain]!
-            .lowercasedEquals(baseToken.addresses[currentChain]!) &&
-        depositWithNativeToken);
-  }
-
-  bool get isQuoteTokenNative {
-    final currentChain = _cubit.selectedYield!.network.chainId;
-
-    return (_cubit.selectedYield!.network.wrappedNative.addresses[currentChain]!
-            .lowercasedEquals(quoteToken.addresses[currentChain]!) &&
-        depositWithNativeToken);
+    return areTokensReversed ? _cubit.selectedYield!.token0 : _cubit.selectedYield!.token1;
   }
 
   bool areTokensReversed = false;
@@ -120,8 +100,6 @@ class _DepositPageState extends State<DepositPage>
   bool isBaseTokenAmountUserInput = false;
   double minPrice = 0;
   double maxPrice = 0;
-
-  late bool depositWithNativeToken = true;
 
   late Slippage selectedSlippage = _cubit.depositSettings.slippage;
   late Duration selectedDeadline = _cubit.depositSettings.deadline;
@@ -206,13 +184,13 @@ class _DepositPageState extends State<DepositPage>
     if (isOutOfRange.maxPrice) return baseTokenAmountController.clear();
 
     final maxTickPrice = tickToPrice(
-      tick: V3PoolConstants.maxTick,
+      tick: V3V4PoolConstants.maxTick,
       poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
       poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
     );
 
     final minTickPrice = tickToPrice(
-      tick: V3PoolConstants.minTick,
+      tick: V3V4PoolConstants.minTick,
       poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
       poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
     );
@@ -258,12 +236,12 @@ class _DepositPageState extends State<DepositPage>
 
   Future<({String title, Widget? icon, Function()? onPressed})> depositButtonState() async {
     final userWalletBaseTokenAmount = await _cubit.getWalletTokenAmount(
-      isBaseTokenNative ? EthereumConstants.zeroAddress : baseToken.addresses[_cubit.selectedYield!.network.chainId]!,
+      baseToken.addresses[_cubit.selectedYield!.network.chainId]!,
       network: _cubit.selectedYield!.network,
     );
 
     final userWalletQuoteTokenAmount = await _cubit.getWalletTokenAmount(
-      isQuoteTokenNative ? EthereumConstants.zeroAddress : quoteToken.addresses[_cubit.selectedYield!.network.chainId]!,
+      quoteToken.addresses[_cubit.selectedYield!.network.chainId]!,
       network: _cubit.selectedYield!.network,
     );
 
@@ -308,7 +286,6 @@ class _DepositPageState extends State<DepositPage>
         PreviewDepositModal(
           key: const Key("preview-deposit-modal"),
           yieldTimeFrame: _cubit.selectedYieldTimeframe!,
-          depositWithNativeToken: depositWithNativeToken,
           deadline: selectedDeadline,
           maxSlippage: selectedSlippage,
           currentYield: _cubit.selectedYield!,
@@ -697,7 +674,7 @@ class _DepositPageState extends State<DepositPage>
           child: IgnorePointer(
             ignoring: true,
             child: Text(
-              "${_cubit.selectedYield?.maybeNativeToken0(permitNative: depositWithNativeToken).symbol} / ${_cubit.selectedYield?.maybeNativeToken1(permitNative: depositWithNativeToken).symbol}",
+              "${_cubit.selectedYield?.token0.symbol} / ${_cubit.selectedYield?.token1.symbol}",
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
             ),
           ),
@@ -708,7 +685,7 @@ class _DepositPageState extends State<DepositPage>
           child: IgnorePointer(
               ignoring: true,
               child: Text(
-                "${_cubit.selectedYield?.maybeNativeToken1(permitNative: depositWithNativeToken).symbol} / ${_cubit.selectedYield?.maybeNativeToken0(permitNative: depositWithNativeToken).symbol}",
+                "${_cubit.selectedYield?.token1.symbol} / ${_cubit.selectedYield?.token0.symbol}",
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
               )),
         ),
@@ -866,36 +843,14 @@ class _DepositPageState extends State<DepositPage>
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (baseToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(_cubit
-                            .selectedYield!.network.wrappedNative.addresses[_cubit.selectedYield!.network.chainId]!) ||
-                        quoteToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(
-                          _cubit.selectedYield!.network.wrappedNative.addresses[_cubit.selectedYield!.network.chainId]!,
-                        ))
-                      Row(
-                        children: [
-                          _sectionTitle(S.of(context).depositPageDepositSectionTitle),
-                          const Spacer(),
-                          Text(
-                            S.of(context).depositPageDepositWithNativeToken(
-                                  tokenSymbol: _cubit.selectedYield?.network.chainInfo.nativeCurrency!.symbol ?? "",
-                                ),
-                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(width: 10),
-                          ZupSwitch(
-                            key: const Key("deposit-with-native-token-switch"),
-                            value: depositWithNativeToken,
-                            onChanged: (value) => setState(() => depositWithNativeToken = value),
-                          ),
-                        ],
-                      ),
+                    _sectionTitle(S.of(context).depositPageDepositSectionTitle),
                     const SizedBox(height: 12),
                     TokenAmountInputCard(
                       key: const Key("base-token-input-card"),
                       token: baseToken,
-                      isNative: depositWithNativeToken &&
-                          baseToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(_cubit
-                              .selectedYield!.network.wrappedNative.addresses[_cubit.selectedYield!.network.chainId]!),
+                      isNative: baseToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(
+                        EthereumConstants.zeroAddress,
+                      ),
                       onRefreshBalance: () => setState(() {}),
                       disabledText: () {
                         if (!isBaseTokenNeeded) {
@@ -922,9 +877,9 @@ class _DepositPageState extends State<DepositPage>
                     TokenAmountInputCard(
                       key: const Key("quote-token-input-card"),
                       token: quoteToken,
-                      isNative: depositWithNativeToken &&
-                          quoteToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(_cubit
-                              .selectedYield!.network.wrappedNative.addresses[_cubit.selectedYield!.network.chainId]!),
+                      isNative: quoteToken.addresses[_cubit.selectedYield!.network.chainId]!.lowercasedEquals(
+                        EthereumConstants.zeroAddress,
+                      ),
                       onRefreshBalance: () => setState(() {}),
                       disabledText: () {
                         if (!isQuoteTokenNeeded) {
@@ -948,39 +903,46 @@ class _DepositPageState extends State<DepositPage>
                       network: _cubit.selectedYield!.network,
                     ),
                     const SizedBox(height: 20),
-                    StreamBuilder(
-                      key: const Key("deposit-button"),
-                      stream: wallet.signerStream,
-                      initialData: wallet.signer,
-                      builder: (context, signerSnapshot) {
-                        if (!signerSnapshot.hasData) {
-                          return ZupPrimaryButton(
-                            width: double.maxFinite,
-                            title: S.of(context).connectWallet,
-                            icon: Assets.icons.walletBifold.svg(),
-                            fixedIcon: true,
-                            alignCenter: true,
-                            hoverElevation: 0,
-                            backgroundColor: ZupColors.brand7,
-                            foregroundColor: ZupColors.brand,
-                            onPressed: () => ConnectModal().show(context),
-                          );
-                        }
+                    Row(
+                      children: [
+                        Expanded(
+                          child: StreamBuilder(
+                            key: const Key("deposit-button"),
+                            stream: wallet.signerStream,
+                            initialData: wallet.signer,
+                            builder: (context, signerSnapshot) {
+                              if (!signerSnapshot.hasData) {
+                                return ZupPrimaryButton(
+                                  width: double.maxFinite,
+                                  title: S.of(context).connectWallet,
+                                  icon: Assets.icons.walletBifold.svg(),
+                                  fixedIcon: true,
+                                  alignCenter: true,
+                                  hoverElevation: 0,
+                                  backgroundColor: ZupColors.brand7,
+                                  foregroundColor: ZupColors.brand,
+                                  onPressed: () => ConnectModal().show(context),
+                                );
+                              }
 
-                        return FutureBuilder(
-                            future: depositButtonState(),
-                            builder: (context, stateSnapshot) {
-                              return ZupPrimaryButton(
-                                alignCenter: true,
-                                title: stateSnapshot.data?.title ?? "Loading...",
-                                icon: stateSnapshot.data?.icon,
-                                isLoading: stateSnapshot.connectionState == ConnectionState.waiting,
-                                fixedIcon: true,
-                                onPressed: stateSnapshot.data?.onPressed,
-                                width: double.maxFinite,
+                              return FutureBuilder(
+                                future: depositButtonState(),
+                                builder: (context, stateSnapshot) {
+                                  return ZupPrimaryButton(
+                                    alignCenter: true,
+                                    title: stateSnapshot.data?.title ?? "Loading...",
+                                    icon: stateSnapshot.data?.icon,
+                                    isLoading: stateSnapshot.connectionState == ConnectionState.waiting,
+                                    fixedIcon: true,
+                                    onPressed: stateSnapshot.data?.onPressed,
+                                    width: double.maxFinite,
+                                  );
+                                },
                               );
-                            });
-                      },
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 );

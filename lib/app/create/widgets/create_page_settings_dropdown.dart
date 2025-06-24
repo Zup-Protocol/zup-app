@@ -162,6 +162,55 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
                   )
                 : const SizedBox.shrink(),
           ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Text(
+                S.of(context).createPageSettingsDropdownAllowedPoolTypes,
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+              ),
+              const SizedBox(width: 8),
+              ZupTooltip(
+                key: const Key("pool-types-allowed-tooltip"),
+                message: S.of(context).createPageSettingsDropdownAllowedPoolTypesDescription,
+                child: Assets.icons.infoCircle.svg(
+                  colorFilter: const ColorFilter.mode(ZupColors.gray, BlendMode.srcIn),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 5),
+          Row(
+            children: [
+              const Text("V4", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+              const SizedBox(width: 5),
+              ZupSwitch(
+                key: const Key("pool-types-allowed-v4-switch"),
+                value: cache.getPoolSearchSettings().allowV4Search,
+                onChanged: (value) async {
+                  await cache.savePoolSearchSettings(
+                    settings: cache.getPoolSearchSettings().copyWith(allowV4Search: value),
+                  );
+
+                  setState(() {});
+                },
+              ),
+              const SizedBox(width: 12),
+              const Text("V3", style: TextStyle(fontWeight: FontWeight.w500)),
+              const SizedBox(width: 5),
+              ZupSwitch(
+                key: const Key("pool-types-allowed-v3-switch"),
+                value: cache.getPoolSearchSettings().allowV3Search,
+                onChanged: (value) async {
+                  await cache.savePoolSearchSettings(
+                    settings: cache.getPoolSearchSettings().copyWith(allowV3Search: value),
+                  );
+
+                  setState(() {});
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );

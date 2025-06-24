@@ -10,20 +10,22 @@ import 'package:web3kit/core/dtos/transaction_receipt.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/core/exceptions/ethers_exceptions.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 
 import '../../../../../golden_config.dart';
-import '../../../../../matchers.dart';
 import '../../../../../mocks.dart';
 import '../../../../../wrappers.dart';
 
@@ -40,9 +42,12 @@ void main() {
   late Wallet wallet;
   late Signer signer;
   late TransactionResponse transactionResponse;
-  late UniswapPositionManager uniswapPositionManager;
-  late UniswapPositionManagerImpl uniswapPositionManagerImpl;
+  late UniswapV3PositionManager uniswapPositionManager;
+  late UniswapV3PositionManagerImpl uniswapPositionManagerImpl;
   late ZupAnalytics zupAnalytics;
+  late UniswapPermit2 permit2;
+  late UniswapPermit2Impl permit2Impl;
+  late PoolService poolService;
 
   setUp(() {
     uniswapV3Pool = UniswapV3PoolMock();
@@ -52,20 +57,23 @@ void main() {
     erc20Impl = Erc20ImplMock();
     signer = SignerMock();
     transactionResponse = TransactionResponseMock();
-    uniswapPositionManager = UniswapPositionManagerMock();
-    uniswapPositionManagerImpl = UniswapPositionManagerImplMock();
+    uniswapPositionManager = UniswapV3PositionManagerMock();
+    uniswapPositionManagerImpl = UniswapV3PositionManagerImplMock();
     zupAnalytics = ZupAnalyticsMock();
+    permit2 = UniswapPermit2Mock();
+    permit2Impl = UniswapPermit2ImplMock();
+    poolService = PoolServiceMock();
 
     sut = PreviewDepositModalCubit(
       initialPoolTick: initialPoolTick,
-      uniswapV3Pool: uniswapV3Pool,
       currentYield: currentYield,
       erc20: erc20,
       wallet: wallet,
-      depositWithNative: false,
       uniswapPositionManager: uniswapPositionManager,
       navigatorKey: GlobalKey(),
       zupAnalytics: zupAnalytics,
+      permit2: permit2,
+      poolService: poolService,
     );
 
     registerFallbackValue(const ChainInfo(hexChainId: "0x1"));
@@ -73,6 +81,7 @@ void main() {
     registerFallbackValue(BigInt.one);
     registerFallbackValue((amount: BigInt.from(1), token: ""));
     registerFallbackValue(YieldDto.fixture());
+    registerFallbackValue(Duration.zero);
     registerFallbackValue((
       amount0Desired: BigInt.zero,
       amount0Min: BigInt.zero,
@@ -113,6 +122,11 @@ void main() {
           unlocked: true,
         ));
 
+    when(() => permit2.fromSigner(contractAddress: any(named: "contractAddress"), signer: any(named: "signer")))
+        .thenReturn(permit2Impl);
+    when(() => permit2.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
+        .thenReturn(permit2Impl);
+
     when(() => erc20.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
         .thenReturn(erc20Impl);
 
@@ -131,6 +145,18 @@ void main() {
       (_) async => TransactionReceipt(hash: transactionHash),
     );
 
+    when(
+      () => permit2Impl.approve(
+          token: any(named: "token"),
+          spender: any(named: "spender"),
+          amount: any(named: "amount"),
+          expiration: any(named: "expiration")),
+    ).thenAnswer((_) async => transactionResponse);
+
+    when(() => permit2Impl.allowance(any(), any(), any())).thenAnswer(
+      (_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero),
+    );
+
     when(() => wallet.connectedNetwork).thenAnswer((_) async => currentYield.network.chainInfo);
 
     when(() => uniswapPositionManager.fromRpcProvider(
@@ -147,6 +173,16 @@ void main() {
     ).thenAnswer((_) async => transactionResponse);
 
     when(() => uniswapPositionManager.getMintCalldata(params: any(named: "params"))).thenReturn("0x");
+
+    when(() => poolService.sendV3PoolDepositTransaction(any(), any(),
+        amount0Desired: any(named: "amount0Desired"),
+        amount1Desired: any(named: "amount1Desired"),
+        amount0Min: any(named: "amount0Min"),
+        amount1Min: any(named: "amount1Min"),
+        deadline: any(named: "deadline"),
+        recipient: any(named: "recipient"),
+        tickLower: any(named: "tickLower"),
+        tickUpper: any(named: "tickUpper"))).thenAnswer((_) async => transactionResponse);
   });
 
   void sutCopyWith({
@@ -155,17 +191,19 @@ void main() {
     UniswapV3Pool? customUniswapV3Pool,
     Erc20? customErc20,
     Wallet? customWallet,
-    UniswapPositionManager? customUniswapPositionManager,
+    UniswapV3PositionManager? customUniswapPositionManager,
     YieldDto? customYield,
     GlobalKey<NavigatorState>? customNavigatorKey,
+    UniswapPermit2? customPermit2,
+    PoolService? customPoolService,
   }) {
     sut = PreviewDepositModalCubit(
       initialPoolTick: customInitialPoolTick ?? initialPoolTick,
-      uniswapV3Pool: customUniswapV3Pool ?? uniswapV3Pool,
+      permit2: customPermit2 ?? permit2,
+      poolService: customPoolService ?? poolService,
       currentYield: customYield ?? currentYield,
       erc20: customErc20 ?? erc20,
       wallet: customWallet ?? wallet,
-      depositWithNative: customDepositWithNative ?? false,
       uniswapPositionManager: customUniswapPositionManager ?? uniswapPositionManager,
       navigatorKey: customNavigatorKey ?? GlobalKey(),
       zupAnalytics: zupAnalytics,
@@ -197,15 +235,7 @@ void main() {
       BigInt latestEmittedTick = BigInt.zero;
       const minutesPassed = 2;
 
-      when(() => uniswapV3PoolImpl.slot0()).thenAnswer((_) async => (
-            feeProtocol: BigInt.zero,
-            observationCardinality: BigInt.zero,
-            observationCardinalityNext: BigInt.zero,
-            observationIndex: BigInt.zero,
-            sqrtPriceX96: BigInt.zero,
-            tick: expectedEmittedTick,
-            unlocked: true,
-          ));
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedEmittedTick);
 
       fakeAsync((async) {
         sut.setup();
@@ -233,7 +263,7 @@ void main() {
         expectedEmittedTick,
         reason: "`latestPoolTick` should be updated",
       );
-      verify(() => uniswapV3PoolImpl.slot0()).called(2);
+      verify(() => poolService.getPoolTick(any())).called(2);
     },
   );
 
@@ -271,11 +301,11 @@ void main() {
       sut = PreviewDepositModalCubit(
           uniswapPositionManager: uniswapPositionManager,
           initialPoolTick: initialPoolTick,
-          uniswapV3Pool: uniswapV3Pool,
+          permit2: permit2,
+          poolService: poolService,
           currentYield: customYield,
           erc20: erc20,
           wallet: wallet,
-          depositWithNative: false,
           navigatorKey: GlobalKey(),
           zupAnalytics: zupAnalytics);
 
@@ -331,16 +361,19 @@ void main() {
       sut = PreviewDepositModalCubit(
           navigatorKey: GlobalKey(),
           initialPoolTick: initialPoolTick,
-          uniswapV3Pool: uniswapV3Pool,
+          permit2: permit2,
+          poolService: poolService,
           currentYield: customYield,
           erc20: erc20,
           wallet: wallet,
-          depositWithNative: false,
           uniswapPositionManager: uniswapPositionManager,
           zupAnalytics: zupAnalytics);
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
       when(() => wallet.connectedNetwork).thenAnswer((_) async => AppNetworks.mainnet.chainInfo);
+      when(() => permit2Impl.allowance(any(), any(), any())).thenAnswer(
+        (_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero),
+      );
 
       await sut.approveToken(currentYield.token0, BigInt.from(32761));
 
@@ -360,11 +393,11 @@ void main() {
           navigatorKey: GlobalKey(),
           uniswapPositionManager: uniswapPositionManager,
           initialPoolTick: initialPoolTick,
-          uniswapV3Pool: uniswapV3Pool,
+          permit2: permit2,
+          poolService: poolService,
           currentYield: customYield,
           erc20: erc20,
           wallet: wallet,
-          depositWithNative: false,
           zupAnalytics: zupAnalytics);
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
@@ -720,7 +753,7 @@ void main() {
     },
   );
 
-  test("When calling `deposit`, the tokens amount sent to the contract call should match the passed values", () async {
+  test("When calling `deposit`, the tokens amount sent to the pool service to deposit should be correct", () async {
     final token0Amount = BigInt.from(32421);
     final token1Amount = BigInt.from(8729889);
 
@@ -737,25 +770,24 @@ void main() {
     );
 
     verify(
-      () => uniswapPositionManagerImpl.mint(
-        params: any(
-          named: "params",
-          that: ExpectedMatcher(
-            expects: (item) {
-              expect(item.amount0Desired, token0Amount);
-              expect(item.amount1Desired, token1Amount);
-              expect(item.token0, currentYield.token0.addresses[currentYield.network.chainId]!);
-              expect(item.token1, currentYield.token1.addresses[currentYield.network.chainId]!);
-            },
-          ),
-        ),
+      () => poolService.sendV3PoolDepositTransaction(
+        any(),
+        any(),
+        amount0Desired: token0Amount,
+        amount1Desired: token1Amount,
+        amount0Min: any(named: "amount0Min"),
+        amount1Min: any(named: "amount1Min"),
+        deadline: any(named: "deadline"),
+        recipient: any(named: "recipient"),
+        tickLower: any(named: "tickLower"),
+        tickUpper: any(named: "tickUpper"),
       ),
     );
   });
 
   test(
-    """When calling `deposit`, the amount1Min in the depositData should be
-      the passed token1 amount minus the slippage percent""",
+    """When calling `deposit`, the amount1Min sent to the pool service to deposit
+    should be the one calculated from the slippage""",
     () async {
       final token1Amount = BigInt.from(6721);
       const slippage = Slippage.halfPercent;
@@ -777,34 +809,28 @@ void main() {
       );
 
       verify(
-        () => uniswapPositionManager.getMintCalldata(
-          params: any(
-            named: "params",
-            that: ExpectedMatcher(
-              expects: (item) {
-                expect(
-                  item.amount1Min,
-                  slippage.calculateTokenAmountFromSlippage(token1Amount),
-                );
-              },
-            ),
-          ),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: slippage.calculateMinTokenAmountFromSlippage(token1Amount),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: any(named: "tickUpper"),
         ),
       ).called(1);
     },
   );
 
   test(
-    """When calling `deposit`, the amount0Min in the depositData should be
-      the passed token0 amount minus the slippage percent""",
+    """When calling `deposit`, the amount0Min sent to the pool service to deposit
+    should be the one calculated from the slippage""",
     () async {
       final token0Amount = BigInt.from(32421);
       final slippage = Slippage.fromValue(50);
-
-      // when(() => feeControllerImpl.calculateJoinPoolFee(
-      //     token0Amount: any(named: "token0Amount"), token1Amount: any(named: "token1Amount"))).thenAnswer(
-      //   (_) async => (feeToken0: feeAmount, feeToken1: feeAmount),
-      // );
 
       when(() => uniswapPositionManager.getMintCalldata(params: any(named: "params"))).thenReturn("");
       sutCopyWith(customDepositWithNative: true);
@@ -822,25 +848,24 @@ void main() {
       );
 
       verify(
-        () => uniswapPositionManager.getMintCalldata(
-          params: any(
-            named: "params",
-            that: ExpectedMatcher(
-              expects: (item) {
-                expect(
-                  item.amount0Min,
-                  slippage.calculateTokenAmountFromSlippage(token0Amount),
-                );
-              },
-            ),
-          ),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: slippage.calculateMinTokenAmountFromSlippage(token0Amount),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: any(named: "tickUpper"),
         ),
       ).called(1);
     },
   );
 
   test(
-    "When calling `deposit`, the recipient in the depositData, should be the connected signer address",
+    "When calling `deposit`, the recipient sent to the pool service to deposit should be the signer address",
     () async {
       const signerAddress = "0x0000000000000000000000000000000000000231";
       when(() => signer.address).thenAnswer((_) async => signerAddress);
@@ -859,17 +884,25 @@ void main() {
         isReversed: false,
       );
 
-      verify(() => uniswapPositionManager.getMintCalldata(
-            params: any(
-              named: "params",
-              that: ExpectedMatcher(expects: (item) => expect(item.recipient, signerAddress)),
-            ),
-          )).called(1);
+      verify(
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: signerAddress,
+          tickLower: any(named: "tickLower"),
+          tickUpper: any(named: "tickUpper"),
+        ),
+      ).called(1);
     },
   );
 
   test("""When calling `deposit` the minPrice is infinity, and is not reversed,
-      the tick lower in the depositData should be the min tick (adjusted for the tick spacing)""", () async {
+      the tick lower send to the pool service should be the min tick (adjusted for the tick spacing)""", () async {
     sutCopyWith(customDepositWithNative: true);
 
     await sut.deposit(
@@ -885,25 +918,27 @@ void main() {
     );
 
     verify(
-      () => uniswapPositionManager.getMintCalldata(
-        params: any(
-          named: "params",
-          that: ExpectedMatcher(
-            expects: (item) => expect(
-              item.tickLower,
-              V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-                tick: V3PoolConstants.minTick,
-                tickSpacing: currentYield.tickSpacing,
-              ),
-            ),
-          ),
+      () => poolService.sendV3PoolDepositTransaction(
+        any(),
+        any(),
+        amount0Desired: any(named: "amount0Desired"),
+        amount1Desired: any(named: "amount1Desired"),
+        amount0Min: any(named: "amount0Min"),
+        amount1Min: any(named: "amount1Min"),
+        deadline: any(named: "deadline"),
+        recipient: any(named: "recipient"),
+        tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+          tick: V3V4PoolConstants.minTick,
+          tickSpacing: currentYield.tickSpacing,
         ),
+        tickUpper: any(named: "tickUpper"),
       ),
     ).called(1);
   });
 
   test("""When calling `deposit` with the maxPrice infinity, and reversed,
-      the tick lower in the depositData should be the min tick (but adjusted for the tick spacing)""", () async {
+      the tick lower sent to the pool service should be the min tick
+      (but adjusted for the tick spacing)""", () async {
     sutCopyWith(customDepositWithNative: true);
 
     await sut.deposit(
@@ -919,25 +954,26 @@ void main() {
     );
 
     verify(
-      () => uniswapPositionManager.getMintCalldata(
-        params: any(
-          named: "params",
-          that: ExpectedMatcher(
-            expects: (item) => expect(
-              item.tickLower,
-              V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-                tick: V3PoolConstants.minTick,
-                tickSpacing: currentYield.tickSpacing,
-              ),
-            ),
-          ),
+      () => poolService.sendV3PoolDepositTransaction(
+        any(),
+        any(),
+        amount0Desired: any(named: "amount0Desired"),
+        amount1Desired: any(named: "amount1Desired"),
+        amount0Min: any(named: "amount0Min"),
+        amount1Min: any(named: "amount1Min"),
+        deadline: any(named: "deadline"),
+        recipient: any(named: "recipient"),
+        tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+          tick: V3V4PoolConstants.minTick,
+          tickSpacing: currentYield.tickSpacing,
         ),
+        tickUpper: any(named: "tickUpper"),
       ),
     ).called(1);
   });
 
   test(
-    "When calling `deposit` with a min price that is not infinity, it should calculate the correct tickLower for the depositData",
+    "When calling `deposit` with a min price that is not infinity, it should calculate the correct tickLower and send it to the pool service",
     () async {
       sutCopyWith(customDepositWithNative: true);
 
@@ -956,24 +992,25 @@ void main() {
       );
 
       verify(
-        () => uniswapPositionManager.getMintCalldata(
-          params: any(
-            named: "params",
-            that: ExpectedMatcher(
-              expects: (item) => expect(
-                item.tickLower,
-                V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-                  tick: V3PoolConversorsMixinWrapper().priceToTick(
-                    price: minPrice,
-                    poolToken0Decimals: currentYield.token0.decimals,
-                    poolToken1Decimals: currentYield.token1.decimals,
-                    isReversed: false,
-                  ),
-                  tickSpacing: currentYield.tickSpacing,
-                ),
-              ),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: V3PoolConversorsMixinWrapper().priceToTick(
+              price: minPrice,
+              poolToken0Decimals: currentYield.token0.decimals,
+              poolToken1Decimals: currentYield.token1.decimals,
+              isReversed: false,
             ),
+            tickSpacing: currentYield.tickSpacing,
           ),
+          tickUpper: any(named: "tickUpper"),
         ),
       ).called(1);
     },
@@ -981,8 +1018,8 @@ void main() {
 
   test(
     """When calling `deposit` with a max price that is not infinity, and it's reversed,
-    it should calculate the correct tickLower for the depositData, using the max price
-    (because it's reversed)
+    it should calculate the correct tickLower and, using the max price
+    (because it's reversed), and send it to the pool service
     """,
     () async {
       sutCopyWith(customDepositWithNative: true);
@@ -1003,24 +1040,25 @@ void main() {
       );
 
       verify(
-        () => uniswapPositionManager.getMintCalldata(
-          params: any(
-            named: "params",
-            that: ExpectedMatcher(
-              expects: (item) => expect(
-                item.tickLower,
-                V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-                  tick: V3PoolConversorsMixinWrapper().priceToTick(
-                    price: maxPrice,
-                    poolToken0Decimals: currentYield.token0.decimals,
-                    poolToken1Decimals: currentYield.token1.decimals,
-                    isReversed: isReversed,
-                  ),
-                  tickSpacing: currentYield.tickSpacing,
-                ),
-              ),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: V3PoolConversorsMixinWrapper().priceToTick(
+              price: maxPrice,
+              poolToken0Decimals: currentYield.token0.decimals,
+              poolToken1Decimals: currentYield.token1.decimals,
+              isReversed: isReversed,
             ),
+            tickSpacing: currentYield.tickSpacing,
           ),
+          tickUpper: any(named: "tickUpper"),
         ),
       ).called(1);
     },
@@ -1028,7 +1066,7 @@ void main() {
 
   test(
     """When calling `deposit` with a max price that is infinity, and it's not reversed,
-    the tick upper in the depositData should be the max tick (but adjusted for the tick spacing)""",
+    the tick upper should be the max tick (but adjusted for the tick spacing)""",
     () async {
       sutCopyWith(customDepositWithNative: true);
 
@@ -1045,18 +1083,19 @@ void main() {
       );
 
       verify(
-        () => uniswapPositionManager.getMintCalldata(
-          params: any(
-            named: "params",
-            that: ExpectedMatcher(
-              expects: (item) => expect(
-                item.tickUpper,
-                V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-                  tick: V3PoolConstants.maxTick,
-                  tickSpacing: currentYield.tickSpacing,
-                ),
-              ),
-            ),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: V3V4PoolConstants.maxTick,
+            tickSpacing: currentYield.tickSpacing,
           ),
         ),
       ).called(1);
@@ -1065,7 +1104,7 @@ void main() {
 
   test(
     """When calling `deposit` with a min price that is infinity, and it's reversed,
-    the tick upper in the depositData should be the max tick (but adjusted for the tick spacing)""",
+    the tick upper should be the max tick (but adjusted for the tick spacing)""",
     () async {
       sutCopyWith(customDepositWithNative: true);
 
@@ -1083,20 +1122,20 @@ void main() {
         isMaxPriceInfinity: false,
         isReversed: isReversed,
       );
-
       verify(
-        () => uniswapPositionManager.getMintCalldata(
-          params: any(
-            named: "params",
-            that: ExpectedMatcher(
-              expects: (item) => expect(
-                item.tickUpper,
-                V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-                  tick: V3PoolConstants.maxTick,
-                  tickSpacing: currentYield.tickSpacing,
-                ),
-              ),
-            ),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: V3V4PoolConstants.maxTick,
+            tickSpacing: currentYield.tickSpacing,
           ),
         ),
       ).called(1);
@@ -1105,7 +1144,7 @@ void main() {
 
   test(
     """When calling `deposit` with a max price that is not infinity,
-    and it's not reversed, the tick upper in the depositData should be
+    and it's not reversed, the tick upper should be
     calculated based on the max price""",
     () async {
       sutCopyWith(customDepositWithNative: true);
@@ -1125,23 +1164,24 @@ void main() {
       );
 
       verify(
-        () => uniswapPositionManager.getMintCalldata(
-          params: any(
-            named: "params",
-            that: ExpectedMatcher(
-              expects: (item) => expect(
-                item.tickUpper,
-                V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-                  tick: V3PoolConversorsMixinWrapper().priceToTick(
-                    price: maxPrice,
-                    poolToken0Decimals: currentYield.token0.decimals,
-                    poolToken1Decimals: currentYield.token1.decimals,
-                    isReversed: false,
-                  ),
-                  tickSpacing: currentYield.tickSpacing,
-                ),
-              ),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: V3PoolConversorsMixinWrapper().priceToTick(
+              price: maxPrice,
+              poolToken0Decimals: currentYield.token0.decimals,
+              poolToken1Decimals: currentYield.token1.decimals,
+              isReversed: false,
             ),
+            tickSpacing: currentYield.tickSpacing,
           ),
         ),
       ).called(1);
@@ -1150,7 +1190,7 @@ void main() {
 
   test(
     """When calling `deposit` with a max price that is not infinity,
-    and it's reversed, the tick upper in the depositData should be
+    and it's reversed, the tick upper should be
     calculated based on the min price""",
     () async {
       sutCopyWith(customDepositWithNative: true);
@@ -1171,109 +1211,29 @@ void main() {
       );
 
       verify(
-        () => uniswapPositionManager.getMintCalldata(
-          params: any(
-            named: "params",
-            that: ExpectedMatcher(
-              expects: (item) => expect(
-                item.tickUpper,
-                V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-                  tick: V3PoolConversorsMixinWrapper().priceToTick(
-                    price: minPrice,
-                    poolToken0Decimals: currentYield.token0.decimals,
-                    poolToken1Decimals: currentYield.token1.decimals,
-                    isReversed: isReversed,
-                  ),
-                  tickSpacing: currentYield.tickSpacing,
-                ),
-              ),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: V3PoolConversorsMixinWrapper().priceToTick(
+              price: minPrice,
+              poolToken0Decimals: currentYield.token0.decimals,
+              poolToken1Decimals: currentYield.token1.decimals,
+              isReversed: isReversed,
             ),
+            tickSpacing: currentYield.tickSpacing,
           ),
         ),
       ).called(1);
     },
   );
-
-  test("When calling `deposit` the fee in the depositData should be the feeTier of the yield pool", () async {
-    sutCopyWith(customDepositWithNative: true);
-
-    await sut.deposit(
-      deadline: const Duration(minutes: 30),
-      slippage: Slippage.halfPercent,
-      token0Amount: BigInt.one,
-      token1Amount: BigInt.one,
-      minPrice: 1200,
-      maxPrice: 3000.50,
-      isMinPriceInfinity: false,
-      isMaxPriceInfinity: false,
-      isReversed: false,
-    );
-
-    verify(
-      () => uniswapPositionManager.getMintCalldata(
-        params: any(
-          named: "params",
-          that: ExpectedMatcher(
-            expects: (item) => expect(item.fee, BigInt.from(currentYield.feeTier)),
-          ),
-        ),
-      ),
-    ).called(1);
-  });
-
-  test("When calling `deposit` the token0 in the depositData should be the token0 of the yield pool", () async {
-    sutCopyWith(customDepositWithNative: true);
-
-    await sut.deposit(
-      deadline: const Duration(minutes: 30),
-      slippage: Slippage.halfPercent,
-      token0Amount: BigInt.one,
-      token1Amount: BigInt.one,
-      minPrice: 1200,
-      maxPrice: 3000.50,
-      isMinPriceInfinity: false,
-      isMaxPriceInfinity: false,
-      isReversed: false,
-    );
-
-    verify(
-      () => uniswapPositionManager.getMintCalldata(
-        params: any(
-          named: "params",
-          that: ExpectedMatcher(
-            expects: (item) => expect(item.token0, currentYield.token0.addresses[currentYield.network.chainId]!),
-          ),
-        ),
-      ),
-    ).called(1);
-  });
-
-  test("When calling `deposit` the token1 in the depositData should be the token1 of the yield pool", () async {
-    sutCopyWith(customDepositWithNative: true);
-
-    await sut.deposit(
-      deadline: const Duration(minutes: 30),
-      slippage: Slippage.halfPercent,
-      token0Amount: BigInt.one,
-      token1Amount: BigInt.one,
-      minPrice: 1200,
-      maxPrice: 3000.50,
-      isMinPriceInfinity: false,
-      isMaxPriceInfinity: false,
-      isReversed: false,
-    );
-
-    verify(
-      () => uniswapPositionManager.getMintCalldata(
-        params: any(
-          named: "params",
-          that: ExpectedMatcher(
-            expects: (item) => expect(item.token1, currentYield.token1.addresses[currentYield.network.chainId]!),
-          ),
-        ),
-      ),
-    ).called(1);
-  });
 
   test(
     "When calling `deposit`, after the transcation to deposit is sent, it should emit the waiting transaction state",
@@ -1283,8 +1243,17 @@ void main() {
 
       when(() => transactionResponse.hash).thenReturn(txId);
       when(
-        () => uniswapPositionManagerImpl.mint(
-          params: any(named: "params"),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: any(named: "tickUpper"),
         ),
       ).thenAnswer((_) async {
         expectLater(
@@ -1381,7 +1350,18 @@ void main() {
     and right after, it should emit the initial state""",
     () async {
       when(
-        () => uniswapPositionManagerImpl.mint(params: any(named: "params")),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: any(named: "tickUpper"),
+        ),
       ).thenThrow("dale error");
 
       expectLater(
@@ -1411,7 +1391,18 @@ void main() {
     "When calling `deposit` and an error of User rejected action occurs, it should emit the initial state",
     () async {
       when(
-        () => uniswapPositionManagerImpl.mint(params: any(named: "params")),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: any(named: "tickUpper"),
+        ),
       ).thenThrow(UserRejectedAction());
 
       expectLater(
@@ -1443,7 +1434,6 @@ void main() {
 
       withClock(Clock(() => date), () async {
         const deadline = Duration(minutes: 54);
-        final expectedDeadline = date.add(deadline).millisecondsSinceEpoch;
 
         when(() => uniswapPositionManagerImpl.multicall(data: any(named: "data")))
             .thenAnswer((_) async => transactionResponse);
@@ -1463,13 +1453,17 @@ void main() {
         );
 
         verify(
-          () => uniswapPositionManager.getMintCalldata(
-            params: any(
-              named: "params",
-              that: ExpectedMatcher(
-                expects: (item) => expect(item.deadline, BigInt.from(expectedDeadline)),
-              ),
-            ),
+          () => poolService.sendV3PoolDepositTransaction(
+            any(),
+            any(),
+            amount0Desired: any(named: "amount0Desired"),
+            amount1Desired: any(named: "amount1Desired"),
+            amount0Min: any(named: "amount0Min"),
+            amount1Min: any(named: "amount1Min"),
+            deadline: deadline,
+            recipient: any(named: "recipient"),
+            tickLower: any(named: "tickLower"),
+            tickUpper: any(named: "tickUpper"),
           ),
         ).called(1);
       });
@@ -1650,7 +1644,18 @@ void main() {
     it should emit the slippage check error state and the initial state""",
     () async {
       when(
-        () => uniswapPositionManagerImpl.mint(params: any(named: "params")),
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          amount0Min: any(named: "amount0Min"),
+          amount1Min: any(named: "amount1Min"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: any(named: "tickLower"),
+          tickUpper: any(named: "tickUpper"),
+        ),
       ).thenThrow("SLIPPAGE_ERROR");
 
       expectLater(
@@ -1729,4 +1734,259 @@ void main() {
           ));
     },
   );
+
+  test(
+    "When calling `approveToken` and the pool type is v4, it should approve the permit2 contract as well ",
+    () async {
+      when(() => permit2Impl.allowance(any(), any(), any()))
+          .thenAnswer((_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero));
+
+      when(
+        () => permit2Impl.approve(
+            token: any(named: "token"),
+            spender: any(named: "spender"),
+            amount: any(named: "amount"),
+            expiration: any(named: "expiration")),
+      ).thenAnswer((_) async => transactionResponse);
+
+      const permit2Address = "0x1234";
+      final currentYield0 = currentYield.copyWith(poolType: PoolType.v4, permit2: permit2Address);
+
+      sut = PreviewDepositModalCubit(
+        initialPoolTick: initialPoolTick,
+        poolService: poolService,
+        currentYield: currentYield0,
+        erc20: erc20,
+        wallet: wallet,
+        uniswapPositionManager: uniswapPositionManager,
+        permit2: permit2,
+        navigatorKey: GlobalKey(),
+        zupAnalytics: zupAnalytics,
+      );
+
+      final token = currentYield.token0;
+      final value = BigInt.one;
+
+      await sut.approveToken(token, value);
+
+      verify(
+        () => permit2Impl.approve(
+          token: token.addresses[currentYield.network.chainId]!,
+          spender: currentYield0.positionManagerAddress,
+          amount: EthereumConstants.uint160Max,
+          expiration: EthereumConstants.uint48Max,
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    "When calling `approveToken` with the pool type v4, the allowance is more than the needed value, and the expiration is not expired, it should not approve the permit2 contract ",
+    () async {
+      final allowedAmount = BigInt.from(1275);
+
+      when(() => permit2Impl.allowance(any(), any(), any())).thenAnswer(
+        (_) async => (amount: allowedAmount, expiration: EthereumConstants.uint48Max, nonce: BigInt.zero),
+      );
+
+      when(
+        () => permit2Impl.approve(
+            token: any(named: "token"),
+            spender: any(named: "spender"),
+            amount: any(named: "amount"),
+            expiration: any(named: "expiration")),
+      ).thenAnswer((_) async => transactionResponse);
+
+      const permit2Address = "0x1234";
+      final currentYield0 = currentYield.copyWith(poolType: PoolType.v4, permit2: permit2Address);
+
+      sut = PreviewDepositModalCubit(
+        initialPoolTick: initialPoolTick,
+        poolService: poolService,
+        currentYield: currentYield0,
+        erc20: erc20,
+        wallet: wallet,
+        uniswapPositionManager: uniswapPositionManager,
+        permit2: permit2,
+        navigatorKey: GlobalKey(),
+        zupAnalytics: zupAnalytics,
+      );
+
+      final token = currentYield.token0;
+      final value = allowedAmount - BigInt.one;
+
+      await sut.approveToken(token, value);
+
+      verifyNever(
+        () => permit2Impl.approve(
+          token: token.addresses[currentYield.network.chainId]!,
+          spender: currentYield0.positionManagerAddress,
+          amount: EthereumConstants.uint160Max,
+          expiration: EthereumConstants.uint48Max,
+        ),
+      );
+    },
+  );
+
+  test(
+    """When calling `approveToken` with the pool type v4, the allowance is more than the needed value,
+    but the expiration is already expired,it should approve the permit2 contract""",
+    () async {
+      final allowedAmount = BigInt.from(1275);
+
+      when(() => permit2Impl.allowance(any(), any(), any())).thenAnswer(
+        (_) async => (
+          amount: allowedAmount,
+          expiration: BigInt.from((DateTime.now().millisecondsSinceEpoch / 1000) - 1),
+          nonce: BigInt.zero
+        ),
+      );
+
+      when(
+        () => permit2Impl.approve(
+            token: any(named: "token"),
+            spender: any(named: "spender"),
+            amount: any(named: "amount"),
+            expiration: any(named: "expiration")),
+      ).thenAnswer((_) async => transactionResponse);
+
+      const permit2Address = "0x1234";
+      final currentYield0 = currentYield.copyWith(poolType: PoolType.v4, permit2: permit2Address);
+
+      sut = PreviewDepositModalCubit(
+        initialPoolTick: initialPoolTick,
+        poolService: poolService,
+        currentYield: currentYield0,
+        erc20: erc20,
+        wallet: wallet,
+        uniswapPositionManager: uniswapPositionManager,
+        permit2: permit2,
+        navigatorKey: GlobalKey(),
+        zupAnalytics: zupAnalytics,
+      );
+
+      final token = currentYield.token0;
+      final value = allowedAmount - BigInt.one;
+
+      await sut.approveToken(token, value);
+
+      verify(
+        () => permit2Impl.approve(
+          token: token.addresses[currentYield.network.chainId]!,
+          spender: currentYield0.positionManagerAddress,
+          amount: EthereumConstants.uint160Max,
+          expiration: EthereumConstants.uint48Max,
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    "When calling `approveToken` and the pool type is v4, it should approve the token for the permit2 address",
+    () async {
+      const permit2Address = "0x1234";
+      final currentYield0 = currentYield.copyWith(poolType: PoolType.v4, permit2: permit2Address);
+      when(() => permit2Impl.allowance(any(), any(), any())).thenAnswer(
+        (_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero),
+      );
+
+      sut = PreviewDepositModalCubit(
+        initialPoolTick: initialPoolTick,
+        poolService: poolService,
+        currentYield: currentYield0,
+        erc20: erc20,
+        wallet: wallet,
+        uniswapPositionManager: uniswapPositionManager,
+        permit2: permit2,
+        navigatorKey: GlobalKey(),
+        zupAnalytics: zupAnalytics,
+      );
+
+      final token = currentYield.token0;
+      final value = BigInt.one;
+
+      await sut.approveToken(token, value);
+
+      verify(
+        () => erc20Impl.approve(
+          spender: permit2Address,
+          value: value,
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+      "when calling `deposit` and the pool type is v4, it should call the pool service to deposit on v4 with the correct parameters",
+      () async {
+    final currentYield0 = currentYield.copyWith(
+      poolType: PoolType.v4,
+      permit2: "0x1234",
+    );
+    final token0Amount = BigInt.one;
+    final token1Amount = BigInt.two;
+    const minPrice = 1200.43;
+    const maxPrice = 4000.12;
+    const isMinPriceInfinity = false;
+    const isMaxPriceInfinity = false;
+    const isReversed = false;
+    final slippage = Slippage.fromValue(32);
+    const deadline = Duration(minutes: 30);
+    final recipient = await signer.address;
+    final tickLower = V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+        tick: V3PoolConversorsMixinWrapper().priceToTick(
+          price: minPrice,
+          poolToken0Decimals: currentYield0.token0.decimals,
+          poolToken1Decimals: currentYield0.token1.decimals,
+        ),
+        tickSpacing: currentYield0.tickSpacing);
+
+    final tickUpper = V3PoolConversorsMixinWrapper().tickToClosestValidTick(
+        tick: V3PoolConversorsMixinWrapper().priceToTick(
+          price: maxPrice,
+          poolToken0Decimals: currentYield0.token0.decimals,
+          poolToken1Decimals: currentYield0.token1.decimals,
+        ),
+        tickSpacing: currentYield0.tickSpacing);
+
+    sut = PreviewDepositModalCubit(
+      initialPoolTick: initialPoolTick,
+      poolService: poolService,
+      currentYield: currentYield0,
+      erc20: erc20,
+      wallet: wallet,
+      uniswapPositionManager: uniswapPositionManager,
+      permit2: permit2,
+      navigatorKey: GlobalKey(),
+      zupAnalytics: zupAnalytics,
+    );
+
+    await sut.deposit(
+      token0Amount: token0Amount,
+      token1Amount: token1Amount,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      isMinPriceInfinity: isMinPriceInfinity,
+      isMaxPriceInfinity: isMaxPriceInfinity,
+      isReversed: isReversed,
+      slippage: slippage,
+      deadline: deadline,
+    );
+
+    verify(
+      () => poolService.sendV4PoolDepositTransaction(
+        currentYield0,
+        signer,
+        amount0toDeposit: token0Amount,
+        amount1ToDeposit: token1Amount,
+        maxAmount0ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(token0Amount),
+        maxAmount1ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(token1Amount),
+        deadline: deadline,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        recipient: recipient,
+        currentPoolTick: initialPoolTick,
+      ),
+    ).called(1);
+  });
 }

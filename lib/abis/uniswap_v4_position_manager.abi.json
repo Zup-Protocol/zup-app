@@ -1,0 +1,20 @@
+[
+    {
+        "type": "function",
+        "name": "modifyLiquidities",
+        "inputs": [
+            {
+                "name": "unlockData",
+                "type": "bytes",
+                "internalType": "bytes"
+            },
+            {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "payable"
+    }
+]

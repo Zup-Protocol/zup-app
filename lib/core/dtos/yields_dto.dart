@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
+import 'package:zup_app/core/enums/pool_type.dart';
 
 part 'yields_dto.freezed.dart';
 part 'yields_dto.g.dart';
@@ -33,6 +34,7 @@ class YieldsDto with _$YieldsDto {
         pools: [
           YieldDto(
             positionManagerAddress: "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4",
+            poolType: PoolType.v3,
             token0: TokenDto(
               addresses: {11155111: "0x02a3e7E0480B668bD46b42852C58363F93e3bA5C"},
               decimals: 6,

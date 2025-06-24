@@ -7,9 +7,7 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
 import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
-import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
-import 'package:zup_app/widgets/token_avatar.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 
 import '../../../../golden_config.dart';
@@ -38,7 +36,6 @@ void main() {
   Future<DeviceBuilder> goldenBuilder({
     YieldDto? customYield,
     bool showAsBottomSheet = false,
-    bool depositedWithNative = false,
   }) async =>
       await goldenDeviceBuilder(Builder(builder: (context) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -46,7 +43,6 @@ void main() {
             context,
             depositedYield: customYield ?? YieldDto.fixture().copyWith(),
             showAsBottomSheet: showAsBottomSheet,
-            depositedWithNative: depositedWithNative,
           );
         });
 
@@ -114,58 +110,5 @@ void main() {
       wrapper: GoldenConfig.localizationsWrapper(),
     );
     await tester.pumpAndSettle();
-  });
-
-  zGoldenTest(
-      """When passing depositedWithNative to true, the modal should use the native token symbol in the description
-  if the token0 or token1 are wrapped natives""", (tester) async {
-    final wrappedNativeYield = YieldDto.fixture().copyWith(
-      chainId: AppNetworks.sepolia.chainId,
-      token0: AppNetworks.sepolia.wrappedNative,
-      token1: AppNetworks.sepolia.wrappedNative,
-    );
-
-    await tester.pumpDeviceBuilder(
-      await goldenBuilder(
-        depositedWithNative: true,
-        customYield: wrappedNativeYield,
-      ),
-      wrapper: GoldenConfig.localizationsWrapper(),
-    );
-    await tester.pumpAndSettle();
-
-    expect(
-      find.text(
-        "You have successfully deposited into ETH/ETH Pool at ${wrappedNativeYield.protocol.name} on ${wrappedNativeYield.network.label}",
-        findRichText: true,
-      ),
-      findsOne,
-    );
-  });
-
-  zGoldenTest(
-      """When passing depositedWithNative to true, the modal should use the native token images in the tokenavatars
-      (if the token0 or token1 are wrapped natives)""", (tester) async {
-    final wrappedNativeYield = YieldDto.fixture().copyWith(
-      chainId: AppNetworks.sepolia.chainId,
-      token0: AppNetworks.sepolia.wrappedNative,
-      token1: AppNetworks.sepolia.wrappedNative,
-    );
-
-    await tester.pumpDeviceBuilder(
-      await goldenBuilder(
-        depositedWithNative: true,
-        customYield: wrappedNativeYield,
-      ),
-      wrapper: GoldenConfig.localizationsWrapper(),
-    );
-    await tester.pumpAndSettle();
-
-    final tokenAvatars = find.byType(TokenAvatar).evaluate();
-    final token0Avatar = tokenAvatars.first.widget as TokenAvatar;
-    final token1Avatar = tokenAvatars.last.widget as TokenAvatar;
-
-    expect(token0Avatar.asset, wrappedNativeYield.maybeNativeToken0(permitNative: true));
-    expect(token1Avatar.asset, wrappedNativeYield.maybeNativeToken1(permitNative: true));
   });
 }

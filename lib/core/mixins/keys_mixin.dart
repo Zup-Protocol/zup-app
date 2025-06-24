@@ -8,4 +8,8 @@ mixin KeysMixin {
   String poolTickCacheKey({required AppNetworks network, required String poolAddress}) {
     return 'poolTick-$poolAddress-${network.name}';
   }
+
+  String tokenPriceCacheKey({required String tokenAddress, required AppNetworks network}) {
+    return 'tokenPrice-$tokenAddress-${network.name}';
+  }
 }

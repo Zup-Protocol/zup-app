@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/web3kit.dart';
-import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
@@ -13,6 +12,7 @@ import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/mixins/keys_mixin.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/zup_analytics.dart';
@@ -26,16 +26,16 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     this._yieldRepository,
     this._zupSingletonCache,
     this._wallet,
-    this._uniswapV3Pool,
     this._cache,
     this._appCubit,
     this._zupAnalytics,
+    this._poolService,
   ) : super(const DepositState.initial());
 
   final YieldRepository _yieldRepository;
   final ZupSingletonCache _zupSingletonCache;
   final Wallet _wallet;
-  final UniswapV3Pool _uniswapV3Pool;
+  final PoolService _poolService;
   final Cache _cache;
   final AppCubit _appCubit;
   final ZupAnalytics _zupAnalytics;
@@ -81,14 +81,14 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
           ? await _yieldRepository.getAllNetworksYield(
               token0InternalId: token0AddressOrId,
               token1InternalId: token1AddressOrId,
-              minTvlUsd: ignoreMinLiquidity ? 0 : poolSearchSettings.minLiquidityUSD,
+              searchSettings: ignoreMinLiquidity ? poolSearchSettings.copyWith(minLiquidityUSD: 0) : poolSearchSettings,
               testnetMode: _appCubit.isTestnetMode,
             )
           : await _yieldRepository.getSingleNetworkYield(
               token0Address: token0AddressOrId,
               token1Address: token1AddressOrId,
               network: _appCubit.selectedNetwork,
-              minTvlUsd: ignoreMinLiquidity ? 0 : poolSearchSettings.minLiquidityUSD,
+              searchSettings: ignoreMinLiquidity ? poolSearchSettings.copyWith(minLiquidityUSD: 0) : poolSearchSettings,
             );
 
       if (yields.isEmpty) {
@@ -118,17 +118,12 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     _pooltickStreamController.add(null);
 
     final selectedYieldBeforeCall = selectedYield;
+    BigInt tick = await _poolService.getPoolTick(selectedYieldBeforeCall!);
 
-    final uniswapV3Pool = _uniswapV3Pool.fromRpcProvider(
-      contractAddress: selectedYieldBeforeCall!.poolAddress,
-      rpcUrl: selectedYieldBeforeCall.network.rpcUrl,
-    );
-
-    final slot0 = await uniswapV3Pool.slot0();
     if (selectedYieldBeforeCall != selectedYield) return await getSelectedPoolTick();
 
-    _pooltickStreamController.add(slot0.tick);
-    _latestPoolTick = slot0.tick;
+    _pooltickStreamController.add(tick);
+    _latestPoolTick = tick;
   }
 
   Future<double> getWalletTokenAmount(String tokenAddress, {required AppNetworks network}) async {

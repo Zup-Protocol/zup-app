@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/v3_v4_pool_constants.dart';
 
 mixin V3PoolConversorsMixin {
   ({double priceAsQuoteToken, double priceAsBaseToken}) tickToPrice({
@@ -22,11 +22,11 @@ mixin V3PoolConversorsMixin {
     final highestValidTickDistanceFromTick = (highestValidTick - tick).abs();
 
     if (lowestValidTickDistanceFromTick < highestValidTickDistanceFromTick &&
-        lowestValidTick >= V3PoolConstants.minTick) {
+        lowestValidTick >= V3V4PoolConstants.minTick) {
       return lowestValidTick;
     }
 
-    return highestValidTick > V3PoolConstants.maxTick ? lowestValidTick : highestValidTick;
+    return highestValidTick > V3V4PoolConstants.maxTick ? lowestValidTick : highestValidTick;
   }
 
   BigInt priceToTick({

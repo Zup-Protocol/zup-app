@@ -12,13 +12,17 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v4_state_view.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
@@ -28,6 +32,7 @@ import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/zup_holder.dart';
 import 'package:zup_core/zup_singleton_cache.dart';
 
 class $AssetsLottiesGenMock extends Mock implements $AssetsLottiesGen {}
@@ -62,9 +67,25 @@ class TokensRepositoryMock extends Mock implements TokensRepository {}
 
 class TransactionResponseMock extends Mock implements TransactionResponse {}
 
-class UniswapPositionManagerImplMock extends Mock implements UniswapPositionManagerImpl {}
+class UniswapV3PositionManagerImplMock extends Mock implements UniswapV3PositionManagerImpl {}
 
-class UniswapPositionManagerMock extends Mock implements UniswapPositionManager {}
+class EthereumAbiCoderMock extends Mock implements EthereumAbiCoder {}
+
+class UniswapV3PositionManagerMock extends Mock implements UniswapV3PositionManager {}
+
+class PoolServiceMock extends Mock implements PoolService {}
+
+class UniswapPermit2Mock extends Mock implements UniswapPermit2 {}
+
+class UniswapPermit2ImplMock extends Mock implements UniswapPermit2Impl {}
+
+class UniswapV4StateViewMock extends Mock implements UniswapV4StateView {}
+
+class UniswapV4StateViewImplMock extends Mock implements UniswapV4StateViewImpl {}
+
+class UniswapV4PositionManagerMock extends Mock implements UniswapV4PositionManager {}
+
+class UniswapV4PositionManagerImplMock extends Mock implements UniswapV4PositionManagerImpl {}
 
 class UniswapV3PoolImplMock extends Mock implements UniswapV3PoolImpl {}
 
@@ -89,6 +110,8 @@ class DioMock extends Mock implements Dio {}
 class ConfettiControllerMock extends Mock implements ConfettiController {}
 
 class FirebaseAnalyticsMock extends Mock implements FirebaseAnalytics {}
+
+class ZupHolderMock extends Mock implements ZupHolder {}
 
 class ChangeNotifierMock extends Mock with ChangeNotifier {
   void notify() => notifyListeners();

@@ -35,8 +35,12 @@ class Slippage extends Equatable {
     return ZupColors.brand;
   }
 
-  BigInt calculateTokenAmountFromSlippage(BigInt amount) {
+  BigInt calculateMinTokenAmountFromSlippage(BigInt amount) {
     return amount * (BigInt.from(10000) - BigInt.from(valueBasisPoints)) ~/ BigInt.from(10000);
+  }
+
+  BigInt calculateMaxTokenAmountFromSlippage(BigInt amount) {
+    return amount * (BigInt.from(10000) + BigInt.from(valueBasisPoints)) ~/ BigInt.from(10000);
   }
 
   bool get isCustom => this != zeroPointOnePercent && this != halfPercent && this != onePercent;

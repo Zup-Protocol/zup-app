@@ -10,20 +10,18 @@ import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 class DepositSuccessModal extends StatefulWidget {
-  const DepositSuccessModal({super.key, required this.depositedYield, required this.depositedWithNative});
+  const DepositSuccessModal({super.key, required this.depositedYield});
 
   final YieldDto depositedYield;
-  final bool depositedWithNative;
 
   static Future<void> show(
     BuildContext context, {
     required YieldDto depositedYield,
     required showAsBottomSheet,
-    required bool depositedWithNative,
   }) async =>
       ZupModal.show(
         context,
-        content: DepositSuccessModal(depositedYield: depositedYield, depositedWithNative: depositedWithNative),
+        content: DepositSuccessModal(depositedYield: depositedYield),
         padding: const EdgeInsets.all(20),
         showAsBottomSheet: showAsBottomSheet,
         dismissible: true,
@@ -61,11 +59,11 @@ class _DepositSuccessModalState extends State<DepositSuccessModal> {
           children: [
             ZupMergedWidgets(
               firstWidget: TokenAvatar(
-                asset: widget.depositedYield.maybeNativeToken0(permitNative: widget.depositedWithNative),
+                asset: widget.depositedYield.token0,
                 size: 70,
               ),
               secondWidget: TokenAvatar(
-                asset: widget.depositedYield.maybeNativeToken1(permitNative: widget.depositedWithNative),
+                asset: widget.depositedYield.token1,
                 size: 70,
               ),
               spacing: 0,
@@ -103,8 +101,7 @@ class _DepositSuccessModalState extends State<DepositSuccessModal> {
                 text: TextSpan(style: const TextStyle(color: ZupColors.gray, fontSize: 14), children: [
                   TextSpan(text: "${S.of(context).depositSuccessModalDescriptionPart1} "),
                   TextSpan(
-                    text:
-                        "${widget.depositedYield.maybeNativeToken0(permitNative: widget.depositedWithNative).symbol}/${widget.depositedYield.maybeNativeToken1(permitNative: widget.depositedWithNative).symbol}",
+                    text: "${widget.depositedYield.token0.symbol}/${widget.depositedYield.token1.symbol}",
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       color: ZupColors.black,

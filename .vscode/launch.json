@@ -10,6 +10,9 @@
             "flutterMode": "release",
             "toolArgs": [
                 "--dart-define=env=local",
+            ],
+            "args": [
+                "--web-experimental-hot-reload"
             ]
         },
         {
@@ -21,6 +24,9 @@
             "flutterMode": "debug",
             "toolArgs": [
                 "--dart-define=env=local",
+            ],
+            "args": [
+                "--web-experimental-hot-reload"
             ]
         },
         {
@@ -31,6 +37,9 @@
             "program": "./lib/main.dart",
             "toolArgs": [
                 "--dart-define=env=local",
+            ],
+            "args": [
+                "--web-experimental-hot-reload"
             ]
         },
     ]

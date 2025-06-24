@@ -315,4 +315,106 @@ void main() {
       verify(() => wallet.nativeOrTokenBalance(EthereumConstants.zeroAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
     },
   );
+
+  test(
+    """When calling 'updateNativeTokenAndFetch' it should update the is native variable
+    so when a new signer is emitted it will get the native balance based on the variable.
+    (isNative = true testcase)""",
+    () async {
+      final wallet0 = WalletMock();
+
+      final signerStreamController = StreamController<Signer?>.broadcast();
+      final signerStream = signerStreamController.stream;
+      when(() => wallet0.signerStream).thenAnswer((_) => signerStream);
+      when(() => wallet0.signer).thenAnswer((_) => null);
+
+      final sut0 = TokenAmountCardUserBalanceCubit(
+        wallet0,
+        "0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c",
+        AppNetworks.sepolia,
+        ZupSingletonCache.shared,
+        () {},
+      );
+
+      await sut0.updateNativeTokenAndFetch(isNative: true);
+
+      when(() => wallet0.signer).thenAnswer((_) => signer);
+
+      await ZupSingletonCache.shared.clear();
+      signerStreamController.add(signer);
+
+      await Future.delayed(const Duration(seconds: 0));
+
+      verify(() => wallet0.nativeOrTokenBalance(EthereumConstants.zeroAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
+    },
+  );
+
+  test(
+    """When calling 'updateNativeTokenAndFetch' it should update the is native variable
+    so when a new signer is emitted it will get the native balance based on the variable.
+    (isNative = false testcase)""",
+    () async {
+      final wallet0 = WalletMock();
+      final signerStreamController = StreamController<Signer?>.broadcast();
+      final signerStream = signerStreamController.stream;
+      const tokenAddress = "0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c";
+
+      when(() => wallet0.signerStream).thenAnswer((_) => signerStream);
+      when(() => wallet0.signer).thenAnswer((_) => null);
+
+      final sut0 = TokenAmountCardUserBalanceCubit(
+        wallet0,
+        tokenAddress,
+        AppNetworks.sepolia,
+        ZupSingletonCache.shared,
+        () {},
+      );
+
+      await sut0.updateNativeTokenAndFetch(isNative: false);
+
+      when(() => wallet0.signer).thenAnswer((_) => signer);
+
+      await ZupSingletonCache.shared.clear();
+      signerStreamController.add(signer);
+
+      await Future.delayed(const Duration(seconds: 0));
+
+      verify(() => wallet0.nativeOrTokenBalance(tokenAddress, rpcUrl: any(named: "rpcUrl"))).called(1);
+    },
+  );
+
+  test("When calling 'updateNativeTokenAndFetch' and the signer is null, it should not get the user token balance",
+      () async {
+    final sut0 = TokenAmountCardUserBalanceCubit(
+      wallet,
+      tokenAddress,
+      AppNetworks.sepolia,
+      ZupSingletonCache.shared,
+      () {},
+    );
+
+    when(() => wallet.signer).thenAnswer((_) => null);
+
+    await sut0.updateNativeTokenAndFetch(isNative: false);
+
+    verifyNever(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")));
+  });
+
+  test("When calling `updateNativeTokenAndFetch` and the signer is not null, it should get the user token balance",
+      () async {
+    final sut0 = TokenAmountCardUserBalanceCubit(
+      wallet,
+      tokenAddress,
+      AppNetworks.sepolia,
+      ZupSingletonCache.shared,
+      () {},
+    );
+
+    when(() => wallet.signer).thenAnswer((_) => signer);
+
+    await sut0.updateNativeTokenAndFetch(isNative: false);
+
+    verify(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+        .called(2); // two times because of the initial load
+  });
 }
