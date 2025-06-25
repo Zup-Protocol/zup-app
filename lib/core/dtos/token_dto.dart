@@ -13,7 +13,7 @@ class TokenDto with _$TokenDto {
     @Default("") String name,
     @Default("") String logoUrl,
     @Default({}) Map<int, String?> addresses,
-    @Default(0) int decimals,
+    @Default({}) Map<int, int?> decimals,
   }) = _TokenDto;
 
   factory TokenDto.fromJson(Map<String, dynamic> json) => _$TokenDtoFromJson(json);
@@ -23,6 +23,13 @@ class TokenDto with _$TokenDto {
   factory TokenDto.fixture() => TokenDto(
         symbol: 'WETH',
         name: 'Wrapped Ether',
+        decimals: Map.fromEntries(
+          AppNetworks.values.where((network) => !network.isAllNetworks).map(
+            (network) {
+              return MapEntry(network.chainId, 18);
+            },
+          ),
+        ),
         addresses: Map.fromEntries(
           AppNetworks.values.where((network) => !network.isAllNetworks).map(
             (network) {

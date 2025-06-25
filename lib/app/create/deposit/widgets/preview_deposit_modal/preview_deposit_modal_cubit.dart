@@ -175,8 +175,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
           return priceToTick(
             price: isReversed ? maxPrice : minPrice,
-            poolToken0Decimals: _yield.token0.decimals,
-            poolToken1Decimals: _yield.token1.decimals,
+            poolToken0Decimals: _yield.token0NetworkDecimals,
+            poolToken1Decimals: _yield.token1NetworkDecimals,
             isReversed: isReversed,
           );
         }
@@ -194,8 +194,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
           return priceToTick(
             price: isReversed ? minPrice : maxPrice,
-            poolToken0Decimals: _yield.token0.decimals,
-            poolToken1Decimals: _yield.token1.decimals,
+            poolToken0Decimals: _yield.token0NetworkDecimals,
+            poolToken1Decimals: _yield.token1NetworkDecimals,
             isReversed: isReversed,
           );
         }
@@ -253,8 +253,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       emit(PreviewDepositModalState.depositSuccess(txId: tx.hash));
       _zupAnalytics.logDeposit(
         depositedYield: _yield,
-        amount0: amount0Desired.parseTokenAmount(decimals: _yield.token0.decimals),
-        amount1: amount1Desired.parseTokenAmount(decimals: _yield.token1.decimals),
+        amount0: amount0Desired.parseTokenAmount(decimals: _yield.token0NetworkDecimals),
+        amount1: amount1Desired.parseTokenAmount(decimals: _yield.token1NetworkDecimals),
         walletAddress: recipient,
       );
     } catch (e) {

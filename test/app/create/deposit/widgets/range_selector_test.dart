@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:zup_app/app/create/deposit/widgets/range_selector.dart';
-import 'package:zup_app/core/dtos/token_dto.dart';
 
 import '../../../../golden_config.dart';
 
@@ -11,8 +10,8 @@ void main() {
     Key? key,
     bool isReversed = false,
     Function(double price)? onPriceChanged,
-    TokenDto? poolToken0,
-    TokenDto? poolToken1,
+    int? poolToken0Decimals,
+    int? poolToken1Decimals,
     int tickSpacing = 10,
     RangeSelectorType type = RangeSelectorType.minPrice,
     double? initialPrice,
@@ -32,8 +31,8 @@ void main() {
                 displayQuoteTokenSymbol: "Token B",
                 isReversed: isReversed,
                 onPriceChanged: onPriceChanged ?? (_) {},
-                poolToken0: poolToken0 ?? TokenDto.fixture().copyWith(symbol: "Token A"),
-                poolToken1: poolToken1 ?? TokenDto.fixture().copyWith(symbol: "Token B"),
+                poolToken0Decimals: poolToken0Decimals ?? 18,
+                poolToken1Decimals: poolToken0Decimals ?? 18,
                 tickSpacing: tickSpacing,
                 type: type,
                 initialPrice: initialPrice,
@@ -58,11 +57,7 @@ void main() {
   zGoldenTest("When the `isReversed` param is true, it should reverse the tokens in the widget",
       goldenFileName: "range_selector_reversed", (tester) async {
     return tester.pumpDeviceBuilder(
-      await goldenBuilder(
-        isReversed: true,
-        poolToken0: TokenDto.fixture().copyWith(symbol: "Token 0"),
-        poolToken1: TokenDto.fixture().copyWith(symbol: "Token 1"),
-      ),
+      await goldenBuilder(isReversed: true),
     );
   });
 
@@ -304,13 +299,13 @@ void main() {
     "When the price is infinity, and click to increase, the price should increase to the minimum price based on the tick spacing",
     goldenFileName: "range_selector_is_infinity_increase_price",
     (tester) async {
-      const expectedIncreasedPrice = 1.0010004501200209e-12;
+      const expectedIncreasedPrice = 9.996040641477102e-19;
       double actualIncreasedPrice = 0;
 
       await tester.pumpDeviceBuilder(await goldenBuilder(
         isInfinity: true,
-        poolToken0: TokenDto.fixture().copyWith(decimals: 6),
-        poolToken1: TokenDto.fixture().copyWith(decimals: 18),
+        poolToken0Decimals: 6,
+        poolToken1Decimals: 18,
         onPriceChanged: (price) {
           actualIncreasedPrice = price;
         },
@@ -328,14 +323,14 @@ void main() {
     the price should increase to the minimum price based on the tick spacing""",
     goldenFileName: "range_selector_is_infinity_increase_price_reversed",
     (tester) async {
-      const expectedIncreasedPrice = 1.0008055719626048e-12;
+      const expectedIncreasedPrice = 9.996040641477102e-19;
       double actualIncreasedPrice = 0;
 
       await tester.pumpDeviceBuilder(await goldenBuilder(
         isInfinity: true,
         isReversed: true,
-        poolToken0: TokenDto.fixture().copyWith(decimals: 6),
-        poolToken1: TokenDto.fixture().copyWith(decimals: 18),
+        poolToken0Decimals: 6,
+        poolToken1Decimals: 18,
         onPriceChanged: (price) {
           actualIncreasedPrice = price;
         },
@@ -359,8 +354,8 @@ void main() {
       await tester.pumpDeviceBuilder(await goldenBuilder(
         isInfinity: true,
         isReversed: true,
-        poolToken0: TokenDto.fixture().copyWith(decimals: 6),
-        poolToken1: TokenDto.fixture().copyWith(decimals: 18),
+        poolToken0Decimals: 6,
+        poolToken1Decimals: 18,
         onPriceChanged: (price) {
           actualIncreasedPrice = price;
         },
@@ -382,8 +377,8 @@ void main() {
 
       await tester.pumpDeviceBuilder(await goldenBuilder(
         isInfinity: true,
-        poolToken0: TokenDto.fixture().copyWith(decimals: 6),
-        poolToken1: TokenDto.fixture().copyWith(decimals: 18),
+        poolToken0Decimals: 6,
+        poolToken1Decimals: 18,
         onPriceChanged: (price) {
           actualIncreasedPrice = price;
         },

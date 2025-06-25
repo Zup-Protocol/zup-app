@@ -12,6 +12,7 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
@@ -86,6 +87,10 @@ class UniswapV4StateViewImplMock extends Mock implements UniswapV4StateViewImpl 
 class UniswapV4PositionManagerMock extends Mock implements UniswapV4PositionManager {}
 
 class UniswapV4PositionManagerImplMock extends Mock implements UniswapV4PositionManagerImpl {}
+
+class PancakeSwapInfinityCLPoolManagerMock extends Mock implements PancakeSwapInfinityClPoolManager {}
+
+class PancakeSwapInfinityCLPoolManagerImplMock extends Mock implements PancakeSwapInfinityClPoolManagerImpl {}
 
 class UniswapV3PoolImplMock extends Mock implements UniswapV3PoolImpl {}
 
