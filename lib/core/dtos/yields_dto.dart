@@ -37,7 +37,7 @@ class YieldsDto with _$YieldsDto {
             poolType: PoolType.v3,
             token0: TokenDto(
               addresses: {11155111: "0x02a3e7E0480B668bD46b42852C58363F93e3bA5C"},
-              decimals: 6,
+              decimals: {11155111: 6},
               logoUrl:
                   "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4/logo.png",
               name: "USDC",
@@ -45,7 +45,7 @@ class YieldsDto with _$YieldsDto {
             ),
             token1: TokenDto(
               addresses: {11155111: "0x5300000000000000000000000000000000000004"},
-              decimals: 18,
+              decimals: {11155111: 18},
               logoUrl:
                   "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x5300000000000000000000000000000000000004/logo.png",
               name: "Wrapped Ether",

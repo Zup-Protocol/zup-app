@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
@@ -115,14 +116,13 @@ Future<void> setupInjections() async {
 
   inject.registerLazySingleton<EthereumAbiCoder>(() => EthereumAbiCoder());
 
+  inject.registerLazySingleton<PancakeSwapInfinityClPoolManager>(
+    () => PancakeSwapInfinityClPoolManager(),
+  );
+
   inject.registerLazySingleton<PoolService>(
-    () => PoolService(
-      inject<UniswapV4StateView>(),
-      inject<UniswapV3Pool>(),
-      inject<UniswapV3PositionManager>(),
-      inject<UniswapV4PositionManager>(),
-      inject<EthereumAbiCoder>(),
-    ),
+    () => PoolService(inject<UniswapV4StateView>(), inject<UniswapV3Pool>(), inject<UniswapV3PositionManager>(),
+        inject<UniswapV4PositionManager>(), inject<EthereumAbiCoder>(), inject<PancakeSwapInfinityClPoolManager>()),
   );
 
   inject.registerLazySingleton<UniswapPermit2>(

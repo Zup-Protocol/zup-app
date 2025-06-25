@@ -61,6 +61,9 @@ class YieldDto with _$YieldDto {
   bool get isToken0Native => token0.addresses[network.chainId] == EthereumConstants.zeroAddress;
   bool get isToken1Native => token1.addresses[network.chainId] == EthereumConstants.zeroAddress;
 
+  int get token0NetworkDecimals => token0.decimals[network.chainId]!;
+  int get token1NetworkDecimals => token1.decimals[network.chainId]!;
+
   factory YieldDto.fromJson(Map<String, dynamic> json) => _$YieldDtoFromJson(json);
 
   factory YieldDto.fixture() => YieldDto(
@@ -73,7 +76,9 @@ class YieldDto with _$YieldDto {
         poolType: PoolType.v3,
         token0: TokenDto.fixture().copyWith(
           symbol: "USDC",
-          decimals: 6,
+          decimals: {
+            AppNetworks.sepolia.chainId: 6,
+          },
           addresses: {
             AppNetworks.sepolia.chainId: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
           },
@@ -82,7 +87,9 @@ class YieldDto with _$YieldDto {
         ),
         token1: TokenDto.fixture().copyWith(
           symbol: "WETH",
-          decimals: 18,
+          decimals: {
+            AppNetworks.sepolia.chainId: 18,
+          },
           addresses: {
             AppNetworks.sepolia.chainId: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
           },

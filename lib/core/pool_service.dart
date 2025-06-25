@@ -1,6 +1,7 @@
 import 'package:clock/clock.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
@@ -15,6 +16,7 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
   final UniswapV3PositionManager _uniswapV3PositionManager;
   final UniswapV4PositionManager _uniswapV4PositionManager;
   final EthereumAbiCoder _ethereumAbiCoder;
+  final PancakeSwapInfinityClPoolManager _pancakeSwapInfinityClPoolManager;
 
   PoolService(
     this._uniswapV4StateView,
@@ -22,9 +24,19 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
     this._uniswapV3PositionManager,
     this._uniswapV4PositionManager,
     this._ethereumAbiCoder,
+    this._pancakeSwapInfinityClPoolManager,
   );
 
   Future<BigInt> getPoolTick(YieldDto forYield) async {
+    if (forYield.protocol.id.isPancakeSwapInfinityCL) {
+      final pancakeSwapInfinityCLPoolManagerContract = _pancakeSwapInfinityClPoolManager.fromRpcProvider(
+        contractAddress: forYield.v4PoolManager!,
+        rpcUrl: forYield.network.rpcUrl,
+      );
+
+      return (await pancakeSwapInfinityCLPoolManagerContract.getSlot0(id: forYield.poolAddress)).tick;
+    }
+
     if (forYield.poolType.isV4) {
       final stateView = _uniswapV4StateView.fromRpcProvider(
         contractAddress: forYield.v4StateView!,

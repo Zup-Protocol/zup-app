@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:zup_app/core/enums/protocol_id.dart';
 
 part 'protocol_dto.freezed.dart';
 part 'protocol_dto.g.dart';
@@ -9,6 +10,7 @@ class ProtocolDto with _$ProtocolDto {
 
   @JsonSerializable(explicitToJson: true)
   const factory ProtocolDto({
+    @Default(ProtocolId.unknown) @JsonKey(unknownEnumValue: ProtocolId.unknown) ProtocolId id,
     @Default("") String name,
     @Default("") String url,
     @Default("") String logo,

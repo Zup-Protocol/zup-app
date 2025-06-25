@@ -279,8 +279,8 @@ void main() {
   test("""When calling 'searchToken' and all the tokens in the list returned does not have name and symbol,
   it should emit the search not found state""", () async {
     final returnedList = [
-      const TokenDto(name: "", symbol: "", decimals: 0, logoUrl: "", addresses: {}),
-      const TokenDto(name: "", symbol: "", decimals: 0, logoUrl: "", addresses: {}),
+      TokenDto.fixture().copyWith(name: "", symbol: "", logoUrl: "", addresses: {}),
+      TokenDto.fixture().copyWith(name: "", symbol: "", decimals: {}, logoUrl: "", addresses: {}),
     ];
 
     when(() => tokensRepository.searchToken(any(), any())).thenAnswer((_) async => returnedList);
@@ -294,8 +294,8 @@ void main() {
   it should emit the search sucesss state, without the tokens without name and symbol""", () async {
     final namedToken = TokenDto.fixture();
     final returnedList = [
-      const TokenDto(name: "", symbol: "", decimals: 0, logoUrl: "", addresses: {}),
-      const TokenDto(name: "", symbol: "", decimals: 0, logoUrl: "", addresses: {}),
+      TokenDto.fixture().copyWith(name: "", symbol: "", logoUrl: "", addresses: {}),
+      TokenDto.fixture().copyWith(name: "", symbol: "", logoUrl: "", addresses: {}),
       namedToken,
     ];
 

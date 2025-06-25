@@ -4,14 +4,17 @@ import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/core/dtos/transaction_receipt.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_state_view.abi.g.dart';
+import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/pool_type.dart';
+import 'package:zup_app/core/enums/protocol_id.dart';
 import 'package:zup_app/core/mixins/v4_pool_liquidity_calculations_mixin.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/v4_pool_constants.dart';
@@ -26,6 +29,7 @@ void main() {
   late UniswapV3Pool uniswapV3Pool;
   late UniswapV3PositionManager positionManagerV3;
   late UniswapV4PositionManager positionManagerV4;
+  late PancakeSwapInfinityClPoolManager pancakeSwapInfinityCLPoolManager;
   late Signer signer;
   late YieldDto currentYield;
   late TransactionResponse transactionResponse;
@@ -34,6 +38,7 @@ void main() {
   late UniswapV3PoolImpl uniswapV3PoolImpl;
   late UniswapV3PositionManagerImpl positionManagerV3Impl;
   late UniswapV4PositionManagerImpl positionManagerV4Impl;
+  late PancakeSwapInfinityClPoolManagerImpl pancakeSwapInfinityCLPoolManagerImpl;
   late EthereumAbiCoder ethereumAbiCoder;
 
   setUp(() {
@@ -58,8 +63,11 @@ void main() {
     uniswapV3Pool = UniswapV3PoolMock();
     positionManagerV3 = UniswapV3PositionManagerMock();
     positionManagerV4 = UniswapV4PositionManagerMock();
+    pancakeSwapInfinityCLPoolManager = PancakeSwapInfinityCLPoolManagerMock();
     ethereumAbiCoder = EthereumAbiCoderMock();
     signer = SignerMock();
+
+    pancakeSwapInfinityCLPoolManagerImpl = PancakeSwapInfinityCLPoolManagerImplMock();
 
     stateViewImpl = UniswapV4StateViewImplMock();
     uniswapV3PoolImpl = UniswapV3PoolImplMock();
@@ -68,7 +76,14 @@ void main() {
 
     currentYield = YieldDto.fixture();
 
-    sut = PoolService(stateView, uniswapV3Pool, positionManagerV3, positionManagerV4, ethereumAbiCoder);
+    sut = PoolService(
+      stateView,
+      uniswapV3Pool,
+      positionManagerV3,
+      positionManagerV4,
+      ethereumAbiCoder,
+      pancakeSwapInfinityCLPoolManager,
+    );
 
     when(() => stateView.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
         .thenReturn(stateViewImpl);
@@ -105,6 +120,12 @@ void main() {
     () async {
       final expectedTick = BigInt.from(87654);
       when(() => stateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer((_) async => (
+            lpFee: BigInt.from(0),
+            protocolFee: BigInt.from(0),
+            sqrtPriceX96: BigInt.from(0),
+            tick: expectedTick,
+          ));
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer((_) async => (
             lpFee: BigInt.from(0),
             protocolFee: BigInt.from(0),
             sqrtPriceX96: BigInt.from(0),
@@ -1329,6 +1350,36 @@ void main() {
           ethValue: amount1Desired,
         ),
       ).called(1);
+    },
+  );
+
+  test(
+    """"When calling `getPoolTick` and the yield protocol is pancakeswap infinity cl,
+  it should use the pancakeswap inifity cl pool manager to get the tick""",
+    () async {
+      final expectedTick = BigInt.from(318675);
+
+      when(() => pancakeSwapInfinityCLPoolManager.fromRpcProvider(
+          contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl"))).thenReturn(
+        pancakeSwapInfinityCLPoolManagerImpl,
+      );
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer((_) async => (
+            sqrtPriceX96: BigInt.from(0),
+            tick: expectedTick,
+            protocolFee: BigInt.from(0),
+            lpFee: BigInt.from(0),
+          ));
+
+      final yield0 = currentYield.copyWith(
+        protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.pancakeSwapInfinityCL),
+        v4PoolManager: "0x0000001",
+      );
+
+      final receivedPoolTick = await sut.getPoolTick(yield0);
+      expect(receivedPoolTick, expectedTick);
+
+      verify(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: yield0.poolAddress)).called(1);
     },
   );
 }
