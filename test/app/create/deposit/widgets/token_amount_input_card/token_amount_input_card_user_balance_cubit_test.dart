@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/create/deposit/widgets/token_amount_input_card/token_amount_input_card_user_balance_cubit.dart';
+import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_core/zup_core.dart';
 
@@ -300,6 +301,8 @@ void main() {
     """When calling 'updateTokenAndNetwork' with 'asNativeToken' true,
       it should pass the address zero to wallet to get the native balance""",
     () async {
+      when(() => wallet.signerStream).thenAnswer((_) => const Stream.empty());
+
       const tokenAddress = "0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c";
 
       final sut0 = TokenAmountCardUserBalanceCubit(
@@ -416,5 +419,31 @@ void main() {
 
     verify(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
         .called(2); // two times because of the initial load
+  });
+
+  test("""When calling `updateTokenAndNetwork` passsing the is native true, it should update the isNative variable,
+  and when a new signer is emitted it will get the native balance""", () async {
+    final signerStreamController = StreamController<Signer?>.broadcast();
+
+    when(() => wallet.signerStream).thenAnswer((_) => signerStreamController.stream);
+
+    final sut0 = TokenAmountCardUserBalanceCubit(
+      wallet,
+      tokenAddress,
+      AppNetworks.sepolia,
+      ZupSingletonCache.shared,
+      () {},
+    );
+
+    final token = TokenDto.fixture();
+    const network = AppNetworks.base;
+
+    await sut0.updateTokenAndNetwork(token.addresses[network.chainId]!, network, asNativeToken: true);
+
+    signerStreamController.add(signer);
+    await Future.delayed(const Duration(seconds: 0));
+
+    verify(() => wallet.nativeOrTokenBalance(EthereumConstants.zeroAddress, rpcUrl: any(named: "rpcUrl")))
+        .called(2); // two because of the initial load
   });
 }

@@ -40,12 +40,14 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
   Future<void> updateTokenAndNetwork(String tokenAddress, AppNetworks network, {required bool asNativeToken}) async {
     _tokenAddress = tokenAddress;
     _network = network;
+    _isNative = asNativeToken;
 
     if (_wallet.signer != null) await getUserTokenAmount(isNative: asNativeToken);
   }
 
   Future<void> updateNativeTokenAndFetch({required bool isNative}) async {
     _isNative = isNative;
+    if (isNative) _tokenAddress = EthereumConstants.zeroAddress;
 
     if (_wallet.signer != null) await getUserTokenAmount(isNative: _isNative);
   }
