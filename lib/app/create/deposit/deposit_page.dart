@@ -119,8 +119,8 @@ class _DepositPageState extends State<DepositPage>
 
     final price = tickToPrice(
       tick: _cubit.latestPoolTick!,
-      poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
-      poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
+      poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+      poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
     );
 
     return areTokensReversed ? price.priceAsQuoteToken : price.priceAsBaseToken;
@@ -185,14 +185,14 @@ class _DepositPageState extends State<DepositPage>
 
     final maxTickPrice = tickToPrice(
       tick: V3V4PoolConstants.maxTick,
-      poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
-      poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
+      poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+      poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
     );
 
     final minTickPrice = tickToPrice(
       tick: V3V4PoolConstants.minTick,
-      poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
-      poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
+      poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+      poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
     );
 
     double getMinPrice() {
@@ -727,8 +727,8 @@ class _DepositPageState extends State<DepositPage>
                       "1 ${baseToken.symbol} ≈ ${() {
                         final currentPrice = tickToPrice(
                           tick: poolTickSnapshot.data ?? BigInt.zero,
-                          poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
-                          poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
+                          poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+                          poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
                         );
 
                         return areTokensReversed ? currentPrice.priceAsQuoteToken : currentPrice.priceAsBaseToken;
@@ -758,8 +758,8 @@ class _DepositPageState extends State<DepositPage>
                   });
                 },
                 initialPrice: minPrice,
-                poolToken0: _cubit.selectedYield!.token0,
-                poolToken1: _cubit.selectedYield!.token1,
+                poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+                poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
                 isReversed: areTokensReversed,
                 displayBaseTokenSymbol: baseToken.symbol,
                 displayQuoteTokenSymbol: quoteToken.symbol,
@@ -803,8 +803,8 @@ class _DepositPageState extends State<DepositPage>
                 type: RangeSelectorType.maxPrice,
                 isInfinity: isMaxRangeInfinity,
                 initialPrice: maxPrice,
-                poolToken0: _cubit.selectedYield!.token0,
-                poolToken1: _cubit.selectedYield!.token1,
+                poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+                poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
                 isReversed: areTokensReversed,
                 tickSpacing: _cubit.selectedYield!.tickSpacing,
                 state: () {
