@@ -180,36 +180,59 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
             ],
           ),
           const SizedBox(height: 5),
-          Row(
-            children: [
-              const Text("V4", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-              const SizedBox(width: 5),
-              ZupSwitch(
-                key: const Key("pool-types-allowed-v4-switch"),
-                value: cache.getPoolSearchSettings().allowV4Search,
-                onChanged: (value) async {
-                  await cache.savePoolSearchSettings(
-                    settings: cache.getPoolSearchSettings().copyWith(allowV4Search: value),
-                  );
+          SizedBox(
+            width: 200,
+            child: Wrap(
+              alignment: WrapAlignment.start,
+              runAlignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const Text("V4", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+                const SizedBox(width: 5),
+                ZupSwitch(
+                  key: const Key("pool-types-allowed-v4-switch"),
+                  value: cache.getPoolSearchSettings().allowV4Search,
+                  onChanged: (value) async {
+                    await cache.savePoolSearchSettings(
+                      settings: cache.getPoolSearchSettings().copyWith(allowV4Search: value),
+                    );
 
-                  setState(() {});
-                },
-              ),
-              const SizedBox(width: 12),
-              const Text("V3", style: TextStyle(fontWeight: FontWeight.w500)),
-              const SizedBox(width: 5),
-              ZupSwitch(
-                key: const Key("pool-types-allowed-v3-switch"),
-                value: cache.getPoolSearchSettings().allowV3Search,
-                onChanged: (value) async {
-                  await cache.savePoolSearchSettings(
-                    settings: cache.getPoolSearchSettings().copyWith(allowV3Search: value),
-                  );
+                    setState(() {});
+                  },
+                ),
+                const SizedBox(width: 12),
+                const Text("V3", style: TextStyle(fontWeight: FontWeight.w500)),
+                const SizedBox(width: 5),
+                ZupSwitch(
+                  key: const Key("pool-types-allowed-v3-switch"),
+                  value: cache.getPoolSearchSettings().allowV3Search,
+                  onChanged: (value) async {
+                    await cache.savePoolSearchSettings(
+                      settings: cache.getPoolSearchSettings().copyWith(allowV3Search: value),
+                    );
 
-                  setState(() {});
-                },
-              ),
-            ],
+                    setState(() {});
+                  },
+                ),
+                Row(
+                  children: [
+                    const Text("V2", style: TextStyle(fontWeight: FontWeight.w500)),
+                    const SizedBox(width: 5),
+                    ZupSwitch(
+                      key: const Key("pool-types-allowed-v2-switch"),
+                      value: cache.getPoolSearchSettings().allowV2Search,
+                      onChanged: (value) async {
+                        await cache.savePoolSearchSettings(
+                          settings: cache.getPoolSearchSettings().copyWith(allowV2Search: value),
+                        );
+
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ],
       ),

@@ -280,4 +280,72 @@ void main() {
       ).called(1);
     },
   );
+
+  zGoldenTest("When clicking to disable the V2 switch it should update the UI",
+      goldenFileName: "create_page_settings_dropdown_v2_pool_type_disable", (tester) async {
+    final initialSettings = PoolSearchSettingsDto();
+    when(() => cache.getPoolSearchSettings()).thenReturn(initialSettings);
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(
+      initialSettings.copyWith(allowV2Search: false),
+    );
+
+    await tester.tap(find.byKey(const Key("pool-types-allowed-v2-switch")));
+    await tester.pumpAndSettle();
+  });
+  zGoldenTest("When clicking to enable the V2 switch it should update the UI",
+      goldenFileName: "create_page_settings_dropdown_v2_pool_type_enable", (tester) async {
+    final initialSettings = PoolSearchSettingsDto(allowV2Search: false, allowV3Search: false, allowV4Search: false);
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(initialSettings);
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(
+      initialSettings.copyWith(allowV2Search: true),
+    );
+
+    await tester.tap(find.byKey(const Key("pool-types-allowed-v2-switch")));
+    await tester.pumpAndSettle();
+  });
+
+  zGoldenTest(
+      "When clicking to disable the V2 switch it should call the cache to update the settings only for the v2 switch",
+      (tester) async {
+    final initialSettings = PoolSearchSettingsDto(allowV2Search: true);
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(initialSettings);
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key("pool-types-allowed-v2-switch")));
+    await tester.pumpAndSettle();
+
+    verify(
+      () => cache.savePoolSearchSettings(settings: initialSettings.copyWith(allowV2Search: false)),
+    ).called(1);
+  });
+
+  zGoldenTest(
+      "When clicking to enable the V2 switch it should call the cache to update the settings only for the v2 switch",
+      (tester) async {
+    final initialSettings = PoolSearchSettingsDto(allowV2Search: false);
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(initialSettings);
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key("pool-types-allowed-v2-switch")));
+    await tester.pumpAndSettle();
+
+    verify(
+      () => cache.savePoolSearchSettings(settings: initialSettings.copyWith(allowV2Search: true)),
+    ).called(1);
+  });
 }

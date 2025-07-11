@@ -634,6 +634,13 @@ abstract class S {
   /// **'Please enter an amount for {tokenSymbol}'**
   String depositPagePleaseEnterAmountForToken({required String tokenSymbol});
 
+  /// No description provided for @depositPageInvalidTokenAmountV2Pool.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount for {token0Symbol} or {token1Symbol}'**
+  String depositPageInvalidTokenAmountV2Pool(
+      {required String token0Symbol, required String token1Symbol});
+
   /// No description provided for @depositPageDeposit.
   ///
   /// In en, this message translates to:

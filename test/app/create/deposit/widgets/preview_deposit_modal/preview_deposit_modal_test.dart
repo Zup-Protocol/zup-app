@@ -17,6 +17,7 @@ import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
@@ -307,8 +308,8 @@ void main() {
 
       final currentPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
         price: currentPrice,
-        poolToken0Decimals: currentYield.token0.decimals,
-        poolToken1Decimals: currentYield.token1.decimals,
+        poolToken0Decimals: currentYield.token0NetworkDecimals,
+        poolToken1Decimals: currentYield.token1NetworkDecimals,
       );
 
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
@@ -333,8 +334,8 @@ void main() {
 
       final currentPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
         price: currentPrice,
-        poolToken0Decimals: currentYield.token0.decimals,
-        poolToken1Decimals: currentYield.token1.decimals,
+        poolToken0Decimals: currentYield.token0NetworkDecimals,
+        poolToken1Decimals: currentYield.token1NetworkDecimals,
       );
 
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
@@ -362,8 +363,8 @@ void main() {
 
       final currentPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
         price: currentPrice,
-        poolToken0Decimals: currentYield.token0.decimals,
-        poolToken1Decimals: currentYield.token1.decimals,
+        poolToken0Decimals: currentYield.token0NetworkDecimals,
+        poolToken1Decimals: currentYield.token1NetworkDecimals,
       );
 
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
@@ -539,7 +540,7 @@ void main() {
       verify(
         () => cubit.approveToken(
           currentYield.token0,
-          depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
         ),
       ).called(1);
     },
@@ -556,14 +557,14 @@ void main() {
 
       when(() => cubit.state).thenReturn(
         PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
           token1Allowance: token1Allowance,
         ),
       );
 
       when(() => cubit.stream).thenAnswer((_) {
         return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
           token1Allowance: token1Allowance,
         ));
       });
@@ -591,14 +592,14 @@ void main() {
 
       when(() => cubit.state).thenReturn(
         PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
           token1Allowance: token1Allowance,
         ),
       );
 
       when(() => cubit.stream).thenAnswer((_) {
         return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
           token1Allowance: token1Allowance,
         ));
       });
@@ -615,7 +616,7 @@ void main() {
       verify(
         () => cubit.approveToken(
           currentYield.token1,
-          depositAmount.parseTokenAmount(decimals: currentYield.token1.decimals),
+          depositAmount.parseTokenAmount(decimals: currentYield.token1NetworkDecimals),
         ),
       ).called(1);
     },
@@ -627,8 +628,8 @@ void main() {
     in the deposit state""",
     goldenFileName: "preview_deposit_modal_deposit_state",
     (tester) async {
-      final token0Allowance = 400.parseTokenAmount(decimals: currentYield.token0.decimals);
-      final token1Allowance = 1200.parseTokenAmount(decimals: currentYield.token1.decimals);
+      final token0Allowance = 400.parseTokenAmount(decimals: currentYield.token0NetworkDecimals);
+      final token1Allowance = 1200.parseTokenAmount(decimals: currentYield.token1NetworkDecimals);
 
       const deposit0Amount = 100.2;
       const deposit1Amount = 110.2;
@@ -661,8 +662,8 @@ void main() {
     in the deposit state. Once the deposit button is clicked, it should call
     the deposit function in the cubit passing the correct params (got from the constructor)""",
     (tester) async {
-      final token0Allowance = 400.parseTokenAmount(decimals: currentYield.token0.decimals);
-      final token1Allowance = 1200.parseTokenAmount(decimals: currentYield.token1.decimals);
+      final token0Allowance = 400.parseTokenAmount(decimals: currentYield.token0NetworkDecimals);
+      final token1Allowance = 1200.parseTokenAmount(decimals: currentYield.token1NetworkDecimals);
 
       const deposit0Amount = 100.2;
       const deposit1Amount = 110.2;
@@ -714,8 +715,8 @@ void main() {
           maxPrice: maxPrice,
           minPrice: minPrice,
           slippage: slippage,
-          token0Amount: deposit0Amount.parseTokenAmount(decimals: currentYield.token0.decimals),
-          token1Amount: deposit1Amount.parseTokenAmount(decimals: currentYield.token1.decimals),
+          token0Amount: deposit0Amount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
+          token1Amount: deposit1Amount.parseTokenAmount(decimals: currentYield.token1NetworkDecimals),
         ),
       ).called(1);
     },
@@ -728,8 +729,8 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(
         V3PoolConversorsMixinWrapper().priceToTick(
           price: 0.01, // It should be shown in the card (or very close to it)
-          poolToken0Decimals: currentYield.token0.decimals,
-          poolToken1Decimals: currentYield.token1.decimals,
+          poolToken0Decimals: currentYield.token0NetworkDecimals,
+          poolToken1Decimals: currentYield.token1NetworkDecimals,
           isReversed: false,
         ),
       );
@@ -746,8 +747,8 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(
         V3PoolConversorsMixinWrapper().priceToTick(
           price: 1200, // It should be shown in the card (or very close to it)
-          poolToken0Decimals: currentYield.token0.decimals,
-          poolToken1Decimals: currentYield.token1.decimals,
+          poolToken0Decimals: currentYield.token0NetworkDecimals,
+          poolToken1Decimals: currentYield.token1NetworkDecimals,
           isReversed: true,
         ),
       );
@@ -766,8 +767,8 @@ void main() {
       const newPrice = 0.02632; // It should be shown in the card (or very close to it)
       final newPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
         price: newPrice,
-        poolToken0Decimals: currentYield.token0.decimals,
-        poolToken1Decimals: currentYield.token1.decimals,
+        poolToken0Decimals: currentYield.token0NetworkDecimals,
+        poolToken1Decimals: currentYield.token1NetworkDecimals,
         isReversed: false,
       );
 
@@ -1011,6 +1012,26 @@ void main() {
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(),
+        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
+      );
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    "When the pool type is v2, the modal should be adapted to show v2 deposit information",
+    goldenFileName: "preview_deposit_modal_v2_pool_type",
+    (tester) async {
+      when(() => cubit.state).thenReturn(
+        PreviewDepositModalState.initial(
+          token0Allowance: BigInt.from(0),
+          token1Allowance: BigInt.from(0),
+        ),
+      );
+
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(customYield: YieldDto.fixture().copyWith(poolType: PoolType.v2)),
         wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
       );
 

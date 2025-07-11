@@ -51,6 +51,7 @@ void main() {
           "allowedPoolTypes": [
             "V3",
             "V4",
+            "V2",
           ],
         }
       }),
@@ -89,6 +90,7 @@ void main() {
           "minTvlUsd": searchSettings.minLiquidityUSD,
           "allowedPoolTypes": [
             "V4",
+            "V2",
           ],
         }
       }),
@@ -125,7 +127,43 @@ void main() {
       }, data: {
         "filters": {
           "minTvlUsd": searchSettings.minLiquidityUSD,
-          "allowedPoolTypes": ["V3"],
+          "allowedPoolTypes": ["V3", "V2"],
+        }
+      }),
+    ).called(1);
+  });
+
+  test("When the V2 Pool is disabled in the search settings, it should not be included in the request", () async {
+    final yields = YieldsDto.fixture();
+
+    when(() => dio.post(any(), queryParameters: any(named: "queryParameters"), data: any(named: "data"))).thenAnswer(
+      (_) async => Response(
+        data: {"bestYields": yields.toJson()},
+        statusCode: 200,
+        requestOptions: RequestOptions(),
+      ),
+    );
+
+    const token0Address = "0x123";
+    const token1Address = "0x456";
+    const network = AppNetworks.sepolia;
+    final searchSettings = PoolSearchSettingsDto.fixture().copyWith(allowV2Search: false);
+
+    await sut.getSingleNetworkYield(
+      token0Address: token0Address,
+      token1Address: token1Address,
+      network: network,
+      searchSettings: searchSettings,
+    );
+
+    verify(
+      () => dio.post("/pools/search/${network.chainId}", queryParameters: {
+        "token0Address": token0Address,
+        "token1Address": token1Address
+      }, data: {
+        "filters": {
+          "minTvlUsd": searchSettings.minLiquidityUSD,
+          "allowedPoolTypes": ["V3", "V4"],
         }
       }),
     ).called(1);

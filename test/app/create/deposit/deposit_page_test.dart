@@ -19,10 +19,12 @@ import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
+import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/token_price_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/pool_service.dart';
@@ -2241,6 +2243,363 @@ void main() {
       await tester.pumpAndSettle();
 
       verifyNever(() => appCubit.updateAppNetwork(any()));
+    },
+  );
+
+  zGoldenTest(
+    "When selecting a V2 pool yield, it should automatically scroll to the deposit section",
+    goldenFileName: "deposit_page_select_v2_pool_scroll_to_deposit_section",
+    (tester) async {
+      await tester.runAsync(() async {
+        when(() => cubit.depositSettings).thenReturn(DepositSettingsDto());
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn((reserve0: 0, reserve1: 0));
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+        when(() => cubit.selectYield(any(), any())).thenAnswer((_) async => () {});
+
+        await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key("yield-card-30d")));
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    """When inputting an amount in the base token amount input and the yield is v2, it should calculate
+    the quote token amount correctly based on the pool reserves""",
+    goldenFileName: "deposit_page_calculate_quote_token_amount",
+    (tester) async {
+      await tester.runAsync(() async {
+        const ({double reserve0, double reserve1}) poolReserves = (reserve0: 1, reserve1: 2);
+
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn(poolReserves);
+
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+        when(() => cubit.selectYield(any(), any())).thenAnswer((_) async => () {});
+
+        await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("v2-pool-base-token-input-card")), "1");
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    """When inputting an amount in the quote token amount input and the yield is v2, it should calculate
+    the base token amount correctly based on the pool reserves""",
+    goldenFileName: "deposit_page_calculate_base_token_amount",
+    (tester) async {
+      await tester.runAsync(() async {
+        const ({double reserve0, double reserve1}) poolReserves = (reserve0: 1, reserve1: 2);
+
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn(poolReserves);
+
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+        when(() => cubit.selectYield(any(), any())).thenAnswer((_) async => () {});
+
+        await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("v2-pool-quote-token-input-card")), "1");
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    """When inputting an amount in the quote token amount input with the yield being v2,
+    and then deleting the text, it should also clear the amount in the base token amount input""",
+    goldenFileName: "deposit_page_clear_base_token_amount",
+    (tester) async {
+      await tester.runAsync(() async {
+        const ({double reserve0, double reserve1}) poolReserves = (reserve0: 1, reserve1: 2);
+
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn(poolReserves);
+
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+        when(() => cubit.selectYield(any(), any())).thenAnswer((_) async => () {});
+
+        await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("v2-pool-quote-token-input-card")), "1");
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("v2-pool-quote-token-input-card")), "");
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    """When inputting an amount in the base token amount input with the yield being v2,
+    and then deleting the text, it should also clear the amount in the quote token amount input""",
+    goldenFileName: "deposit_page_clear_quote_token_amount",
+    (tester) async {
+      await tester.runAsync(() async {
+        const ({double reserve0, double reserve1}) poolReserves = (reserve0: 1, reserve1: 2);
+
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn(poolReserves);
+
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+        when(() => cubit.selectYield(any(), any())).thenAnswer((_) async => () {});
+
+        await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("v2-pool-base-token-input-card")), "1");
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("v2-pool-base-token-input-card")), "");
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    """When a wallet is connected, a v2 yield is selected, and there is no deposit amount typed,
+    the deposit button should be disabled with text to input the amount""",
+    goldenFileName: "deposit_page_deposit_v2_pool_button_disabled_input_amount",
+    (tester) async {
+      await tester.runAsync(() async {
+        const ({double reserve0, double reserve1}) poolReserves = (reserve0: 1, reserve1: 2);
+        final signer = SignerMock();
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn(poolReserves);
+        when(() => wallet.signer).thenReturn(signer);
+        when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
+        when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+
+        await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    """When a wallet is connected, a v2 yield is selected, and the typed amount in the
+    base token input is less than the available in the wallet, the deposit button should
+    be disabled with the text indicating that the wallet balance is too low""",
+    goldenFileName: "deposit_page_deposit_v2_pool_button_disabled_wallet_balance_too_low_base_token",
+    (tester) async {
+      await tester.runAsync(() async {
+        const ({double reserve0, double reserve1}) poolReserves = (reserve0: 1, reserve1: 2);
+        final signer = SignerMock();
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+        const availableWalletAmount = 0.1;
+
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn(poolReserves);
+        when(() => wallet.signer).thenReturn(signer);
+        when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
+        when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
+        when(() => cubit.getWalletTokenAmount(selectedYield.token1NetworkAddress, network: any(named: "network")))
+            .thenAnswer((_) async => 172678152164213);
+        when(() => cubit.getWalletTokenAmount(selectedYield.token0NetworkAddress, network: any(named: "network")))
+            .thenAnswer((_) async => availableWalletAmount);
+        when(() => wallet.nativeOrTokenBalance(selectedYield.token0NetworkAddress, rpcUrl: any(named: "rpcUrl")))
+            .thenAnswer((_) async => availableWalletAmount);
+        when(() => wallet.nativeOrTokenBalance(selectedYield.token1NetworkAddress, rpcUrl: any(named: "rpcUrl")))
+            .thenAnswer((_) async => 172678152164213);
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+
+        await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const Key("v2-pool-base-token-input-card")),
+          (availableWalletAmount + 0.5).toString(),
+        );
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    """When a wallet is connected, a v2 yield is selected, and the typed amount in the
+    quote token input is less than the available in the wallet, the deposit button should
+    be disabled with the text indicating that the wallet balance is too low""",
+    goldenFileName: "deposit_page_deposit_v2_pool_button_disabled_wallet_balance_too_low_quote_token",
+    (tester) async {
+      await tester.runAsync(() async {
+        const ({double reserve0, double reserve1}) poolReserves = (reserve0: 1, reserve1: 2);
+        final signer = SignerMock();
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+        const availableWalletAmount = 0.1;
+
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn(poolReserves);
+        when(() => wallet.signer).thenReturn(signer);
+        when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
+        when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
+        when(() => cubit.getWalletTokenAmount(selectedYield.token0NetworkAddress, network: any(named: "network")))
+            .thenAnswer((_) async => 172678152164213);
+        when(() => cubit.getWalletTokenAmount(selectedYield.token1NetworkAddress, network: any(named: "network")))
+            .thenAnswer((_) async => availableWalletAmount);
+        when(() => wallet.nativeOrTokenBalance(selectedYield.token1NetworkAddress, rpcUrl: any(named: "rpcUrl")))
+            .thenAnswer((_) async => availableWalletAmount);
+        when(() => wallet.nativeOrTokenBalance(selectedYield.token0NetworkAddress, rpcUrl: any(named: "rpcUrl")))
+            .thenAnswer((_) async => 172678152164213);
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+
+        await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.byKey(const Key("v2-pool-quote-token-input-card")),
+          (availableWalletAmount + 0.5).toString(),
+        );
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    """When a wallet is connected, a v2 yield is selected, and the amounts to deposit
+    are available in the wallet, the deposit button should be enabled to preview the deposit""",
+    goldenFileName: "deposit_page_deposit_v2_pool_button_enabled_preview",
+    (tester) async {
+      await tester.runAsync(() async {
+        const ({double reserve0, double reserve1}) poolReserves = (reserve0: 1, reserve1: 2);
+        final signer = SignerMock();
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn(poolReserves);
+        when(() => wallet.signer).thenReturn(signer);
+        when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
+        when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
+        when(() => cubit.getWalletTokenAmount(any(), network: any(named: "network")))
+            .thenAnswer((_) async => 172678152164213);
+        when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+            .thenAnswer((_) async => 172678152164213);
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+
+        await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("v2-pool-quote-token-input-card")), 0.1.toString());
+        await tester.pumpAndSettle();
+      });
+    },
+  );
+
+  zGoldenTest(
+    """When clicking the preview deposit button in the v2 pool, the preview deposit
+    modal should be shown""",
+    goldenFileName: "deposit_page_deposit_v2_pool_button_preview_tap",
+    (tester) async {
+      await tester.runAsync(() async {
+        const ({double reserve0, double reserve1}) poolReserves = (reserve0: 1, reserve1: 2);
+        final signer = SignerMock();
+        final selectedYield = YieldDto.fixture().copyWith(
+          poolType: PoolType.v2,
+          protocol: ProtocolDto.fixture().copyWith(name: "V2 PPOOL"),
+        );
+        final yields = YieldsDto.fixture().copyWith(pools: [selectedYield]);
+
+        when(() => cubit.v2PoolReservesStream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestV2PoolReserves).thenReturn(poolReserves);
+        when(() => wallet.signer).thenReturn(signer);
+        when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
+        when(() => signer.address).thenAnswer((_) => Future.value("0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c"));
+        when(() => cubit.getWalletTokenAmount(any(), network: any(named: "network")))
+            .thenAnswer((_) async => 172678152164213);
+        when(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+            .thenAnswer((_) async => 172678152164213);
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.state).thenReturn(DepositState.success(yields));
+
+        await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("v2-pool-quote-token-input-card")), 0.1.toString());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key("deposit-button")));
+        await tester.pumpAndSettle();
+      });
     },
   );
 }

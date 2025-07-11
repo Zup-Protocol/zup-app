@@ -23,6 +23,7 @@ class YieldRepository {
         "allowedPoolTypes": [
           if (searchSettings.allowV3Search) "V3",
           if (searchSettings.allowV4Search) "V4",
+          if (searchSettings.allowV2Search) "V2",
         ],
       }
     });

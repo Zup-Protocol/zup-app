@@ -3,7 +3,6 @@ import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/core/dtos/chain_info.dart';
 import 'package:web3kit/core/enums/native_currencies.dart';
-import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
 import '../../golden_config.dart';
@@ -24,6 +23,7 @@ void main() {
     expect(AppNetworks.fromValue("allNetworks"), AppNetworks.allNetworks, reason: "All networks should match");
     expect(AppNetworks.fromValue("base"), AppNetworks.base, reason: "Base should match");
     expect(AppNetworks.fromValue("unichain"), AppNetworks.unichain, reason: "Unichain should match");
+    expect(AppNetworks.fromValue("bnb"), AppNetworks.bnb, reason: "BNB should match");
   });
 
   test("Label extension should match for all networks", () {
@@ -33,6 +33,7 @@ void main() {
     expect(AppNetworks.allNetworks.label, "All Networks", reason: "All Networks Label should match");
     expect(AppNetworks.base.label, "Base", reason: "Base Label should match");
     expect(AppNetworks.unichain.label, "Unichain", reason: "Unichain Label should match");
+    expect(AppNetworks.bnb.label, "BNB Chain", reason: "BNB Chain Label should match");
   });
 
   test("`testnets` method should return all testnets in the enum, excluding the 'all networks'", () {
@@ -48,6 +49,7 @@ void main() {
         AppNetworks.scroll,
         AppNetworks.base,
         AppNetworks.unichain,
+        AppNetworks.bnb
       ]),
     );
   });
@@ -70,6 +72,10 @@ void main() {
 
   test("`isTestnet` method should return false for unichain", () {
     expect(AppNetworks.unichain.isTestnet, false);
+  });
+
+  test("`isTestnet` method should return false for bnb", () {
+    expect(AppNetworks.bnb.isTestnet, false);
   });
 
   test("Chain info extension should match for all networks", () {
@@ -125,11 +131,23 @@ void main() {
       ChainInfo(
         hexChainId: "0x82",
         chainName: "Unichain",
-        blockExplorerUrls: const ["https://uniscan.xyz/"],
+        blockExplorerUrls: const ["https://uniscan.xyz"],
         nativeCurrency: NativeCurrencies.eth.currencyInfo,
         rpcUrls: const ["https://unichain-rpc.publicnode.com"],
       ),
       reason: "Unichain ChainInfo should match",
+    );
+
+    expect(
+      AppNetworks.bnb.chainInfo,
+      ChainInfo(
+        hexChainId: "0x38",
+        chainName: "BNB Chain",
+        blockExplorerUrls: const ["https://bscscan.com"],
+        nativeCurrency: NativeCurrencies.bnb.currencyInfo,
+        rpcUrls: const ["https://bsc-rpc.publicnode.com"],
+      ),
+      reason: "BNB Chain ChainInfo should match",
     );
   });
 
@@ -163,79 +181,11 @@ void main() {
       "0x4200000000000000000000000000000000000006",
       reason: "Unichain wrapped native token address should match",
     );
-  });
-
-  test("wrapped native token should match for all networks", () {
-    expect(
-      AppNetworks.sepolia.wrappedNative,
-      TokenDto(
-        addresses: {
-          AppNetworks.sepolia.chainId: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
-        },
-        name: "Wrapped Ether",
-        decimals: 18,
-        symbol: "WETH",
-        logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
-      ),
-      reason: "Sepolia default token should match",
-    );
 
     expect(
-      AppNetworks.mainnet.wrappedNative,
-      TokenDto(
-        addresses: {
-          AppNetworks.mainnet.chainId: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-        },
-        name: "Wrapped Ether",
-        decimals: 18,
-        symbol: "WETH",
-        logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
-      ),
-      reason: "Ethereum default token should match",
-    );
-
-    expect(
-      AppNetworks.scroll.wrappedNative,
-      TokenDto(
-        addresses: {
-          AppNetworks.scroll.chainId: "0x5300000000000000000000000000000000000004",
-        },
-        name: "Wrapped Ether",
-        decimals: 18,
-        symbol: "WETH",
-        logoUrl:
-            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x5300000000000000000000000000000000000004/logo.png",
-      ),
-      reason: "Scroll default token should match",
-    );
-
-    expect(
-      AppNetworks.base.wrappedNative,
-      TokenDto(
-        addresses: {
-          AppNetworks.base.chainId: "0x4200000000000000000000000000000000000006",
-        },
-        name: "Wrapped Ether",
-        decimals: 18,
-        symbol: "WETH",
-        logoUrl:
-            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x4200000000000000000000000000000000000006/logo.png",
-      ),
-      reason: "Base default token should match",
-    );
-
-    expect(
-      AppNetworks.unichain.wrappedNative,
-      TokenDto(
-        addresses: {
-          AppNetworks.unichain.chainId: "0x4200000000000000000000000000000000000006",
-        },
-        name: "Wrapped Ether",
-        decimals: 18,
-        symbol: "WETH",
-        logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/unichain/logo.png",
-      ),
-      reason: "Unichain default token should match",
+      AppNetworks.bnb.wrappedNativeTokenAddress,
+      "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+      reason: "BNB wrapped native token address should match",
     );
   });
 
@@ -268,6 +218,12 @@ void main() {
       AppNetworks.unichain.rpcUrl,
       "https://unichain-rpc.publicnode.com",
       reason: "Unichain rpc url should match",
+    );
+
+    expect(
+      AppNetworks.bnb.rpcUrl,
+      "https://bsc-rpc.publicnode.com",
+      reason: "BNB rpc url should match",
     );
   });
 
@@ -347,6 +303,13 @@ void main() {
   zGoldenTest("Unichain network icon should match", goldenFileName: "unichain_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
       AppNetworks.unichain.icon,
+      device: GoldenDevice.square,
+    ));
+  });
+
+  zGoldenTest("BNB network icon should match", goldenFileName: "bnb_network_icon", (tester) async {
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+      AppNetworks.bnb.icon,
       device: GoldenDevice.square,
     ));
   });

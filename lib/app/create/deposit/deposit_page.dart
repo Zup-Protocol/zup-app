@@ -80,6 +80,7 @@ class _DepositPageState extends State<DepositPage>
   final quoteTokenAmountController = TextEditingController();
   final wallet = inject<Wallet>();
   final selectRangeSectorKey = GlobalKey();
+  final v2PoolDepositSectionKey = GlobalKey();
 
   ZupNavigator get _navigator => inject<ZupNavigator>();
   DepositCubit get _cubit => context.read<DepositCubit>();
@@ -119,8 +120,8 @@ class _DepositPageState extends State<DepositPage>
 
     final price = tickToPrice(
       tick: _cubit.latestPoolTick!,
-      poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
-      poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
+      poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+      poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
     );
 
     return areTokensReversed ? price.priceAsQuoteToken : price.priceAsBaseToken;
@@ -153,9 +154,11 @@ class _DepositPageState extends State<DepositPage>
 
     if (yieldDto != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (selectRangeSectorKey.currentContext != null) {
+        final scrollToKey = yieldDto.poolType.isV2 ? v2PoolDepositSectionKey : selectRangeSectorKey;
+
+        if (scrollToKey.currentContext != null) {
           Scrollable.ensureVisible(
-            selectRangeSectorKey.currentContext!,
+            scrollToKey.currentContext!,
             duration: const Duration(milliseconds: 600),
             curve: Curves.fastEaseInToSlowEaseOut,
           );
@@ -178,6 +181,35 @@ class _DepositPageState extends State<DepositPage>
   }
 
   void calculateDepositTokensAmount() {
+    if (_cubit.selectedYield?.poolType.isV2 ?? false) {
+      if (_cubit.latestV2PoolReserves == null || _cubit.selectedYield == null) return;
+
+      final poolReserve0 = _cubit.latestV2PoolReserves!.reserve0;
+      final poolReserve1 = _cubit.latestV2PoolReserves!.reserve1;
+
+      if (isBaseTokenAmountUserInput && baseTokenAmountController.text.isEmpty) {
+        quoteTokenAmountController.clear();
+        return;
+      }
+
+      if (!isBaseTokenAmountUserInput && quoteTokenAmountController.text.isEmpty) {
+        baseTokenAmountController.clear();
+        return;
+      }
+
+      if (isBaseTokenAmountUserInput) {
+        quoteTokenAmountController.text =
+            (poolReserve1 / poolReserve0 * (double.parse(baseTokenAmountController.text))).toString();
+
+        return;
+      }
+
+      baseTokenAmountController.text =
+          (poolReserve0 / poolReserve1 * (double.parse(quoteTokenAmountController.text))).toString();
+
+      return;
+    }
+
     if (_cubit.latestPoolTick == null || _cubit.selectedYield == null) return;
 
     if (isOutOfRange.minPrice) return quoteTokenAmountController.clear();
@@ -185,14 +217,14 @@ class _DepositPageState extends State<DepositPage>
 
     final maxTickPrice = tickToPrice(
       tick: V3V4PoolConstants.maxTick,
-      poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
-      poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
+      poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+      poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
     );
 
     final minTickPrice = tickToPrice(
       tick: V3V4PoolConstants.minTick,
-      poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
-      poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
+      poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+      poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
     );
 
     double getMinPrice() {
@@ -234,7 +266,7 @@ class _DepositPageState extends State<DepositPage>
     baseTokenAmountController.text = newBaseTokenAmount;
   }
 
-  Future<({String title, Widget? icon, Function()? onPressed})> depositButtonState() async {
+  Future<({String title, Widget? icon, Function()? onPressed})> v3PoolDepositButtonState() async {
     final userWalletBaseTokenAmount = await _cubit.getWalletTokenAmount(
       baseToken.addresses[_cubit.selectedYield!.network.chainId]!,
       network: _cubit.selectedYield!.network,
@@ -303,6 +335,65 @@ class _DepositPageState extends State<DepositPage>
         ).show(
           context,
           currentPoolTick: _cubit.latestPoolTick ?? BigInt.zero,
+        );
+      }
+    );
+  }
+
+  Future<({String title, Widget? icon, Function()? onPressed})> v2PoolDepositButtonState() async {
+    if (baseTokenAmountController.text.isEmptyOrZero || quoteTokenAmountController.text.isEmptyOrZero) {
+      return (
+        title: S.of(context).depositPageInvalidTokenAmountV2Pool(
+              token0Symbol: _cubit.selectedYield!.token0.symbol,
+              token1Symbol: _cubit.selectedYield!.token1.symbol,
+            ),
+        icon: null,
+        onPressed: null
+      );
+    }
+
+    final userWalletToken0Amount = await _cubit.getWalletTokenAmount(
+      _cubit.selectedYield!.token0NetworkAddress,
+      network: _cubit.selectedYield!.network,
+    );
+
+    final userWalletToken1Amount = await _cubit.getWalletTokenAmount(
+      _cubit.selectedYield!.token1NetworkAddress,
+      network: _cubit.selectedYield!.network,
+    );
+
+    if (userWalletToken0Amount < (double.tryParse(baseTokenAmountController.text) ?? 0)) {
+      return (
+        title: S.of(context).depositPageInsufficientTokenBalance(tokenSymbol: baseToken.symbol),
+        icon: null,
+        onPressed: null
+      );
+    }
+
+    if (userWalletToken1Amount < (double.tryParse(quoteTokenAmountController.text) ?? 0)) {
+      return (
+        title: S.of(context).depositPageInsufficientTokenBalance(tokenSymbol: quoteToken.symbol),
+        icon: null,
+        onPressed: null
+      );
+    }
+
+    return (
+      title: S.of(context).preview,
+      icon: Assets.icons.scrollFill.svg(),
+      onPressed: () {
+        PreviewDepositModal(
+          key: const Key("preview-deposit-modal"),
+          yieldTimeFrame: _cubit.selectedYieldTimeframe!,
+          deadline: selectedDeadline,
+          maxSlippage: selectedSlippage,
+          currentYield: _cubit.selectedYield!,
+          isReversed: areTokensReversed,
+          token0DepositAmount: double.tryParse(baseTokenAmountController.text) ?? 0,
+          token1DepositAmount: double.tryParse(quoteTokenAmountController.text) ?? 0,
+        ).show(
+          context,
+          currentPoolTick: BigInt.zero,
         );
       }
     );
@@ -399,10 +490,13 @@ class _DepositPageState extends State<DepositPage>
                             const SizedBox(height: 16),
                             _buildYieldSelectionSector(yields),
                             const SizedBox(height: 20),
-                            if (selectedYieldSnapshot.data != null) ...[
+                            if (selectedYieldSnapshot.data != null && !(selectedYieldSnapshot.data!.poolType.isV2)) ...[
                               _buildSelectRangeSector(),
                               const SizedBox(height: 20),
                               _buildDepositSection(),
+                            ] else if (selectedYieldSnapshot.data != null &&
+                                selectedYieldSnapshot.data!.poolType.isV2) ...[
+                              _buildDepositSectionForV2Pool()
                             ],
                             const SizedBox(height: 200)
                           ],
@@ -727,8 +821,8 @@ class _DepositPageState extends State<DepositPage>
                       "1 ${baseToken.symbol} ≈ ${() {
                         final currentPrice = tickToPrice(
                           tick: poolTickSnapshot.data ?? BigInt.zero,
-                          poolToken0Decimals: _cubit.selectedYield!.token0.decimals,
-                          poolToken1Decimals: _cubit.selectedYield!.token1.decimals,
+                          poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+                          poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
                         );
 
                         return areTokensReversed ? currentPrice.priceAsQuoteToken : currentPrice.priceAsBaseToken;
@@ -758,8 +852,8 @@ class _DepositPageState extends State<DepositPage>
                   });
                 },
                 initialPrice: minPrice,
-                poolToken0: _cubit.selectedYield!.token0,
-                poolToken1: _cubit.selectedYield!.token1,
+                poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+                poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
                 isReversed: areTokensReversed,
                 displayBaseTokenSymbol: baseToken.symbol,
                 displayQuoteTokenSymbol: quoteToken.symbol,
@@ -803,8 +897,8 @@ class _DepositPageState extends State<DepositPage>
                 type: RangeSelectorType.maxPrice,
                 isInfinity: isMaxRangeInfinity,
                 initialPrice: maxPrice,
-                poolToken0: _cubit.selectedYield!.token0,
-                poolToken1: _cubit.selectedYield!.token1,
+                poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
+                poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
                 isReversed: areTokensReversed,
                 tickSpacing: _cubit.selectedYield!.tickSpacing,
                 state: () {
@@ -838,7 +932,6 @@ class _DepositPageState extends State<DepositPage>
           opacity: isRangeInvalid ? 0.2 : 1,
           child: StreamBuilder(
               stream: _cubit.poolTickStream,
-              initialData: _cubit.latestPoolTick,
               builder: (context, poolTickSnapshot) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -926,7 +1019,7 @@ class _DepositPageState extends State<DepositPage>
                               }
 
                               return FutureBuilder(
-                                future: depositButtonState(),
+                                future: v3PoolDepositButtonState(),
                                 builder: (context, stateSnapshot) {
                                   return ZupPrimaryButton(
                                     alignCenter: true,
@@ -949,4 +1042,97 @@ class _DepositPageState extends State<DepositPage>
               }),
         ),
       );
+
+  Widget _buildDepositSectionForV2Pool() {
+    return StreamBuilder(
+        key: const Key("v2-pool-deposit-section"),
+        stream: _cubit.v2PoolReservesStream,
+        initialData: _cubit.latestV2PoolReserves,
+        builder: (context, poolReservesSnapshot) {
+          return Column(
+            key: v2PoolDepositSectionKey,
+            children: [
+              TokenAmountInputCard(
+                key: const Key("v2-pool-base-token-input-card"),
+                token: _cubit.selectedYield!.token0,
+                isNative: _cubit.selectedYield!.isToken0Native,
+                disabledText: () {
+                  if (!(poolReservesSnapshot.hasData) &&
+                      !(isBaseTokenAmountUserInput) &&
+                      quoteTokenAmountController.text.isNotEmpty) {
+                    return S.of(context).loading;
+                  }
+                }.call(),
+                onInput: (_) {
+                  setState(() {
+                    isBaseTokenAmountUserInput = true;
+
+                    calculateDepositTokensAmount();
+                  });
+                },
+                controller: baseTokenAmountController,
+                network: _cubit.selectedYield!.network,
+              ),
+              const SizedBox(height: 6),
+              TokenAmountInputCard(
+                key: const Key("v2-pool-quote-token-input-card"),
+                token: _cubit.selectedYield!.token1,
+                isNative: _cubit.selectedYield!.isToken1Native,
+                disabledText: () {
+                  if (!(poolReservesSnapshot.hasData) &&
+                      isBaseTokenAmountUserInput &&
+                      baseTokenAmountController.text.isNotEmpty) {
+                    return S.of(context).loading;
+                  }
+                }.call(),
+                onInput: (_) {
+                  setState(() {
+                    isBaseTokenAmountUserInput = false;
+
+                    calculateDepositTokensAmount();
+                  });
+                },
+                controller: quoteTokenAmountController,
+                network: _cubit.selectedYield!.network,
+              ),
+              const SizedBox(height: 20),
+              StreamBuilder(
+                key: const Key("deposit-button"),
+                stream: wallet.signerStream,
+                initialData: wallet.signer,
+                builder: (context, signerSnapshot) {
+                  if (!signerSnapshot.hasData) {
+                    return ZupPrimaryButton(
+                      width: double.maxFinite,
+                      title: S.of(context).connectWallet,
+                      icon: Assets.icons.walletBifold.svg(),
+                      fixedIcon: true,
+                      alignCenter: true,
+                      hoverElevation: 0,
+                      backgroundColor: ZupColors.brand7,
+                      foregroundColor: ZupColors.brand,
+                      onPressed: () => ConnectModal().show(context),
+                    );
+                  }
+
+                  return FutureBuilder(
+                    future: v2PoolDepositButtonState(),
+                    builder: (context, stateSnapshot) {
+                      return ZupPrimaryButton(
+                        alignCenter: true,
+                        title: stateSnapshot.data?.title ?? "Loading...",
+                        icon: stateSnapshot.data?.icon,
+                        isLoading: stateSnapshot.connectionState == ConnectionState.waiting,
+                        fixedIcon: true,
+                        onPressed: stateSnapshot.data?.onPressed,
+                        width: double.maxFinite,
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          );
+        });
+  }
 }
