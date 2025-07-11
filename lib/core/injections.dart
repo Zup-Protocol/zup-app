@@ -9,6 +9,8 @@ import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v2_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v2_router_02.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
@@ -120,9 +122,20 @@ Future<void> setupInjections() async {
     () => PancakeSwapInfinityClPoolManager(),
   );
 
+  inject.registerLazySingleton<UniswapV2Pool>(() => UniswapV2Pool());
+
+  inject.registerLazySingleton<UniswapV2Router02>(() => UniswapV2Router02());
+
   inject.registerLazySingleton<PoolService>(
-    () => PoolService(inject<UniswapV4StateView>(), inject<UniswapV3Pool>(), inject<UniswapV3PositionManager>(),
-        inject<UniswapV4PositionManager>(), inject<EthereumAbiCoder>(), inject<PancakeSwapInfinityClPoolManager>()),
+    () => PoolService(
+        inject<UniswapV4StateView>(),
+        inject<UniswapV3Pool>(),
+        inject<UniswapV2Pool>(),
+        inject<UniswapV3PositionManager>(),
+        inject<UniswapV4PositionManager>(),
+        inject<UniswapV2Router02>(),
+        inject<EthereumAbiCoder>(),
+        inject<PancakeSwapInfinityClPoolManager>()),
   );
 
   inject.registerLazySingleton<UniswapPermit2>(

@@ -12,6 +12,7 @@ import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/slippage.dart';
@@ -632,4 +633,338 @@ void main() {
 
     expect(sut.selectedYieldTimeframe, selectedYieldTimeFrame);
   });
+
+  test(
+    """When calling 'selectYield' and the yield is v2 pool,
+    it should get the pool reserves from the pool service
+    and update the variable with the formatted values to double""",
+    () async {
+      final expectedReserves = (reserve0: BigInt.from(21578), reserve1: BigInt.from(45678));
+      when(() => poolService.getV2PoolReserves(any())).thenAnswer((_) async => expectedReserves);
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v2);
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+
+      expect(
+        sut.latestV2PoolReserves!.reserve0,
+        expectedReserves.reserve0.parseTokenAmount(decimals: selectedYield.token0NetworkDecimals),
+      );
+
+      expect(
+        sut.latestV2PoolReserves!.reserve1,
+        expectedReserves.reserve1.parseTokenAmount(decimals: selectedYield.token1NetworkDecimals),
+      );
+
+      verify(() => poolService.getV2PoolReserves(selectedYield)).called(1);
+    },
+  );
+
+  test(
+    """When calling 'selectYield' and the yield is v3 pool,
+    it should get the pool tick from the pool service
+    and update the variable with the received values""",
+    () async {
+      final expectedTick = BigInt.from(215781527812761);
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedTick);
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v3);
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+
+      expect(
+        sut.latestPoolTick!,
+        expectedTick,
+      );
+
+      verify(() => poolService.getPoolTick(selectedYield)).called(1);
+    },
+  );
+
+  test(
+    """When calling 'selectYield' and the yield is v4 pool,
+    it should get the pool tick from the pool service
+    and update the variable with the received values""",
+    () async {
+      final expectedTick = BigInt.from(1716161616161);
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedTick);
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v4);
+      await sut.selectYield(selectedYield, YieldTimeFrame.month);
+
+      expect(
+        sut.latestPoolTick!,
+        expectedTick,
+      );
+
+      verify(() => poolService.getPoolTick(selectedYield)).called(1);
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolTickOrReserves' and the yield is v2 pool,
+    it should get the pool reserves from the pool service
+    and update the variable with the formatted values to double""",
+    () async {
+      final expectedReserves = (reserve0: BigInt.from(9781278), reserve1: BigInt.from(11111655666));
+      when(() => poolService.getV2PoolReserves(any())).thenAnswer((_) async => expectedReserves);
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v2);
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+
+      await sut.getSelectedPoolTickOrReserves();
+
+      expect(
+        sut.latestV2PoolReserves!.reserve0,
+        expectedReserves.reserve0.parseTokenAmount(decimals: selectedYield.token0NetworkDecimals),
+      );
+
+      expect(
+        sut.latestV2PoolReserves!.reserve1,
+        expectedReserves.reserve1.parseTokenAmount(decimals: selectedYield.token1NetworkDecimals),
+      );
+
+      verify(() => poolService.getV2PoolReserves(selectedYield))
+          .called(2); // 2 because it's lso called when the yield is selected
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolTickOrReserves' and the yield is v4 pool,
+    it should get the pool tick from the pool service
+    and update the variable with the received values""",
+    () async {
+      final expectedTick = BigInt.from(1716161616161);
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => BigInt.zero);
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v4);
+      await sut.selectYield(selectedYield, YieldTimeFrame.month);
+
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedTick);
+
+      await sut.getSelectedPoolTickOrReserves();
+
+      expect(sut.latestPoolTick!, expectedTick);
+
+      verify(() => poolService.getPoolTick(selectedYield))
+          .called(2); // two because it's lso called when the yield is selected
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolTickOrReserves' and the yield is v3 pool,
+    it should get the pool tick from the pool service
+    and update the variable with the received values""",
+    () async {
+      final expectedTick = BigInt.from(98987162781);
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => BigInt.zero);
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v3);
+      await sut.selectYield(selectedYield, YieldTimeFrame.month);
+
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedTick);
+      await sut.getSelectedPoolTickOrReserves();
+
+      expect(sut.latestPoolTick!, expectedTick);
+
+      verify(() => poolService.getPoolTick(selectedYield))
+          .called(2); // two because it's lso called when the yield is selected
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolTickOrReserves' and there is no yield selected,
+    it should not call to get the pool tick or reserves""",
+    () async {
+      await sut.getSelectedPoolTickOrReserves();
+
+      verifyNever(() => poolService.getPoolTick(any()));
+      verifyNever(() => poolService.getV2PoolReserves(any()));
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolV2Reserves' and there is no yield selected,
+  it should not call to get the pool reserves""",
+    () async {
+      await sut.getSelectedPoolV2Reserves();
+
+      verifyNever(() => poolService.getV2PoolReserves(any()));
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolV2Reserves' it should emit a
+  new pool reserve in the stream with the formatted values""",
+    () async {
+      ({double reserve0, double reserve1})? receivedPoolReserves;
+      final expectedReserves = (reserve0: BigInt.from(9781278), reserve1: BigInt.from(11111655666));
+
+      when(() => poolService.getV2PoolReserves(any())).thenAnswer((_) async => expectedReserves);
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v2);
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+
+      sut.v2PoolReservesStream.listen((poolReserves) {
+        receivedPoolReserves = poolReserves;
+      });
+
+      await sut.getSelectedPoolV2Reserves();
+
+      await Future.delayed(Duration.zero);
+
+      expect(
+        receivedPoolReserves!.reserve0,
+        expectedReserves.reserve0.parseTokenAmount(decimals: selectedYield.token0NetworkDecimals),
+      );
+
+      expect(
+        receivedPoolReserves!.reserve1,
+        expectedReserves.reserve1.parseTokenAmount(decimals: selectedYield.token1NetworkDecimals),
+      );
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolV2Reserves' it should
+    update the latest pool reserve variable with the
+    received values formatted""",
+    () async {
+      final expectedReserves = (reserve0: BigInt.from(12516), reserve1: BigInt.from(999991929127));
+
+      when(() => poolService.getV2PoolReserves(any())).thenAnswer((_) async => expectedReserves);
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v2);
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+
+      await sut.getSelectedPoolV2Reserves();
+
+      await Future.delayed(Duration.zero);
+
+      expect(
+        sut.latestV2PoolReserves!.reserve0,
+        expectedReserves.reserve0.parseTokenAmount(decimals: selectedYield.token0NetworkDecimals),
+      );
+
+      expect(
+        sut.latestV2PoolReserves!.reserve1,
+        expectedReserves.reserve1.parseTokenAmount(decimals: selectedYield.token1NetworkDecimals),
+      );
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolV2Reserves' and selecting
+    another yield while the call is being made, it should get
+    again the pool reserves for the new selected yield""",
+    () async {
+      final selectedYield1 = YieldDto.fixture().copyWith(poolAddress: "0x1", poolType: PoolType.v2);
+      final selectedYield2 = YieldDto.fixture().copyWith(poolAddress: "0x2", poolType: PoolType.v2);
+
+      final expectedReserves = (reserve0: BigInt.from(12516), reserve1: BigInt.from(999991929127));
+
+      when(() => poolService.getV2PoolReserves(selectedYield1)).thenAnswer(
+        (_) async => (reserve0: BigInt.zero, reserve1: BigInt.zero),
+      );
+
+      when(() => poolService.getV2PoolReserves(selectedYield2)).thenAnswer((_) async => expectedReserves);
+
+      await sut.selectYield(selectedYield1, YieldTimeFrame.day);
+
+      when(() => poolService.getV2PoolReserves(selectedYield1)).thenAnswer((_) async {
+        await sut.selectYield(selectedYield2, YieldTimeFrame.day);
+
+        return (reserve0: BigInt.zero, reserve1: BigInt.zero);
+      });
+
+      await sut.getSelectedPoolV2Reserves();
+
+      expect(
+        sut.latestV2PoolReserves!.reserve0,
+        expectedReserves.reserve0.parseTokenAmount(decimals: selectedYield2.token0NetworkDecimals),
+      );
+
+      expect(
+        sut.latestV2PoolReserves!.reserve1,
+        expectedReserves.reserve1.parseTokenAmount(decimals: selectedYield2.token1NetworkDecimals),
+      );
+
+      verify(() => poolService.getV2PoolReserves(selectedYield2))
+          .called(2); // two because of the selection call and the getSelectedPoolV2Reserves
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolV2Reserves' and there is already a previous
+    value in the latest pool reserve, it should make it null before the call""",
+    () async {
+      bool testRun = false;
+
+      when(() => poolService.getV2PoolReserves(any())).thenAnswer(
+        (_) async => (reserve0: BigInt.zero, reserve1: BigInt.zero),
+      );
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v2);
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+
+      when(() => poolService.getV2PoolReserves(any())).thenAnswer(
+        (_) async {
+          testRun = true;
+          expect(sut.latestV2PoolReserves, null);
+          return (reserve0: BigInt.zero, reserve1: BigInt.zero);
+        },
+      );
+
+      await sut.getSelectedPoolTickOrReserves();
+
+      expect(testRun, true); // checker that the call was made and the previous value was null
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolV2Reserves' it should emit a null reserve in the stream before the call""",
+    () async {
+      when(() => poolService.getV2PoolReserves(any()))
+          .thenAnswer((_) async => (reserve0: BigInt.zero, reserve1: BigInt.zero));
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v2);
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+
+      expectLater(sut.v2PoolReservesStream, emits(null));
+
+      await sut.getSelectedPoolTickOrReserves();
+    },
+  );
+
+  test(
+    """When every 1 minute is passed, it should refresh the pool
+    reserves in the latest pool reserve variable""",
+    () async {
+      const minutesPassed = 5;
+      when(() => poolService.getV2PoolReserves(any())).thenAnswer(
+        (_) async => (reserve0: BigInt.zero, reserve1: BigInt.zero),
+      );
+
+      final selectedYield = YieldDto.fixture().copyWith(poolType: PoolType.v2);
+
+      fakeAsync((time) async {
+        final expectedNewReserves = (reserve0: BigInt.from(12516), reserve1: BigInt.from(999991929127));
+        await sut.selectYield(selectedYield, YieldTimeFrame.day);
+
+        when(() => poolService.getV2PoolReserves(any())).thenAnswer((_) async => expectedNewReserves);
+
+        time.elapse(const Duration(minutes: minutesPassed));
+
+        expect(
+          sut.latestV2PoolReserves!.reserve0,
+          expectedNewReserves.reserve0.parseTokenAmount(decimals: selectedYield.token0NetworkDecimals),
+        );
+
+        expect(
+          sut.latestV2PoolReserves!.reserve1,
+          expectedNewReserves.reserve1.parseTokenAmount(decimals: selectedYield.token1NetworkDecimals),
+        );
+
+        verify(() => poolService.getV2PoolReserves(selectedYield)).called(minutesPassed + 1); // 1 of the initial call
+      });
+    },
+  );
 }

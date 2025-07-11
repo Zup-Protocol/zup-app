@@ -41,26 +41,31 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
   final ZupAnalytics _zupAnalytics;
 
   final StreamController<BigInt?> _pooltickStreamController = StreamController.broadcast();
+  final StreamController<({double reserve0, double reserve1})?> _v2PoolReservesStreamController =
+      StreamController.broadcast();
   final StreamController<YieldDto?> _selectedYieldStreamController = StreamController.broadcast();
 
   BigInt? _latestPoolTick;
+  ({double reserve0, double reserve1})? _latestV2PoolReserves;
   YieldDto? _selectedYield;
   YieldTimeFrame? _selectedYieldTimeframe;
 
   late final Stream<YieldDto?> selectedYieldStream = _selectedYieldStreamController.stream;
   late final Stream<BigInt?> poolTickStream = _pooltickStreamController.stream;
+  late final Stream<({double reserve0, double reserve1})?> v2PoolReservesStream =
+      _v2PoolReservesStreamController.stream;
 
   YieldDto? get selectedYield => _selectedYield;
   YieldTimeFrame? get selectedYieldTimeframe => _selectedYieldTimeframe;
   BigInt? get latestPoolTick => _latestPoolTick;
+  ({double reserve0, double reserve1})? get latestV2PoolReserves => _latestV2PoolReserves;
   DepositSettingsDto get depositSettings => _cache.getDepositSettings();
   PoolSearchSettingsDto get poolSearchSettings => _cache.getPoolSearchSettings();
 
   void setup() async {
     Timer.periodic(const Duration(minutes: 1), (timer) {
-      if (_pooltickStreamController.isClosed) return timer.cancel();
-
-      if (selectedYield != null) getSelectedPoolTick();
+      if (_pooltickStreamController.isClosed || _v2PoolReservesStreamController.isClosed) return timer.cancel();
+      if (selectedYield != null) getSelectedPoolTickOrReserves();
     });
   }
 
@@ -108,7 +113,41 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     _selectedYieldTimeframe = yieldTimeFrame;
     _selectedYieldStreamController.add(selectedYield);
 
-    if (selectedYield != null) await getSelectedPoolTick();
+    if (selectedYield != null) await getSelectedPoolTickOrReserves();
+  }
+
+  Future<void> getSelectedPoolTickOrReserves() async {
+    if (selectedYield == null) return;
+
+    if (selectedYield!.poolType.isV2) return await getSelectedPoolV2Reserves();
+    return await getSelectedPoolTick();
+  }
+
+  Future<void> getSelectedPoolV2Reserves() async {
+    if (selectedYield == null) return;
+
+    _latestV2PoolReserves = null;
+    _v2PoolReservesStreamController.add(null);
+
+    final selectedYieldBeforeCall = selectedYield;
+
+    final poolReserves = await _poolService.getV2PoolReserves(selectedYield!);
+
+    final poolReserve0DecimalFormatted = poolReserves.reserve0.parseTokenAmount(
+      decimals: selectedYield!.token0NetworkDecimals,
+    );
+
+    final poolReserve1DecimalFormatted = poolReserves.reserve1.parseTokenAmount(
+      decimals: selectedYield!.token1NetworkDecimals,
+    );
+
+    if (selectedYieldBeforeCall != selectedYield) return await getSelectedPoolV2Reserves();
+
+    _v2PoolReservesStreamController.add(
+      (reserve0: poolReserve0DecimalFormatted, reserve1: poolReserve1DecimalFormatted),
+    );
+
+    _latestV2PoolReserves = (reserve0: poolReserve0DecimalFormatted, reserve1: poolReserve1DecimalFormatted);
   }
 
   Future<void> getSelectedPoolTick() async {

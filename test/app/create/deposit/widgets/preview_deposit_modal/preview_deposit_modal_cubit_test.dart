@@ -1989,4 +1989,43 @@ void main() {
       ),
     ).called(1);
   });
+
+  test(
+    """When calling `deposit` and the deposit pool type is v2,
+    it should call the pool service to deposit on v2 with the
+    correct params""",
+    () async {
+      const slippage = Slippage.halfPercent;
+      final amount0 = BigInt.from(1261821789);
+      final amount1 = BigInt.from(1261821789);
+      const deadline = Duration(minutes: 30);
+
+      final currentYield0 = currentYield.copyWith(poolType: PoolType.v2);
+      final sut0 = PreviewDepositModalCubit(
+        initialPoolTick: initialPoolTick,
+        poolService: poolService,
+        currentYield: currentYield0,
+        erc20: erc20,
+        wallet: wallet,
+        uniswapPositionManager: uniswapPositionManager,
+        permit2: permit2,
+        navigatorKey: GlobalKey(),
+        zupAnalytics: zupAnalytics,
+      );
+
+      await sut0.deposit(token0Amount: amount0, token1Amount: amount1, slippage: slippage, deadline: deadline);
+
+      verify(
+        () => poolService.sendV2PoolDepositTransaction(
+          currentYield0,
+          signer,
+          amount0: amount0,
+          amount1: amount1,
+          amount0Min: slippage.calculateMinTokenAmountFromSlippage(amount0),
+          amount1Min: slippage.calculateMinTokenAmountFromSlippage(amount1),
+          deadline: deadline,
+        ),
+      ).called(1);
+    },
+  );
 }

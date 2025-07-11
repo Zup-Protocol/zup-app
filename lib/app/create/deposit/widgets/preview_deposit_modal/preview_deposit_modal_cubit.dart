@@ -26,7 +26,7 @@ part "preview_deposit_modal_state.dart";
 
 class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3PoolConversorsMixin, DeviceInfoMixin {
   PreviewDepositModalCubit({
-    required BigInt initialPoolTick,
+    BigInt? initialPoolTick,
     required PoolService poolService,
     required YieldDto currentYield,
     required Erc20 erc20,
@@ -39,7 +39,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
         _poolRepository = poolService,
         _erc20 = erc20,
         _wallet = wallet,
-        _latestPoolTick = initialPoolTick,
+        _latestPoolTick = initialPoolTick ?? BigInt.zero,
         _navigatorKey = navigatorKey,
         _zupAnalytics = zupAnalytics,
         _permit2 = permit2,
@@ -156,11 +156,11 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
   Future<void> deposit({
     required BigInt token0Amount,
     required BigInt token1Amount,
-    required double minPrice,
-    required double maxPrice,
-    required bool isMinPriceInfinity,
-    required bool isMaxPriceInfinity,
-    required bool isReversed,
+    double? minPrice,
+    double? maxPrice,
+    bool? isMinPriceInfinity,
+    bool? isMaxPriceInfinity,
+    bool? isReversed,
     required Slippage slippage,
     required Duration deadline,
   }) async {
@@ -170,11 +170,11 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       BigInt tickLower() {
         BigInt convertPriceToTickLower() {
-          if (isMinPriceInfinity && !isReversed) return V3V4PoolConstants.minTick;
-          if (isReversed && isMaxPriceInfinity) return V3V4PoolConstants.minTick;
+          if (isMinPriceInfinity! && !(isReversed)!) return V3V4PoolConstants.minTick;
+          if (isReversed! && isMaxPriceInfinity!) return V3V4PoolConstants.minTick;
 
           return priceToTick(
-            price: isReversed ? maxPrice : minPrice,
+            price: isReversed ? maxPrice! : minPrice!,
             poolToken0Decimals: _yield.token0NetworkDecimals,
             poolToken1Decimals: _yield.token1NetworkDecimals,
             isReversed: isReversed,
@@ -189,11 +189,11 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       BigInt tickUpper() {
         BigInt convertPriceToTickUpper() {
-          if (isMaxPriceInfinity && !isReversed) return V3V4PoolConstants.maxTick;
-          if (isReversed && isMinPriceInfinity) return V3V4PoolConstants.maxTick;
+          if (isMaxPriceInfinity! && !isReversed!) return V3V4PoolConstants.maxTick;
+          if (isReversed! && isMinPriceInfinity!) return V3V4PoolConstants.maxTick;
 
           return priceToTick(
-            price: isReversed ? minPrice : maxPrice,
+            price: isReversed ? minPrice! : maxPrice!,
             poolToken0Decimals: _yield.token0NetworkDecimals,
             poolToken1Decimals: _yield.token1NetworkDecimals,
             isReversed: isReversed,
@@ -213,6 +213,18 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       final recipient = await _wallet.signer!.address;
 
       final TransactionResponse tx = await () async {
+        if (_yield.poolType.isV2) {
+          return await _poolRepository.sendV2PoolDepositTransaction(
+            _yield,
+            _wallet.signer!,
+            amount0: amount0Desired,
+            amount1: amount1Desired,
+            amount0Min: amount0Min,
+            amount1Min: amount1Min,
+            deadline: deadline,
+          );
+        }
+
         if (_yield.poolType.isV3) {
           return await _poolRepository.sendV3PoolDepositTransaction(
             _yield,

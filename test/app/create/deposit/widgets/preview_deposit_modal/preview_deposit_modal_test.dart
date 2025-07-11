@@ -17,6 +17,7 @@ import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
@@ -1011,6 +1012,26 @@ void main() {
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(),
+        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
+      );
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    "When the pool type is v2, the modal should be adapted to show v2 deposit information",
+    goldenFileName: "preview_deposit_modal_v2_pool_type",
+    (tester) async {
+      when(() => cubit.state).thenReturn(
+        PreviewDepositModalState.initial(
+          token0Allowance: BigInt.from(0),
+          token1Allowance: BigInt.from(0),
+        ),
+      );
+
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(customYield: YieldDto.fixture().copyWith(poolType: PoolType.v2)),
         wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
       );
 

@@ -2,6 +2,8 @@ import 'package:clock/clock.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v2_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v2_router_02.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
@@ -13,19 +15,34 @@ import 'package:zup_app/core/v4_pool_constants.dart';
 class PoolService with V4PoolLiquidityCalculationsMixin {
   final UniswapV4StateView _uniswapV4StateView;
   final UniswapV3Pool _uniswapV3Pool;
+  final UniswapV2Pool _uniswapV2Pool;
   final UniswapV3PositionManager _uniswapV3PositionManager;
   final UniswapV4PositionManager _uniswapV4PositionManager;
+  final UniswapV2Router02 _uniswapV2Router02;
   final EthereumAbiCoder _ethereumAbiCoder;
   final PancakeSwapInfinityClPoolManager _pancakeSwapInfinityClPoolManager;
 
   PoolService(
     this._uniswapV4StateView,
     this._uniswapV3Pool,
+    this._uniswapV2Pool,
     this._uniswapV3PositionManager,
     this._uniswapV4PositionManager,
+    this._uniswapV2Router02,
     this._ethereumAbiCoder,
     this._pancakeSwapInfinityClPoolManager,
   );
+
+  Future<({BigInt reserve0, BigInt reserve1})> getV2PoolReserves(YieldDto forYield) async {
+    final poolContract = _uniswapV2Pool.fromRpcProvider(
+      contractAddress: forYield.poolAddress,
+      rpcUrl: forYield.network.rpcUrl,
+    );
+
+    final reserves = await poolContract.getReserves();
+
+    return (reserve0: reserves.reserve0, reserve1: reserves.reserve1);
+  }
 
   Future<BigInt> getPoolTick(YieldDto forYield) async {
     if (forYield.protocol.id.isPancakeSwapInfinityCL) {
@@ -46,12 +63,55 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
       return (await stateView.getSlot0(poolId: forYield.poolAddress)).tick;
     }
 
-    final uniswapV3Pool = _uniswapV3Pool.fromRpcProvider(
-      contractAddress: forYield.poolAddress,
-      rpcUrl: forYield.network.rpcUrl,
+    if (forYield.poolType.isV3) {
+      final uniswapV3Pool = _uniswapV3Pool.fromRpcProvider(
+        contractAddress: forYield.poolAddress,
+        rpcUrl: forYield.network.rpcUrl,
+      );
+
+      return (await uniswapV3Pool.slot0()).tick;
+    }
+
+    throw Exception('Cannot get pool tick for ${forYield.poolType} pool type');
+  }
+
+  Future<TransactionResponse> sendV2PoolDepositTransaction(
+    YieldDto depositOnYield,
+    Signer signer, {
+    required BigInt amount0,
+    required BigInt amount1,
+    required BigInt amount0Min,
+    required BigInt amount1Min,
+    required Duration deadline,
+  }) async {
+    final v2RouterContract = _uniswapV2Router02.fromSigner(
+      contractAddress: depositOnYield.positionManagerAddress,
+      signer: signer,
     );
 
-    return (await uniswapV3Pool.slot0()).tick;
+    if (depositOnYield.isToken0Native || depositOnYield.isToken1Native) {
+      return v2RouterContract.addLiquidityETH(
+        token:
+            depositOnYield.isToken0Native ? depositOnYield.token1NetworkAddress : depositOnYield.token0NetworkAddress,
+        amountTokenDesired: depositOnYield.isToken0Native ? amount1 : amount0,
+        amountTokenMin: depositOnYield.isToken0Native ? amount1Min : amount0Min,
+        amountETHMin: depositOnYield.isToken0Native ? amount0Min : amount1Min,
+        to: await signer.address,
+        deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
+        ethValue: depositOnYield.isToken0Native ? amount0 : amount1,
+      );
+    }
+
+    return await v2RouterContract.addLiquidity(
+      tokenA: depositOnYield.token0NetworkAddress,
+      tokenB: depositOnYield.token1NetworkAddress,
+      amountADesired: amount0,
+      amountBDesired: amount1,
+      amountAMin: amount0Min,
+      amountBMin: amount1Min,
+      to: await signer.address,
+      deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
+    );
   }
 
   Future<TransactionResponse> sendV3PoolDepositTransaction(

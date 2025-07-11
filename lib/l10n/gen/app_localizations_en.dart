@@ -338,6 +338,12 @@ class SEn extends S {
   }
 
   @override
+  String depositPageInvalidTokenAmountV2Pool(
+      {required String token0Symbol, required String token1Symbol}) {
+    return 'Enter a valid amount for $token0Symbol or $token1Symbol';
+  }
+
+  @override
   String get depositPageDeposit => 'Deposit';
 
   @override

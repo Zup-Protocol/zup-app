@@ -210,6 +210,17 @@
             }
         }
     },
+    "depositPageInvalidTokenAmountV2Pool": "Enter a valid amount for {token0Symbol} or {token1Symbol}",
+    "@depositPageInvalidTokenAmountV2Pool": {
+        "placeholders": {
+            "token0Symbol": {
+                "type": "String"
+            },
+            "token1Symbol": {
+                "type": "String"
+            }
+        }
+    },
     "depositPageDeposit": "Deposit",
     "connectYourWallet": "Connect your wallet",
     "tokenSelectorModalTitle": "Select a token",

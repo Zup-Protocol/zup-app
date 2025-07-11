@@ -31,8 +31,8 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
     super.key,
     required this.currentYield,
     required this.isReversed,
-    required this.minPrice,
-    required this.maxPrice,
+    this.minPrice,
+    this.maxPrice,
     required this.token0DepositAmount,
     required this.token1DepositAmount,
     required this.deadline,
@@ -43,22 +43,20 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
   final YieldDto currentYield;
   final YieldTimeFrame yieldTimeFrame;
   final bool isReversed;
-  final ({double price, bool isInfinity}) minPrice;
-  final ({double price, bool isInfinity}) maxPrice;
+  final ({double price, bool isInfinity})? minPrice;
+  final ({double price, bool isInfinity})? maxPrice;
   final double token0DepositAmount;
   final double token1DepositAmount;
   final Duration deadline;
   final Slippage maxSlippage;
 
-  final double paddingSize = 20;
-
-  show(BuildContext context, {required BigInt currentPoolTick}) {
+  show(BuildContext context, {BigInt? currentPoolTick}) {
     return ZupModal.show(
       context,
       showAsBottomSheet: isMobileSize(context),
       title: S.of(context).previewDepositModalTitle,
-      size: const Size(450, 650),
-      padding: EdgeInsets.only(left: paddingSize).copyWith(top: 5),
+      size: Size(450, currentYield.poolType.isV2 ? 505 : 650),
+      padding: const EdgeInsets.only(left: 20).copyWith(top: 5),
       content: BlocProvider(
         create: (context) => PreviewDepositModalCubit(
           zupAnalytics: inject<ZupAnalytics>(),
@@ -136,10 +134,10 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
 
   double get minPrice {
     BigInt tick() {
-      if (widget.isReversed != isReversedLocal && widget.maxPrice.isInfinity) return V3V4PoolConstants.minTick;
+      if (widget.isReversed != isReversedLocal && widget.maxPrice!.isInfinity) return V3V4PoolConstants.minTick;
 
       return priceToTick(
-        price: (widget.isReversed == !isReversedLocal) ? widget.maxPrice.price : widget.minPrice.price,
+        price: (widget.isReversed == !isReversedLocal) ? widget.maxPrice!.price : widget.minPrice!.price,
         poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
         poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
         isReversed: widget.isReversed,
@@ -157,10 +155,10 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
 
   double get maxPrice {
     BigInt tick() {
-      if (widget.isReversed != isReversedLocal && widget.minPrice.isInfinity) return V3V4PoolConstants.minTick;
+      if (widget.isReversed != isReversedLocal && widget.minPrice!.isInfinity) return V3V4PoolConstants.minTick;
 
       return priceToTick(
-        price: (widget.isReversed == !isReversedLocal) ? widget.minPrice.price : widget.maxPrice.price,
+        price: (widget.isReversed == !isReversedLocal) ? widget.minPrice!.price : widget.maxPrice!.price,
         poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
         poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
         isReversed: widget.isReversed,
@@ -189,8 +187,8 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
   }
 
   ({bool minPrice, bool maxPrice, bool any}) get isOutOfRange {
-    final isMinPriceOutOfRange = !widget.minPrice.isInfinity && (minPrice) > currentPrice;
-    final isMaxPriceOutOfRanfe = !widget.maxPrice.isInfinity && (maxPrice) < currentPrice;
+    final isMinPriceOutOfRange = !widget.minPrice!.isInfinity && (minPrice) > currentPrice;
+    final isMaxPriceOutOfRanfe = !widget.maxPrice!.isInfinity && (maxPrice) < currentPrice;
 
     return (
       minPrice: isMinPriceOutOfRange,
@@ -260,10 +258,10 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                 slippage: widget.maxSlippage,
                 token0Amount: token0DepositAmount,
                 token1Amount: token1DepositAmount,
-                minPrice: widget.minPrice.price,
-                maxPrice: widget.maxPrice.price,
-                isMinPriceInfinity: widget.minPrice.isInfinity,
-                isMaxPriceInfinity: widget.maxPrice.isInfinity,
+                minPrice: widget.minPrice?.price,
+                maxPrice: widget.maxPrice?.price,
+                isMinPriceInfinity: widget.minPrice?.isInfinity,
+                isMaxPriceInfinity: widget.maxPrice?.isInfinity,
                 isReversed: widget.isReversed,
               ),
         );
@@ -419,56 +417,59 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                           "${baseToken.symbol}/${quoteToken.symbol}",
                           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                         ),
-                        const SizedBox(width: 10),
-                        StreamBuilder(
-                            stream: cubit.poolTickStream,
-                            builder: (context, tickSnapshot) {
-                              return ZupTag(
-                                title: isOutOfRange.any
-                                    ? S.of(context).previewDepositModalOutOfRange
-                                    : S.of(context).previewDepositModalInRange,
-                                color: isOutOfRange.any ? ZupColors.orange : ZupColors.green,
-                              );
-                            }),
-                        const Spacer(),
+                        if (!widget.currentYield.poolType.isV2) ...[
+                          const SizedBox(width: 10),
+                          StreamBuilder(
+                              stream: cubit.poolTickStream,
+                              builder: (context, tickSnapshot) {
+                                return ZupTag(
+                                  title: isOutOfRange.any
+                                      ? S.of(context).previewDepositModalOutOfRange
+                                      : S.of(context).previewDepositModalInRange,
+                                  color: isOutOfRange.any ? ZupColors.orange : ZupColors.green,
+                                );
+                              }),
+                          const Spacer(),
+                        ]
                       ],
                     ),
                     const SizedBox(height: 16),
-                    CupertinoSlidingSegmentedControl(
-                      groupValue: isReversedLocal,
-                      children: {
-                        false: MouseRegion(
-                          key: const Key("unreverse-tokens"),
-                          cursor: SystemMouseCursors.click,
-                          child: IgnorePointer(
-                            child: SizedBox(
-                              height: 15,
-                              child: Text(
-                                "${widget.currentYield.token0.symbol} / ${widget.currentYield.token1.symbol}",
-                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ),
-                        ),
-                        true: MouseRegion(
-                          key: const Key("reverse-tokens"),
-                          cursor: SystemMouseCursors.click,
-                          child: IgnorePointer(
-                            child: SizedBox(
-                              height: 16,
-                              child: Text(
-                                "${widget.currentYield.token1.symbol} / ${widget.currentYield.token0.symbol}",
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                    if (!widget.currentYield.poolType.isV2)
+                      CupertinoSlidingSegmentedControl(
+                        groupValue: isReversedLocal,
+                        children: {
+                          false: MouseRegion(
+                            key: const Key("unreverse-tokens"),
+                            cursor: SystemMouseCursors.click,
+                            child: IgnorePointer(
+                              child: SizedBox(
+                                height: 15,
+                                child: Text(
+                                  "${widget.currentYield.token0.symbol} / ${widget.currentYield.token1.symbol}",
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      },
-                      onValueChanged: (value) => setState(() => isReversedLocal = value ?? false),
-                    ),
+                          true: MouseRegion(
+                            key: const Key("reverse-tokens"),
+                            cursor: SystemMouseCursors.click,
+                            child: IgnorePointer(
+                              child: SizedBox(
+                                height: 16,
+                                child: Text(
+                                  "${widget.currentYield.token1.symbol} / ${widget.currentYield.token0.symbol}",
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        },
+                        onValueChanged: (value) => setState(() => isReversedLocal = value ?? false),
+                      ),
                     const SizedBox(height: 10),
                     const ZupDivider(),
                     const SizedBox(height: 10),
@@ -566,14 +567,16 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                     const SizedBox(height: 10),
                     const ZupDivider(),
                     const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        Expanded(child: rangeInfoCard(isMinPrice: true)),
-                        const SizedBox(width: 10),
-                        Expanded(child: rangeInfoCard(isMinPrice: false)),
-                      ],
-                    ),
-                    const Spacer(),
+                    if (!widget.currentYield.poolType.isV2) ...[
+                      Row(
+                        children: [
+                          Expanded(child: rangeInfoCard(isMinPrice: true)),
+                          const SizedBox(width: 10),
+                          Expanded(child: rangeInfoCard(isMinPrice: false)),
+                        ],
+                      ),
+                      const Spacer(),
+                    ],
                     const SizedBox(height: 10),
                     ZupPrimaryButton(
                       key: const Key("deposit-button"),
@@ -617,7 +620,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
             Text(
                 () {
                   if (isMinPrice) {
-                    return widget.minPrice.isInfinity
+                    return widget.minPrice!.isInfinity
                         ? "0"
                         : minPrice.maybeFormatCompactCurrency(
                             isUSD: false,
@@ -627,7 +630,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                           );
                   }
 
-                  return widget.maxPrice.isInfinity
+                  return widget.maxPrice!.isInfinity
                       ? "∞"
                       : maxPrice.maybeFormatCompactCurrency(
                           isUSD: false,

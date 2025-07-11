@@ -18,8 +18,17 @@ void main() {
     expect(PoolType.v3.isV4, false);
   });
 
+  test('When calling `isV2` and the pool is indeed v2, it should return true', () {
+    expect(PoolType.v2.isV2, true);
+  });
+
+  test('When calling `isV2` and the pool is not v2, it should return false', () {
+    expect(PoolType.v3.isV2, false);
+  });
+
   test('label should return correct string', () {
     expect(PoolType.v3.label, "V3");
     expect(PoolType.v4.label, "V4");
+    expect(PoolType.v2.label, "V2");
   });
 }

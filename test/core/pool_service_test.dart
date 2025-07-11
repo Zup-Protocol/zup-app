@@ -5,6 +5,8 @@ import 'package:web3kit/core/dtos/transaction_receipt.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v2_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v2_router_02.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
@@ -17,6 +19,7 @@ import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/core/enums/protocol_id.dart';
 import 'package:zup_app/core/mixins/v4_pool_liquidity_calculations_mixin.dart';
 import 'package:zup_app/core/pool_service.dart';
+import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v4_pool_constants.dart';
 
 import '../mocks.dart';
@@ -27,6 +30,8 @@ void main() {
   late PoolService sut;
   late UniswapV4StateView stateView;
   late UniswapV3Pool uniswapV3Pool;
+  late UniswapV2Pool uniswapV2Pool;
+  late UniswapV2Router02 uniswapV2Router02;
   late UniswapV3PositionManager positionManagerV3;
   late UniswapV4PositionManager positionManagerV4;
   late PancakeSwapInfinityClPoolManager pancakeSwapInfinityCLPoolManager;
@@ -39,6 +44,8 @@ void main() {
   late UniswapV3PositionManagerImpl positionManagerV3Impl;
   late UniswapV4PositionManagerImpl positionManagerV4Impl;
   late PancakeSwapInfinityClPoolManagerImpl pancakeSwapInfinityCLPoolManagerImpl;
+  late UniswapV2PoolImpl uniswapV2PoolImpl;
+  late UniswapV2Router02Impl uniswapV2Router02Impl;
   late EthereumAbiCoder ethereumAbiCoder;
 
   setUp(() {
@@ -61,6 +68,8 @@ void main() {
     transactionResponse = TransactionResponseMock();
     stateView = UniswapV4StateViewMock();
     uniswapV3Pool = UniswapV3PoolMock();
+    uniswapV2Pool = UniswapV2PoolMock();
+    uniswapV2Router02 = UniswapV2Router02Mock();
     positionManagerV3 = UniswapV3PositionManagerMock();
     positionManagerV4 = UniswapV4PositionManagerMock();
     pancakeSwapInfinityCLPoolManager = PancakeSwapInfinityCLPoolManagerMock();
@@ -68,7 +77,8 @@ void main() {
     signer = SignerMock();
 
     pancakeSwapInfinityCLPoolManagerImpl = PancakeSwapInfinityCLPoolManagerImplMock();
-
+    uniswapV2PoolImpl = UniswapV2PoolImplMock();
+    uniswapV2Router02Impl = UniswapV2Router02ImplMock();
     stateViewImpl = UniswapV4StateViewImplMock();
     uniswapV3PoolImpl = UniswapV3PoolImplMock();
     positionManagerV3Impl = UniswapV3PositionManagerImplMock();
@@ -79,11 +89,22 @@ void main() {
     sut = PoolService(
       stateView,
       uniswapV3Pool,
+      uniswapV2Pool,
       positionManagerV3,
       positionManagerV4,
+      uniswapV2Router02,
       ethereumAbiCoder,
       pancakeSwapInfinityCLPoolManager,
     );
+
+    when(() =>
+            uniswapV2Pool.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
+        .thenReturn(uniswapV2PoolImpl);
+
+    when(() => uniswapV2Router02.fromRpcProvider(
+          contractAddress: any(named: "contractAddress"),
+          rpcUrl: any(named: "rpcUrl"),
+        )).thenReturn(uniswapV2Router02Impl);
 
     when(() => stateView.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
         .thenReturn(stateViewImpl);
@@ -113,6 +134,9 @@ void main() {
 
     when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async => TransactionReceipt(hash: "0x123"));
     when(() => transactionResponse.hash).thenReturn("0x123");
+    when(() =>
+            uniswapV2Pool.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
+        .thenReturn(uniswapV2PoolImpl);
   });
 
   test(
@@ -1380,6 +1404,229 @@ void main() {
       expect(receivedPoolTick, expectedTick);
 
       verify(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: yield0.poolAddress)).called(1);
+    },
+  );
+
+  test(
+    "When calling 'getV2PoolReserves' it should call the pool contract to get it and return the result",
+    () async {
+      final expectedReserves = (reserve0: BigInt.from(861287), reserve1: BigInt.from(98687));
+
+      when(() => uniswapV2PoolImpl.getReserves()).thenAnswer(
+        (_) async => (
+          reserve0: expectedReserves.reserve0,
+          reserve1: expectedReserves.reserve1,
+          blockTimestampLast: BigInt.from(0)
+        ),
+      );
+
+      final receivedReserves = await sut.getV2PoolReserves(currentYield);
+      expect(receivedReserves, expectedReserves);
+    },
+  );
+
+  test(
+    "When calling `sendV2PoolDepositTransaction` it should connect the passed signer to the v2 router contract",
+    () async {
+      when(() => uniswapV2Router02.fromSigner(
+          contractAddress: any(named: "contractAddress"),
+          signer: any(named: "signer"))).thenReturn(uniswapV2Router02Impl);
+      when(
+        () => uniswapV2Router02Impl.addLiquidity(
+            tokenA: any(named: "tokenA"),
+            tokenB: any(named: "tokenB"),
+            amountADesired: any(named: "amountADesired"),
+            amountBDesired: any(named: "amountBDesired"),
+            amountAMin: any(named: "amountAMin"),
+            amountBMin: any(named: "amountBMin"),
+            to: any(named: "to"),
+            deadline: any(named: "deadline")),
+      ).thenAnswer((_) async => transactionResponse);
+
+      await sut.sendV2PoolDepositTransaction(
+        currentYield,
+        signer,
+        amount0: BigInt.from(0),
+        amount1: BigInt.from(0),
+        amount0Min: BigInt.from(0),
+        amount1Min: BigInt.from(0),
+        deadline: Duration.zero,
+      );
+
+      verify(
+        () => uniswapV2Router02.fromSigner(contractAddress: currentYield.positionManagerAddress, signer: signer),
+      ).called(1);
+    },
+  );
+
+  test(
+    """When calling `sendV2PoolDepositTransaction` and the pool token0 is native,
+    it should use the `addLiquidityETH` method with the correct params""",
+    () async {
+      withClock(Clock.fixed(DateTime(2027)), () async {
+        when(() => uniswapV2Router02.fromSigner(
+            contractAddress: any(named: "contractAddress"),
+            signer: any(named: "signer"))).thenReturn(uniswapV2Router02Impl);
+
+        when(
+          () => uniswapV2Router02Impl.addLiquidityETH(
+              token: any(named: "token"),
+              amountETHMin: any(named: "amountETHMin"),
+              amountTokenDesired: any(named: "amountTokenDesired"),
+              amountTokenMin: any(named: "amountTokenMin"),
+              ethValue: any(named: "ethValue"),
+              to: any(named: "to"),
+              deadline: any(named: "deadline")),
+        ).thenAnswer((_) async => transactionResponse);
+
+        final amount0 = BigInt.from(12718929112712516);
+        final amount1 = BigInt.from(88627236);
+        final amount0Min = Slippage.halfPercent.calculateMinTokenAmountFromSlippage(amount0);
+        final amount1Min = Slippage.halfPercent.calculateMinTokenAmountFromSlippage(amount1);
+        const deadline = Duration(minutes: 3211);
+        final walletSigner = signer;
+        final signerAddress = await signer.address;
+
+        await sut.sendV2PoolDepositTransaction(
+          currentYield.copyWith(
+            token0: TokenDto.fixture().copyWith(
+              addresses: {currentYield.chainId: EthereumConstants.zeroAddress},
+            ),
+          ),
+          walletSigner,
+          amount0: amount0,
+          amount1: amount1,
+          amount0Min: amount0Min,
+          amount1Min: amount1Min,
+          deadline: deadline,
+        );
+
+        verify(
+          () => uniswapV2Router02Impl.addLiquidityETH(
+            token: currentYield.token1NetworkAddress,
+            amountTokenDesired: amount1,
+            amountTokenMin: amount1Min,
+            amountETHMin: amount0Min,
+            to: signerAddress,
+            deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
+            ethValue: amount0,
+          ),
+        ).called(1);
+      });
+    },
+  );
+
+  test(
+    """When calling `sendV2PoolDepositTransaction` and the pool token1 is native,
+    it should use the `addLiquidityETH` method with the correct params""",
+    () async {
+      withClock(Clock.fixed(DateTime(1998)), () async {
+        when(() => uniswapV2Router02.fromSigner(
+            contractAddress: any(named: "contractAddress"),
+            signer: any(named: "signer"))).thenReturn(uniswapV2Router02Impl);
+
+        when(
+          () => uniswapV2Router02Impl.addLiquidityETH(
+              token: any(named: "token"),
+              amountETHMin: any(named: "amountETHMin"),
+              amountTokenDesired: any(named: "amountTokenDesired"),
+              amountTokenMin: any(named: "amountTokenMin"),
+              ethValue: any(named: "ethValue"),
+              to: any(named: "to"),
+              deadline: any(named: "deadline")),
+        ).thenAnswer((_) async => transactionResponse);
+
+        final amount0 = BigInt.from(12718929112712516);
+        final amount1 = BigInt.from(88627236);
+        final amount0Min = Slippage.halfPercent.calculateMinTokenAmountFromSlippage(amount0);
+        final amount1Min = Slippage.halfPercent.calculateMinTokenAmountFromSlippage(amount1);
+        const deadline = Duration(minutes: 3211);
+        final walletSigner = signer;
+        final signerAddress = await signer.address;
+
+        await sut.sendV2PoolDepositTransaction(
+          currentYield.copyWith(
+            token1: TokenDto.fixture().copyWith(
+              addresses: {currentYield.chainId: EthereumConstants.zeroAddress},
+            ),
+          ),
+          walletSigner,
+          amount0: amount0,
+          amount1: amount1,
+          amount0Min: amount0Min,
+          amount1Min: amount1Min,
+          deadline: deadline,
+        );
+
+        verify(
+          () => uniswapV2Router02Impl.addLiquidityETH(
+            token: currentYield.token0NetworkAddress,
+            amountTokenDesired: amount0,
+            amountTokenMin: amount0Min,
+            amountETHMin: amount1Min,
+            to: signerAddress,
+            deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
+            ethValue: amount1,
+          ),
+        ).called(1);
+      });
+    },
+  );
+
+  test(
+    """When calling `sendV2PoolDepositTransaction` it should correctly 
+    call the correct function in the router to deposit with the correct
+    params""",
+    () async {
+      withClock(Clock.fixed(DateTime(1500)), () async {
+        when(() => uniswapV2Router02.fromSigner(
+            contractAddress: any(named: "contractAddress"),
+            signer: any(named: "signer"))).thenReturn(uniswapV2Router02Impl);
+
+        when(
+          () => uniswapV2Router02Impl.addLiquidity(
+            amountADesired: any(named: "amountADesired"),
+            to: any(named: "to"),
+            deadline: any(named: "deadline"),
+            amountAMin: any(named: "amountAMin"),
+            amountBDesired: any(named: "amountBDesired"),
+            amountBMin: any(named: "amountBMin"),
+            tokenA: any(named: "tokenA"),
+            tokenB: any(named: "tokenB"),
+          ),
+        ).thenAnswer((_) async => transactionResponse);
+
+        final amount0 = BigInt.from(12718929112712516);
+        final amount1 = BigInt.from(88627236);
+        final amount0Min = Slippage.halfPercent.calculateMinTokenAmountFromSlippage(amount0);
+        final amount1Min = Slippage.halfPercent.calculateMinTokenAmountFromSlippage(amount1);
+        const deadline = Duration(minutes: 3211);
+        final walletSigner = signer;
+        final signerAddress = await signer.address;
+
+        await sut.sendV2PoolDepositTransaction(
+          currentYield,
+          walletSigner,
+          amount0: amount0,
+          amount1: amount1,
+          amount0Min: amount0Min,
+          amount1Min: amount1Min,
+          deadline: deadline,
+        );
+
+        verify(
+          () => uniswapV2Router02Impl.addLiquidity(
+            amountADesired: amount0,
+            amountAMin: amount0Min,
+            amountBDesired: amount1,
+            amountBMin: amount1Min,
+            tokenA: currentYield.token0NetworkAddress,
+            tokenB: currentYield.token1NetworkAddress,
+            to: signerAddress,
+            deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
+          ),
+        ).called(1);
+      });
     },
   );
 }

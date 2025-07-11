@@ -14,6 +14,8 @@ import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v2_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v2_router_02.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
@@ -95,6 +97,14 @@ class PancakeSwapInfinityCLPoolManagerImplMock extends Mock implements PancakeSw
 class UniswapV3PoolImplMock extends Mock implements UniswapV3PoolImpl {}
 
 class UniswapV3PoolMock extends Mock implements UniswapV3Pool {}
+
+class UniswapV2PoolMock extends Mock implements UniswapV2Pool {}
+
+class UniswapV2PoolImplMock extends Mock implements UniswapV2PoolImpl {}
+
+class UniswapV2Router02Mock extends Mock implements UniswapV2Router02 {}
+
+class UniswapV2Router02ImplMock extends Mock implements UniswapV2Router02Impl {}
 
 class WalletMock extends Mock implements Wallet {}
 

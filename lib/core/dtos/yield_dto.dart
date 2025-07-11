@@ -41,7 +41,6 @@ class YieldDto with _$YieldDto {
     required TokenDto token1,
     required String poolAddress,
     required String positionManagerAddress,
-    required int tickSpacing,
     required ProtocolDto protocol,
     required int feeTier,
     required num yield24h,
@@ -49,6 +48,7 @@ class YieldDto with _$YieldDto {
     required num yield90d,
     required int chainId,
     required PoolType poolType,
+    @Default(0) int tickSpacing,
     @Default(0) num totalValueLockedUSD,
     @Default(EthereumConstants.zeroAddress) @JsonKey(name: "hooksAddress") String v4Hooks,
     @JsonKey(name: "poolManagerAddress") String? v4PoolManager,
@@ -63,6 +63,9 @@ class YieldDto with _$YieldDto {
 
   int get token0NetworkDecimals => token0.decimals[network.chainId]!;
   int get token1NetworkDecimals => token1.decimals[network.chainId]!;
+
+  String get token0NetworkAddress => token0.addresses[network.chainId]!;
+  String get token1NetworkAddress => token1.addresses[network.chainId]!;
 
   factory YieldDto.fromJson(Map<String, dynamic> json) => _$YieldDtoFromJson(json);
 
