@@ -127,27 +127,35 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                     ),
                     const Spacer(),
                     StatefulBuilder(builder: (context, localSetState) {
-                      return Badge(
-                        alignment: const Alignment(0.8, -0.8),
-                        smallSize: cache.getPoolSearchSettings().isDefault ? 0 : 6,
-                        child: ZupIconButton(
-                          key: const Key("pool-search-settings-button"),
-                          backgroundColor: Colors.transparent,
-                          icon: Assets.icons.gear.svg(height: 18),
-                          padding: const EdgeInsets.all(10),
-                          iconColor: ZupColors.brand,
-                          onPressed: (buttonContext) => CreatePageSettingsDropdown.show(
-                            buttonContext,
-                            onClose: () {
-                              if (mounted) WidgetsBinding.instance.addPostFrameCallback((_) => localSetState(() {}));
-                            },
+                      return Row(
+                        children: [
+                          Badge(
+                            alignment: const Alignment(1.05, -1.05),
+                            smallSize: cache.getPoolSearchSettings().isDefault ? 0 : 6,
+                            backgroundColor: ZupColors.orange,
+                            child: ZupPillButton(
+                              key: const Key("pool-search-settings-button"),
+                              onPressed: (buttonContext) => CreatePageSettingsDropdown.show(
+                                buttonContext,
+                                onClose: () {
+                                  if (mounted) {
+                                    WidgetsBinding.instance.addPostFrameCallback((_) => localSetState(() {}));
+                                  }
+                                },
+                              ),
+                              foregroundColor: ZupColors.gray,
+                              backgroundColor: ZupColors.gray6,
+                              title: "Search settings",
+                              icon: Assets.icons.gear.svg(
+                                  height: 18, colorFilter: const ColorFilter.mode(ZupColors.white, BlendMode.srcIn)),
+                            ),
                           ),
-                        ),
+                        ],
                       );
                     })
                   ],
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 12),
                 TokenSelectorButton(
                   key: const Key("token-a-selector"),
                   controller: token0SelectorController,

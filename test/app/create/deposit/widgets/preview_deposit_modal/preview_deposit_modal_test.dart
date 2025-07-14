@@ -9,17 +9,20 @@ import 'package:mocktail/mocktail.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
-import 'package:zup_app/abis/uniswap_position_manager.abi.g.dart';
+import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_pool_constants.dart';
+import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
+import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
@@ -33,6 +36,8 @@ void main() {
   late ZupNavigator navigator;
   late UrlLauncherPlatform urlLauncherPlatform;
   late ConfettiController confettiController;
+  late PoolService poolService;
+  late UniswapPermit2 permit2;
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   final currentYield = YieldDto.fixture();
 
@@ -41,6 +46,8 @@ void main() {
     cubit = PreviewDepositModalCubitMock();
     urlLauncherPlatform = UrlLauncherPlatformCustomMock();
     confettiController = ConfettiControllerMock();
+    poolService = PoolServiceMock();
+    permit2 = UniswapPermit2Mock();
 
     UrlLauncherPlatform.instance = urlLauncherPlatform;
 
@@ -52,10 +59,12 @@ void main() {
       () => confettiController,
       instanceName: InjectInstanceNames.confettiController10s,
     );
+    inject.registerFactory<ZupLinks>(() => ZupLinksMock());
+    inject.registerFactory<UniswapPermit2>(() => permit2);
     inject.registerFactory<ZupAnalytics>(() => ZupAnalyticsMock());
     inject.registerFactory<UniswapV3Pool>(() => UniswapV3PoolMock());
     inject.registerFactory<Erc20>(() => Erc20Mock());
-    inject.registerFactory<UniswapPositionManager>(() => UniswapPositionManagerMock());
+    inject.registerFactory<UniswapV3PositionManager>(() => UniswapV3PositionManagerMock());
     inject.registerFactory<Wallet>(() => WalletMock());
     inject.registerLazySingleton<PreviewDepositModalCubit>(() => cubit);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
@@ -65,10 +74,11 @@ void main() {
       () => GoldenConfig.scrollController,
       instanceName: InjectInstanceNames.appScrollController,
     );
+    inject.registerFactory<PoolService>(() => poolService);
     inject.registerFactory<GlobalKey<NavigatorState>>(() => GlobalKey());
 
     when(() => cubit.setup()).thenAnswer((_) async {});
-    when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(V3PoolConstants.maxTick));
+    when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(V3V4PoolConstants.maxTick));
     when(() => cubit.latestPoolTick).thenReturn(BigInt.from(3247));
     when(() => cubit.stream).thenAnswer((_) => Stream.value(
           PreviewDepositModalState.initial(
@@ -116,7 +126,6 @@ void main() {
     double token1DepositAmount = 3,
     Duration deadline = const Duration(minutes: 30),
     Slippage slippage = Slippage.halfPercent,
-    bool depositWithNativeToken = false,
   }) =>
       goldenDeviceBuilder(
         Builder(builder: (context) {
@@ -129,7 +138,6 @@ void main() {
                   value: cubit,
                   child: PreviewDepositModal(
                     yieldTimeFrame: YieldTimeFrame.day,
-                    depositWithNativeToken: depositWithNativeToken,
                     deadline: deadline,
                     maxSlippage: slippage,
                     currentYield: customYield ?? currentYield,
@@ -285,28 +293,6 @@ void main() {
           await goldenBuilder(
             minPrice: (price: 0, isInfinity: true),
             maxPrice: (price: 0, isInfinity: true),
-          ),
-          wrapper: GoldenConfig.localizationsWrapper());
-
-      await tester.pumpAndSettle();
-    },
-  );
-
-  zGoldenTest(
-    "When depositWithNativeToken is true, the wrapped native token should be the native token",
-    goldenFileName: "preview_deposit_modal_deposit_with_native_token",
-    (tester) async {
-      await tester.pumpDeviceBuilder(
-          await goldenBuilder(
-            depositWithNativeToken: true,
-            customYield: currentYield.copyWith(
-              token0: TokenDto.fixture().copyWith(addresses: {
-                currentYield.network.chainId: currentYield.network.wrappedNative.addresses[currentYield.network.chainId]
-              }),
-              token1: TokenDto.fixture().copyWith(addresses: {
-                currentYield.network.chainId: currentYield.network.wrappedNative.addresses[currentYield.network.chainId]
-              }),
-            ),
           ),
           wrapper: GoldenConfig.localizationsWrapper());
 
@@ -928,7 +914,6 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
-
   zGoldenTest(
     "When calling `.show` method and the device is mobile, it should should a bottom sheet instead of a dialog",
     goldenFileName: "preview_deposit_modal_show_mobile",
@@ -940,7 +925,6 @@ void main() {
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 PreviewDepositModal(
                   yieldTimeFrame: YieldTimeFrame.day,
-                  depositWithNativeToken: false,
                   currentYield: currentYield,
                   isReversed: true,
                   minPrice: (isInfinity: true, price: 0),
@@ -974,7 +958,6 @@ void main() {
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 PreviewDepositModal(
                   yieldTimeFrame: YieldTimeFrame.day,
-                  depositWithNativeToken: false,
                   currentYield: currentYield,
                   isReversed: true,
                   minPrice: (isInfinity: true, price: 0),

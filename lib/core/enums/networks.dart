@@ -8,6 +8,8 @@ import 'package:zup_app/gen/assets.gen.dart';
 enum AppNetworks {
   allNetworks,
   mainnet,
+  // base,
+  unichain,
   scroll,
   sepolia;
 
@@ -43,6 +45,8 @@ enum AppNetworks {
         scroll => false,
         sepolia => true,
         allNetworks => false,
+        // base => false,
+        unichain => false,
       };
 
   String get label => switch (this) {
@@ -50,12 +54,16 @@ enum AppNetworks {
         mainnet => "Ethereum",
         scroll => "Scroll",
         allNetworks => "All Networks",
+        // base => "Base",
+        unichain => "Unichain",
       };
 
   Widget get icon => switch (this) {
         sepolia => Assets.logos.ethereum.svg(),
         mainnet => Assets.logos.ethereum.svg(),
         scroll => Assets.logos.scroll.svg(),
+        // base => Assets.logos.base.svg(),
+        unichain => Assets.logos.unichain.svg(),
         allNetworks => Assets.icons.all.svg(),
       };
 
@@ -82,6 +90,20 @@ enum AppNetworks {
             nativeCurrency: NativeCurrencies.eth.currencyInfo,
             rpcUrls: [rpcUrl],
           ),
+        // base => ChainInfo(
+        //     hexChainId: "0x2105",
+        //     chainName: label,
+        //     blockExplorerUrls: const ["https://basescan.org"],
+        //     nativeCurrency: NativeCurrencies.eth.currencyInfo,
+        //     rpcUrls: [rpcUrl],
+        //   ),
+        unichain => ChainInfo(
+            hexChainId: "0x82",
+            chainName: label,
+            blockExplorerUrls: const ["https://uniscan.xyz/"],
+            nativeCurrency: NativeCurrencies.eth.currencyInfo,
+            rpcUrls: [rpcUrl],
+          ),
       };
 
   String get wrappedNativeTokenAddress => switch (this) {
@@ -89,6 +111,8 @@ enum AppNetworks {
         sepolia => "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
         mainnet => "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
         scroll => "0x5300000000000000000000000000000000000004",
+        // base => "0x4200000000000000000000000000000000000006",
+        unichain => "0x4200000000000000000000000000000000000006"
       };
 
   TokenDto get wrappedNative => switch (this) {
@@ -115,6 +139,21 @@ enum AppNetworks {
             logoUrl:
                 "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x5300000000000000000000000000000000000004/logo.png",
           ),
+        // base => TokenDto(
+        //     addresses: {chainId: wrappedNativeTokenAddress},
+        //     decimals: NativeCurrencies.eth.currencyInfo.decimals,
+        //     name: "Wrapped Ether",
+        //     symbol: "WETH",
+        //     logoUrl:
+        //         "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x4200000000000000000000000000000000000006/logo.png",
+        //   ),
+        unichain => TokenDto(
+            addresses: {chainId: wrappedNativeTokenAddress},
+            decimals: NativeCurrencies.eth.currencyInfo.decimals,
+            name: "Wrapped Ether",
+            symbol: "WETH",
+            logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/unichain/logo.png",
+          ),
       };
 
   String get rpcUrl => switch (this) {
@@ -122,28 +161,8 @@ enum AppNetworks {
         sepolia => "https://ethereum-sepolia-rpc.publicnode.com",
         mainnet => "https://ethereum-rpc.publicnode.com",
         scroll => "https://scroll-rpc.publicnode.com",
-      };
-
-  TokenDto get nativeCurrencyTokenDto => switch (this) {
-        allNetworks => throw UnimplementedError("allNetworks is not a valid network"),
-        sepolia => TokenDto(
-            name: NativeCurrencies.eth.currencyInfo.name,
-            decimals: NativeCurrencies.eth.currencyInfo.decimals,
-            symbol: NativeCurrencies.eth.currencyInfo.symbol,
-            logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
-          ),
-        mainnet => TokenDto(
-            name: NativeCurrencies.eth.currencyInfo.name,
-            decimals: NativeCurrencies.eth.currencyInfo.decimals,
-            symbol: NativeCurrencies.eth.currencyInfo.symbol,
-            logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
-          ),
-        scroll => TokenDto(
-            name: NativeCurrencies.eth.currencyInfo.name,
-            decimals: NativeCurrencies.eth.currencyInfo.decimals,
-            symbol: NativeCurrencies.eth.currencyInfo.symbol,
-            logoUrl: NativeCurrencies.eth.currencyInfo.logoUrl,
-          ),
+        // base => "https://base-rpc.publicnode.com",
+        unichain => "https://unichain-rpc.publicnode.com",
       };
 
   Future<void> openTx(String txHash) async {

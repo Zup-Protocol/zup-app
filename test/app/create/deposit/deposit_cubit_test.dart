@@ -12,6 +12,7 @@ import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/zup_analytics.dart';
@@ -29,12 +30,15 @@ void main() {
   late Cache cache;
   late AppCubit appCubit;
   late ZupAnalytics zupAnalytics;
-
+  late PoolService poolService;
   final poolTick = BigInt.from(31276567121);
 
   setUp(() {
     registerFallbackValue(DepositSettingsDto.fixture());
     registerFallbackValue(AppNetworks.sepolia);
+    registerFallbackValue(PoolSearchSettingsDto.fixture());
+    registerFallbackValue(YieldDto.fixture());
+    poolService = PoolServiceMock();
 
     yieldRepository = YieldRepositoryMock();
     zupSingletonCache = ZupSingletonCache.shared;
@@ -49,10 +53,10 @@ void main() {
       yieldRepository,
       zupSingletonCache,
       wallet,
-      uniswapV3Pool,
       cache,
       appCubit,
       zupAnalytics,
+      poolService,
     );
 
     when(() => appCubit.isTestnetMode).thenReturn(false);
@@ -60,7 +64,7 @@ void main() {
     when(() => yieldRepository.getAllNetworksYield(
         token0InternalId: any(named: "token0InternalId"),
         token1InternalId: any(named: "token1InternalId"),
-        minTvlUsd: any(named: "minTvlUsd"),
+        searchSettings: any(named: "searchSettings"),
         testnetMode: any(named: "testnetMode"))).thenAnswer((_) async => YieldsDto.fixture());
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
@@ -87,6 +91,7 @@ void main() {
           unlocked: true
         ));
 
+    when(() => poolService.getPoolTick(any())).thenAnswer((_) async => poolTick);
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 129816));
   });
 
@@ -180,7 +185,7 @@ void main() {
     when(() => yieldRepository.getSingleNetworkYield(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
-        minTvlUsd: any(named: "minTvlUsd"),
+        searchSettings: any(named: "searchSettings"),
         network: any(named: "network"))).thenAnswer(
       (_) async => YieldsDto.fixture(),
     );
@@ -193,7 +198,7 @@ void main() {
     verify(() => yieldRepository.getSingleNetworkYield(
           token0Address: token0Address,
           token1Address: token1Address,
-          minTvlUsd: any(named: "minTvlUsd"),
+          searchSettings: any(named: "searchSettings"),
           network: any(named: "network"),
         )).called(1);
   });
@@ -206,7 +211,7 @@ void main() {
     when(() => yieldRepository.getSingleNetworkYield(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
-        minTvlUsd: any(named: "minTvlUsd"),
+        searchSettings: any(named: "searchSettings"),
         network: any(named: "network"))).thenAnswer(
       (_) async => const YieldsDto(pools: [], minLiquidityUSD: minLiquidityUSD),
     );
@@ -227,7 +232,7 @@ void main() {
     when(() => yieldRepository.getSingleNetworkYield(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
-        minTvlUsd: any(named: "minTvlUsd"),
+        searchSettings: any(named: "searchSettings"),
         network: any(named: "network"))).thenAnswer((_) async => pools);
 
     expectLater(sut.stream, emitsInOrder([const DepositState.loading(), DepositState.success(pools)]));
@@ -239,7 +244,7 @@ void main() {
     when(() => yieldRepository.getSingleNetworkYield(
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
-        minTvlUsd: any(named: "minTvlUsd"),
+        searchSettings: any(named: "searchSettings"),
         network: any(named: "network"))).thenThrow(Exception());
 
     expectLater(sut.stream, emitsInOrder([const DepositState.loading(), const DepositState.error()]));
@@ -268,7 +273,7 @@ void main() {
 
     await sut.selectYield(selectedYield, YieldTimeFrame.day);
 
-    verify(() => uniswapV3PoolImpl.slot0()).called(1);
+    verify(() => poolService.getPoolTick(selectedYield)).called(1);
   });
 
   test("When calling `selectYield` but the yield is null, it should not get the pool tick", () async {
@@ -291,35 +296,20 @@ void main() {
     await sut.getSelectedPoolTick();
   });
 
-  test("""When calling `getSelectedPoolTick` it should create the
-  UniswapV3Pool contract from RPC, with the address of the selected
-  pool""", () async {
-    final selectedYield = YieldDto.fixture();
-
-    await sut.selectYield(YieldDto.fixture(), YieldTimeFrame.day);
+  test("When calling `getSelectedPoolTick` it should use the pool service to get it", () async {
+    final yieldDto = YieldDto.fixture();
+    await sut.selectYield(yieldDto, YieldTimeFrame.day);
     await sut.getSelectedPoolTick();
 
-    verify(
-      () => uniswapV3Pool.fromRpcProvider(
-        contractAddress: selectedYield.poolAddress,
-        rpcUrl: selectedYield.network.rpcUrl,
-      ),
-    ).called(2); // 2 because of the `selectYield` and the `getSelectedPoolTick`
-  });
-
-  test("When calling `getSelectedPoolTick` it should use the slot0 from the UniswapV3Pool contract", () async {
-    await sut.selectYield(YieldDto.fixture(), YieldTimeFrame.day);
-    await sut.getSelectedPoolTick();
-
-    verify(() => uniswapV3PoolImpl.slot0()).called(2); // 2 because of the `selectYield` and the `getSelectedPoolTick`
+    verify(() => poolService.getPoolTick(yieldDto))
+        .called(2); // 2 because of the `selectYield` and the `getSelectedPoolTick`
   });
 
   test(""""
   When calling `getSelectedPoolTick` for a selected pool,
   but when the call to the contract completes, the selected pool
   is not the same as the one passed to the call, it shoul re-call
-  `getSelectedPoolTick` to get the correct pool tick
-""", () async {
+  `getSelectedPoolTick` to get the correct pool tick""", () async {
     final expectedYieldBTick = BigInt.from(326287637265372111);
 
     const yieldAPoolAddress = "0x3263782637263";
@@ -328,37 +318,20 @@ void main() {
     final yieldA = YieldDto.fixture().copyWith(poolAddress: yieldAPoolAddress);
     final yieldB = YieldDto.fixture().copyWith(poolAddress: yieldBPoolAddress);
 
-    when(() => uniswapV3PoolImpl.slot0()).thenAnswer((_) async {
-      when(() => uniswapV3PoolImpl.slot0()).thenAnswer((_) async {
-        return (
-          feeProtocol: BigInt.zero,
-          observationCardinality: BigInt.zero,
-          observationCardinalityNext: BigInt.zero,
-          observationIndex: BigInt.zero,
-          sqrtPriceX96: BigInt.zero,
-          tick: expectedYieldBTick,
-          unlocked: true
-        );
+    when(() => poolService.getPoolTick(any())).thenAnswer((_) async {
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async {
+        return expectedYieldBTick;
       });
 
       await sut.selectYield(yieldB, YieldTimeFrame.day);
 
-      return (
-        feeProtocol: BigInt.zero,
-        observationCardinality: BigInt.zero,
-        observationCardinalityNext: BigInt.zero,
-        observationIndex: BigInt.zero,
-        sqrtPriceX96: BigInt.zero,
-        tick: poolTick,
-        unlocked: true
-      );
+      return poolTick;
     });
 
     await sut.selectYield(yieldA, YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
 
-    verify(
-      () => uniswapV3Pool.fromRpcProvider(contractAddress: yieldBPoolAddress, rpcUrl: yieldB.network.rpcUrl),
-    ).called(2); // 2 because of the check in the `getSelectedPoolTick` that will re-call, and the selection
+    verify(() => poolService.getPoolTick(yieldB))
+        .called(2); // 2 because of the check in the `getSelectedPoolTick` that will re-call, and the selection
 
     expect(sut.latestPoolTick, expectedYieldBTick);
   });
@@ -366,15 +339,7 @@ void main() {
   test("When calling `getSelectedPoolTick` it should emit the pool tick got", () async {
     final expectedPoolTick = BigInt.from(97866745634534392);
 
-    when(() => uniswapV3PoolImpl.slot0()).thenAnswer((_) async => (
-          feeProtocol: BigInt.zero,
-          observationCardinality: BigInt.zero,
-          observationCardinalityNext: BigInt.zero,
-          observationIndex: BigInt.zero,
-          sqrtPriceX96: BigInt.zero,
-          tick: expectedPoolTick,
-          unlocked: true
-        ));
+    when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedPoolTick);
 
     expectLater(sut.poolTickStream, emitsInOrder([null, expectedPoolTick]));
 
@@ -385,15 +350,7 @@ void main() {
   test("When calling `getSelectedPoolTick` it should save the pool tick in the cubit", () async {
     final expectedPoolTick = BigInt.from(97866745634534392);
 
-    when(() => uniswapV3PoolImpl.slot0()).thenAnswer((_) async => (
-          feeProtocol: BigInt.zero,
-          observationCardinality: BigInt.zero,
-          observationCardinalityNext: BigInt.zero,
-          observationIndex: BigInt.zero,
-          sqrtPriceX96: BigInt.zero,
-          tick: expectedPoolTick,
-          unlocked: true
-        ));
+    when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedPoolTick);
 
     await sut.selectYield(
         YieldDto.fixture(), YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
@@ -404,15 +361,7 @@ void main() {
   test("When calling `getSelectedPoolTick` it should save the same tick as the emitted ", () async {
     final expectedPoolTick = BigInt.from(97866745634534392);
 
-    when(() => uniswapV3PoolImpl.slot0()).thenAnswer((_) async => (
-          feeProtocol: BigInt.zero,
-          observationCardinality: BigInt.zero,
-          observationCardinalityNext: BigInt.zero,
-          observationIndex: BigInt.zero,
-          sqrtPriceX96: BigInt.zero,
-          tick: expectedPoolTick,
-          unlocked: true
-        ));
+    when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedPoolTick);
 
     expectLater(sut.poolTickStream, emitsInOrder([null, expectedPoolTick]));
     await sut.selectYield(
@@ -588,7 +537,7 @@ void main() {
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
-          minTvlUsd: any(named: "minTvlUsd"),
+          searchSettings: any(named: "searchSettings"),
         )).thenAnswer((_) async => YieldsDto.fixture());
 
     await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x", ignoreMinLiquidity: true);
@@ -597,7 +546,26 @@ void main() {
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
-          minTvlUsd: 0,
+          searchSettings: PoolSearchSettingsDto.fixture().copyWith(minLiquidityUSD: 0),
+        )).called(1);
+  });
+
+  test("""When calling 'getBestPools' with the current network as all networks and the param
+  'ignoreMinLiquidity' true, it should pass the minLiquidityUSD as 0 to the repository""", () async {
+    when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.allNetworks);
+    when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 129816));
+    when(() => yieldRepository.getAllNetworksYield(
+          token0InternalId: any(named: "token0InternalId"),
+          token1InternalId: any(named: "token1InternalId"),
+          searchSettings: any(named: "searchSettings"),
+        )).thenAnswer((_) async => YieldsDto.fixture());
+
+    await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x", ignoreMinLiquidity: true);
+
+    verify(() => yieldRepository.getAllNetworksYield(
+          token0InternalId: any(named: "token0InternalId"),
+          token1InternalId: any(named: "token1InternalId"),
+          searchSettings: PoolSearchSettingsDto.fixture().copyWith(minLiquidityUSD: 0),
         )).called(1);
   });
 
@@ -610,7 +578,7 @@ void main() {
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
-          minTvlUsd: any(named: "minTvlUsd"),
+          searchSettings: any(named: "searchSettings"),
         )).thenAnswer((_) async => YieldsDto.fixture());
 
     await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x", ignoreMinLiquidity: false);
@@ -619,7 +587,7 @@ void main() {
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
-          minTvlUsd: minLiquiditySaved,
+          searchSettings: PoolSearchSettingsDto.fixture().copyWith(minLiquidityUSD: minLiquiditySaved),
         )).called(1);
   });
 
@@ -652,7 +620,7 @@ void main() {
     verify(() => yieldRepository.getAllNetworksYield(
           token0InternalId: token0Address,
           token1InternalId: token1Address,
-          minTvlUsd: any(named: "minTvlUsd"),
+          searchSettings: any(named: "searchSettings"),
         )).called(1);
   });
 

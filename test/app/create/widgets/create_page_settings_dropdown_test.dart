@@ -127,4 +127,157 @@ void main() {
       ).called(1);
     },
   );
+
+  zGoldenTest(
+    "When hovering over the info icon in the allowed pool types section, it should show a tooltip explaining the field",
+    goldenFileName: "create_page_settings_dropdown_pool_types_tooltip_hover",
+    (tester) async {
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
+
+      await tester.hover(find.byKey(const Key("pool-types-allowed-tooltip")));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest("When clicking to disable the v4 switch, it should update the UI",
+      goldenFileName: "create_page_settings_dropdown_v4_pool_type_disabled", (tester) async {
+    when(() => cache.getPoolSearchSettings()).thenReturn(
+      PoolSearchSettingsDto().copyWith(allowV4Search: true),
+    );
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(
+      PoolSearchSettingsDto().copyWith(allowV4Search: false),
+    ); // using this when because it fetches again after click
+
+    await tester.tap(find.byKey(const Key("pool-types-allowed-v4-switch")));
+    await tester.pumpAndSettle();
+  });
+
+  zGoldenTest("When clicking to disable the v3 switch, it should update the UI",
+      goldenFileName: "create_page_settings_dropdown_v3_pool_type_disabled", (tester) async {
+    when(() => cache.getPoolSearchSettings()).thenReturn(
+      PoolSearchSettingsDto().copyWith(allowV3Search: true),
+    );
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(
+      PoolSearchSettingsDto().copyWith(allowV3Search: false),
+    ); // using this when because it fetches again after click
+
+    await tester.tap(find.byKey(const Key("pool-types-allowed-v3-switch")));
+    await tester.pumpAndSettle();
+  });
+
+  zGoldenTest(
+    "When clicking to disable the v4 switch, it should call the cache to update the settings only for the v4 switch",
+    (tester) async {
+      final initialSettings = PoolSearchSettingsDto.fixture().copyWith(allowV3Search: true, allowV4Search: true);
+      when(() => cache.getPoolSearchSettings()).thenReturn(initialSettings);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("pool-types-allowed-v4-switch")));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => cache.savePoolSearchSettings(settings: initialSettings.copyWith(allowV4Search: false)),
+      ).called(1);
+    },
+  );
+
+  zGoldenTest(
+    "When clicking to disable the v3 switch, it should call the cache to update the settings only for the v3 switch",
+    (tester) async {
+      final initialSettings = PoolSearchSettingsDto.fixture().copyWith(allowV3Search: true, allowV4Search: true);
+      when(() => cache.getPoolSearchSettings()).thenReturn(initialSettings);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("pool-types-allowed-v3-switch")));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => cache.savePoolSearchSettings(settings: initialSettings.copyWith(allowV3Search: false)),
+      ).called(1);
+    },
+  );
+
+  zGoldenTest("When clicking to enable the v4 switch, it should update the UI",
+      goldenFileName: "create_page_settings_dropdown_v4_pool_type_enable", (tester) async {
+    final initialSettings = PoolSearchSettingsDto.fixture().copyWith(allowV3Search: false, allowV4Search: false);
+    when(() => cache.getPoolSearchSettings()).thenReturn(
+      initialSettings,
+    );
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(
+      initialSettings.copyWith(allowV4Search: true),
+    ); // using this when because it fetches again after click
+
+    await tester.tap(find.byKey(const Key("pool-types-allowed-v4-switch")));
+    await tester.pumpAndSettle();
+  });
+
+  zGoldenTest("When clicking to disable the v3 switch, it should update the UI",
+      goldenFileName: "create_page_settings_dropdown_v3_pool_type_enable", (tester) async {
+    final initialSettings = PoolSearchSettingsDto.fixture().copyWith(allowV3Search: false, allowV4Search: false);
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(initialSettings);
+
+    await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
+
+    when(() => cache.getPoolSearchSettings()).thenReturn(
+      initialSettings.copyWith(allowV3Search: true),
+    ); // using this when because it fetches again after click
+
+    await tester.tap(find.byKey(const Key("pool-types-allowed-v3-switch")));
+    await tester.pumpAndSettle();
+  });
+
+  zGoldenTest(
+    "When clicking to enable the v4 switch, it should call the cache to update the settings only for the v4 switch",
+    (tester) async {
+      final initialSettings = PoolSearchSettingsDto.fixture().copyWith(allowV3Search: false, allowV4Search: false);
+      when(() => cache.getPoolSearchSettings()).thenReturn(initialSettings);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("pool-types-allowed-v4-switch")));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => cache.savePoolSearchSettings(settings: initialSettings.copyWith(allowV4Search: true)),
+      ).called(1);
+    },
+  );
+
+  zGoldenTest(
+    "When clicking to disable the v3 switch, it should call the cache to update the settings only for the v3 switch",
+    (tester) async {
+      final initialSettings = PoolSearchSettingsDto.fixture().copyWith(allowV3Search: false, allowV4Search: false);
+      when(() => cache.getPoolSearchSettings()).thenReturn(initialSettings);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("pool-types-allowed-v3-switch")));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => cache.savePoolSearchSettings(settings: initialSettings.copyWith(allowV3Search: true)),
+      ).called(1);
+    },
+  );
 }
