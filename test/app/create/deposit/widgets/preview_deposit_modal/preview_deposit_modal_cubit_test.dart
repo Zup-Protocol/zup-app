@@ -99,8 +99,8 @@ void main() {
     when(
       () => zupAnalytics.logDeposit(
           depositedYield: any(named: "depositedYield"),
-          amount0: any(named: "amount0"),
-          amount1: any(named: "amount1"),
+          amount0Formatted: any(named: "amount0Formatted"),
+          amount1Formatted: any(named: "amount1Formatted"),
           walletAddress: any(named: "walletAddress")),
     ).thenAnswer((_) async {});
 
@@ -1702,8 +1702,8 @@ void main() {
 
       verify(() => zupAnalytics.logDeposit(
             depositedYield: currentYield,
-            amount0: token0amount.parseTokenAmount(decimals: currentYield.token0.decimals),
-            amount1: token1amount.parseTokenAmount(decimals: currentYield.token1.decimals),
+            amount0Formatted: token0amount.parseTokenAmount(decimals: currentYield.token0.decimals),
+            amount1Formatted: token1amount.parseTokenAmount(decimals: currentYield.token1.decimals),
             walletAddress: userAddress,
           )).called(1);
     },
@@ -1728,8 +1728,8 @@ void main() {
 
       verifyNever(() => zupAnalytics.logDeposit(
             depositedYield: any(named: "depositedYield"),
-            amount0: any(named: "amount0"),
-            amount1: any(named: "amount1"),
+            amount0Formatted: any(named: "amount0Formatted"),
+            amount1Formatted: any(named: "amount1Formatted"),
             walletAddress: any(named: "walletAddress"),
           ));
     },

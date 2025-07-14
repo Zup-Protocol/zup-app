@@ -253,8 +253,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       emit(PreviewDepositModalState.depositSuccess(txId: tx.hash));
       _zupAnalytics.logDeposit(
         depositedYield: _yield,
-        amount0: amount0Desired.parseTokenAmount(decimals: _yield.token0.decimals),
-        amount1: amount1Desired.parseTokenAmount(decimals: _yield.token1.decimals),
+        amount0Formatted: amount0Desired.parseTokenAmount(decimals: _yield.token0.decimals),
+        amount1Formatted: amount1Desired.parseTokenAmount(decimals: _yield.token1.decimals),
         walletAddress: recipient,
       );
     } catch (e) {

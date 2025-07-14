@@ -76,7 +76,12 @@ Future<void> setupInjections() async {
     () => YieldRepository(inject<Dio>(instanceName: InjectInstanceNames.zupAPIDio)),
   );
   inject.registerLazySingleton<FirebaseAnalytics>(() => FirebaseAnalytics.instance);
-  inject.registerLazySingleton<ZupAnalytics>(() => ZupAnalytics(inject<FirebaseAnalytics>()));
+  inject.registerLazySingleton<ZupAnalytics>(
+    () => ZupAnalytics(
+      inject<FirebaseAnalytics>(),
+      inject<TokensRepository>(),
+    ),
+  );
   inject.registerLazySingleton<ZupHolder>(() => ZupHolder());
   inject.registerFactory<ZupHolder>(() => ZupHolder(), instanceName: InjectInstanceNames.zupHolderFactory);
   inject.registerLazySingleton<Erc20>(() => Erc20());
