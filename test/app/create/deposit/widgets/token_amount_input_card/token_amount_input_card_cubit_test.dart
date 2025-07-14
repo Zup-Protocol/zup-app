@@ -19,7 +19,7 @@ void main() {
   late ZupHolder zupHolder;
 
   setUp(() {
-    registerFallbackValue(AppNetworks.base);
+    registerFallbackValue(AppNetworks.sepolia);
 
     tokensRepository = TokensRepositoryMock();
     zupSingletonCache = ZupSingletonCache.shared;
@@ -36,7 +36,7 @@ void main() {
     when(() => zupHolder.hold<num>(any())).thenAnswer((_) async => 31);
     final sut0 = TokenAmountInputCardCubit(tokensRepository, zupSingletonCache, zupHolder);
 
-    await sut0.getTokenPrice(token: TokenDto.fixture(), network: AppNetworks.base);
+    await sut0.getTokenPrice(token: TokenDto.fixture(), network: AppNetworks.sepolia);
     verify(() => zupHolder.hold<num>(any())).called(1);
   });
 
@@ -44,7 +44,7 @@ void main() {
     zupSingletonCache = ZupSingletonCacheMock();
     final sut0 = TokenAmountInputCardCubit(tokensRepository, zupSingletonCache, zupHolder);
     final token = TokenDto.fixture();
-    const network = AppNetworks.base;
+    const network = AppNetworks.sepolia;
 
     when(() => zupSingletonCache.run<num>(any(), expiration: any(named: "expiration"), key: any(named: "key")))
         .thenAnswer((_) async => 31);
@@ -58,7 +58,7 @@ void main() {
 
   test("When calling `getTokenPrice` it should use tokensRepository to get the token price", () async {
     final token = TokenDto.fixture();
-    const network = AppNetworks.base;
+    const network = AppNetworks.sepolia;
 
     await sut.getTokenPrice(token: token, network: network);
     verify(() => tokensRepository.getTokenPrice(token.addresses[network.chainId]!, network)).called(1);

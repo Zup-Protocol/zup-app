@@ -8,7 +8,7 @@ import 'package:zup_app/gen/assets.gen.dart';
 enum AppNetworks {
   allNetworks,
   mainnet,
-  base,
+  // base,
   unichain,
   scroll,
   sepolia;
@@ -45,7 +45,7 @@ enum AppNetworks {
         scroll => false,
         sepolia => true,
         allNetworks => false,
-        base => false,
+        // base => false,
         unichain => false,
       };
 
@@ -54,7 +54,7 @@ enum AppNetworks {
         mainnet => "Ethereum",
         scroll => "Scroll",
         allNetworks => "All Networks",
-        base => "Base",
+        // base => "Base",
         unichain => "Unichain",
       };
 
@@ -62,7 +62,7 @@ enum AppNetworks {
         sepolia => Assets.logos.ethereum.svg(),
         mainnet => Assets.logos.ethereum.svg(),
         scroll => Assets.logos.scroll.svg(),
-        base => Assets.logos.base.svg(),
+        // base => Assets.logos.base.svg(),
         unichain => Assets.logos.unichain.svg(),
         allNetworks => Assets.icons.all.svg(),
       };
@@ -90,13 +90,13 @@ enum AppNetworks {
             nativeCurrency: NativeCurrencies.eth.currencyInfo,
             rpcUrls: [rpcUrl],
           ),
-        base => ChainInfo(
-            hexChainId: "0x2105",
-            chainName: label,
-            blockExplorerUrls: const ["https://basescan.org"],
-            nativeCurrency: NativeCurrencies.eth.currencyInfo,
-            rpcUrls: [rpcUrl],
-          ),
+        // base => ChainInfo(
+        //     hexChainId: "0x2105",
+        //     chainName: label,
+        //     blockExplorerUrls: const ["https://basescan.org"],
+        //     nativeCurrency: NativeCurrencies.eth.currencyInfo,
+        //     rpcUrls: [rpcUrl],
+        //   ),
         unichain => ChainInfo(
             hexChainId: "0x82",
             chainName: label,
@@ -111,7 +111,7 @@ enum AppNetworks {
         sepolia => "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
         mainnet => "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
         scroll => "0x5300000000000000000000000000000000000004",
-        base => "0x4200000000000000000000000000000000000006",
+        // base => "0x4200000000000000000000000000000000000006",
         unichain => "0x4200000000000000000000000000000000000006"
       };
 
@@ -139,14 +139,14 @@ enum AppNetworks {
             logoUrl:
                 "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x5300000000000000000000000000000000000004/logo.png",
           ),
-        base => TokenDto(
-            addresses: {chainId: wrappedNativeTokenAddress},
-            decimals: NativeCurrencies.eth.currencyInfo.decimals,
-            name: "Wrapped Ether",
-            symbol: "WETH",
-            logoUrl:
-                "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x4200000000000000000000000000000000000006/logo.png",
-          ),
+        // base => TokenDto(
+        //     addresses: {chainId: wrappedNativeTokenAddress},
+        //     decimals: NativeCurrencies.eth.currencyInfo.decimals,
+        //     name: "Wrapped Ether",
+        //     symbol: "WETH",
+        //     logoUrl:
+        //         "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x4200000000000000000000000000000000000006/logo.png",
+        //   ),
         unichain => TokenDto(
             addresses: {chainId: wrappedNativeTokenAddress},
             decimals: NativeCurrencies.eth.currencyInfo.decimals,
@@ -161,7 +161,7 @@ enum AppNetworks {
         sepolia => "https://ethereum-sepolia-rpc.publicnode.com",
         mainnet => "https://ethereum-rpc.publicnode.com",
         scroll => "https://scroll-rpc.publicnode.com",
-        base => "https://base-rpc.publicnode.com",
+        // base => "https://base-rpc.publicnode.com",
         unichain => "https://unichain-rpc.publicnode.com",
       };
 

@@ -29,6 +29,7 @@ import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/zup_analytics.dart';
+import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
@@ -100,6 +101,7 @@ void main() {
 
     inject.registerFactory<Cache>(() => cache);
     inject.registerFactory<ZupAnalytics>(() => ZupAnalyticsMock());
+    inject.registerFactory<ZupLinks>(() => ZupLinksMock());
     inject.registerFactory<GlobalKey<NavigatorState>>(() => GlobalKey());
     inject.registerFactory<ZupNavigator>(() => navigator);
     inject.registerFactory<Wallet>(() => wallet);

@@ -22,7 +22,7 @@ void main() {
     expect(AppNetworks.fromValue("mainnet"), AppNetworks.mainnet, reason: "Mainnet should match");
     expect(AppNetworks.fromValue("scroll"), AppNetworks.scroll, reason: "Scroll should match");
     expect(AppNetworks.fromValue("allNetworks"), AppNetworks.allNetworks, reason: "All networks should match");
-    expect(AppNetworks.fromValue("base"), AppNetworks.base, reason: "Base should match");
+    // expect(AppNetworks.fromValue("base"), AppNetworks.base, reason: "Base should match");
     expect(AppNetworks.fromValue("unichain"), AppNetworks.unichain, reason: "Unichain should match");
   });
 
@@ -31,7 +31,7 @@ void main() {
     expect(AppNetworks.mainnet.label, "Ethereum", reason: "Ethereum Label should match");
     expect(AppNetworks.scroll.label, "Scroll", reason: "Scroll Label should match");
     expect(AppNetworks.allNetworks.label, "All Networks", reason: "All Networks Label should match");
-    expect(AppNetworks.base.label, "Base", reason: "Base Label should match");
+    // expect(AppNetworks.base.label, "Base", reason: "Base Label should match");
     expect(AppNetworks.unichain.label, "Unichain", reason: "Unichain Label should match");
   });
 
@@ -46,7 +46,7 @@ void main() {
         AppNetworks.allNetworks,
         AppNetworks.mainnet,
         AppNetworks.scroll,
-        AppNetworks.base,
+        // AppNetworks.base,
         AppNetworks.unichain,
       ]),
     );
@@ -65,7 +65,7 @@ void main() {
   });
 
   test("`isTestnet` method should return false for base", () {
-    expect(AppNetworks.base.isTestnet, false);
+    // expect(AppNetworks.base.isTestnet, false);
   });
 
   test("`isTestnet` method should return false for unichain", () {
@@ -108,17 +108,17 @@ void main() {
       reason: "Scroll ChainInfo should match",
     );
 
-    expect(
-      AppNetworks.base.chainInfo,
-      ChainInfo(
-        hexChainId: "0x2105",
-        chainName: "Base",
-        blockExplorerUrls: const ["https://basescan.org"],
-        nativeCurrency: NativeCurrencies.eth.currencyInfo,
-        rpcUrls: const ["https://base-rpc.publicnode.com"],
-      ),
-      reason: "Base ChainInfo should match",
-    );
+    // expect(
+    //   AppNetworks.base.chainInfo,
+    //   ChainInfo(
+    //     hexChainId: "0x2105",
+    //     chainName: "Base",
+    //     blockExplorerUrls: const ["https://basescan.org"],
+    //     nativeCurrency: NativeCurrencies.eth.currencyInfo,
+    //     rpcUrls: const ["https://base-rpc.publicnode.com"],
+    //   ),
+    //   reason: "Base ChainInfo should match",
+    // );
 
     expect(
       AppNetworks.unichain.chainInfo,
@@ -152,11 +152,11 @@ void main() {
       reason: "Scroll wrapped native token address should match",
     );
 
-    expect(
-      AppNetworks.base.wrappedNativeTokenAddress,
-      "0x4200000000000000000000000000000000000006",
-      reason: "Base wrapped native token address should match",
-    );
+    // expect(
+    //   AppNetworks.base.wrappedNativeTokenAddress,
+    //   "0x4200000000000000000000000000000000000006",
+    //   reason: "Base wrapped native token address should match",
+    // );
 
     expect(
       AppNetworks.unichain.wrappedNativeTokenAddress,
@@ -209,20 +209,20 @@ void main() {
       reason: "Scroll default token should match",
     );
 
-    expect(
-      AppNetworks.base.wrappedNative,
-      TokenDto(
-        addresses: {
-          AppNetworks.base.chainId: "0x4200000000000000000000000000000000000006",
-        },
-        name: "Wrapped Ether",
-        decimals: 18,
-        symbol: "WETH",
-        logoUrl:
-            "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x4200000000000000000000000000000000000006/logo.png",
-      ),
-      reason: "Base default token should match",
-    );
+    // expect(
+    //   AppNetworks.base.wrappedNative,
+    //   TokenDto(
+    //     addresses: {
+    //       AppNetworks.base.chainId: "0x4200000000000000000000000000000000000006",
+    //     },
+    //     name: "Wrapped Ether",
+    //     decimals: 18,
+    //     symbol: "WETH",
+    //     logoUrl:
+    //         "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x4200000000000000000000000000000000000006/logo.png",
+    //   ),
+    //   reason: "Base default token should match",
+    // );
 
     expect(
       AppNetworks.unichain.wrappedNative,
@@ -258,11 +258,11 @@ void main() {
       reason: "Scroll rpc url should match",
     );
 
-    expect(
-      AppNetworks.base.rpcUrl,
-      "https://base-rpc.publicnode.com",
-      reason: "Base rpc url should match",
-    );
+    // expect(
+    //   AppNetworks.base.rpcUrl,
+    //   "https://base-rpc.publicnode.com",
+    //   reason: "Base rpc url should match",
+    // );
 
     expect(
       AppNetworks.unichain.rpcUrl,
@@ -330,12 +330,12 @@ void main() {
     ));
   });
 
-  zGoldenTest("Base network icon should match", goldenFileName: "base_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      AppNetworks.base.icon,
-      device: GoldenDevice.square,
-    ));
-  });
+  // zGoldenTest("Base network icon should match", goldenFileName: "base_network_icon", (tester) async {
+  //   await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+  //     AppNetworks.base.icon,
+  //     device: GoldenDevice.square,
+  //   ));
+  // });
 
   zGoldenTest("Scroll network icon should match", goldenFileName: "scroll_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(await goldenDeviceBuilder(

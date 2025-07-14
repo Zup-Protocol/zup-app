@@ -436,7 +436,7 @@ void main() {
     );
 
     final token = TokenDto.fixture();
-    const network = AppNetworks.base;
+    const network = AppNetworks.sepolia;
 
     await sut0.updateTokenAndNetwork(token.addresses[network.chainId]!, network, asNativeToken: true);
 
