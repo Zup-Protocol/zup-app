@@ -33,6 +33,7 @@ class YieldsDto with _$YieldsDto {
   factory YieldsDto.fixture() => const YieldsDto(
         pools: [
           YieldDto(
+            latestTick: "637812562",
             positionManagerAddress: "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4",
             poolType: PoolType.v3,
             token0: TokenDto(

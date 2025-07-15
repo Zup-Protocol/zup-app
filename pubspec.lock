@@ -1293,7 +1293,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "42dfe9f12673e21d2bc15623a6f58a1094969f2c"
+      resolved-ref: "96c38241bbd55f27820c0fbe0e62ed53f2febed7"
       url: "https://github.com/Zup-Protocol/web3kit.git"
     source: git
     version: "0.0.1"
@@ -1351,7 +1351,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: e67c82ded372f740d5b2e7823d4bce070efdb3bb
+      resolved-ref: cd1e5f42c34c93ec91f8da476ec19cc2d2435c36
       url: "https://github.com/Zup-Protocol/zup-ui-kit.git"
     source: git
     version: "0.0.1"
