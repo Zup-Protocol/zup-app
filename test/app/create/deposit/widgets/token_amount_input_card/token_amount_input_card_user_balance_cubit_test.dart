@@ -339,7 +339,7 @@ void main() {
         () {},
       );
 
-      await sut0.updateNativeTokenAndFetch(isNative: true);
+      await sut0.updateNativeTokenAndFetch(isNative: true, network: AppNetworks.sepolia);
 
       when(() => wallet0.signer).thenAnswer((_) => signer);
 
@@ -373,7 +373,7 @@ void main() {
         () {},
       );
 
-      await sut0.updateNativeTokenAndFetch(isNative: false);
+      await sut0.updateNativeTokenAndFetch(isNative: false, network: AppNetworks.sepolia);
 
       when(() => wallet0.signer).thenAnswer((_) => signer);
 
@@ -398,7 +398,7 @@ void main() {
 
     when(() => wallet.signer).thenAnswer((_) => null);
 
-    await sut0.updateNativeTokenAndFetch(isNative: false);
+    await sut0.updateNativeTokenAndFetch(isNative: false, network: AppNetworks.sepolia);
 
     verifyNever(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")));
   });
@@ -415,9 +415,30 @@ void main() {
 
     when(() => wallet.signer).thenAnswer((_) => signer);
 
-    await sut0.updateNativeTokenAndFetch(isNative: false);
+    await sut0.updateNativeTokenAndFetch(isNative: false, network: AppNetworks.sepolia);
 
     verify(() => wallet.nativeOrTokenBalance(any(), rpcUrl: any(named: "rpcUrl")))
+        .called(2); // two times because of the initial load
+  });
+
+  test("""When calling `updateNativeTokenAndFetch`
+  it should update the network variable for the one passed,
+  so the next time to fetch the balance it will use the new network""", () async {
+    const initialNetwork = AppNetworks.sepolia;
+    const nextNetwork = AppNetworks.mainnet;
+    final sut0 = TokenAmountCardUserBalanceCubit(
+      wallet,
+      tokenAddress,
+      initialNetwork,
+      ZupSingletonCache.shared,
+      () {},
+    );
+
+    when(() => wallet.signer).thenAnswer((_) => signer);
+
+    await sut0.updateNativeTokenAndFetch(isNative: false, network: nextNetwork);
+
+    verify(() => wallet.nativeOrTokenBalance(any(), rpcUrl: nextNetwork.rpcUrl))
         .called(2); // two times because of the initial load
   });
 

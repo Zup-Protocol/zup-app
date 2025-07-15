@@ -249,6 +249,32 @@ void main() {
   );
 
   zGoldenTest(
+    """When updating the widget with a different network, being native,
+    it should update the token in the cubit and get the balance again
+    for the new network""",
+    (tester) async {
+      await tester.runAsync(() async {
+        const key = Key("token-amount-card");
+        const oldNetwork = AppNetworks.sepolia;
+        const newNetwork = AppNetworks.mainnet;
+        final token = TokenDto.fixture().copyWith(
+          addresses: {
+            oldNetwork.chainId: EthereumConstants.zeroAddress,
+            newNetwork.chainId: EthereumConstants.zeroAddress,
+          },
+        );
+
+        await tester.pumpDeviceBuilder(await goldenBuilder(key: key, network: oldNetwork, token: token));
+        await tester.pumpDeviceBuilder(await goldenBuilder(key: key, network: newNetwork, token: token));
+
+        verify(
+          () => wallet.nativeOrTokenBalance(token.addresses[newNetwork.chainId]!, rpcUrl: newNetwork.rpcUrl),
+        ).called(1);
+      });
+    },
+  );
+
+  zGoldenTest(
     "When updating the widget from a native token, for a different native token, it should update the token in the cubit and get the balance again",
     (tester) async {
       await tester.runAsync(() async {
