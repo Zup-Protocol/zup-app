@@ -9,14 +9,16 @@ void main() {
     const userAddress = '0xUserAddress';
     const tokenAddress = '0xTokenAddress';
     const isNative = true;
+    const network = AppNetworks.sepolia;
 
     final key = _KeysMixinWrapper().userTokenBalanceCacheKey(
       userAddress: userAddress,
       tokenAddress: tokenAddress,
       isNative: isNative,
+      network: network,
     );
 
-    expect(key, 'userTokenBalance-$userAddress-$tokenAddress-native=$isNative');
+    expect(key, 'userTokenBalance-$userAddress-$tokenAddress-native=$isNative-${network.name}');
   });
 
   test("`poolTickCacheKey` should return correct key", () {

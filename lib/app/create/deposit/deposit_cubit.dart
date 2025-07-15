@@ -143,6 +143,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
         tokenAddress: tokenAddress,
         userAddress: walletAddress,
         isNative: tokenAddress == EthereumConstants.zeroAddress,
+        network: network,
       ),
       expiration: const Duration(minutes: 10),
     );
