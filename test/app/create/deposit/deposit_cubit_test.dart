@@ -120,15 +120,10 @@ void main() {
         async.elapse(const Duration(minutes: minutesPassed));
 
         expect(actualLastEmittedPoolTick, poolTick);
-        expect(
-          eventsCounter,
-          minutesPassed *
-              2, /* it will be called twice per minute because
-                of one of the emits are null,
-                before fetching the latest tick */
-        );
+        expect(eventsCounter, minutesPassed);
       });
     });
+
     test("""And when the minuted passed, but the selected yield is null
   it should not execute the task to get the pool tick""", () async {
       BigInt? actualLastEmittedPoolTick;
@@ -289,20 +284,12 @@ void main() {
     await sut.getSelectedPoolTick();
   });
 
-  test("When calling `getSelectedPoolTick` it should emit a null pool tick before getting the pool tick", () async {
-    expectLater(sut.poolTickStream, emits(null));
-
-    await sut.selectYield(YieldDto.fixture(), YieldTimeFrame.day);
-    await sut.getSelectedPoolTick();
-  });
-
   test("When calling `getSelectedPoolTick` it should use the pool service to get it", () async {
     final yieldDto = YieldDto.fixture();
     await sut.selectYield(yieldDto, YieldTimeFrame.day);
     await sut.getSelectedPoolTick();
 
-    verify(() => poolService.getPoolTick(yieldDto))
-        .called(2); // 2 because of the `selectYield` and the `getSelectedPoolTick`
+    verify(() => poolService.getPoolTick(yieldDto)).called(1);
   });
 
   test(""""
@@ -331,20 +318,184 @@ void main() {
     await sut.selectYield(yieldA, YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
 
     verify(() => poolService.getPoolTick(yieldB))
-        .called(2); // 2 because of the check in the `getSelectedPoolTick` that will re-call, and the selection
+        .called(1); // 2 because of the check in the `getSelectedPoolTick` that will re-call, and the selection
 
     expect(sut.latestPoolTick, expectedYieldBTick);
   });
 
-  test("When calling `getSelectedPoolTick` it should emit the pool tick got", () async {
-    final expectedPoolTick = BigInt.from(97866745634534392);
+  test("""When calling `selectYield` it should first emit the selected yield latest tick from the DTO
+      (without making a contract call)""", () {
+    final latestTickYield = BigInt.from(27189);
 
-    when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedPoolTick);
+    expectLater(sut.poolTickStream, emits(latestTickYield));
 
-    expectLater(sut.poolTickStream, emitsInOrder([null, expectedPoolTick]));
+    sut.selectYield(
+      YieldDto.fixture().copyWith(latestTick: latestTickYield.toString()),
+      YieldTimeFrame.day,
+    );
+
+    expect(sut.latestPoolTick, latestTickYield);
+  });
+
+  test(
+    """When calling 'getSelectedPoolTick' with `forceRefresh` true,
+  it should get the tick again regardless of the cached value""",
+    () async {
+      final selectedYield = YieldDto.fixture();
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => poolTick);
+
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+      await sut.getSelectedPoolTick(forceRefresh: true);
+
+      verify(() => poolService.getPoolTick(selectedYield)).called(2);
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolTick' multiple times for the same
+    pool within a minute, it should not get the tick again from the
+    contract. Instead, it should use the cached value""",
+    () async {
+      final selectedYield = YieldDto.fixture();
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => poolTick);
+
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+
+      await sut.getSelectedPoolTick();
+      await sut.getSelectedPoolTick();
+      await sut.getSelectedPoolTick();
+      await sut.getSelectedPoolTick();
+      await sut.getSelectedPoolTick();
+
+      verify(() => poolService.getPoolTick(selectedYield)).called(1);
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolTick' multiple times for different
+    pools in the same network, it should get the tick again for each
+    one and emit it""",
+    () async {
+      final yieldA = YieldDto.fixture().copyWith(poolAddress: "0xPoolAddressYieldA");
+      final yieldB = YieldDto.fixture().copyWith(poolAddress: "0xPoolAddressYieldB");
+      final yieldC = YieldDto.fixture().copyWith(poolAddress: "0xPoolAddressYieldC");
+
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => poolTick);
+
+      await sut.selectYield(yieldA, YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
+      await sut.selectYield(yieldB, YieldTimeFrame.day);
+      await sut.selectYield(yieldC, YieldTimeFrame.day);
+
+      verify(() => poolService.getPoolTick(yieldA)).called(1);
+      verify(() => poolService.getPoolTick(yieldB)).called(1);
+      verify(() => poolService.getPoolTick(yieldC)).called(1);
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolTick' multiple times for different
+    pools in other networks, it should get the tick again for each
+    one and emit it""",
+    () async {
+      final yieldA = YieldDto.fixture().copyWith(
+        poolAddress: "0xPoolAddressYieldA",
+        chainId: AppNetworks.mainnet.chainId,
+      );
+      final yieldB = YieldDto.fixture().copyWith(
+        poolAddress: "0xPoolAddressYieldB",
+        chainId: AppNetworks.sepolia.chainId,
+      );
+      final yieldC = YieldDto.fixture().copyWith(
+        poolAddress: "0xPoolAddressYieldC",
+        chainId: AppNetworks.unichain.chainId,
+      );
+
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => poolTick);
+
+      await sut.selectYield(yieldA, YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
+      await sut.selectYield(yieldB, YieldTimeFrame.day);
+      await sut.selectYield(yieldC, YieldTimeFrame.day);
+
+      verify(() => poolService.getPoolTick(yieldA)).called(1);
+      verify(() => poolService.getPoolTick(yieldB)).called(1);
+      verify(() => poolService.getPoolTick(yieldC)).called(1);
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolTick' multiple times for the same
+    pool address but in other networks, it should get the tick again for each
+    one and emit it""",
+    () async {
+      const poolAddress = "0xPoolAddress";
+      final yieldA = YieldDto.fixture().copyWith(
+        poolAddress: poolAddress,
+        chainId: AppNetworks.mainnet.chainId,
+      );
+      final yieldB = YieldDto.fixture().copyWith(
+        poolAddress: poolAddress,
+        chainId: AppNetworks.sepolia.chainId,
+      );
+      final yieldC = YieldDto.fixture().copyWith(
+        poolAddress: poolAddress,
+        chainId: AppNetworks.unichain.chainId,
+      );
+
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => poolTick);
+
+      await sut.selectYield(yieldA, YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
+      await sut.selectYield(yieldB, YieldTimeFrame.day);
+      await sut.selectYield(yieldC, YieldTimeFrame.day);
+
+      verify(() => poolService.getPoolTick(yieldA)).called(1);
+      verify(() => poolService.getPoolTick(yieldB)).called(1);
+      verify(() => poolService.getPoolTick(yieldC)).called(1);
+    },
+  );
+
+  test(
+    """When calling 'getSelectedPoolTick', it should use the zup singleton cache with a expiration of 1 minute""",
+    () async {
+      final selectedYield = YieldDto.fixture();
+
+      zupSingletonCache = ZupSingletonCacheMock();
+      sut = DepositCubit(yieldRepository, zupSingletonCache, wallet, cache, appCubit, zupAnalytics, poolService);
+      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => poolTick);
+      when(() => zupSingletonCache.clear()).thenAnswer((_) async => {});
+      when(() => zupSingletonCache.run<BigInt>(
+            any(),
+            key: any(named: "key"),
+            expiration: any(named: "expiration"),
+            ignoreCache: any(named: "ignoreCache"),
+          )).thenAnswer((_) async => poolTick);
+
+      await sut.selectYield(selectedYield, YieldTimeFrame.day);
+      await sut.getSelectedPoolTick();
+
+      verify(() => zupSingletonCache.run<BigInt>(
+            any(),
+            key: "poolTick-${selectedYield.poolAddress}-${selectedYield.network.name}",
+            expiration: const Duration(minutes: 1),
+            ignoreCache: false,
+          )).called(1);
+    },
+  );
+
+  test("""When calling `getSelectedPoolTick`
+  it should emit the pool tick got from
+  the contract, after emitting the one
+  from the yield call""", () async {
+    final newExpectedPoolTick = BigInt.from(97866745634534392);
+    final latestTickYield = BigInt.from(27189);
+
+    when(() => poolService.getPoolTick(any())).thenAnswer((_) async => newExpectedPoolTick);
+
+    expectLater(sut.poolTickStream, emitsInOrder([latestTickYield, newExpectedPoolTick]));
 
     await sut.selectYield(
-        YieldDto.fixture(), YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
+      YieldDto.fixture().copyWith(latestTick: latestTickYield.toString()),
+      YieldTimeFrame.day,
+    ); // assuming that select yield will call `getSelectedPoolTick`
   });
 
   test("When calling `getSelectedPoolTick` it should save the pool tick in the cubit", () async {
@@ -359,15 +510,19 @@ void main() {
   });
 
   test("When calling `getSelectedPoolTick` it should save the same tick as the emitted ", () async {
-    final expectedPoolTick = BigInt.from(97866745634534392);
+    final newWxpectedPoolTick = BigInt.from(97866745634534392);
+    final yieldTick = BigInt.from(27189);
 
-    when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedPoolTick);
+    when(() => poolService.getPoolTick(any())).thenAnswer((_) async => newWxpectedPoolTick);
 
-    expectLater(sut.poolTickStream, emitsInOrder([null, expectedPoolTick]));
+    expectLater(sut.poolTickStream, emitsInOrder([yieldTick, newWxpectedPoolTick]));
+
     await sut.selectYield(
-        YieldDto.fixture(), YieldTimeFrame.day); // assuming that select yield will call `getSelectedPoolTick`
+      YieldDto.fixture().copyWith(latestTick: yieldTick.toString()),
+      YieldTimeFrame.day,
+    ); // assuming that select yield will call `getSelectedPoolTick`
 
-    expect(sut.latestPoolTick, expectedPoolTick);
+    expect(sut.latestPoolTick, newWxpectedPoolTick);
   });
 
   test("when closing the cubit, it should close the pool tick stream", () async {

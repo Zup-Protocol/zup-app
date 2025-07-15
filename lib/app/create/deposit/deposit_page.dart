@@ -98,8 +98,11 @@ class _DepositPageState extends State<DepositPage>
   bool isMaxRangeInfinity = true;
   bool isMinRangeInfinity = true;
   bool isBaseTokenAmountUserInput = false;
+  double? percentRange;
   double minPrice = 0;
   double maxPrice = 0;
+  RangeController minRangeController = RangeController();
+  RangeController maxRangeController = RangeController();
 
   late Slippage selectedSlippage = _cubit.depositSettings.slippage;
   late Duration selectedDeadline = _cubit.depositSettings.deadline;
@@ -141,11 +144,36 @@ class _DepositPageState extends State<DepositPage>
 
   void setFullRange() {
     setState(() {
+      percentRange = null;
       isMinRangeInfinity = true;
       isMaxRangeInfinity = true;
     });
 
+    minPrice = 0;
+    maxPrice = 0;
+
     calculateDepositTokensAmount();
+  }
+
+  void setPercentageRange(double percentage) {
+    if (currentPrice == 0) return;
+
+    setState(() {
+      percentRange = percentage;
+      isMinRangeInfinity = false;
+      isMaxRangeInfinity = false;
+
+      final percentageDecimals = percentage / 100;
+      final percentageDifference = currentPrice * percentageDecimals;
+
+      minPrice = currentPrice - percentageDifference;
+      maxPrice = currentPrice + percentageDifference;
+
+      minRangeController.setRange(minPrice);
+      maxRangeController.setRange(maxPrice);
+
+      calculateDepositTokensAmount();
+    });
   }
 
   void selectYield(YieldDto? yieldDto, YieldTimeFrame? yieldTimeFrame) async {
@@ -174,6 +202,7 @@ class _DepositPageState extends State<DepositPage>
     quoteTokenAmountController.text = currentBaseTokenDepositAmount;
     isBaseTokenAmountUserInput = isReversed && !isBaseTokenAmountUserInput;
 
+    if (percentRange != null) setPercentageRange(percentRange!);
     calculateDepositTokensAmount();
   }
 
@@ -326,6 +355,13 @@ class _DepositPageState extends State<DepositPage>
     });
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    minRangeController.dispose();
+    maxRangeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -703,13 +739,6 @@ class _DepositPageState extends State<DepositPage>
           children: [
             _sectionTitle(S.of(context).depositPageRangeSectionTitle),
             const SizedBox(width: 12),
-            ZupTextButton(
-              key: const Key("full-range-button"),
-              onPressed: () => setFullRange(),
-              label: S.of(context).depositPageRangeSectionFullRange,
-              icon: Assets.icons.circleDotted.svg(),
-              alignLeft: false,
-            ),
             const Spacer(),
             if (!isMobileSize(context)) tokenSwitcher
           ],
@@ -722,6 +751,7 @@ class _DepositPageState extends State<DepositPage>
         const SizedBox(height: 10),
         StreamBuilder(
             stream: _cubit.poolTickStream,
+            initialData: _cubit.latestPoolTick,
             builder: (context, poolTickSnapshot) {
               return Text(
                       "1 ${baseToken.symbol} ≈ ${() {
@@ -738,12 +768,51 @@ class _DepositPageState extends State<DepositPage>
                 enabled: poolTickSnapshot.data == null,
               );
             }),
-        const SizedBox(height: 20),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            ZupMiniButton(
+              key: const Key("full-range-button"),
+              onPressed: () => setFullRange(),
+              isSelected: isMaxRangeInfinity && isMinRangeInfinity,
+              title: S.of(context).depositPageRangeSectionFullRange,
+              icon: Assets.icons.circleDotted.svg(),
+            ),
+            ZupMiniButton(
+              key: const Key("5-percent-range-button"),
+              onPressed: () => setPercentageRange(5),
+              isSelected: percentRange == 5,
+              title: "5%",
+              icon: Assets.icons.plusminus.svg(),
+              // alignLeft: true,
+            ),
+            ZupMiniButton(
+              key: const Key("20-percent-range-button"),
+              onPressed: () => setPercentageRange(20),
+              isSelected: percentRange == 20,
+              title: "20%",
+              icon: Assets.icons.plusminus.svg(),
+              // alignLeft: true,
+            ),
+            ZupMiniButton(
+              key: const Key("50-percent-range-button"),
+              onPressed: () => setPercentageRange(50),
+              isSelected: percentRange == 50,
+              title: "50%",
+              icon: Assets.icons.plusminus.svg(),
+              // alignLeft: true,
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
         StreamBuilder(
             stream: _cubit.poolTickStream,
             builder: (context, snapshot) {
               return RangeSelector(
                 key: const Key("min-price-selector"),
+                onUserType: () => percentRange = null,
                 onPriceChanged: (price) {
                   setState(() {
                     if (price == 0) {
@@ -766,6 +835,7 @@ class _DepositPageState extends State<DepositPage>
                 tickSpacing: _cubit.selectedYield!.tickSpacing,
                 type: RangeSelectorType.minPrice,
                 isInfinity: isMinRangeInfinity,
+                rangeController: minRangeController,
                 state: () {
                   if (isOutOfRange.minPrice) {
                     return RangeSelectorState(
@@ -786,6 +856,7 @@ class _DepositPageState extends State<DepositPage>
                 key: const Key("max-price-selector"),
                 displayBaseTokenSymbol: baseToken.symbol,
                 displayQuoteTokenSymbol: quoteToken.symbol,
+                onUserType: () => percentRange = null,
                 onPriceChanged: (price) {
                   setState(() {
                     if (price == 0) {
@@ -807,6 +878,7 @@ class _DepositPageState extends State<DepositPage>
                 poolToken1: _cubit.selectedYield!.token1,
                 isReversed: areTokensReversed,
                 tickSpacing: _cubit.selectedYield!.tickSpacing,
+                rangeController: maxRangeController,
                 state: () {
                   if (isRangeInvalid) {
                     return RangeSelectorState(

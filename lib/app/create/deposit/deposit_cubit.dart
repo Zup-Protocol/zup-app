@@ -108,17 +108,28 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     _selectedYieldTimeframe = yieldTimeFrame;
     _selectedYieldStreamController.add(selectedYield);
 
-    if (selectedYield != null) await getSelectedPoolTick();
+    if (selectedYield != null) {
+      _latestPoolTick = BigInt.parse(yieldDto!.latestTick);
+      _pooltickStreamController.add(_latestPoolTick);
+
+      await getSelectedPoolTick(forceRefresh: true);
+    }
   }
 
-  Future<void> getSelectedPoolTick() async {
+  Future<void> getSelectedPoolTick({bool forceRefresh = false}) async {
     if (selectedYield == null) return;
 
-    _latestPoolTick = null;
-    _pooltickStreamController.add(null);
-
     final selectedYieldBeforeCall = selectedYield;
-    BigInt tick = await _poolService.getPoolTick(selectedYieldBeforeCall!);
+
+    final tick = await _zupSingletonCache.run(
+      () => _poolService.getPoolTick(selectedYieldBeforeCall!),
+      expiration: const Duration(minutes: 1),
+      ignoreCache: forceRefresh,
+      key: poolTickCacheKey(
+        network: selectedYield!.network,
+        poolAddress: selectedYield!.poolAddress,
+      ),
+    );
 
     if (selectedYieldBeforeCall != selectedYield) return await getSelectedPoolTick();
 

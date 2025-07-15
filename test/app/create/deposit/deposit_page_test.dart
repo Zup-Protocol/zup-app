@@ -414,7 +414,7 @@ void main() {
 
         await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true));
         await tester.pumpAndSettle();
-        await tester.drag(find.byKey(const Key("full-range-button")), const Offset(0, -500));
+        await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
         await tester.pumpAndSettle();
@@ -785,6 +785,191 @@ void main() {
     });
   });
 
+  zGoldenTest(
+      "When clicking the 5% range button and then clicking the full range button, it should set it to full range",
+      goldenFileName: "deposit_page_5_percent_set_to_full_range", (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("5-percent-range-button")));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("full-range-button")));
+      await tester.pumpAndSettle();
+    });
+  });
+
+  zGoldenTest("""When clicking the 5% range button and then clicking the full range button,
+      it should set it to full range. And when clicking to reverse tokens, it should
+      keep the full range selected""", goldenFileName: "deposit_page_5_percent_set_to_full_range_reverse_tokens",
+      (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("5-percent-range-button")));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("full-range-button")));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
+      await tester.pumpAndSettle();
+    });
+  });
+
+  zGoldenTest("""When clicking the 5% range button, it should set 5% up
+  and 5% down of the current price for the min and max prices""", goldenFileName: "deposit_page_set_5_percent_range",
+      (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("5-percent-range-button")));
+      await tester.pumpAndSettle();
+    });
+  });
+
+  zGoldenTest("""When clicking the 5% range button, it should set 5% up
+  and 5% down of the current price for the min and max prices. And when
+  clicking to reverse tokens, it should keep the 5% range selected but
+  now with the reverse tokens range ratio""", goldenFileName: "deposit_page_set_5_percent_range_reverse_tokens",
+      (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("5-percent-range-button")));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
+      await tester.pumpAndSettle();
+    });
+  });
+
+  zGoldenTest("""When clicking the 20% range button, it should set 20% up
+  and 20% down of the current price for the min and max prices""", goldenFileName: "deposit_page_set_20_percent_range",
+      (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("20-percent-range-button")));
+      await tester.pumpAndSettle();
+    });
+  });
+
+  zGoldenTest("""When clicking the 20% range button, it should set 20% up
+  and 20% down of the current price for the min and max prices. And when
+  clicking to reverse tokens, it should keep the 20% range selected but
+  now with the reverse tokens range ratio""", goldenFileName: "deposit_page_set_20_percent_range_reverse_tokens",
+      (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("20-percent-range-button")));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
+      await tester.pumpAndSettle();
+    });
+  });
+
+  zGoldenTest("""When clicking the 50% range button, it should set 50% up
+  and 50% down of the current price for the min and max prices""", goldenFileName: "deposit_page_set_50_percent_range",
+      (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("50-percent-range-button")));
+      await tester.pumpAndSettle();
+    });
+  });
+
+  zGoldenTest("""When clicking the 50% range button, it should set 50% up
+  and 50% down of the current price for the min and max prices. And when
+  clicking to reverse tokens, it should keep the 50% range selected but
+  now with the reverse tokens range ratio""", goldenFileName: "deposit_page_set_50_percent_range_reverse_tokens",
+      (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("50-percent-range-button")));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
+      await tester.pumpAndSettle();
+    });
+  });
+
   zGoldenTest("When typing a max price, but then selecting the full range button, it should set it to infinity",
       goldenFileName: "deposit_page_max_price_set_to_full_range", (tester) async {
     await tester.runAsync(() async {
@@ -803,6 +988,60 @@ void main() {
       FocusManager.instance.primaryFocus?.unfocus();
 
       await tester.tap(find.byKey(const Key("full-range-button")));
+      await tester.pumpAndSettle();
+    });
+  });
+
+  zGoldenTest("""When clicking the percentage range button,but then typing a custom max price,
+      and reversing tokens, it should keep the typed max price. And the min price should be the
+      one from the percentage range""",
+      goldenFileName: "deposit_page_set_percentage_range_then_type_max_price_reverse_tokens", (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("50-percent-range-button")));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("max-price-selector")), "1");
+      FocusManager.instance.primaryFocus?.unfocus();
+
+      await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
+      await tester.pumpAndSettle();
+    });
+  });
+
+  zGoldenTest("""When clicking the percentage range button,but then typing a custom min price,
+      and reversing tokens, it should keep the typed min price and the max price should be the
+      one from the percentage range""",
+      goldenFileName: "deposit_page_set_percentage_range_then_type_min_price_reverse_tokens", (tester) async {
+    await tester.runAsync(() async {
+      final selectedYield = YieldsDto.fixture().best24hYield;
+      final currentPriceAsTick = BigInt.from(174072);
+
+      when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+      when(() => cubit.selectedYield).thenReturn(selectedYield);
+      when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+      when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+
+      await tester.tap(find.byKey(const Key("50-percent-range-button")));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key("min-price-selector")), "1216");
+      FocusManager.instance.primaryFocus?.unfocus();
+
+      await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
       await tester.pumpAndSettle();
     });
   });
@@ -1880,7 +2119,7 @@ void main() {
       await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.tap(find.byKey(const Key("yield-card-24h")));
       await tester.pumpAndSettle();
-      await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+      await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
@@ -2205,7 +2444,7 @@ void main() {
         await tester.tap(find.byKey(const Key("deposit-settings-button"))); // closing the dropdown
         await tester.pumpAndSettle();
 
-        await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+        await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -1000));
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
