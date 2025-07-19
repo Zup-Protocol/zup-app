@@ -7,8 +7,10 @@ import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/repositories/protocol_repository.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/zup_core.dart';
 
 import '../../golden_config.dart';
 import '../../mocks.dart';
@@ -25,6 +27,8 @@ void main() {
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerFactory<ZupNavigator>(() => ZupNavigatorMock());
+    inject.registerFactory<ZupSingletonCache>(() => ZupSingletonCache.shared);
+    inject.registerFactory<ProtocolRepository>(() => ProtocolRepositoryMock());
 
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto.fixture());
     when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);

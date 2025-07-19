@@ -580,7 +580,9 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                       fixedIcon: true,
                       alignCenter: true,
                       title: depositButtonState.title,
-                      onPressed: depositButtonState.onPressed,
+                      onPressed: depositButtonState.onPressed == null
+                          ? null
+                          : (buttonContext) => depositButtonState.onPressed!(),
                       icon: depositButtonState.icon,
                       isLoading: depositButtonState.isLoading ?? false,
                       width: double.maxFinite,

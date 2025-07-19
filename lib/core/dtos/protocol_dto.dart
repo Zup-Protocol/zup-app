@@ -9,6 +9,7 @@ class ProtocolDto with _$ProtocolDto {
 
   @JsonSerializable(explicitToJson: true)
   const factory ProtocolDto({
+    @Default("") String id,
     @Default("") String name,
     @Default("") String url,
     @Default("") String logo,

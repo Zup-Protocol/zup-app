@@ -69,7 +69,7 @@ class AppCookieConsentWidget extends StatelessWidget {
               hoverElevation: 0,
               backgroundColor: ZupColors.brand6,
               foregroundColor: ZupColors.brand,
-              onPressed: () {
+              onPressed: (buttonContext) {
                 onAccept();
                 cache.saveCookiesConsentStatus(status: true);
               },

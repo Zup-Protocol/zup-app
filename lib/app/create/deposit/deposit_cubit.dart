@@ -6,6 +6,7 @@ import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
@@ -79,12 +80,14 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
       emit(const DepositState.loading());
       final yields = _appCubit.selectedNetwork.isAllNetworks
           ? await _yieldRepository.getAllNetworksYield(
+              blockedProtocolIds: _cache.blockedProtocolsIds,
               token0InternalId: token0AddressOrId,
               token1InternalId: token1AddressOrId,
               searchSettings: ignoreMinLiquidity ? poolSearchSettings.copyWith(minLiquidityUSD: 0) : poolSearchSettings,
               testnetMode: _appCubit.isTestnetMode,
             )
           : await _yieldRepository.getSingleNetworkYield(
+              blockedProtocolIds: _cache.blockedProtocolsIds,
               token0Address: token0AddressOrId,
               token1Address: token1AddressOrId,
               network: _appCubit.selectedNetwork,
@@ -93,7 +96,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
       if (yields.isEmpty) {
         return emit(
-          DepositState.noYields(minLiquiditySearched: yields.minLiquidityUSD),
+          DepositState.noYields(filtersApplied: yields.filters),
         );
       }
 

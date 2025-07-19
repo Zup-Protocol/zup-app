@@ -18,6 +18,7 @@ import 'package:zup_app/app/create/deposit/deposit_page.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/token_price_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
@@ -192,7 +193,11 @@ void main() {
 
   zGoldenTest("When the cubit state is noYields with no min liquidity searched, it should just show the noYields state",
       goldenFileName: "deposit_page_no_yields", (tester) async {
-    when(() => cubit.state).thenReturn(const DepositState.noYields(minLiquiditySearched: 0));
+    when(() => cubit.state).thenReturn(
+      const DepositState.noYields(
+        filtersApplied: PoolSearchFiltersDto(minTvlUsd: 0),
+      ),
+    );
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
 
@@ -204,7 +209,11 @@ void main() {
     with a helper text saying it, and a button to search all pools""",
     goldenFileName: "deposit_page_no_yields_filtered_by_min_liquidity",
     (tester) async {
-      when(() => cubit.state).thenReturn(const DepositState.noYields(minLiquiditySearched: 97654));
+      when(() => cubit.state).thenReturn(
+        const DepositState.noYields(
+          filtersApplied: PoolSearchFiltersDto(minTvlUsd: 97654),
+        ),
+      );
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
 
@@ -222,7 +231,11 @@ void main() {
             ignoreMinLiquidity: any(named: "ignoreMinLiquidity")),
       ).thenAnswer((_) async {});
 
-      when(() => cubit.state).thenReturn(const DepositState.noYields(minLiquiditySearched: 97654));
+      when(() => cubit.state).thenReturn(
+        const DepositState.noYields(
+          filtersApplied: PoolSearchFiltersDto(minTvlUsd: 97654),
+        ),
+      );
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
 
@@ -241,16 +254,16 @@ void main() {
 
   zGoldenTest("""When clicking the helper button in the no yields state,
    it should navigate back to choose tokens stage""", (tester) async {
-    when(() => navigator.back(any())).thenAnswer((_) async {});
+    when(() => navigator.navigateToNewPosition()).thenAnswer((_) async {});
 
-    when(() => cubit.state).thenReturn(const DepositState.noYields(minLiquiditySearched: 0));
+    when(() => cubit.state).thenReturn(const DepositState.noYields(filtersApplied: PoolSearchFiltersDto()));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
 
     await tester.tap(find.byKey(const Key("help-button")));
     await tester.pumpAndSettle();
 
-    verify(() => navigator.back(any())).called(1);
+    verify(() => navigator.navigateToNewPosition()).called(1);
   });
 
   zGoldenTest("When the cubit state is error, it should show the error state", goldenFileName: "deposit_page_error",
@@ -319,7 +332,9 @@ void main() {
     search has zero, but the user has a local filter set, it should show a text and a button to search only pools
     with the local filter amount set""",
       goldenFileName: "deposit_page_success_filtered_by_min_liquidity_local_filter_set", (tester) async {
-    final yields = YieldsDto.fixture().copyWith(minLiquidityUSD: 0); // api filter returns 0
+    final yields = YieldsDto.fixture().copyWith(
+      filters: const PoolSearchFiltersDto(minTvlUsd: 0),
+    ); // api filter returns 0
     when(() => cubit.poolSearchSettings).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 2189)); // local filter set
     when(() => cubit.state).thenReturn(DepositState.success(yields));
 
@@ -331,7 +346,10 @@ void main() {
   zGoldenTest("""When clicking in the button to search all pools in the success state
    that is with a filter for min liquidity, it should call the cubit to get pools with
    the ignore min liquidity flag""", (tester) async {
-    final yields = YieldsDto.fixture().copyWith(minLiquidityUSD: 12675);
+    final yields = YieldsDto.fixture().copyWith(
+      filters: const PoolSearchFiltersDto(minTvlUsd: 12675),
+    );
+
     when(() => cubit.poolSearchSettings).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 12675));
     when(() => cubit.state).thenReturn(DepositState.success(yields));
     when(() => cubit.getBestPools(
@@ -356,7 +374,10 @@ void main() {
   zGoldenTest("""When clicking in the button to search only pools with more than x amount in
    the success state that is without a filter for min liquidity, it should call the cubit to get pools with
    the min liquidity set to not be ignored""", (tester) async {
-    final yields = YieldsDto.fixture().copyWith(minLiquidityUSD: 0); // api filter returns 0
+    final yields = YieldsDto.fixture().copyWith(
+      filters: const PoolSearchFiltersDto(minTvlUsd: 0),
+    ); // api filter returns 0
+
     when(() => cubit.poolSearchSettings).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 12675)); // local filter set
     when(() => cubit.state).thenReturn(DepositState.success(yields));
     when(() => cubit.getBestPools(

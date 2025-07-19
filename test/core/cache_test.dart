@@ -162,4 +162,22 @@ void main() {
     expect(result, true);
     verify(() => sharedPreferencesWithCache.getBool(CacheKey.areCookiesConsented.key)).called(1);
   });
+
+  test("when calling 'blockedProtocolsIds' it should get under the correct key", () {
+    when(() => sharedPreferencesWithCache.getStringList(any())).thenReturn(["1", "2"]);
+
+    final result = sut.blockedProtocolsIds;
+
+    expect(result, ["1", "2"]);
+    verify(() => sharedPreferencesWithCache.getStringList(CacheKey.blockedProtocolsIds.key)).called(1);
+  });
+
+  test("when calling 'saveBlockedProtocolsIds' it should save under the correct key", () async {
+    when(() => sharedPreferencesWithCache.setStringList(any(), any())).thenAnswer((_) async => true);
+
+    final ids = ["1", "2"];
+    await sut.saveBlockedProtocolIds(blockedProtocolIds: ids);
+
+    verify(() => sharedPreferencesWithCache.setStringList(CacheKey.blockedProtocolsIds.key, ids)).called(1);
+  });
 }

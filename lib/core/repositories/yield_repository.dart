@@ -13,6 +13,7 @@ class YieldRepository {
     required String token1Address,
     required AppNetworks network,
     required PoolSearchSettingsDto searchSettings,
+    required List<String> blockedProtocolIds,
   }) async {
     final response = await _zupAPIDio.post("/pools/search/${network.chainId}", queryParameters: {
       "token0Address": token0Address,
@@ -20,6 +21,7 @@ class YieldRepository {
     }, data: {
       "filters": {
         "minTvlUsd": searchSettings.minLiquidityUSD,
+        "blockedProtocols": blockedProtocolIds,
         "allowedPoolTypes": [
           if (searchSettings.allowV3Search) "V3",
           if (searchSettings.allowV4Search) "V4",
@@ -34,6 +36,7 @@ class YieldRepository {
     required String token0InternalId,
     required String token1InternalId,
     required PoolSearchSettingsDto searchSettings,
+    required List<String> blockedProtocolIds,
     bool testnetMode = false,
   }) async {
     final response = await _zupAPIDio.post("/pools/search/all", queryParameters: {
@@ -43,6 +46,7 @@ class YieldRepository {
       "filters": {
         "minTvlUsd": searchSettings.minLiquidityUSD,
         "testnetMode": testnetMode,
+        "blockedProtocols": blockedProtocolIds,
         "allowedPoolTypes": [
           if (searchSettings.allowV3Search) "V3",
           if (searchSettings.allowV4Search) "V4",

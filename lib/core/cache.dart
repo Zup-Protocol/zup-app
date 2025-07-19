@@ -9,6 +9,7 @@ enum CacheKey {
   depositSettings,
   poolSearchSettings,
   areCookiesConsented,
+  blockedProtocolsIds,
   isTestnetMode;
 
   String get key => name;
@@ -45,6 +46,14 @@ class Cache {
 
   bool getTestnetMode() {
     return _cache.getBool(CacheKey.isTestnetMode.key) ?? false;
+  }
+
+  Future<void> saveBlockedProtocolIds({required List<String> blockedProtocolIds}) async {
+    await _cache.setStringList(CacheKey.blockedProtocolsIds.key, blockedProtocolIds);
+  }
+
+  List<String> get blockedProtocolsIds {
+    return _cache.getStringList(CacheKey.blockedProtocolsIds.key) ?? [];
   }
 
   Future<void> savePoolSearchSettings({required PoolSearchSettingsDto settings}) async {

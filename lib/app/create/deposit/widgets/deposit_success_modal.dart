@@ -122,7 +122,7 @@ class _DepositSuccessModalState extends State<DepositSuccessModal> {
         ZupPrimaryButton(
           key: const Key("view-position-button"),
           title: S.of(context).depositSuccessModalViewPositionOnDEX(dexName: widget.depositedYield.protocol.name),
-          onPressed: () => launchUrl(Uri.parse(widget.depositedYield.protocol.url)),
+          onPressed: (buttonContext) => launchUrl(Uri.parse(widget.depositedYield.protocol.url)),
           fontWeight: FontWeight.w500,
           icon: Assets.icons.arrowUpRight.svg(),
           backgroundColor: Colors.transparent,
@@ -135,7 +135,7 @@ class _DepositSuccessModalState extends State<DepositSuccessModal> {
           key: const Key("close-button"),
           title: S.of(context).close,
           width: double.infinity,
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: (buttonContext) => Navigator.of(context).pop(),
         ),
       ],
     );

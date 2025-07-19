@@ -8,6 +8,7 @@ import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
@@ -60,11 +61,12 @@ void main() {
     );
 
     when(() => appCubit.isTestnetMode).thenReturn(false);
-
+    when(() => cache.blockedProtocolsIds).thenReturn([]);
     when(() => yieldRepository.getAllNetworksYield(
         token0InternalId: any(named: "token0InternalId"),
         token1InternalId: any(named: "token1InternalId"),
         searchSettings: any(named: "searchSettings"),
+        blockedProtocolIds: any(named: "blockedProtocolIds"),
         testnetMode: any(named: "testnetMode"))).thenAnswer((_) async => YieldsDto.fixture());
 
     when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.sepolia);
@@ -181,6 +183,7 @@ void main() {
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
         searchSettings: any(named: "searchSettings"),
+        blockedProtocolIds: any(named: "blockedProtocolIds"),
         network: any(named: "network"))).thenAnswer(
       (_) async => YieldsDto.fixture(),
     );
@@ -195,6 +198,7 @@ void main() {
           token1Address: token1Address,
           searchSettings: any(named: "searchSettings"),
           network: any(named: "network"),
+          blockedProtocolIds: any(named: "blockedProtocolIds"),
         )).called(1);
   });
 
@@ -204,18 +208,21 @@ void main() {
     const minLiquidityUSD = 123;
 
     when(() => yieldRepository.getSingleNetworkYield(
+        blockedProtocolIds: any(named: "blockedProtocolIds"),
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
         searchSettings: any(named: "searchSettings"),
         network: any(named: "network"))).thenAnswer(
-      (_) async => const YieldsDto(pools: [], minLiquidityUSD: minLiquidityUSD),
+      (_) async => const YieldsDto(pools: [], filters: PoolSearchFiltersDto(minTvlUsd: minLiquidityUSD)),
     );
 
     expectLater(
         sut.stream,
         emitsInOrder([
           const DepositState.loading(),
-          const DepositState.noYields(minLiquiditySearched: minLiquidityUSD),
+          const DepositState.noYields(
+            filtersApplied: PoolSearchFiltersDto(minTvlUsd: minLiquidityUSD),
+          ),
         ]));
 
     await sut.getBestPools(token0AddressOrId: "", token1AddressOrId: "");
@@ -225,6 +232,7 @@ void main() {
     final pools = YieldsDto.fixture();
 
     when(() => yieldRepository.getSingleNetworkYield(
+        blockedProtocolIds: any(named: "blockedProtocolIds"),
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
         searchSettings: any(named: "searchSettings"),
@@ -237,6 +245,7 @@ void main() {
 
   test("When calling `getBestPools` and receiving an error, it should emit the error state", () async {
     when(() => yieldRepository.getSingleNetworkYield(
+        blockedProtocolIds: any(named: "blockedProtocolIds"),
         token0Address: any(named: "token0Address"),
         token1Address: any(named: "token1Address"),
         searchSettings: any(named: "searchSettings"),
@@ -689,6 +698,7 @@ void main() {
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 129816));
 
     when(() => yieldRepository.getSingleNetworkYield(
+          blockedProtocolIds: any(named: "blockedProtocolIds"),
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
@@ -698,6 +708,7 @@ void main() {
     await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x", ignoreMinLiquidity: true);
 
     verify(() => yieldRepository.getSingleNetworkYield(
+          blockedProtocolIds: any(named: "blockedProtocolIds"),
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
@@ -710,6 +721,7 @@ void main() {
     when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.allNetworks);
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 129816));
     when(() => yieldRepository.getAllNetworksYield(
+          blockedProtocolIds: any(named: "blockedProtocolIds"),
           token0InternalId: any(named: "token0InternalId"),
           token1InternalId: any(named: "token1InternalId"),
           searchSettings: any(named: "searchSettings"),
@@ -718,6 +730,7 @@ void main() {
     await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x", ignoreMinLiquidity: true);
 
     verify(() => yieldRepository.getAllNetworksYield(
+          blockedProtocolIds: any(named: "blockedProtocolIds"),
           token0InternalId: any(named: "token0InternalId"),
           token1InternalId: any(named: "token1InternalId"),
           searchSettings: PoolSearchSettingsDto.fixture().copyWith(minLiquidityUSD: 0),
@@ -730,6 +743,7 @@ void main() {
 
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: minLiquiditySaved));
     when(() => yieldRepository.getSingleNetworkYield(
+          blockedProtocolIds: any(named: "blockedProtocolIds"),
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
@@ -739,6 +753,7 @@ void main() {
     await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x", ignoreMinLiquidity: false);
 
     verify(() => yieldRepository.getSingleNetworkYield(
+          blockedProtocolIds: any(named: "blockedProtocolIds"),
           token0Address: any(named: "token0Address"),
           token1Address: any(named: "token1Address"),
           network: any(named: "network"),
@@ -773,6 +788,7 @@ void main() {
     await sut.getBestPools(token0AddressOrId: token0Address, token1AddressOrId: token1Address);
 
     verify(() => yieldRepository.getAllNetworksYield(
+          blockedProtocolIds: any(named: "blockedProtocolIds"),
           token0InternalId: token0Address,
           token1InternalId: token1Address,
           searchSettings: any(named: "searchSettings"),
@@ -786,5 +802,40 @@ void main() {
     await sut.selectYield(selectedYield, selectedYieldTimeFrame);
 
     expect(sut.selectedYieldTimeframe, selectedYieldTimeFrame);
+  });
+
+  test("""When calling 'getBestPools' and all networks is the selected network,
+  it should call the repository to get it passing the blocked protocol ids got
+  from the cache""", () async {
+    final cachedBlockedProtocolIds = ["0x1", "0x2", "ababa"];
+    when(() => cache.blockedProtocolsIds).thenReturn(cachedBlockedProtocolIds);
+    when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.allNetworks);
+
+    await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x");
+
+    verify(() => yieldRepository.getAllNetworksYield(
+          blockedProtocolIds: cachedBlockedProtocolIds,
+          token0InternalId: any(named: "token0InternalId"),
+          token1InternalId: any(named: "token1InternalId"),
+          searchSettings: any(named: "searchSettings"),
+        )).called(1);
+  });
+
+  test("""When calling 'getBestPools' and all networks is not the selected network,
+  it should call the repository to get it passing the blocked protocol ids got
+  from the cache""", () async {
+    final cachedBlockedProtocolIds = ["017628761", "asaas", "ababa"];
+    when(() => cache.blockedProtocolsIds).thenReturn(cachedBlockedProtocolIds);
+    when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.sepolia);
+
+    await sut.getBestPools(token0AddressOrId: "0x", token1AddressOrId: "0x");
+
+    verify(() => yieldRepository.getSingleNetworkYield(
+          blockedProtocolIds: cachedBlockedProtocolIds,
+          network: any(named: "network"),
+          token0Address: any(named: "token0Address"),
+          token1Address: any(named: "token1Address"),
+          searchSettings: any(named: "searchSettings"),
+        )).called(1);
   });
 }

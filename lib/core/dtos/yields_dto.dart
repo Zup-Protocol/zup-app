@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
 import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
@@ -14,7 +15,7 @@ class YieldsDto with _$YieldsDto {
   @JsonSerializable(explicitToJson: true)
   const factory YieldsDto({
     @Default(<YieldDto>[]) @JsonKey(name: "pools") List<YieldDto> pools,
-    @Default(0) @JsonKey(name: "minTvlUsd") num minLiquidityUSD,
+    @Default(PoolSearchFiltersDto()) PoolSearchFiltersDto filters,
   }) = _YieldsDto;
 
   bool get isEmpty => pools.isEmpty;
@@ -27,12 +28,12 @@ class YieldsDto with _$YieldsDto {
 
   factory YieldsDto.empty() => const YieldsDto(
         pools: [],
-        minLiquidityUSD: 0,
       );
 
-  factory YieldsDto.fixture() => const YieldsDto(
+  factory YieldsDto.fixture() => YieldsDto(
+        filters: PoolSearchFiltersDto.fixture(),
         pools: [
-          YieldDto(
+          const YieldDto(
             latestTick: "637812562",
             positionManagerAddress: "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4",
             poolType: PoolType.v3,
