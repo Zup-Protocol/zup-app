@@ -27,7 +27,7 @@ class _ExchangesFilterDropdownButtonState extends State<ExchangesFilterDropdownB
 
   num get allowedProtocolsCount => cubit!.protocols
       .where(
-        (protocol) => !cache.blockedProtocolsIds.contains(protocol.id),
+        (protocol) => !cache.blockedProtocolsIds.contains(protocol.rawId),
       )
       .length;
 
@@ -122,10 +122,10 @@ class _ExchangesFilterDropdownButtonState extends State<ExchangesFilterDropdownB
                       items: protocols
                           .map(
                             (protocol) => ZupCheckboxItem(
-                              id: protocol.id,
+                              id: protocol.rawId,
                               title: protocol.name,
                               icon: zupCachedImage.build(protocol.logo, radius: 50),
-                              isChecked: !cache.blockedProtocolsIds.contains(protocol.id),
+                              isChecked: !cache.blockedProtocolsIds.contains(protocol.rawId),
                               isDisabled: false,
                             ),
                           )

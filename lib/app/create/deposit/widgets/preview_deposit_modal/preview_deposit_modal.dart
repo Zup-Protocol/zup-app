@@ -120,17 +120,17 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
   double get quoteTokenAmount => isReversedLocal ? widget.token0DepositAmount : widget.token1DepositAmount;
   PreviewDepositModalCubit get cubit => context.read<PreviewDepositModalCubit>();
   BigInt get token0DepositAmount =>
-      widget.token0DepositAmount.parseTokenAmount(decimals: widget.currentYield.token0.decimals);
+      widget.token0DepositAmount.parseTokenAmount(decimals: widget.currentYield.token0NetworkDecimals);
   BigInt get token1DepositAmount =>
-      widget.token1DepositAmount.parseTokenAmount(decimals: widget.currentYield.token1.decimals);
+      widget.token1DepositAmount.parseTokenAmount(decimals: widget.currentYield.token1NetworkDecimals);
 
   double get currentPrice {
     final currentTick = cubit.latestPoolTick;
 
     final price = tickToPrice(
       tick: currentTick,
-      poolToken0Decimals: widget.currentYield.token0.decimals,
-      poolToken1Decimals: widget.currentYield.token1.decimals,
+      poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
+      poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
     );
 
     return isReversedLocal ? price.priceAsQuoteToken : price.priceAsBaseToken;
@@ -142,16 +142,16 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
 
       return priceToTick(
         price: (widget.isReversed == !isReversedLocal) ? widget.maxPrice.price : widget.minPrice.price,
-        poolToken0Decimals: widget.currentYield.token0.decimals,
-        poolToken1Decimals: widget.currentYield.token1.decimals,
+        poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
+        poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
         isReversed: widget.isReversed,
       );
     }
 
     ({double priceAsBaseToken, double priceAsQuoteToken}) price() => tickToPrice(
           tick: tick(),
-          poolToken0Decimals: widget.currentYield.token0.decimals,
-          poolToken1Decimals: widget.currentYield.token1.decimals,
+          poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
+          poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
         );
 
     return isReversedLocal ? price().priceAsQuoteToken : price().priceAsBaseToken;
@@ -163,16 +163,16 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
 
       return priceToTick(
         price: (widget.isReversed == !isReversedLocal) ? widget.minPrice.price : widget.maxPrice.price,
-        poolToken0Decimals: widget.currentYield.token0.decimals,
-        poolToken1Decimals: widget.currentYield.token1.decimals,
+        poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
+        poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
         isReversed: widget.isReversed,
       );
     }
 
     ({double priceAsBaseToken, double priceAsQuoteToken}) price() => tickToPrice(
           tick: tick(),
-          poolToken0Decimals: widget.currentYield.token0.decimals,
-          poolToken1Decimals: widget.currentYield.token1.decimals,
+          poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
+          poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
         );
 
     return isReversedLocal ? price().priceAsQuoteToken : price().priceAsBaseToken;

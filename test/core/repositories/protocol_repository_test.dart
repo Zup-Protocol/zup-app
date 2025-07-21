@@ -31,12 +31,13 @@ void main() {
 
   test("When calling `getAllSupportedProtocols` it should return a list of protocols", () async {
     final protocols = [
-      ProtocolDto.fixture().copyWith(id: "1", name: "LULU", logo: "LALA.png", url: "LALA.com"),
-      ProtocolDto.fixture().copyWith(id: "2", name: "LALA", logo: "LULU.png", url: "LULU.com"),
+      ProtocolDto.fixture().copyWith(rawId: "1", name: "LULU", logo: "LALA.png", url: "LALA.com"),
+      ProtocolDto.fixture().copyWith(rawId: "2", name: "LALA", logo: "LULU.png", url: "LULU.com"),
     ];
+
     when(() => zupApiDio.get(any())).thenAnswer(
       (_) async => Response(
-        data: protocols.map((protocol) => protocol.toJson()).toList(),
+        data: protocols.map((protocol) => protocol.toJson()..["id"] = protocol.rawId.toString()).toList(),
         statusCode: 200,
         requestOptions: RequestOptions(),
       ),

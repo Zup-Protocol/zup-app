@@ -1,6 +1,5 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/token_amount_input_formatter.dart';
@@ -55,8 +54,8 @@ class RangeController extends ChangeNotifier {
 class RangeSelector extends StatefulWidget {
   const RangeSelector({
     super.key,
-    required this.poolToken0,
-    required this.poolToken1,
+    required this.poolToken0Decimals,
+    required this.poolToken1Decimals,
     required this.displayBaseTokenSymbol,
     required this.displayQuoteTokenSymbol,
     required this.isReversed,
@@ -70,8 +69,8 @@ class RangeSelector extends StatefulWidget {
     this.state = const RangeSelectorState(type: RangeSelectorStateType.regular),
   });
 
-  final TokenDto poolToken0;
-  final TokenDto poolToken1;
+  final int poolToken0Decimals;
+  final int poolToken1Decimals;
   final String displayBaseTokenSymbol;
   final String displayQuoteTokenSymbol;
   final bool isReversed;
@@ -116,8 +115,8 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
   double getAdjustedPrice(double price) {
     final adjustedPrice = priceToClosestValidPrice(
       price: price,
-      poolToken0Decimals: widget.poolToken0.decimals,
-      poolToken1Decimals: widget.poolToken1.decimals,
+      poolToken0Decimals: widget.poolToken0Decimals,
+      poolToken1Decimals: widget.poolToken1Decimals,
       tickSpacing: widget.tickSpacing,
       isReversed: widget.isReversed,
     );
@@ -131,13 +130,16 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
     if (currentPrice == 0 && !increasing) return;
 
     if ((currentPrice == 0 || widget.isInfinity) && increasing) {
-      final minimumPrice = tickToPrice(
-        tick: BigInt.from(widget.tickSpacing),
-        poolToken0Decimals: widget.poolToken0.decimals,
-        poolToken1Decimals: widget.poolToken1.decimals,
+      final minimumPrice = priceToClosestValidPrice(
+        price: 0.000000000000000001,
+        poolToken0Decimals: widget.poolToken0Decimals,
+        poolToken1Decimals: widget.poolToken1Decimals,
+        tickSpacing: widget.tickSpacing,
+        isReversed: widget.isReversed,
       );
 
-      userTypedValue = minimumPrice.priceAsBaseToken.toString();
+      userTypedValue = minimumPrice.price.toString();
+
       return adjustTypedAmountAndCallback();
     }
 
@@ -145,8 +147,8 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
       final BigInt currentTick = tickToClosestValidTick(
         tick: priceToTick(
           price: currentPrice,
-          poolToken0Decimals: widget.poolToken0.decimals,
-          poolToken1Decimals: widget.poolToken1.decimals,
+          poolToken0Decimals: widget.poolToken0Decimals,
+          poolToken1Decimals: widget.poolToken1Decimals,
           isReversed: widget.isReversed,
         ),
         tickSpacing: widget.tickSpacing,
@@ -163,8 +165,8 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
     double nextPrice() {
       final nextPrice = tickToPrice(
         tick: nextTick(),
-        poolToken0Decimals: widget.poolToken0.decimals,
-        poolToken1Decimals: widget.poolToken1.decimals,
+        poolToken0Decimals: widget.poolToken0Decimals,
+        poolToken1Decimals: widget.poolToken1Decimals,
       );
 
       if (widget.isReversed) return nextPrice.priceAsQuoteToken;
@@ -179,8 +181,8 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
     if (widget.initialPrice != null) {
       final adjustedInitialPrice = priceToClosestValidPrice(
         price: widget.initialPrice ?? 0,
-        poolToken0Decimals: widget.poolToken0.decimals,
-        poolToken1Decimals: widget.poolToken1.decimals,
+        poolToken0Decimals: widget.poolToken0Decimals,
+        poolToken1Decimals: widget.poolToken1Decimals,
         tickSpacing: widget.tickSpacing,
         isReversed: widget.isReversed,
       );

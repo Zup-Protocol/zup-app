@@ -68,10 +68,10 @@ void main() {
       when(() => cache.blockedProtocolsIds).thenReturn(blockedProtocolsIds);
 
       when(() => protocolRepository.getAllSupportedProtocols()).thenAnswer((_) async => [
-            ProtocolDto(name: "C", id: blockedProtocolsIds[0]),
-            ProtocolDto(name: "A", id: blockedProtocolsIds[1]),
-            ProtocolDto(name: "B", id: blockedProtocolsIds[2]),
-            const ProtocolDto(name: "A", id: "some other id not blocked"),
+            ProtocolDto(name: "C", rawId: blockedProtocolsIds[0]),
+            ProtocolDto(name: "A", rawId: blockedProtocolsIds[1]),
+            ProtocolDto(name: "B", rawId: blockedProtocolsIds[2]),
+            const ProtocolDto(name: "A", rawId: "some other id not blocked"),
           ]);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
@@ -90,7 +90,6 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
-
   zGoldenTest(
     """When the cubit state is error, and the user clicks the button,
     it should show a snackbar saying to try to refresh the page""",
@@ -139,10 +138,10 @@ void main() {
 
       when(() => protocolRepository.getAllSupportedProtocols()).thenAnswer(
         (_) async => [
-          ProtocolDto(name: "A", id: blockedProtocolsIds[0]),
-          const ProtocolDto(name: "B", id: "some other id not blocked"),
-          ProtocolDto(name: "C", id: blockedProtocolsIds[2]),
-          const ProtocolDto(name: "D", id: "some other id not blocked"),
+          ProtocolDto(name: "A", rawId: blockedProtocolsIds[0]),
+          const ProtocolDto(name: "B", rawId: "some other id not blocked"),
+          ProtocolDto(name: "C", rawId: blockedProtocolsIds[2]),
+          const ProtocolDto(name: "D", rawId: "some other id not blocked"),
         ],
       );
 
@@ -161,10 +160,10 @@ void main() {
     (tester) async {
       final blockedProtocolsIds = ["32983", "sag", "nnnn", "dale"];
       final allProtocols = [
-        ProtocolDto(name: "A", id: blockedProtocolsIds[0]),
-        const ProtocolDto(name: "B", id: "some other id not blocked"),
-        ProtocolDto(name: "C", id: blockedProtocolsIds[2]),
-        const ProtocolDto(name: "D", id: "some other id not blocked"),
+        ProtocolDto(name: "A", rawId: blockedProtocolsIds[0]),
+        const ProtocolDto(name: "B", rawId: "some other id not blocked"),
+        ProtocolDto(name: "C", rawId: blockedProtocolsIds[2]),
+        const ProtocolDto(name: "D", rawId: "some other id not blocked"),
       ];
 
       when(() => cache.saveBlockedProtocolIds(blockedProtocolIds: any(named: "blockedProtocolIds"))).thenAnswer(
@@ -199,10 +198,10 @@ void main() {
     (tester) async {
       final blockedProtocolsIds = ["32983", "sag", "nnnn", "dale"];
       final allProtocols = [
-        ProtocolDto(name: "A", id: blockedProtocolsIds[0]),
-        const ProtocolDto(name: "B", id: "some other id not blocked"),
-        ProtocolDto(name: "C", id: blockedProtocolsIds[2]),
-        const ProtocolDto(name: "D", id: "some other id not blocked"),
+        ProtocolDto(name: "A", rawId: blockedProtocolsIds[0]),
+        const ProtocolDto(name: "B", rawId: "some other id not blocked"),
+        ProtocolDto(name: "C", rawId: blockedProtocolsIds[2]),
+        const ProtocolDto(name: "D", rawId: "some other id not blocked"),
       ];
 
       when(() => cache.saveBlockedProtocolIds(blockedProtocolIds: any(named: "blockedProtocolIds"))).thenAnswer(
