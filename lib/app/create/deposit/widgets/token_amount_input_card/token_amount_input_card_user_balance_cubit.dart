@@ -13,8 +13,12 @@ part 'token_amount_input_card_user_balance_state.dart';
 
 class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceState> with KeysMixin {
   TokenAmountCardUserBalanceCubit(
-      this._wallet, this._tokenAddress, this._network, this._zupSingletonCache, this._onRefreshBalance)
-      : super(const TokenAmountCardUserBalanceState.hideUserBalance()) {
+    this._wallet,
+    this._tokenAddress,
+    this._network,
+    this._zupSingletonCache,
+    this._onRefreshBalance,
+  ) : super(const TokenAmountCardUserBalanceState.hideUserBalance()) {
     _setupStreams();
   }
 
@@ -45,9 +49,10 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
     if (_wallet.signer != null) await getUserTokenAmount(isNative: asNativeToken);
   }
 
-  Future<void> updateNativeTokenAndFetch({required bool isNative}) async {
+  Future<void> updateNativeTokenAndFetch({required bool isNative, required AppNetworks network}) async {
     _isNative = isNative;
     if (isNative) _tokenAddress = EthereumConstants.zeroAddress;
+    _network = network;
 
     if (_wallet.signer != null) await getUserTokenAmount(isNative: _isNative);
   }
@@ -66,6 +71,7 @@ class TokenAmountCardUserBalanceCubit extends Cubit<TokenAmountCardUserBalanceSt
             tokenAddress: _tokenAddress,
             userAddress: await _wallet.signer!.address,
             isNative: isNative,
+            network: _network,
           ),
           ignoreCache: ignoreCache,
           expiration: const Duration(minutes: 10));

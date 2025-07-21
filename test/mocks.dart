@@ -25,6 +25,7 @@ import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
+import 'package:zup_app/core/repositories/protocol_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/zup_analytics.dart';
@@ -118,6 +119,8 @@ class FirebaseAnalyticsMock extends Mock implements FirebaseAnalytics {}
 
 class ZupHolderMock extends Mock implements ZupHolder {}
 
+class ProtocolRepositoryMock extends Mock implements ProtocolRepository {}
+
 class ChangeNotifierMock extends Mock with ChangeNotifier {
   void notify() => notifyListeners();
 }
@@ -177,7 +180,7 @@ ZupCachedImage mockZupCachedImage() {
         width: any(named: "width"),
         radius: any(named: "radius"),
         errorWidget: any(named: "errorWidget"),
-        loadingBuilder: any(named: "loadingBuilder"),
+        placeholder: any(named: "placeholder"),
       )).thenReturn(const SizedBox(child: Text("IMAGE")));
 
   return zupCachedImage;

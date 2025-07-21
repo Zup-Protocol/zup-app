@@ -53,13 +53,13 @@ dependencies:
   firebase_analytics: ^11.4.5
   envied: ^1.1.1
 
-dependency_overrides:
-  # zup_core:
-  #   path: ../zup-core
-  # web3kit:
-  #   path: ../web3kit
-  # zup_ui_kit:
-  #   path: ../zup-ui-kit
+# dependency_overrides:
+#   zup_core:
+#     path: ../zup-core
+#   web3kit:
+#     path: ../web3kit
+#   zup_ui_kit:
+#     path: ../zup-ui-kit
 
 dev_dependencies:
   flutter_test:

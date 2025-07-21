@@ -18,6 +18,7 @@ import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
 import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
+import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
@@ -93,6 +94,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
 class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolConversorsMixin, DeviceInfoMixin {
   final zupCachedImage = inject<ZupCachedImage>();
   final navigator = inject<ZupNavigator>();
+  final zupLinks = inject<ZupLinks>();
 
   final ScrollController appScrollController = inject<ScrollController>(
     instanceName: InjectInstanceNames.appScrollController,
@@ -382,9 +384,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                 context,
                 helperButton: (
                   title: S.of(context).previewDepositModalTransactionErrorSnackBarHelperButtonTitle,
-                  onButtonTap: () {
-                    // TODO: Add contact us info
-                  }
+                  onButtonTap: () => zupLinks.launchZupContactUs()
                 ),
                 message: S.of(context).previewDepositModalTransactionErrorSnackBarMessage,
                 type: ZupSnackBarType.error,
@@ -580,7 +580,9 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                       fixedIcon: true,
                       alignCenter: true,
                       title: depositButtonState.title,
-                      onPressed: depositButtonState.onPressed,
+                      onPressed: depositButtonState.onPressed == null
+                          ? null
+                          : (buttonContext) => depositButtonState.onPressed!(),
                       icon: depositButtonState.icon,
                       isLoading: depositButtonState.isLoading ?? false,
                       width: double.maxFinite,

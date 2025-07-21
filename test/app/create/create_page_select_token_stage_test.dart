@@ -13,11 +13,13 @@ import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/injections.dart';
+import 'package:zup_app/core/repositories/protocol_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/widgets/token_card.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/zup_core.dart';
 
 import '../../golden_config.dart';
 import '../../mocks.dart';
@@ -28,12 +30,16 @@ void main() {
   late Wallet wallet;
   late Cache cache;
   late ZupNavigator zupNavigator;
+  late ProtocolRepository protocolRepository;
+  late ZupSingletonCache zupSingletonCache;
 
   setUp(() {
     appCubit = AppCubitMock();
     tokensRepository = TokensRepositoryMock();
     wallet = WalletMock();
     zupNavigator = ZupNavigatorMock();
+    protocolRepository = ProtocolRepositoryMock();
+    zupSingletonCache = ZupSingletonCache.shared;
 
     registerFallbackValue(AppNetworks.sepolia);
 
@@ -43,6 +49,8 @@ void main() {
     inject.registerFactory<Debouncer>(() => Debouncer(milliseconds: 0));
     inject.registerFactory<ZupNavigator>(() => zupNavigator);
     inject.registerFactory<Cache>(() => cache);
+    inject.registerFactory<ZupSingletonCache>(() => zupSingletonCache);
+    inject.registerFactory<ProtocolRepository>(() => protocolRepository);
 
     inject.registerLazySingleton<TokenSelectorModalCubit>(
       () => TokenSelectorModalCubit(tokensRepository, appCubit, wallet),

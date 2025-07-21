@@ -41,6 +41,16 @@ class RangeSelectorState {
   final String? message;
 }
 
+class RangeController extends ChangeNotifier {
+  double currentRange = 0;
+
+  void setRange(double range) {
+    currentRange = range;
+
+    notifyListeners();
+  }
+}
+
 class RangeSelector extends StatefulWidget {
   const RangeSelector({
     super.key,
@@ -52,8 +62,10 @@ class RangeSelector extends StatefulWidget {
     required this.tickSpacing,
     required this.onPriceChanged,
     required this.type,
+    this.onUserType,
     this.isInfinity = false,
     this.initialPrice,
+    this.rangeController,
     this.state = const RangeSelectorState(type: RangeSelectorStateType.regular),
   });
 
@@ -65,9 +77,11 @@ class RangeSelector extends StatefulWidget {
   final double? initialPrice;
   final int tickSpacing;
   final Function(double price) onPriceChanged;
+  final Function()? onUserType;
   final RangeSelectorState state;
   final RangeSelectorType type;
   final bool isInfinity;
+  final RangeController? rangeController;
 
   @override
   State<RangeSelector> createState() => _RangeSelectorState();
@@ -90,12 +104,12 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
     }
 
     final typedDecimals = typedPrice.decimals;
+    final nextPrice = getAdjustedPrice(typedPrice);
 
-    controller.text = Decimal.tryParse(getAdjustedPrice(typedPrice).toString())
-            ?.toStringAsFixed(typedDecimals < 4 ? 4 : typedDecimals) ??
-        "";
+    controller.text =
+        Decimal.tryParse(nextPrice.toString())?.toStringAsFixed(typedDecimals < 4 ? 4 : typedDecimals) ?? "";
 
-    widget.onPriceChanged(getAdjustedPrice(typedPrice));
+    widget.onPriceChanged(nextPrice);
   }
 
   double getAdjustedPrice(double price) {
@@ -188,6 +202,11 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
   void initState() {
     super.initState();
 
+    widget.rangeController?.addListener(() {
+      userTypedValue = widget.rangeController?.currentRange.toString();
+      adjustTypedAmountAndCallback();
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.isInfinity) return setInfinity();
 
@@ -253,7 +272,10 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           clipBehavior: Clip.none,
                           controller: controller,
-                          onChanged: (value) => userTypedValue = value,
+                          onChanged: (value) {
+                            userTypedValue = value;
+                            widget.onUserType?.call();
+                          },
                           style: const TextStyle(fontSize: 28),
                           decoration: const InputDecoration(
                             enabledBorder: InputBorder.none,

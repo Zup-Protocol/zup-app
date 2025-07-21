@@ -173,17 +173,17 @@ abstract class S {
   String depositPageSearchOnlyForPoolsWithMorethan(
       {required String minLiquidity});
 
-  /// No description provided for @depositPageMinLiquiditySearchAlert.
-  ///
-  /// In en, this message translates to:
-  /// **'Searched only for pools with more than {minLiquidity} TVL.'**
-  String depositPageMinLiquiditySearchAlert({required String minLiquidity});
-
   /// No description provided for @depositPageTrySearchAllPools.
   ///
   /// In en, this message translates to:
   /// **'Try search all pools?'**
   String get depositPageTrySearchAllPools;
+
+  /// No description provided for @depositPageMinLiquiditySearchAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'You’ve set the search to only show pools with more than {minLiquidity}.'**
+  String depositPageMinLiquiditySearchAlert({required String minLiquidity});
 
   /// No description provided for @slippageExplanation.
   ///
@@ -496,6 +496,73 @@ abstract class S {
   /// **'Loading...'**
   String get loading;
 
+  /// No description provided for @exchangesFilterDropdownButtonDropdownClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get exchangesFilterDropdownButtonDropdownClearAll;
+
+  /// No description provided for @exchangesFilterDropdownButtonDropdownSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get exchangesFilterDropdownButtonDropdownSelectAll;
+
+  /// No description provided for @exchangesFilterDropdownButtonDropdownSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name'**
+  String get exchangesFilterDropdownButtonDropdownSearchHint;
+
+  /// No description provided for @exchangesFilterDropdownButtonDropdownNotFoundStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not found'**
+  String get exchangesFilterDropdownButtonDropdownNotFoundStateTitle;
+
+  /// No description provided for @exchangesFilterDropdownButtonDropdownNotFoundStateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No supported exchanges found with this name'**
+  String get exchangesFilterDropdownButtonDropdownNotFoundStateDescription;
+
+  /// No description provided for @exchangesFilterDropdownButtonErrorSnackBarMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Uh-oh! Something went wrong loading the exchanges. Please try refreshing the page.'**
+  String get exchangesFilterDropdownButtonErrorSnackBarMessage;
+
+  /// No description provided for @exchangesFilterDropdownButtonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchanges'**
+  String get exchangesFilterDropdownButtonTitle;
+
+  /// No description provided for @exchangesFilterDropdownButtonTitleNumered.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchanges ({exchangesCount})'**
+  String exchangesFilterDropdownButtonTitleNumered(
+      {required String exchangesCount});
+
+  /// No description provided for @createPageSelectTokensStageTokenA.
+  ///
+  /// In en, this message translates to:
+  /// **'Token A'**
+  String get createPageSelectTokensStageTokenA;
+
+  /// No description provided for @createPageSelectTokensStageTokenB.
+  ///
+  /// In en, this message translates to:
+  /// **'Token B'**
+  String get createPageSelectTokensStageTokenB;
+
+  /// No description provided for @createPageSelectTokensStageSearchSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Settings'**
+  String get createPageSelectTokensStageSearchSettings;
+
   /// No description provided for @depositPageLoadingStep1Title.
   ///
   /// In en, this message translates to:
@@ -553,13 +620,13 @@ abstract class S {
   /// No description provided for @depositPageEmptyStateDescription.
   ///
   /// In en, this message translates to:
-  /// **'Seems like that there are no pools on our supported protocols matching your selected tokens. Would you like to try another combination?'**
+  /// **'Seems like that there are no pools matching your defined settings at the moment. Would you like to either change your settings or try another combination?'**
   String get depositPageEmptyStateDescription;
 
   /// No description provided for @depositPageEmptyStateHelpButtonTitle.
   ///
   /// In en, this message translates to:
-  /// **'Try another combination'**
+  /// **'Go Back to New Position'**
   String get depositPageEmptyStateHelpButtonTitle;
 
   /// No description provided for @depositPageBackButtonTitle.

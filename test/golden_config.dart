@@ -73,7 +73,14 @@ class GoldenConfig {
             Web3KitLocalizations.delegate,
           ],
           theme: ZupTheme.lightTheme,
-          home: Scaffold(body: child),
+          home: Scaffold(
+            body: CustomScrollView(controller: scrollController, slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: child,
+              )
+            ]),
+          ),
         );
   }
 }

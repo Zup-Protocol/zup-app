@@ -6,6 +6,7 @@ import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/dtos/yields_dto.dart';
@@ -79,12 +80,14 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
       emit(const DepositState.loading());
       final yields = _appCubit.selectedNetwork.isAllNetworks
           ? await _yieldRepository.getAllNetworksYield(
+              blockedProtocolIds: _cache.blockedProtocolsIds,
               token0InternalId: token0AddressOrId,
               token1InternalId: token1AddressOrId,
               searchSettings: ignoreMinLiquidity ? poolSearchSettings.copyWith(minLiquidityUSD: 0) : poolSearchSettings,
               testnetMode: _appCubit.isTestnetMode,
             )
           : await _yieldRepository.getSingleNetworkYield(
+              blockedProtocolIds: _cache.blockedProtocolsIds,
               token0Address: token0AddressOrId,
               token1Address: token1AddressOrId,
               network: _appCubit.selectedNetwork,
@@ -93,7 +96,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
       if (yields.isEmpty) {
         return emit(
-          DepositState.noYields(minLiquiditySearched: yields.minLiquidityUSD),
+          DepositState.noYields(filtersApplied: yields.filters),
         );
       }
 
@@ -108,17 +111,28 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     _selectedYieldTimeframe = yieldTimeFrame;
     _selectedYieldStreamController.add(selectedYield);
 
-    if (selectedYield != null) await getSelectedPoolTick();
+    if (selectedYield != null) {
+      _latestPoolTick = BigInt.parse(yieldDto!.latestTick);
+      _pooltickStreamController.add(_latestPoolTick);
+
+      await getSelectedPoolTick(forceRefresh: true);
+    }
   }
 
-  Future<void> getSelectedPoolTick() async {
+  Future<void> getSelectedPoolTick({bool forceRefresh = false}) async {
     if (selectedYield == null) return;
 
-    _latestPoolTick = null;
-    _pooltickStreamController.add(null);
-
     final selectedYieldBeforeCall = selectedYield;
-    BigInt tick = await _poolService.getPoolTick(selectedYieldBeforeCall!);
+
+    final tick = await _zupSingletonCache.run(
+      () => _poolService.getPoolTick(selectedYieldBeforeCall!),
+      expiration: const Duration(minutes: 1),
+      ignoreCache: forceRefresh,
+      key: poolTickCacheKey(
+        network: selectedYield!.network,
+        poolAddress: selectedYield!.poolAddress,
+      ),
+    );
 
     if (selectedYieldBeforeCall != selectedYield) return await getSelectedPoolTick();
 
@@ -143,6 +157,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
         tokenAddress: tokenAddress,
         userAddress: walletAddress,
         isNative: tokenAddress == EthereumConstants.zeroAddress,
+        network: network,
       ),
       expiration: const Duration(minutes: 10),
     );

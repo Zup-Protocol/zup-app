@@ -34,8 +34,8 @@
             }
         }
     },
-    "depositPageMinLiquiditySearchAlert": "Searched only for pools with more than {minLiquidity} TVL.",
     "depositPageTrySearchAllPools": "Try search all pools?",
+    "depositPageMinLiquiditySearchAlert": "You’ve set the search to only show pools with more than {minLiquidity}.",
     "@depositPageMinLiquiditySearchAlert": {
         "placeholders": {
             "minLiquidity": {
@@ -166,6 +166,24 @@
     "rangeSelectorMinRange": "Min Range",
     "rangeSelectorMaxRange": "Max Range",
     "loading": "Loading...",
+    "exchangesFilterDropdownButtonDropdownClearAll": "Clear All",
+    "exchangesFilterDropdownButtonDropdownSelectAll": "Select All",
+    "exchangesFilterDropdownButtonDropdownSearchHint": "Search by name",
+    "exchangesFilterDropdownButtonDropdownNotFoundStateTitle": "Not found",
+    "exchangesFilterDropdownButtonDropdownNotFoundStateDescription": "No supported exchanges found with this name",
+    "exchangesFilterDropdownButtonErrorSnackBarMessage": "Uh-oh! Something went wrong loading the exchanges. Please try refreshing the page.",
+    "exchangesFilterDropdownButtonTitle": "Exchanges",
+    "exchangesFilterDropdownButtonTitleNumered": "Exchanges ({exchangesCount})",
+    "@exchangesFilterDropdownButtonTitleNumered": {
+        "placeholders": {
+            "exchangesCount": {
+                "type": "String"
+            }
+        }
+    },
+    "createPageSelectTokensStageTokenA": "Token A",
+    "createPageSelectTokensStageTokenB": "Token B",
+    "createPageSelectTokensStageSearchSettings": "Search Settings",
     "depositPageLoadingStep1Title": "Matching Tokens...",
     "depositPageLoadingStep1Description": "Pairing Token A and Token B to kick off the search for top yields!",
     "depositPageLoadingStep2Title": "Scanning the Pools...",
@@ -175,8 +193,8 @@
     "depositPageErrorStateTitle": "Oops! Something went wrong!",
     "depositPageErrorStateDescription": "We ran into a issue while trying to find the best pool. Give it another shot, and if it keeps happening, don’t hesitate to reach out to us!",
     "depositPageEmptyStateTitle": "No Pools Found",
-    "depositPageEmptyStateDescription": "Seems like that there are no pools on our supported protocols matching your selected tokens. Would you like to try another combination?",
-    "depositPageEmptyStateHelpButtonTitle": "Try another combination",
+    "depositPageEmptyStateDescription": "Seems like that there are no pools matching your defined settings at the moment. Would you like to either change your settings or try another combination?",
+    "depositPageEmptyStateHelpButtonTitle": "Go Back to New Position",
     "depositPageBackButtonTitle": "Select Pair",
     "depositPageTitle": "Add liquidity",
     "depositPageTimeFrameTooltipMessage": "Select a time-frame that matches your goal with this pool: a quick win (Short term), a balanced approach (Medium term), or a long haul (Long term).",
