@@ -8,7 +8,7 @@ enum AppNetworks {
   allNetworks,
   mainnet,
   // base,
-  bnb,
+  // bnb,
   unichain,
   scroll,
   sepolia;
@@ -47,7 +47,7 @@ enum AppNetworks {
         allNetworks => false,
         // base => false,
         unichain => false,
-        bnb => false
+        // bnb => false
       };
 
   String get label => switch (this) {
@@ -57,7 +57,7 @@ enum AppNetworks {
         allNetworks => "All Networks",
         // base => "Base",
         unichain => "Unichain",
-        bnb => "BNB Chain",
+        // bnb => "BNB Chain",
       };
 
   Widget get icon => switch (this) {
@@ -67,7 +67,7 @@ enum AppNetworks {
         // base => Assets.logos.base.svg(),
         unichain => Assets.logos.unichain.svg(),
         allNetworks => Assets.icons.all.svg(),
-        bnb => Assets.logos.bnbChain.svg()
+        // bnb => Assets.logos.bnbChain.svg()
       };
 
   ChainInfo get chainInfo => switch (this) {
@@ -107,13 +107,13 @@ enum AppNetworks {
             nativeCurrency: NativeCurrencies.eth.currencyInfo,
             rpcUrls: [rpcUrl],
           ),
-        bnb => ChainInfo(
-            hexChainId: "0x38",
-            chainName: label,
-            blockExplorerUrls: const ["https://bscscan.com"],
-            nativeCurrency: NativeCurrencies.bnb.currencyInfo,
-            rpcUrls: [rpcUrl],
-          ),
+        // bnb => ChainInfo(
+        //   hexChainId => "0x38",
+        //   chainName => label,
+        //   blockExplorerUrls => const ["https://bscscan.com"],
+        //   nativeCurrency => NativeCurrencies.bnb.currencyInfo,
+        //   rpcUrls => [rpcUrl],
+        // ),
       };
 
   String get wrappedNativeTokenAddress => switch (this) {
@@ -123,7 +123,7 @@ enum AppNetworks {
         scroll => "0x5300000000000000000000000000000000000004",
         // base => "0x4200000000000000000000000000000000000006",
         unichain => "0x4200000000000000000000000000000000000006",
-        bnb => "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+        // bnb => "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
       };
 
   String get rpcUrl => switch (this) {
@@ -133,7 +133,7 @@ enum AppNetworks {
         scroll => "https://scroll-rpc.publicnode.com",
         // base => "https://base-rpc.publicnode.com",
         unichain => "https://unichain-rpc.publicnode.com",
-        bnb => "https://bsc-rpc.publicnode.com"
+        // bnb => "https://bsc-rpc.publicnode.com"
       };
 
   Future<void> openTx(String txHash) async {

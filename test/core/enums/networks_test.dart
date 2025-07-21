@@ -23,7 +23,7 @@ void main() {
     expect(AppNetworks.fromValue("allNetworks"), AppNetworks.allNetworks, reason: "All networks should match");
     // expect(AppNetworks.fromValue("base"), AppNetworks.base, reason: "Base should match");
     expect(AppNetworks.fromValue("unichain"), AppNetworks.unichain, reason: "Unichain should match");
-    expect(AppNetworks.fromValue("bnb"), AppNetworks.bnb, reason: "BNB should match");
+    // expect(AppNetworks.fromValue("bnb"), AppNetworks.bnb, reason: "BNB should match");
   });
 
   test("Label extension should match for all networks", () {
@@ -33,7 +33,7 @@ void main() {
     expect(AppNetworks.allNetworks.label, "All Networks", reason: "All Networks Label should match");
     // expect(AppNetworks.base.label, "Base", reason: "Base Label should match");
     expect(AppNetworks.unichain.label, "Unichain", reason: "Unichain Label should match");
-    expect(AppNetworks.bnb.label, "BNB Chain", reason: "BNB Chain Label should match");
+    // expect(AppNetworks.bnb.label, "BNB Chain", reason: "BNB Chain Label should match");
   });
 
   test("`testnets` method should return all testnets in the enum, excluding the 'all networks'", () {
@@ -49,7 +49,7 @@ void main() {
         AppNetworks.scroll,
         // AppNetworks.base,
         AppNetworks.unichain,
-        AppNetworks.bnb
+        // AppNetworks.bnb
       ]),
     );
   });
@@ -75,7 +75,7 @@ void main() {
   });
 
   test("`isTestnet` method should return false for bnb", () {
-    expect(AppNetworks.bnb.isTestnet, false);
+    // expect(AppNetworks.bnb.isTestnet, false);
   });
 
   test("Chain info extension should match for all networks", () {
@@ -138,17 +138,17 @@ void main() {
       reason: "Unichain ChainInfo should match",
     );
 
-    expect(
-      AppNetworks.bnb.chainInfo,
-      ChainInfo(
-        hexChainId: "0x38",
-        chainName: "BNB Chain",
-        blockExplorerUrls: const ["https://bscscan.com"],
-        nativeCurrency: NativeCurrencies.bnb.currencyInfo,
-        rpcUrls: const ["https://bsc-rpc.publicnode.com"],
-      ),
-      reason: "BNB Chain ChainInfo should match",
-    );
+    // expect(
+    //   AppNetworks.bnb.chainInfo,
+    //   ChainInfo(
+    //     hexChainId: "0x38",
+    //     chainName: "BNB Chain",
+    //     blockExplorerUrls: const ["https://bscscan.com"],
+    //     nativeCurrency: NativeCurrencies.bnb.currencyInfo,
+    //     rpcUrls: const ["https://bsc-rpc.publicnode.com"],
+    //   ),
+    //   reason: "BNB Chain ChainInfo should match",
+    // );
   });
 
   test("wrapped native token address should match for all networks", () {
@@ -214,11 +214,11 @@ void main() {
       reason: "Unichain rpc url should match",
     );
 
-    expect(
-      AppNetworks.bnb.rpcUrl,
-      "https://bsc-rpc.publicnode.com",
-      reason: "BNB rpc url should match",
-    );
+    // expect(
+    //   AppNetworks.bnb.rpcUrl,
+    //   "https://bsc-rpc.publicnode.com",
+    //   reason: "BNB rpc url should match",
+    // );
   });
 
   test("openTx should open the correct url for each network", () async {
@@ -301,10 +301,10 @@ void main() {
     ));
   });
 
-  zGoldenTest("BNB network icon should match", goldenFileName: "bnb_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      AppNetworks.bnb.icon,
-      device: GoldenDevice.square,
-    ));
-  });
+  // zGoldenTest("BNB network icon should match", goldenFileName: "bnb_network_icon", (tester) async {
+  //   await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
+  //     AppNetworks.bnb.icon,
+  //     device: GoldenDevice.square,
+  //   ));
+  // });
 }
