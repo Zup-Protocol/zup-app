@@ -1004,8 +1004,8 @@ void main() {
           tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
             tick: V3PoolConversorsMixinWrapper().priceToTick(
               price: minPrice,
-              poolToken0Decimals: currentYield.token0.decimals,
-              poolToken1Decimals: currentYield.token1.decimals,
+              poolToken0Decimals: currentYield.token0NetworkDecimals,
+              poolToken1Decimals: currentYield.token1NetworkDecimals,
               isReversed: false,
             ),
             tickSpacing: currentYield.tickSpacing,
@@ -1052,8 +1052,8 @@ void main() {
           tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
             tick: V3PoolConversorsMixinWrapper().priceToTick(
               price: maxPrice,
-              poolToken0Decimals: currentYield.token0.decimals,
-              poolToken1Decimals: currentYield.token1.decimals,
+              poolToken0Decimals: currentYield.token0NetworkDecimals,
+              poolToken1Decimals: currentYield.token1NetworkDecimals,
               isReversed: isReversed,
             ),
             tickSpacing: currentYield.tickSpacing,
@@ -1177,8 +1177,8 @@ void main() {
           tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
             tick: V3PoolConversorsMixinWrapper().priceToTick(
               price: maxPrice,
-              poolToken0Decimals: currentYield.token0.decimals,
-              poolToken1Decimals: currentYield.token1.decimals,
+              poolToken0Decimals: currentYield.token0NetworkDecimals,
+              poolToken1Decimals: currentYield.token1NetworkDecimals,
               isReversed: false,
             ),
             tickSpacing: currentYield.tickSpacing,
@@ -1224,8 +1224,8 @@ void main() {
           tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
             tick: V3PoolConversorsMixinWrapper().priceToTick(
               price: minPrice,
-              poolToken0Decimals: currentYield.token0.decimals,
-              poolToken1Decimals: currentYield.token1.decimals,
+              poolToken0Decimals: currentYield.token0NetworkDecimals,
+              poolToken1Decimals: currentYield.token1NetworkDecimals,
               isReversed: isReversed,
             ),
             tickSpacing: currentYield.tickSpacing,
@@ -1702,8 +1702,8 @@ void main() {
 
       verify(() => zupAnalytics.logDeposit(
             depositedYield: currentYield,
-            amount0Formatted: token0amount.parseTokenAmount(decimals: currentYield.token0.decimals),
-            amount1Formatted: token1amount.parseTokenAmount(decimals: currentYield.token1.decimals),
+            amount0Formatted: token0amount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
+            amount1Formatted: token1amount.parseTokenAmount(decimals: currentYield.token1NetworkDecimals),
             walletAddress: userAddress,
           )).called(1);
     },
@@ -1936,16 +1936,16 @@ void main() {
     final tickLower = V3PoolConversorsMixinWrapper().tickToClosestValidTick(
         tick: V3PoolConversorsMixinWrapper().priceToTick(
           price: minPrice,
-          poolToken0Decimals: currentYield0.token0.decimals,
-          poolToken1Decimals: currentYield0.token1.decimals,
+          poolToken0Decimals: currentYield0.token0NetworkDecimals,
+          poolToken1Decimals: currentYield0.token1NetworkDecimals,
         ),
         tickSpacing: currentYield0.tickSpacing);
 
     final tickUpper = V3PoolConversorsMixinWrapper().tickToClosestValidTick(
         tick: V3PoolConversorsMixinWrapper().priceToTick(
           price: maxPrice,
-          poolToken0Decimals: currentYield0.token0.decimals,
-          poolToken1Decimals: currentYield0.token1.decimals,
+          poolToken0Decimals: currentYield0.token0NetworkDecimals,
+          poolToken1Decimals: currentYield0.token1NetworkDecimals,
         ),
         tickSpacing: currentYield0.tickSpacing);
 
@@ -1985,7 +1985,6 @@ void main() {
         tickLower: tickLower,
         tickUpper: tickUpper,
         recipient: recipient,
-        currentPoolTick: initialPoolTick,
       ),
     ).called(1);
   });

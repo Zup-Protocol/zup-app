@@ -11,9 +11,6 @@
             "toolArgs": [
                 "--dart-define=env=local",
             ],
-            "args": [
-                "--web-experimental-hot-reload"
-            ]
         },
         {
             "name": "Zup App (Web) (Debug)",

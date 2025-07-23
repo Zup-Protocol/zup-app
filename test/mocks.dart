@@ -12,6 +12,7 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
@@ -24,6 +25,7 @@ import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
+import 'package:zup_app/core/repositories/protocol_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/zup_analytics.dart';
@@ -87,6 +89,10 @@ class UniswapV4PositionManagerMock extends Mock implements UniswapV4PositionMana
 
 class UniswapV4PositionManagerImplMock extends Mock implements UniswapV4PositionManagerImpl {}
 
+class PancakeSwapInfinityCLPoolManagerMock extends Mock implements PancakeSwapInfinityClPoolManager {}
+
+class PancakeSwapInfinityCLPoolManagerImplMock extends Mock implements PancakeSwapInfinityClPoolManagerImpl {}
+
 class UniswapV3PoolImplMock extends Mock implements UniswapV3PoolImpl {}
 
 class UniswapV3PoolMock extends Mock implements UniswapV3Pool {}
@@ -112,6 +118,8 @@ class ConfettiControllerMock extends Mock implements ConfettiController {}
 class FirebaseAnalyticsMock extends Mock implements FirebaseAnalytics {}
 
 class ZupHolderMock extends Mock implements ZupHolder {}
+
+class ProtocolRepositoryMock extends Mock implements ProtocolRepository {}
 
 class ChangeNotifierMock extends Mock with ChangeNotifier {
   void notify() => notifyListeners();
@@ -172,7 +180,7 @@ ZupCachedImage mockZupCachedImage() {
         width: any(named: "width"),
         radius: any(named: "radius"),
         errorWidget: any(named: "errorWidget"),
-        loadingBuilder: any(named: "loadingBuilder"),
+        placeholder: any(named: "placeholder"),
       )).thenReturn(const SizedBox(child: Text("IMAGE")));
 
   return zupCachedImage;

@@ -15,7 +15,7 @@ class ZupCachedImage {
     double? height,
     double? width,
     double? radius,
-    ImageLoadingBuilder? loadingBuilder,
+    Widget? placeholder,
     ImageErrorWidgetBuilder? errorWidget,
   }) {
     return ClipRRect(
@@ -26,14 +26,17 @@ class ZupCachedImage {
           borderRadius: BorderRadius.circular(radius ?? 0),
           border: Border.all(width: 0.5, color: ZupColors.gray5),
         ),
-        // cache not implemented yet because of web issue rendering images from other domains
+        // cache not implemented yet because of web issue rendering images from other domains (https://github.com/Baseflow/flutter_cached_network_image/issues/972)
         child: Image.network(
           _parseImageUrl(url),
           height: height,
           width: width,
           fit: BoxFit.cover,
           errorBuilder: errorWidget,
-          loadingBuilder: loadingBuilder,
+          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+            if (frame == null) return placeholder ?? ZupCircularLoadingIndicator(size: height ?? 20);
+            return child;
+          },
           webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
         ),
       ),

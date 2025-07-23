@@ -18,6 +18,7 @@ import 'package:zup_app/app/create/deposit/deposit_page.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
+import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/token_price_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
@@ -154,6 +155,7 @@ void main() {
   zGoldenTest("When initializing the page it should call setup in the cubit", (tester) async {
     await tester.runAsync(() async {
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
     });
 
     verify(() => cubit.setup()).called(1);
@@ -169,6 +171,7 @@ void main() {
 
     await tester.runAsync(() async {
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
     });
 
     verify(
@@ -185,6 +188,7 @@ void main() {
 
     await tester.runAsync(() async {
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
     });
 
     await tester.pumpAndSettle();
@@ -192,9 +196,14 @@ void main() {
 
   zGoldenTest("When the cubit state is noYields with no min liquidity searched, it should just show the noYields state",
       goldenFileName: "deposit_page_no_yields", (tester) async {
-    when(() => cubit.state).thenReturn(const DepositState.noYields(minLiquiditySearched: 0));
+    when(() => cubit.state).thenReturn(
+      const DepositState.noYields(
+        filtersApplied: PoolSearchFiltersDto(minTvlUsd: 0),
+      ),
+    );
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.pumpAndSettle();
   });
@@ -204,9 +213,14 @@ void main() {
     with a helper text saying it, and a button to search all pools""",
     goldenFileName: "deposit_page_no_yields_filtered_by_min_liquidity",
     (tester) async {
-      when(() => cubit.state).thenReturn(const DepositState.noYields(minLiquiditySearched: 97654));
+      when(() => cubit.state).thenReturn(
+        const DepositState.noYields(
+          filtersApplied: PoolSearchFiltersDto(minTvlUsd: 97654),
+        ),
+      );
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.pumpAndSettle();
     },
@@ -222,9 +236,14 @@ void main() {
             ignoreMinLiquidity: any(named: "ignoreMinLiquidity")),
       ).thenAnswer((_) async {});
 
-      when(() => cubit.state).thenReturn(const DepositState.noYields(minLiquiditySearched: 97654));
+      when(() => cubit.state).thenReturn(
+        const DepositState.noYields(
+          filtersApplied: PoolSearchFiltersDto(minTvlUsd: 97654),
+        ),
+      );
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("search-all-pools-button")));
       await tester.pumpAndSettle();
@@ -241,16 +260,17 @@ void main() {
 
   zGoldenTest("""When clicking the helper button in the no yields state,
    it should navigate back to choose tokens stage""", (tester) async {
-    when(() => navigator.back(any())).thenAnswer((_) async {});
+    when(() => navigator.navigateToNewPosition()).thenAnswer((_) async {});
 
-    when(() => cubit.state).thenReturn(const DepositState.noYields(minLiquiditySearched: 0));
+    when(() => cubit.state).thenReturn(const DepositState.noYields(filtersApplied: PoolSearchFiltersDto()));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key("help-button")));
     await tester.pumpAndSettle();
 
-    verify(() => navigator.back(any())).called(1);
+    verify(() => navigator.navigateToNewPosition()).called(1);
   });
 
   zGoldenTest("When the cubit state is error, it should show the error state", goldenFileName: "deposit_page_error",
@@ -258,6 +278,7 @@ void main() {
     when(() => cubit.state).thenReturn(const DepositState.error());
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.pumpAndSettle();
   });
@@ -272,6 +293,7 @@ void main() {
     when(() => cubit.state).thenReturn(const DepositState.error());
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key("help-button")));
     await tester.pumpAndSettle();
@@ -287,6 +309,7 @@ void main() {
     when(() => cubit.state).thenReturn(DepositState.success(yields));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.pumpAndSettle();
   });
@@ -299,6 +322,7 @@ void main() {
     when(() => cubit.state).thenReturn(DepositState.success(yields));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.pumpAndSettle();
   });
@@ -311,6 +335,7 @@ void main() {
     when(() => cubit.state).thenReturn(DepositState.success(yields));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.pumpAndSettle();
   });
@@ -319,11 +344,14 @@ void main() {
     search has zero, but the user has a local filter set, it should show a text and a button to search only pools
     with the local filter amount set""",
       goldenFileName: "deposit_page_success_filtered_by_min_liquidity_local_filter_set", (tester) async {
-    final yields = YieldsDto.fixture().copyWith(minLiquidityUSD: 0); // api filter returns 0
+    final yields = YieldsDto.fixture().copyWith(
+      filters: const PoolSearchFiltersDto(minTvlUsd: 0),
+    ); // api filter returns 0
     when(() => cubit.poolSearchSettings).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 2189)); // local filter set
     when(() => cubit.state).thenReturn(DepositState.success(yields));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.pumpAndSettle();
   });
@@ -331,7 +359,10 @@ void main() {
   zGoldenTest("""When clicking in the button to search all pools in the success state
    that is with a filter for min liquidity, it should call the cubit to get pools with
    the ignore min liquidity flag""", (tester) async {
-    final yields = YieldsDto.fixture().copyWith(minLiquidityUSD: 12675);
+    final yields = YieldsDto.fixture().copyWith(
+      filters: const PoolSearchFiltersDto(minTvlUsd: 12675),
+    );
+
     when(() => cubit.poolSearchSettings).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 12675));
     when(() => cubit.state).thenReturn(DepositState.success(yields));
     when(() => cubit.getBestPools(
@@ -340,6 +371,7 @@ void main() {
         ignoreMinLiquidity: any(named: "ignoreMinLiquidity"))).thenAnswer((_) async {});
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key("hide-show-all-pools-button")));
     await tester.pumpAndSettle();
@@ -356,7 +388,10 @@ void main() {
   zGoldenTest("""When clicking in the button to search only pools with more than x amount in
    the success state that is without a filter for min liquidity, it should call the cubit to get pools with
    the min liquidity set to not be ignored""", (tester) async {
-    final yields = YieldsDto.fixture().copyWith(minLiquidityUSD: 0); // api filter returns 0
+    final yields = YieldsDto.fixture().copyWith(
+      filters: const PoolSearchFiltersDto(minTvlUsd: 0),
+    ); // api filter returns 0
+
     when(() => cubit.poolSearchSettings).thenReturn(PoolSearchSettingsDto(minLiquidityUSD: 12675)); // local filter set
     when(() => cubit.state).thenReturn(DepositState.success(yields));
     when(() => cubit.getBestPools(
@@ -365,6 +400,7 @@ void main() {
         ignoreMinLiquidity: any(named: "ignoreMinLiquidity"))).thenAnswer((_) async {});
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key("hide-show-all-pools-button")));
     await tester.pumpAndSettle();
@@ -428,6 +464,7 @@ void main() {
     when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key("back-button")));
     await tester.pumpAndSettle();
@@ -440,6 +477,7 @@ void main() {
     when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.hover(find.byKey(const Key("timeframe-tooltip")));
     await tester.pumpAndSettle();
@@ -451,6 +489,7 @@ void main() {
     when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.hover(find.byKey(const Key("timeframe-tooltip")));
     await tester.pumpAndSettle();
@@ -476,6 +515,7 @@ void main() {
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
       await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
     });
   });
 
@@ -484,6 +524,7 @@ void main() {
     when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
     await tester.pumpDeviceBuilder(await goldenBuilder());
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key("yield-card-24h")));
     await tester.pumpAndSettle();
@@ -502,6 +543,7 @@ void main() {
       when(() => cubit.selectedYield).thenReturn(selectedYield);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("yield-card-30d")));
       await tester.pumpAndSettle();
@@ -521,6 +563,7 @@ void main() {
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
       await tester.pumpAndSettle();
@@ -538,6 +581,7 @@ void main() {
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
       await tester.pumpAndSettle();
@@ -558,6 +602,7 @@ void main() {
       when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
       await tester.pumpAndSettle();
@@ -580,6 +625,7 @@ void main() {
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
       await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
     });
   });
 
@@ -595,6 +641,7 @@ void main() {
       when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(BigInt.from(174072)));
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
       await tester.pumpAndSettle();
@@ -616,6 +663,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("min-price-selector")), "1000");
         FocusManager.instance.primaryFocus?.unfocus();
@@ -643,6 +691,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("min-price-selector")), "1000");
         FocusManager.instance.primaryFocus?.unfocus();
@@ -671,6 +720,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("min-price-selector")), "90000000000");
         FocusManager.instance.primaryFocus?.unfocus();
@@ -694,6 +744,8 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("min-price-selector")), "1200");
       FocusManager.instance.primaryFocus?.unfocus();
@@ -721,6 +773,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("min-price-selector")), "0.000000001");
       FocusManager.instance.primaryFocus?.unfocus();
@@ -745,6 +798,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("min-price-selector")), "1");
       FocusManager.instance.primaryFocus?.unfocus();
@@ -776,6 +830,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("min-price-selector")), "1");
       FocusManager.instance.primaryFocus?.unfocus();
@@ -799,6 +854,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("5-percent-range-button")));
       await tester.pumpAndSettle();
@@ -823,6 +879,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("5-percent-range-button")));
       await tester.pumpAndSettle();
@@ -849,6 +906,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("5-percent-range-button")));
       await tester.pumpAndSettle();
@@ -871,6 +929,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("5-percent-range-button")));
       await tester.pumpAndSettle();
@@ -894,6 +953,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("20-percent-range-button")));
       await tester.pumpAndSettle();
@@ -916,6 +976,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("20-percent-range-button")));
       await tester.pumpAndSettle();
@@ -939,6 +1000,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("50-percent-range-button")));
       await tester.pumpAndSettle();
@@ -961,6 +1023,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("50-percent-range-button")));
       await tester.pumpAndSettle();
@@ -983,6 +1046,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("max-price-selector")), "1");
       FocusManager.instance.primaryFocus?.unfocus();
@@ -1007,6 +1071,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("50-percent-range-button")));
       await tester.pumpAndSettle();
@@ -1034,6 +1099,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key("50-percent-range-button")));
       await tester.pumpAndSettle();
@@ -1060,6 +1126,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("min-price-selector")), "1");
       FocusManager.instance.primaryFocus?.unfocus();
@@ -1086,14 +1153,18 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("min-price-selector")), "2");
       FocusManager.instance.primaryFocus?.unfocus();
 
+      await tester.pumpAndSettle();
+
       await tester.enterText(find.byKey(const Key("max-price-selector")), "1");
       FocusManager.instance.primaryFocus?.unfocus();
 
-      await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+      await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key("deposit-button")));
       await tester.pumpAndSettle();
@@ -1115,6 +1186,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1139,6 +1211,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1165,6 +1238,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1194,6 +1268,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1221,6 +1296,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1248,6 +1324,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1275,6 +1352,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
       await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
@@ -1304,6 +1382,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
       await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
@@ -1333,6 +1412,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1369,6 +1449,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1404,6 +1485,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
       await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
@@ -1441,6 +1523,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
       await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
@@ -1479,6 +1562,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1515,6 +1599,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1550,6 +1635,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1592,6 +1678,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -1632,6 +1719,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
       await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
@@ -1663,6 +1751,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
       await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
@@ -1692,6 +1781,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
       await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
@@ -1727,6 +1817,7 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
       await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
@@ -1761,6 +1852,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
       });
@@ -1818,7 +1910,8 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
-        await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+        await tester.pumpAndSettle();
+        await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
         await tester.pumpAndSettle();
       });
     },
@@ -1847,7 +1940,8 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
-        await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+        await tester.pumpAndSettle();
+        await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("base-token-input-card")), "1");
@@ -1885,7 +1979,8 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
-        await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+        await tester.pumpAndSettle();
+        await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
@@ -1922,7 +2017,8 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
-        await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+        await tester.pumpAndSettle();
+        await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
@@ -1962,6 +2058,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -2002,7 +2099,8 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
-        await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+        await tester.pumpAndSettle();
+        await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
@@ -2037,7 +2135,8 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
-      await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("min-price-selector")), "1");
@@ -2074,7 +2173,8 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
-      await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byKey(const Key("min-price-selector")), "0.0000001");
@@ -2145,6 +2245,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(null);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -2169,6 +2270,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(null);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -2194,6 +2296,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(null);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -2219,6 +2322,7 @@ void main() {
         when(() => cubit.latestPoolTick).thenReturn(null);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
+        await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-section")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
@@ -2482,6 +2586,52 @@ void main() {
       await tester.pumpAndSettle();
 
       verifyNever(() => appCubit.updateAppNetwork(any()));
+    },
+  );
+
+  zGoldenTest(
+    """When emitting a new pool tick, and the deposit amounts are already typed,
+  it should update the amount that have been calculated by the typed amount""",
+    goldenFileName: "deposit_page_pool_tick_update_deposit_amount",
+    (tester) async {
+      await tester.runAsync(() async {
+        final selectedYield = YieldsDto.fixture().best24hYield;
+        final currentPriceAsTick = BigInt.from(174072);
+        final nextPriceAsTick = BigInt.from(261892);
+        final poolTickStreamController = StreamController<BigInt>.broadcast();
+
+        final signer = SignerMock();
+
+        when(() => wallet.signer).thenReturn(signer);
+        when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
+        when(() => cubit.getWalletTokenAmount(selectedYield.token0.addresses[selectedYield.network.chainId]!,
+            network: any(named: "network"))).thenAnswer(
+          (_) => Future.value(347537253),
+        );
+        when(() => cubit.getWalletTokenAmount(selectedYield.token1.addresses[selectedYield.network.chainId]!,
+            network: any(named: "network"))).thenAnswer(
+          (_) => Future.value(32576352673),
+        );
+        when(() => cubit.selectYield(any(), any())).thenAnswer((_) => Future.value());
+        when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
+        when(() => cubit.selectedYield).thenReturn(selectedYield);
+        when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
+        when(() => cubit.poolTickStream).thenAnswer((_) => poolTickStreamController.stream);
+        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+
+        await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+        await tester.tap(find.byKey(const Key("yield-card-24h")));
+        await tester.pumpAndSettle();
+        await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
+        await tester.pumpAndSettle();
+
+        poolTickStreamController.add(nextPriceAsTick);
+        when(() => cubit.latestPoolTick).thenReturn(nextPriceAsTick);
+        await tester.pumpAndSettle();
+      });
     },
   );
 }

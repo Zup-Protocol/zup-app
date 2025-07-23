@@ -1,6 +1,7 @@
 import 'package:clock/clock.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
@@ -15,6 +16,7 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
   final UniswapV3PositionManager _uniswapV3PositionManager;
   final UniswapV4PositionManager _uniswapV4PositionManager;
   final EthereumAbiCoder _ethereumAbiCoder;
+  final PancakeSwapInfinityClPoolManager _pancakeSwapInfinityClPoolManager;
 
   PoolService(
     this._uniswapV4StateView,
@@ -22,9 +24,19 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
     this._uniswapV3PositionManager,
     this._uniswapV4PositionManager,
     this._ethereumAbiCoder,
+    this._pancakeSwapInfinityClPoolManager,
   );
 
   Future<BigInt> getPoolTick(YieldDto forYield) async {
+    if (forYield.protocol.id.isPancakeSwapInfinityCL) {
+      final pancakeSwapInfinityCLPoolManagerContract = _pancakeSwapInfinityClPoolManager.fromRpcProvider(
+        contractAddress: forYield.v4PoolManager!,
+        rpcUrl: forYield.network.rpcUrl,
+      );
+
+      return (await pancakeSwapInfinityCLPoolManagerContract.getSlot0(id: forYield.poolAddress)).tick;
+    }
+
     if (forYield.poolType.isV4) {
       final stateView = _uniswapV4StateView.fromRpcProvider(
         contractAddress: forYield.v4StateView!,
@@ -40,6 +52,37 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
     );
 
     return (await uniswapV3Pool.slot0()).tick;
+  }
+
+  Future<BigInt> getSqrtPriceX96(YieldDto forYield) async {
+    if (forYield.protocol.id.isPancakeSwapInfinityCL) {
+      final pancakeSwapInfinityCLPoolManagerContract = _pancakeSwapInfinityClPoolManager.fromRpcProvider(
+        contractAddress: forYield.v4PoolManager!,
+        rpcUrl: forYield.network.rpcUrl,
+      );
+
+      return (await pancakeSwapInfinityCLPoolManagerContract.getSlot0(id: forYield.poolAddress)).sqrtPriceX96;
+    }
+
+    if (forYield.poolType.isV4) {
+      final stateView = _uniswapV4StateView.fromRpcProvider(
+        contractAddress: forYield.v4StateView!,
+        rpcUrl: forYield.network.rpcUrl,
+      );
+
+      return (await stateView.getSlot0(poolId: forYield.poolAddress)).sqrtPriceX96;
+    }
+
+    if (forYield.poolType.isV3) {
+      final uniswapV3Pool = _uniswapV3Pool.fromRpcProvider(
+        contractAddress: forYield.poolAddress,
+        rpcUrl: forYield.network.rpcUrl,
+      );
+
+      return (await uniswapV3Pool.slot0()).sqrtPriceX96;
+    }
+
+    throw Exception('Unknown pool type; Cannot get sqrtPriceX96');
   }
 
   Future<TransactionResponse> sendV3PoolDepositTransaction(
@@ -126,9 +169,18 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
     required BigInt maxAmount0ToDeposit,
     required BigInt maxAmount1ToDeposit,
     required String recipient,
-    required BigInt currentPoolTick,
   }) async {
     final isNativeDeposit = depositOnYield.isToken0Native || depositOnYield.isToken1Native;
+    final sqrtPriceX96 = await getSqrtPriceX96(depositOnYield);
+    final sqrtPriceAX96 = getSqrtPriceAtTick(tickLower);
+    final sqrtPriceBX96 = getSqrtPriceAtTick(tickUpper);
+    final liquidity = getLiquidityForAmounts(
+      sqrtPriceX96,
+      sqrtPriceAX96,
+      sqrtPriceBX96,
+      amount0toDeposit,
+      amount1ToDeposit,
+    );
 
     final actions = _ethereumAbiCoder.encodePacked([
       "uint8",
@@ -159,15 +211,9 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
       ],
       tickLower,
       tickUpper,
-      getLiquidityForAmounts(
-        getSqrtPriceAtTick(currentPoolTick),
-        getSqrtPriceAtTick(tickLower),
-        getSqrtPriceAtTick(tickUpper),
-        amount0toDeposit,
-        amount1ToDeposit,
-      ),
-      maxAmount0ToDeposit,
-      maxAmount1ToDeposit,
+      liquidity,
+      depositOnYield.isToken0Native ? amount0toDeposit : maxAmount0ToDeposit,
+      depositOnYield.isToken1Native ? amount1ToDeposit : maxAmount1ToDeposit,
       recipient,
       EthereumConstants.emptyBytes,
     ]);

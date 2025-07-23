@@ -11,6 +11,10 @@ void main() {
     expect("0".isEmptyOrZero, true);
   });
 
+  test("`isEmptyOrZero` should return true if the string is zero in double ", () {
+    expect("0.00000".isEmptyOrZero, true);
+  });
+
   test("`isNotEmptyOrZero` should return false if the string is literally empty", () {
     expect("".isNotEmptyOrZero, false);
   });

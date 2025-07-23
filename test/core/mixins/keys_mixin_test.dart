@@ -44,4 +44,10 @@ void main() {
 
     expect(key, 'tokenPrice-$tokenAddress-${network.name}');
   });
+
+  test("protocolsListKey should return correct key", () {
+    final key = _KeysMixinWrapper().protocolsListKey;
+
+    expect(key, 'zup-supported-protocols');
+  });
 }

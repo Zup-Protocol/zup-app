@@ -1,15 +1,26 @@
 mixin V4PoolLiquidityCalculationsMixin {
-  final _q96 = BigInt.parse("0x1000000000000000000000000");
+  final _q96 = BigInt.from(2).pow(96);
 
   BigInt getLiquidityForAmount0(BigInt sqrtPriceAX96, BigInt sqrtPriceBX96, BigInt amount0) {
-    if (sqrtPriceAX96 > sqrtPriceBX96) (sqrtPriceAX96, sqrtPriceBX96) = (sqrtPriceBX96, sqrtPriceAX96);
+    if (sqrtPriceAX96 > sqrtPriceBX96) {
+      final sqrtPriceAX96Before = sqrtPriceAX96;
+      sqrtPriceAX96 = sqrtPriceBX96;
+      sqrtPriceBX96 = sqrtPriceAX96Before;
+    }
 
-    BigInt intermediate = ((sqrtPriceAX96 * sqrtPriceBX96) ~/ _q96);
-    return (amount0 * intermediate) ~/ (sqrtPriceBX96 - sqrtPriceAX96);
+    final numerator = (amount0 * sqrtPriceAX96) * sqrtPriceBX96;
+    final denominator = _q96 * (sqrtPriceBX96 - sqrtPriceAX96);
+
+    return numerator ~/ denominator;
   }
 
   BigInt getLiquidityForAmount1(BigInt sqrtPriceAX96, BigInt sqrtPriceBX96, BigInt amount1) {
-    if (sqrtPriceAX96 > sqrtPriceBX96) (sqrtPriceAX96, sqrtPriceBX96) = (sqrtPriceBX96, sqrtPriceAX96);
+    if (sqrtPriceAX96 > sqrtPriceBX96) {
+      final sqrtPriceAX96Before = sqrtPriceAX96;
+      sqrtPriceAX96 = sqrtPriceBX96;
+      sqrtPriceBX96 = sqrtPriceAX96Before;
+    }
+
     return (amount1 * _q96) ~/ (sqrtPriceBX96 - sqrtPriceAX96);
   }
 
@@ -20,7 +31,11 @@ mixin V4PoolLiquidityCalculationsMixin {
     BigInt amount0,
     BigInt amount1,
   ) {
-    if (sqrtPriceAX96 > sqrtPriceBX96) (sqrtPriceAX96, sqrtPriceBX96) = (sqrtPriceBX96, sqrtPriceAX96);
+    if (sqrtPriceAX96 > sqrtPriceBX96) {
+      final sqrtPriceAX96Before = sqrtPriceAX96;
+      sqrtPriceAX96 = sqrtPriceBX96;
+      sqrtPriceBX96 = sqrtPriceAX96Before;
+    }
 
     if (sqrtPriceX96 <= sqrtPriceAX96) {
       return getLiquidityForAmount0(sqrtPriceAX96, sqrtPriceBX96, amount0);
@@ -75,10 +90,9 @@ mixin V4PoolLiquidityCalculationsMixin {
       price = maxUint256 ~/ price;
     }
 
-    BigInt maxUint32 = (BigInt.one << 32) - BigInt.one;
-    price = (price + maxUint32) >> 32;
+    final remainder = price & ((BigInt.one << 32) - BigInt.one);
+    final sqrtPriceX96 = price >> 32;
 
-    BigInt mask160 = (BigInt.one << 160) - BigInt.one;
-    return price & mask160;
+    return remainder > BigInt.zero ? sqrtPriceX96 + BigInt.one : sqrtPriceX96;
   }
 }

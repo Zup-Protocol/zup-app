@@ -18,9 +18,9 @@ class CreatePageSettingsDropdown extends StatefulWidget {
     BuildContext showBelowContext, {
     required void Function() onClose,
   }) =>
-      ZupDropdown.show(
-        showBelowContext: showBelowContext,
-        offset: const Offset(0, 90),
+      ZupPopover.show(
+        showBasedOnContext: showBelowContext,
+        adjustment: const Offset(0, 10),
         child: CreatePageSettingsDropdown(onClose: onClose),
       );
 
@@ -47,6 +47,14 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
     }
   }
 
+  Widget sectionTitle(String title) => Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      );
+
   @override
   void initState() {
     minTVLController.text = cache.getPoolSearchSettings().minLiquidityUSD.formatCurrency(isUSD: false);
@@ -69,9 +77,7 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
       decoration: BoxDecoration(
         color: ZupColors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: ZupColors.gray5,
-        ),
+        border: Border.all(color: ZupColors.gray5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,10 +86,7 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                S.of(context).createPageSettingsDropdownMinimumLiquidity,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-              ),
+              sectionTitle(S.of(context).createPageSettingsDropdownMinimumLiquidity),
               const SizedBox(width: 8),
               ZupTooltip(
                 key: const Key("min-liquidity-tooltip"),
@@ -165,10 +168,7 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
           const SizedBox(height: 10),
           Row(
             children: [
-              Text(
-                S.of(context).createPageSettingsDropdownAllowedPoolTypes,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-              ),
+              sectionTitle(S.of(context).createPageSettingsDropdownAllowedPoolTypes),
               const SizedBox(width: 8),
               ZupTooltip(
                 key: const Key("pool-types-allowed-tooltip"),

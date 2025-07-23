@@ -7,6 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
@@ -18,6 +19,7 @@ import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/enums/app_environment.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
+import 'package:zup_app/core/repositories/protocol_repository.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/zup_analytics.dart';
@@ -120,14 +122,13 @@ Future<void> setupInjections() async {
 
   inject.registerLazySingleton<EthereumAbiCoder>(() => EthereumAbiCoder());
 
+  inject.registerLazySingleton<PancakeSwapInfinityClPoolManager>(
+    () => PancakeSwapInfinityClPoolManager(),
+  );
+
   inject.registerLazySingleton<PoolService>(
-    () => PoolService(
-      inject<UniswapV4StateView>(),
-      inject<UniswapV3Pool>(),
-      inject<UniswapV3PositionManager>(),
-      inject<UniswapV4PositionManager>(),
-      inject<EthereumAbiCoder>(),
-    ),
+    () => PoolService(inject<UniswapV4StateView>(), inject<UniswapV3Pool>(), inject<UniswapV3PositionManager>(),
+        inject<UniswapV4PositionManager>(), inject<EthereumAbiCoder>(), inject<PancakeSwapInfinityClPoolManager>()),
   );
 
   inject.registerLazySingleton<UniswapPermit2>(
@@ -151,6 +152,10 @@ Future<void> setupInjections() async {
   );
 
   inject.registerLazySingleton<UniswapV3Pool>(() => UniswapV3Pool());
+
+  inject.registerLazySingleton<ProtocolRepository>(
+    () => ProtocolRepository(zupApiDio: inject<Dio>(instanceName: InjectInstanceNames.zupAPIDio)),
+  );
 
   // WARNING: this should be factory, as it's a controller and can/should be disposed
   inject.registerFactory<ConfettiController>(

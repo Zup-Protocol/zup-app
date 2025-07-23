@@ -33,8 +33,10 @@ void main() {
     const network = AppNetworks.sepolia;
     const minTvlUsd = 1213;
     final searchSettings = PoolSearchSettingsDto.fixture().copyWith(minLiquidityUSD: minTvlUsd);
+    final blockedProtocolsIds = ["1", "2", "3"];
 
     await sut.getSingleNetworkYield(
+      blockedProtocolIds: blockedProtocolsIds,
       token0Address: token0Address,
       token1Address: token1Address,
       network: network,
@@ -48,6 +50,7 @@ void main() {
       }, data: {
         "filters": {
           "minTvlUsd": searchSettings.minLiquidityUSD,
+          "blockedProtocols": blockedProtocolsIds,
           "allowedPoolTypes": [
             "V3",
             "V4",
@@ -72,8 +75,10 @@ void main() {
     const token1Address = "0x456";
     const network = AppNetworks.sepolia;
     final searchSettings = PoolSearchSettingsDto.fixture().copyWith(allowV3Search: false);
+    final blockedProtocolsIds = ["1", "2", "3"];
 
     await sut.getSingleNetworkYield(
+      blockedProtocolIds: blockedProtocolsIds,
       token0Address: token0Address,
       token1Address: token1Address,
       network: network,
@@ -87,6 +92,7 @@ void main() {
       }, data: {
         "filters": {
           "minTvlUsd": searchSettings.minLiquidityUSD,
+          "blockedProtocols": blockedProtocolsIds,
           "allowedPoolTypes": [
             "V4",
           ],
@@ -110,8 +116,10 @@ void main() {
     const token1Address = "0x456";
     const network = AppNetworks.sepolia;
     final searchSettings = PoolSearchSettingsDto.fixture().copyWith(allowV4Search: false);
+    final blockedProtocolIds = ["1", "2", "3"];
 
     await sut.getSingleNetworkYield(
+      blockedProtocolIds: blockedProtocolIds,
       token0Address: token0Address,
       token1Address: token1Address,
       network: network,
@@ -124,6 +132,7 @@ void main() {
         "token1Address": token1Address
       }, data: {
         "filters": {
+          "blockedProtocols": blockedProtocolIds,
           "minTvlUsd": searchSettings.minLiquidityUSD,
           "allowedPoolTypes": ["V3"],
         }
@@ -147,6 +156,7 @@ void main() {
     const network = AppNetworks.sepolia;
 
     final response = await sut.getSingleNetworkYield(
+      blockedProtocolIds: [],
       token0Address: token0Address,
       token1Address: token1Address,
       network: network,
@@ -171,8 +181,10 @@ void main() {
     const token1Id = "0x456";
     const minTvlUsd = 1213;
     final searchSettings = PoolSearchSettingsDto.fixture().copyWith(minLiquidityUSD: minTvlUsd);
+    final blockedProtocolsIds = ["1", "2", "3"];
 
     await sut.getAllNetworksYield(
+      blockedProtocolIds: blockedProtocolsIds,
       token0InternalId: token0Id,
       token1InternalId: token1Id,
       searchSettings: searchSettings,
@@ -187,6 +199,7 @@ void main() {
         "filters": {
           "testnetMode": true,
           "minTvlUsd": searchSettings.minLiquidityUSD,
+          "blockedProtocols": blockedProtocolsIds,
           "allowedPoolTypes": [
             "V3",
             "V4",
@@ -213,8 +226,10 @@ void main() {
     const token1Id = "0x456";
     const minTvlUsd = 1213;
     final searchSettings = PoolSearchSettingsDto.fixture().copyWith(minLiquidityUSD: minTvlUsd, allowV4Search: false);
+    final blockedProtocolsIds = ["ai", "be", "cd"];
 
     await sut.getAllNetworksYield(
+      blockedProtocolIds: blockedProtocolsIds,
       token0InternalId: token0Id,
       token1InternalId: token1Id,
       searchSettings: searchSettings,
@@ -229,6 +244,7 @@ void main() {
         "filters": {
           "testnetMode": true,
           "minTvlUsd": searchSettings.minLiquidityUSD,
+          "blockedProtocols": blockedProtocolsIds,
           "allowedPoolTypes": [
             "V3",
           ],
@@ -254,8 +270,10 @@ void main() {
     const token1Id = "0x456";
     const minTvlUsd = 1213;
     final searchSettings = PoolSearchSettingsDto.fixture().copyWith(minLiquidityUSD: minTvlUsd, allowV3Search: false);
+    final blockedProtocolsIds = ["ai", "be", "cd"];
 
     await sut.getAllNetworksYield(
+      blockedProtocolIds: blockedProtocolsIds,
       token0InternalId: token0Id,
       token1InternalId: token1Id,
       searchSettings: searchSettings,
@@ -270,6 +288,7 @@ void main() {
         "filters": {
           "testnetMode": true,
           "minTvlUsd": searchSettings.minLiquidityUSD,
+          "blockedProtocols": blockedProtocolsIds,
           "allowedPoolTypes": [
             "V4",
           ],
@@ -293,6 +312,7 @@ void main() {
     const token1Id = "0x456";
 
     final response = await sut.getAllNetworksYield(
+      blockedProtocolIds: [],
       token0InternalId: token0Id,
       token1InternalId: token1Id,
       searchSettings: PoolSearchSettingsDto.fixture().copyWith(minLiquidityUSD: 0),

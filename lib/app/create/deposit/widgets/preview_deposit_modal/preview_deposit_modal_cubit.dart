@@ -129,6 +129,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
   Future<void> checkOrApprovePermit2ForV4Pool(BigInt approveValue, TokenDto token) async {
     final tokenAddressInNetwork = token.addresses[_yield.network.chainId]!;
 
+    if (tokenAddressInNetwork == EthereumConstants.zeroAddress) return;
+
     final permit2Contract = _permit2.fromSigner(
       contractAddress: _yield.permit2!,
       signer: _wallet.signer!,
@@ -175,8 +177,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
           return priceToTick(
             price: isReversed ? maxPrice : minPrice,
-            poolToken0Decimals: _yield.token0.decimals,
-            poolToken1Decimals: _yield.token1.decimals,
+            poolToken0Decimals: _yield.token0NetworkDecimals,
+            poolToken1Decimals: _yield.token1NetworkDecimals,
             isReversed: isReversed,
           );
         }
@@ -194,8 +196,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
           return priceToTick(
             price: isReversed ? minPrice : maxPrice,
-            poolToken0Decimals: _yield.token0.decimals,
-            poolToken1Decimals: _yield.token1.decimals,
+            poolToken0Decimals: _yield.token0NetworkDecimals,
+            poolToken1Decimals: _yield.token1NetworkDecimals,
             isReversed: isReversed,
           );
         }
@@ -242,7 +244,6 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
           maxAmount0ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(amount0Desired),
           maxAmount1ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(amount1Desired),
           recipient: recipient,
-          currentPoolTick: _latestPoolTick,
         );
       }.call();
 
@@ -253,8 +254,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       emit(PreviewDepositModalState.depositSuccess(txId: tx.hash));
       _zupAnalytics.logDeposit(
         depositedYield: _yield,
-        amount0Formatted: amount0Desired.parseTokenAmount(decimals: _yield.token0.decimals),
-        amount1Formatted: amount1Desired.parseTokenAmount(decimals: _yield.token1.decimals),
+        amount0Formatted: amount0Desired.parseTokenAmount(decimals: _yield.token0NetworkDecimals),
+        amount1Formatted: amount1Desired.parseTokenAmount(decimals: _yield.token1NetworkDecimals),
         walletAddress: recipient,
       );
     } catch (e) {
@@ -322,15 +323,15 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     }
   }
 
-  void _updateTick() {
+  Future<BigInt> _updateTick() async {
     try {
-      _poolRepository.getPoolTick(_yield).then((tick) {
-        _latestPoolTick = tick;
-        _poolTickStreamController.add(tick);
-      });
+      _latestPoolTick = await _poolRepository.getPoolTick(_yield);
+      _poolTickStreamController.add(_latestPoolTick);
     } catch (_) {
       // DO NOTHING
     }
+
+    return _latestPoolTick;
   }
 
   void _waitTransactionFinishBeforeClosing() {

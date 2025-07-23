@@ -21,9 +21,9 @@ mixin V3PoolLiquidityCalculationsMixin {
     double priceUpper,
   ) {
     final liquidity = tokenYAmount / (sqrt(currentPrice) - sqrt(priceLower));
-    final token1Amount =
+    final token0Amount =
         liquidity * ((sqrt(priceUpper) - sqrt(currentPrice)) / (sqrt(priceUpper) * sqrt(currentPrice)));
 
-    return token1Amount;
+    return token0Amount;
   }
 }

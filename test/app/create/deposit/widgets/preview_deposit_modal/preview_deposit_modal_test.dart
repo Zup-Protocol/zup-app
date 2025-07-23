@@ -122,8 +122,8 @@ void main() {
     bool isReversed = false,
     ({bool isInfinity, double price}) minPrice = (isInfinity: false, price: 1200),
     ({bool isInfinity, double price}) maxPrice = (isInfinity: false, price: 3000),
-    double token0DepositAmount = 1,
-    double token1DepositAmount = 3,
+    TextEditingController? token0DepositAmountController,
+    TextEditingController? token1DepositAmountController,
     Duration deadline = const Duration(minutes: 30),
     Slippage slippage = Slippage.halfPercent,
   }) =>
@@ -144,8 +144,8 @@ void main() {
                     isReversed: isReversed,
                     minPrice: minPrice,
                     maxPrice: maxPrice,
-                    token0DepositAmount: token0DepositAmount,
-                    token1DepositAmount: token1DepositAmount,
+                    token0DepositAmountController: token0DepositAmountController ?? TextEditingController(text: "1"),
+                    token1DepositAmountController: token1DepositAmountController ?? TextEditingController(text: "3"),
                   ),
                 ));
           });
@@ -309,8 +309,8 @@ void main() {
 
       final currentPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
         price: currentPrice,
-        poolToken0Decimals: currentYield.token0.decimals,
-        poolToken1Decimals: currentYield.token1.decimals,
+        poolToken0Decimals: currentYield.token0NetworkDecimals,
+        poolToken1Decimals: currentYield.token1NetworkDecimals,
       );
 
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
@@ -335,8 +335,8 @@ void main() {
 
       final currentPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
         price: currentPrice,
-        poolToken0Decimals: currentYield.token0.decimals,
-        poolToken1Decimals: currentYield.token1.decimals,
+        poolToken0Decimals: currentYield.token0NetworkDecimals,
+        poolToken1Decimals: currentYield.token1NetworkDecimals,
       );
 
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
@@ -364,8 +364,8 @@ void main() {
 
       final currentPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
         price: currentPrice,
-        poolToken0Decimals: currentYield.token0.decimals,
-        poolToken1Decimals: currentYield.token1.decimals,
+        poolToken0Decimals: currentYield.token0NetworkDecimals,
+        poolToken1Decimals: currentYield.token1NetworkDecimals,
       );
 
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
@@ -497,7 +497,9 @@ void main() {
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: depositAmount, token1DepositAmount: 0),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+            token1DepositAmountController: TextEditingController(text: "0")),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -530,7 +532,9 @@ void main() {
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: depositAmount, token1DepositAmount: 0),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+            token1DepositAmountController: TextEditingController(text: "0")),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -541,7 +545,7 @@ void main() {
       verify(
         () => cubit.approveToken(
           currentYield.token0,
-          depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
         ),
       ).called(1);
     },
@@ -558,20 +562,22 @@ void main() {
 
       when(() => cubit.state).thenReturn(
         PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
           token1Allowance: token1Allowance,
         ),
       );
 
       when(() => cubit.stream).thenAnswer((_) {
         return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
           token1Allowance: token1Allowance,
         ));
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: depositAmount, token1DepositAmount: depositAmount),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+            token1DepositAmountController: TextEditingController(text: depositAmount.toString())),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -593,20 +599,22 @@ void main() {
 
       when(() => cubit.state).thenReturn(
         PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
           token1Allowance: token1Allowance,
         ),
       );
 
       when(() => cubit.stream).thenAnswer((_) {
         return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0.decimals),
+          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
           token1Allowance: token1Allowance,
         ));
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: depositAmount, token1DepositAmount: depositAmount),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+            token1DepositAmountController: TextEditingController(text: depositAmount.toString())),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -617,7 +625,7 @@ void main() {
       verify(
         () => cubit.approveToken(
           currentYield.token1,
-          depositAmount.parseTokenAmount(decimals: currentYield.token1.decimals),
+          depositAmount.parseTokenAmount(decimals: currentYield.token1NetworkDecimals),
         ),
       ).called(1);
     },
@@ -629,8 +637,8 @@ void main() {
     in the deposit state""",
     goldenFileName: "preview_deposit_modal_deposit_state",
     (tester) async {
-      final token0Allowance = 400.parseTokenAmount(decimals: currentYield.token0.decimals);
-      final token1Allowance = 1200.parseTokenAmount(decimals: currentYield.token1.decimals);
+      final token0Allowance = 400.parseTokenAmount(decimals: currentYield.token0NetworkDecimals);
+      final token1Allowance = 1200.parseTokenAmount(decimals: currentYield.token1NetworkDecimals);
 
       const deposit0Amount = 100.2;
       const deposit1Amount = 110.2;
@@ -650,7 +658,9 @@ void main() {
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: deposit0Amount, token1DepositAmount: deposit1Amount),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: deposit0Amount.toString()),
+            token1DepositAmountController: TextEditingController(text: deposit1Amount.toString())),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -663,8 +673,8 @@ void main() {
     in the deposit state. Once the deposit button is clicked, it should call
     the deposit function in the cubit passing the correct params (got from the constructor)""",
     (tester) async {
-      final token0Allowance = 400.parseTokenAmount(decimals: currentYield.token0.decimals);
-      final token1Allowance = 1200.parseTokenAmount(decimals: currentYield.token1.decimals);
+      final token0Allowance = 400.parseTokenAmount(decimals: currentYield.token0NetworkDecimals);
+      final token1Allowance = 1200.parseTokenAmount(decimals: currentYield.token1NetworkDecimals);
 
       const deposit0Amount = 100.2;
       const deposit1Amount = 110.2;
@@ -692,8 +702,8 @@ void main() {
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(
-          token0DepositAmount: deposit0Amount,
-          token1DepositAmount: deposit1Amount,
+          token0DepositAmountController: TextEditingController(text: deposit0Amount.toString()),
+          token1DepositAmountController: TextEditingController(text: deposit1Amount.toString()),
           deadline: deadline,
           isReversed: isReversed,
           minPrice: (isInfinity: isMinPriceInfinity, price: minPrice),
@@ -716,8 +726,8 @@ void main() {
           maxPrice: maxPrice,
           minPrice: minPrice,
           slippage: slippage,
-          token0Amount: deposit0Amount.parseTokenAmount(decimals: currentYield.token0.decimals),
-          token1Amount: deposit1Amount.parseTokenAmount(decimals: currentYield.token1.decimals),
+          token0Amount: deposit0Amount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
+          token1Amount: deposit1Amount.parseTokenAmount(decimals: currentYield.token1NetworkDecimals),
         ),
       ).called(1);
     },
@@ -730,8 +740,8 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(
         V3PoolConversorsMixinWrapper().priceToTick(
           price: 0.01, // It should be shown in the card (or very close to it)
-          poolToken0Decimals: currentYield.token0.decimals,
-          poolToken1Decimals: currentYield.token1.decimals,
+          poolToken0Decimals: currentYield.token0NetworkDecimals,
+          poolToken1Decimals: currentYield.token1NetworkDecimals,
           isReversed: false,
         ),
       );
@@ -748,8 +758,8 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(
         V3PoolConversorsMixinWrapper().priceToTick(
           price: 1200, // It should be shown in the card (or very close to it)
-          poolToken0Decimals: currentYield.token0.decimals,
-          poolToken1Decimals: currentYield.token1.decimals,
+          poolToken0Decimals: currentYield.token0NetworkDecimals,
+          poolToken1Decimals: currentYield.token1NetworkDecimals,
           isReversed: true,
         ),
       );
@@ -768,8 +778,8 @@ void main() {
       const newPrice = 0.02632; // It should be shown in the card (or very close to it)
       final newPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
         price: newPrice,
-        poolToken0Decimals: currentYield.token0.decimals,
-        poolToken1Decimals: currentYield.token1.decimals,
+        poolToken0Decimals: currentYield.token0NetworkDecimals,
+        poolToken1Decimals: currentYield.token1NetworkDecimals,
         isReversed: false,
       );
 
@@ -929,8 +939,8 @@ void main() {
                   isReversed: true,
                   minPrice: (isInfinity: true, price: 0),
                   maxPrice: (isInfinity: true, price: 0),
-                  token0DepositAmount: 1200,
-                  token1DepositAmount: 4300,
+                  token0DepositAmountController: TextEditingController(text: "1200"),
+                  token1DepositAmountController: TextEditingController(text: "4300"),
                   deadline: const Duration(minutes: 30),
                   maxSlippage: Slippage.halfPercent,
                 ).show(context, currentPoolTick: BigInt.from(121475));
@@ -962,8 +972,8 @@ void main() {
                   isReversed: true,
                   minPrice: (isInfinity: true, price: 0),
                   maxPrice: (isInfinity: true, price: 0),
-                  token0DepositAmount: 1200,
-                  token1DepositAmount: 4300,
+                  token0DepositAmountController: TextEditingController(text: "1200"),
+                  token1DepositAmountController: TextEditingController(text: "4300"),
                   deadline: const Duration(minutes: 30),
                   maxSlippage: Slippage.halfPercent,
                 ).show(context, currentPoolTick: BigInt.from(121475));
@@ -1019,4 +1029,37 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
+
+  zGoldenTest("When the token amounts controllers change its amount, it should reflect in the UI",
+      goldenFileName: "preview_deposit_modal_token_amounts_change", (tester) async {
+    final token0DepositAmountController = TextEditingController(text: "0");
+    final token1DepositAmountController = TextEditingController(text: "0");
+
+    when(() => cubit.state).thenReturn(
+      PreviewDepositModalState.initial(
+        token0Allowance: EthereumConstants.uint256Max,
+        token1Allowance: EthereumConstants.uint256Max,
+      ),
+    );
+
+    when(() => cubit.stream).thenAnswer((_) {
+      return Stream.value(PreviewDepositModalState.initial(
+        token0Allowance: EthereumConstants.uint256Max,
+        token1Allowance: EthereumConstants.uint256Max,
+      ));
+    });
+
+    await tester.pumpDeviceBuilder(
+        await goldenBuilder(
+          token0DepositAmountController: token0DepositAmountController,
+          token1DepositAmountController: token1DepositAmountController,
+        ),
+        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey));
+
+    await tester.pumpAndSettle();
+
+    token0DepositAmountController.text = "1200";
+    token1DepositAmountController.text = "4300";
+    await tester.pumpAndSettle();
+  });
 }

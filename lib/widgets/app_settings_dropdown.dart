@@ -8,9 +8,9 @@ import 'package:zup_ui_kit/zup_ui_kit.dart';
 class AppSettingsDropdown extends StatefulWidget {
   const AppSettingsDropdown({super.key});
 
-  static void show(BuildContext showBelowContext) => ZupDropdown.show(
-        showBelowContext: showBelowContext,
-        offset: const Offset(0, 16),
+  static void show(BuildContext showBelowContext) => ZupPopover.show(
+        showBasedOnContext: showBelowContext,
+        adjustment: const Offset(0, 16),
         child: const AppSettingsDropdown(),
       );
 

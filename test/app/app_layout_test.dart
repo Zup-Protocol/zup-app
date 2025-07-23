@@ -59,13 +59,15 @@ void main() {
             initialPath: ZupNavigatorPaths.newPosition.path,
             routeBuilder: (context, settings, child) => PageRouteBuilder(
               settings: settings,
-              pageBuilder: (context, __, ___) => const AppPage(),
+              pageBuilder: (context, __, ___) => const SizedBox(
+                height: 500,
+                child: AppPage(),
+              ),
             ),
           ),
         ),
         device: isMobile ? GoldenDevice.mobile : GoldenDevice.pc,
       );
-
   zGoldenTest("When the device size is a mobile, it should have a bottom navbar instead of a top app bar",
       goldenFileName: "app_layout_navbar", (tester) async {
     await tester.pumpDeviceBuilder(await goldenBuilder(isMobile: true), wrapper: GoldenConfig.localizationsWrapper());

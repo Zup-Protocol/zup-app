@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
-import 'package:zup_app/app/create/widgets/create_page_settings_dropdown.dart';
+import 'package:zup_app/app/create/widgets/create_page_settings_dropdown/create_page_settings_dropdown.dart';
+import 'package:zup_app/app/create/widgets/exchanges_filter_dropdown_button/exchanges_filter_dropdown_button.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
@@ -100,7 +101,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 490, minHeight: 500),
+          constraints: const BoxConstraints(maxWidth: 490),
           child: Align(
             alignment: Alignment.topLeft,
             child: Column(
@@ -112,48 +113,56 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                   style: const TextStyle(fontSize: 14, color: ZupColors.gray),
                 ),
                 const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Transform.translate(
-                      offset: const Offset(0, 8),
-                      child: Text(
-                        S.of(context).token0,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                          color: ZupColors.gray,
+                SizedBox(
+                  width: double.infinity,
+                  child: Wrap(
+                    runSpacing: 10,
+                    verticalDirection: VerticalDirection.up,
+                    alignment: WrapAlignment.spaceBetween,
+                    children: [
+                      Transform.translate(
+                        offset: const Offset(0, 8),
+                        child: Text(
+                          S.of(context).token0,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            color: ZupColors.gray,
+                          ),
                         ),
                       ),
-                    ),
-                    const Spacer(),
-                    StatefulBuilder(builder: (context, localSetState) {
-                      return Row(
-                        children: [
-                          Badge(
-                            alignment: const Alignment(1.05, -1.05),
-                            smallSize: cache.getPoolSearchSettings().isDefault ? 0 : 6,
-                            backgroundColor: ZupColors.orange,
-                            child: ZupPillButton(
-                              key: const Key("pool-search-settings-button"),
-                              onPressed: (buttonContext) => CreatePageSettingsDropdown.show(
-                                buttonContext,
-                                onClose: () {
-                                  if (mounted) {
-                                    WidgetsBinding.instance.addPostFrameCallback((_) => localSetState(() {}));
-                                  }
-                                },
+                      StatefulBuilder(builder: (context, localSetState) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const ExchangesFilterDropdownButton(),
+                            const SizedBox(width: 10),
+                            Badge(
+                              alignment: const Alignment(1.05, -1.05),
+                              smallSize: cache.getPoolSearchSettings().isDefault ? 0 : 6,
+                              backgroundColor: ZupColors.orange,
+                              child: ZupMiniButton(
+                                key: const Key("pool-search-settings-button"),
+                                onPressed: (buttonContext) => CreatePageSettingsDropdown.show(
+                                  buttonContext,
+                                  onClose: () {
+                                    if (mounted) {
+                                      WidgetsBinding.instance.addPostFrameCallback((_) => localSetState(() {}));
+                                    }
+                                  },
+                                ),
+                                title: S.of(context).createPageSelectTokensStageSearchSettings,
+                                icon: Assets.icons.gear.svg(
+                                  height: 18,
+                                  colorFilter: const ColorFilter.mode(ZupColors.white, BlendMode.srcIn),
+                                ),
                               ),
-                              foregroundColor: ZupColors.gray,
-                              backgroundColor: ZupColors.gray6,
-                              title: "Search settings",
-                              icon: Assets.icons.gear.svg(
-                                  height: 18, colorFilter: const ColorFilter.mode(ZupColors.white, BlendMode.srcIn)),
                             ),
-                          ),
-                        ],
-                      );
-                    })
-                  ],
+                          ],
+                        );
+                      })
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TokenSelectorButton(
@@ -191,7 +200,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                             icon: Assets.icons.sparkleMagnifyingglass.svg(),
                             onPressed: token0SelectorController.selectedToken != null &&
                                     token1SelectorController.selectedToken != null
-                                ? () {
+                                ? (buttonContext) {
                                     return navigator.navigateToDeposit(
                                       appCubit.selectedNetwork.isAllNetworks
                                           ? token0SelectorController.selectedToken!.internalId!

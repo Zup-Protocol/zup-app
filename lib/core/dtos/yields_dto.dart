@@ -1,8 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
 import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/pool_type.dart';
+import 'package:zup_app/core/enums/protocol_id.dart';
 
 part 'yields_dto.freezed.dart';
 part 'yields_dto.g.dart';
@@ -14,7 +16,7 @@ class YieldsDto with _$YieldsDto {
   @JsonSerializable(explicitToJson: true)
   const factory YieldsDto({
     @Default(<YieldDto>[]) @JsonKey(name: "pools") List<YieldDto> pools,
-    @Default(0) @JsonKey(name: "minTvlUsd") num minLiquidityUSD,
+    @Default(PoolSearchFiltersDto()) PoolSearchFiltersDto filters,
   }) = _YieldsDto;
 
   bool get isEmpty => pools.isEmpty;
@@ -27,26 +29,26 @@ class YieldsDto with _$YieldsDto {
 
   factory YieldsDto.empty() => const YieldsDto(
         pools: [],
-        minLiquidityUSD: 0,
       );
 
-  factory YieldsDto.fixture() => const YieldsDto(
+  factory YieldsDto.fixture() => YieldsDto(
+        filters: PoolSearchFiltersDto.fixture(),
         pools: [
           YieldDto(
             latestTick: "637812562",
             positionManagerAddress: "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4",
             poolType: PoolType.v3,
-            token0: TokenDto(
+            token0: const TokenDto(
               addresses: {11155111: "0x02a3e7E0480B668bD46b42852C58363F93e3bA5C"},
-              decimals: 6,
+              decimals: {11155111: 6},
               logoUrl:
                   "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4/logo.png",
               name: "USDC",
               symbol: "USDC",
             ),
-            token1: TokenDto(
+            token1: const TokenDto(
               addresses: {11155111: "0x5300000000000000000000000000000000000004"},
-              decimals: 18,
+              decimals: {11155111: 18},
               logoUrl:
                   "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x5300000000000000000000000000000000000004/logo.png",
               name: "Wrapped Ether",
@@ -61,6 +63,8 @@ class YieldsDto with _$YieldsDto {
             totalValueLockedUSD: 65434567890.21,
             feeTier: 500,
             protocol: ProtocolDto(
+              id: ProtocolId.pancakeSwapInfinityCL,
+              rawId: ProtocolId.pancakeSwapInfinityCL.toRawJsonValue,
               name: "PancakeSwap",
               logo:
                   "https://raw.githubusercontent.com/trustwallet/assets/master/dapps/exchange.pancakeswap.finance.png",

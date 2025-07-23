@@ -57,12 +57,12 @@ class SEn extends S {
   }
 
   @override
-  String depositPageMinLiquiditySearchAlert({required String minLiquidity}) {
-    return 'Searched only for pools with more than $minLiquidity TVL.';
-  }
+  String get depositPageTrySearchAllPools => 'Try search all pools?';
 
   @override
-  String get depositPageTrySearchAllPools => 'Try search all pools?';
+  String depositPageMinLiquiditySearchAlert({required String minLiquidity}) {
+    return 'You’ve set the search to only show pools with more than $minLiquidity.';
+  }
 
   @override
   String get slippageExplanation =>
@@ -255,6 +255,46 @@ class SEn extends S {
   String get loading => 'Loading...';
 
   @override
+  String get exchangesFilterDropdownButtonDropdownClearAll => 'Clear All';
+
+  @override
+  String get exchangesFilterDropdownButtonDropdownSelectAll => 'Select All';
+
+  @override
+  String get exchangesFilterDropdownButtonDropdownSearchHint =>
+      'Search by name';
+
+  @override
+  String get exchangesFilterDropdownButtonDropdownNotFoundStateTitle =>
+      'Not found';
+
+  @override
+  String get exchangesFilterDropdownButtonDropdownNotFoundStateDescription =>
+      'No supported exchanges found with this name';
+
+  @override
+  String get exchangesFilterDropdownButtonErrorSnackBarMessage =>
+      'Uh-oh! Something went wrong loading the exchanges. Please try refreshing the page.';
+
+  @override
+  String get exchangesFilterDropdownButtonTitle => 'Exchanges';
+
+  @override
+  String exchangesFilterDropdownButtonTitleNumered(
+      {required String exchangesCount}) {
+    return 'Exchanges ($exchangesCount)';
+  }
+
+  @override
+  String get createPageSelectTokensStageTokenA => 'Token A';
+
+  @override
+  String get createPageSelectTokensStageTokenB => 'Token B';
+
+  @override
+  String get createPageSelectTokensStageSearchSettings => 'Search Settings';
+
+  @override
   String get depositPageLoadingStep1Title => 'Matching Tokens...';
 
   @override
@@ -288,10 +328,10 @@ class SEn extends S {
 
   @override
   String get depositPageEmptyStateDescription =>
-      'Seems like that there are no pools on our supported protocols matching your selected tokens. Would you like to try another combination?';
+      'Seems like that there are no pools matching your defined settings at the moment. Would you like to either change your settings or try another combination?';
 
   @override
-  String get depositPageEmptyStateHelpButtonTitle => 'Try another combination';
+  String get depositPageEmptyStateHelpButtonTitle => 'Go Back to New Position';
 
   @override
   String get depositPageBackButtonTitle => 'Select Pair';

@@ -73,9 +73,13 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
                 title: AppHeader(height: appBarHeight),
                 toolbarHeight: appBarHeight,
               ),
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: RouterOutlet(key: Key("screen")),
+              SliverToBoxAdapter(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height - appBarHeight),
+                  child: const RouterOutlet(
+                    key: Key("screen"),
+                  ),
+                ),
               ),
               SliverToBoxAdapter(
                 child: Padding(

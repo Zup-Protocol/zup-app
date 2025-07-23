@@ -30,23 +30,17 @@ class TokenAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return asset.logoUrl.isEmpty
         ? genericAvatar()
-        : zupCachedImage.build(
-            asset.logoUrl,
+        : zupCachedImage.build(asset.logoUrl,
             height: size,
             width: size,
             radius: 50,
             errorWidget: (_, __, ___) => genericAvatar(),
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-
-              return Skeleton.ignore(
-                child: ZupCircularLoadingIndicator(
-                  size: size,
-                  backgroundColor: ZupColors.brand5,
-                  indicatorColor: ZupColors.brand,
-                ),
-              );
-            },
-          );
+            placeholder: Skeleton.ignore(
+              child: ZupCircularLoadingIndicator(
+                size: size,
+                backgroundColor: ZupColors.brand5,
+                indicatorColor: ZupColors.brand,
+              ),
+            ));
   }
 }

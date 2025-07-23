@@ -2,13 +2,13 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web3kit/web3kit.dart';
-import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 
 enum AppNetworks {
   allNetworks,
   mainnet,
   // base,
+  // bnb,
   unichain,
   scroll,
   sepolia;
@@ -47,6 +47,7 @@ enum AppNetworks {
         allNetworks => false,
         // base => false,
         unichain => false,
+        // bnb => false
       };
 
   String get label => switch (this) {
@@ -56,6 +57,7 @@ enum AppNetworks {
         allNetworks => "All Networks",
         // base => "Base",
         unichain => "Unichain",
+        // bnb => "BNB Chain",
       };
 
   Widget get icon => switch (this) {
@@ -65,6 +67,7 @@ enum AppNetworks {
         // base => Assets.logos.base.svg(),
         unichain => Assets.logos.unichain.svg(),
         allNetworks => Assets.icons.all.svg(),
+        // bnb => Assets.logos.bnbChain.svg()
       };
 
   ChainInfo get chainInfo => switch (this) {
@@ -100,10 +103,17 @@ enum AppNetworks {
         unichain => ChainInfo(
             hexChainId: "0x82",
             chainName: label,
-            blockExplorerUrls: const ["https://uniscan.xyz/"],
+            blockExplorerUrls: const ["https://uniscan.xyz"],
             nativeCurrency: NativeCurrencies.eth.currencyInfo,
             rpcUrls: [rpcUrl],
           ),
+        // bnb => ChainInfo(
+        //   hexChainId => "0x38",
+        //   chainName => label,
+        //   blockExplorerUrls => const ["https://bscscan.com"],
+        //   nativeCurrency => NativeCurrencies.bnb.currencyInfo,
+        //   rpcUrls => [rpcUrl],
+        // ),
       };
 
   String get wrappedNativeTokenAddress => switch (this) {
@@ -112,48 +122,8 @@ enum AppNetworks {
         mainnet => "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
         scroll => "0x5300000000000000000000000000000000000004",
         // base => "0x4200000000000000000000000000000000000006",
-        unichain => "0x4200000000000000000000000000000000000006"
-      };
-
-  TokenDto get wrappedNative => switch (this) {
-        allNetworks => throw UnimplementedError("allNetworks is not a valid network"),
-        sepolia => TokenDto(
-            addresses: {chainId: wrappedNativeTokenAddress},
-            name: "Wrapped Ether",
-            decimals: NativeCurrencies.eth.currencyInfo.decimals,
-            symbol: "WETH",
-            logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
-          ),
-        mainnet => TokenDto(
-            addresses: {chainId: wrappedNativeTokenAddress},
-            decimals: NativeCurrencies.eth.currencyInfo.decimals,
-            name: "Wrapped Ether",
-            symbol: "WETH",
-            logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
-          ),
-        scroll => TokenDto(
-            addresses: {chainId: wrappedNativeTokenAddress},
-            decimals: NativeCurrencies.eth.currencyInfo.decimals,
-            name: "Wrapped Ether",
-            symbol: "WETH",
-            logoUrl:
-                "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/scroll/assets/0x5300000000000000000000000000000000000004/logo.png",
-          ),
-        // base => TokenDto(
-        //     addresses: {chainId: wrappedNativeTokenAddress},
-        //     decimals: NativeCurrencies.eth.currencyInfo.decimals,
-        //     name: "Wrapped Ether",
-        //     symbol: "WETH",
-        //     logoUrl:
-        //         "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/base/assets/0x4200000000000000000000000000000000000006/logo.png",
-        //   ),
-        unichain => TokenDto(
-            addresses: {chainId: wrappedNativeTokenAddress},
-            decimals: NativeCurrencies.eth.currencyInfo.decimals,
-            name: "Wrapped Ether",
-            symbol: "WETH",
-            logoUrl: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/unichain/logo.png",
-          ),
+        unichain => "0x4200000000000000000000000000000000000006",
+        // bnb => "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
       };
 
   String get rpcUrl => switch (this) {
@@ -163,6 +133,7 @@ enum AppNetworks {
         scroll => "https://scroll-rpc.publicnode.com",
         // base => "https://base-rpc.publicnode.com",
         unichain => "https://unichain-rpc.publicnode.com",
+        // bnb => "https://bsc-rpc.publicnode.com"
       };
 
   Future<void> openTx(String txHash) async {

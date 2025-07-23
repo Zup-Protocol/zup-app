@@ -542,10 +542,10 @@ packages:
     dependency: transitive
     description:
       name: hashlib
-      sha256: f00cbea036b8a8ea19be5df1e233fb2e250858639d3488776c32f0bd60b41cc4
+      sha256: a7b34c92005e9ccf462b71bcab40b5d5cff53669c7e87e6c7277f18bb075bf05
       url: "https://pub.dev"
     source: hosted
-    version: "1.21.2"
+    version: "1.21.3"
   hashlib_codecs:
     dependency: transitive
     description:
@@ -1293,7 +1293,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "96c38241bbd55f27820c0fbe0e62ed53f2febed7"
+      resolved-ref: "50b4737ccfa02d8b657173e430ca197dc18b5993"
       url: "https://github.com/Zup-Protocol/web3kit.git"
     source: git
     version: "0.0.1"
@@ -1342,7 +1342,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "2fb18c6a9212718d0bb72d13f255436800d34c4a"
+      resolved-ref: "93b849fffe3a50e116c28d45530ffb28a007c5e1"
       url: "https://github.com/Zup-Protocol/zup-core.git"
     source: git
     version: "0.0.1"
@@ -1351,7 +1351,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: cd1e5f42c34c93ec91f8da476ec19cc2d2435c36
+      resolved-ref: "1d2a3b3890032536df60a14db88bf7cd8fe7e52e"
       url: "https://github.com/Zup-Protocol/zup-ui-kit.git"
     source: git
     version: "0.0.1"

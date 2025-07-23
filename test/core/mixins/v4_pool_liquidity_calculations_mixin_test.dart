@@ -13,7 +13,7 @@ void main() {
 
       expect(
         _V4PoolLiquidityCalculationsMixinTest().getLiquidityForAmount0(sqrtPriceAX96, sqrtPriceBX96, amount0),
-        BigInt.parse("282021882116526385819866125"),
+        BigInt.parse("282021882116526385820841971"),
       );
     },
   );
@@ -44,7 +44,7 @@ void main() {
       expect(
         _V4PoolLiquidityCalculationsMixinTest()
             .getLiquidityForAmounts(sqrtPriceX96, sqrtPriceAX96, sqrtPriceBX96, amount0, amount1),
-        BigInt.parse("282021882116526385819866125"),
+        BigInt.parse("282021882116526385820841971"),
       );
     },
   );
@@ -61,7 +61,7 @@ void main() {
       expect(
         _V4PoolLiquidityCalculationsMixinTest()
             .getLiquidityForAmounts(sqrtPriceX96, sqrtPriceAX96, sqrtPriceBX96, amount0, amount1),
-        BigInt.parse("94007294038842128606622041"),
+        BigInt.parse("94007294038842128606947412"),
       );
     },
   );

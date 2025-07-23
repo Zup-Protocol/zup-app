@@ -6,5 +6,5 @@ class DepositState with _$DepositState {
   const factory DepositState.loading() = _Loading;
   const factory DepositState.success(YieldsDto yields) = _Success;
   const factory DepositState.error() = _Error;
-  const factory DepositState.noYields({required num minLiquiditySearched}) = _NoYields;
+  const factory DepositState.noYields({required PoolSearchFiltersDto filtersApplied}) = _NoYields;
 }

@@ -16,4 +16,6 @@ mixin KeysMixin {
   String tokenPriceCacheKey({required String tokenAddress, required AppNetworks network}) {
     return 'tokenPrice-$tokenAddress-${network.name}';
   }
+
+  String get protocolsListKey => 'zup-supported-protocols';
 }

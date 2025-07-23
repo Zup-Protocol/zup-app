@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:zup_app/app/create/widgets/create_page_settings_dropdown.dart';
+import 'package:zup_app/app/create/widgets/create_page_settings_dropdown/create_page_settings_dropdown.dart';
 import 'package:zup_app/core/cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
