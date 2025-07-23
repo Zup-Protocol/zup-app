@@ -48,7 +48,7 @@ class YieldDto with _$YieldDto {
     required num yield30d,
     required num yield90d,
     required int chainId,
-    required PoolType poolType,
+    @Default(PoolType.unknown) @JsonKey(unknownEnumValue: PoolType.unknown) PoolType poolType,
     @Default("0") String latestTick,
     @Default(0) num totalValueLockedUSD,
     @Default(EthereumConstants.zeroAddress) @JsonKey(name: "hooksAddress") String v4Hooks,

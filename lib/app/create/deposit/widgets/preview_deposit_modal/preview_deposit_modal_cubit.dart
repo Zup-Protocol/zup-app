@@ -129,6 +129,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
   Future<void> checkOrApprovePermit2ForV4Pool(BigInt approveValue, TokenDto token) async {
     final tokenAddressInNetwork = token.addresses[_yield.network.chainId]!;
 
+    if (tokenAddressInNetwork == EthereumConstants.zeroAddress) return;
+
     final permit2Contract = _permit2.fromSigner(
       contractAddress: _yield.permit2!,
       signer: _wallet.signer!,
@@ -242,7 +244,6 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
           maxAmount0ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(amount0Desired),
           maxAmount1ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(amount1Desired),
           recipient: recipient,
-          currentPoolTick: _latestPoolTick,
         );
       }.call();
 
@@ -322,15 +323,15 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     }
   }
 
-  void _updateTick() {
+  Future<BigInt> _updateTick() async {
     try {
-      _poolRepository.getPoolTick(_yield).then((tick) {
-        _latestPoolTick = tick;
-        _poolTickStreamController.add(tick);
-      });
+      _latestPoolTick = await _poolRepository.getPoolTick(_yield);
+      _poolTickStreamController.add(_latestPoolTick);
     } catch (_) {
       // DO NOTHING
     }
+
+    return _latestPoolTick;
   }
 
   void _waitTransactionFinishBeforeClosing() {

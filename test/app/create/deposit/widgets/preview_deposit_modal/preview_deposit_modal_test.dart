@@ -122,8 +122,8 @@ void main() {
     bool isReversed = false,
     ({bool isInfinity, double price}) minPrice = (isInfinity: false, price: 1200),
     ({bool isInfinity, double price}) maxPrice = (isInfinity: false, price: 3000),
-    double token0DepositAmount = 1,
-    double token1DepositAmount = 3,
+    TextEditingController? token0DepositAmountController,
+    TextEditingController? token1DepositAmountController,
     Duration deadline = const Duration(minutes: 30),
     Slippage slippage = Slippage.halfPercent,
   }) =>
@@ -144,8 +144,8 @@ void main() {
                     isReversed: isReversed,
                     minPrice: minPrice,
                     maxPrice: maxPrice,
-                    token0DepositAmount: token0DepositAmount,
-                    token1DepositAmount: token1DepositAmount,
+                    token0DepositAmountController: token0DepositAmountController ?? TextEditingController(text: "1"),
+                    token1DepositAmountController: token1DepositAmountController ?? TextEditingController(text: "3"),
                   ),
                 ));
           });
@@ -497,7 +497,9 @@ void main() {
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: depositAmount, token1DepositAmount: 0),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+            token1DepositAmountController: TextEditingController(text: "0")),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -530,7 +532,9 @@ void main() {
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: depositAmount, token1DepositAmount: 0),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+            token1DepositAmountController: TextEditingController(text: "0")),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -571,7 +575,9 @@ void main() {
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: depositAmount, token1DepositAmount: depositAmount),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+            token1DepositAmountController: TextEditingController(text: depositAmount.toString())),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -606,7 +612,9 @@ void main() {
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: depositAmount, token1DepositAmount: depositAmount),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+            token1DepositAmountController: TextEditingController(text: depositAmount.toString())),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -650,7 +658,9 @@ void main() {
       });
 
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(token0DepositAmount: deposit0Amount, token1DepositAmount: deposit1Amount),
+        await goldenBuilder(
+            token0DepositAmountController: TextEditingController(text: deposit0Amount.toString()),
+            token1DepositAmountController: TextEditingController(text: deposit1Amount.toString())),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -692,8 +702,8 @@ void main() {
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(
-          token0DepositAmount: deposit0Amount,
-          token1DepositAmount: deposit1Amount,
+          token0DepositAmountController: TextEditingController(text: deposit0Amount.toString()),
+          token1DepositAmountController: TextEditingController(text: deposit1Amount.toString()),
           deadline: deadline,
           isReversed: isReversed,
           minPrice: (isInfinity: isMinPriceInfinity, price: minPrice),
@@ -929,8 +939,8 @@ void main() {
                   isReversed: true,
                   minPrice: (isInfinity: true, price: 0),
                   maxPrice: (isInfinity: true, price: 0),
-                  token0DepositAmount: 1200,
-                  token1DepositAmount: 4300,
+                  token0DepositAmountController: TextEditingController(text: "1200"),
+                  token1DepositAmountController: TextEditingController(text: "4300"),
                   deadline: const Duration(minutes: 30),
                   maxSlippage: Slippage.halfPercent,
                 ).show(context, currentPoolTick: BigInt.from(121475));
@@ -962,8 +972,8 @@ void main() {
                   isReversed: true,
                   minPrice: (isInfinity: true, price: 0),
                   maxPrice: (isInfinity: true, price: 0),
-                  token0DepositAmount: 1200,
-                  token1DepositAmount: 4300,
+                  token0DepositAmountController: TextEditingController(text: "1200"),
+                  token1DepositAmountController: TextEditingController(text: "4300"),
                   deadline: const Duration(minutes: 30),
                   maxSlippage: Slippage.halfPercent,
                 ).show(context, currentPoolTick: BigInt.from(121475));
@@ -1019,4 +1029,37 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
+
+  zGoldenTest("When the token amounts controllers change its amount, it should reflect in the UI",
+      goldenFileName: "preview_deposit_modal_token_amounts_change", (tester) async {
+    final token0DepositAmountController = TextEditingController(text: "0");
+    final token1DepositAmountController = TextEditingController(text: "0");
+
+    when(() => cubit.state).thenReturn(
+      PreviewDepositModalState.initial(
+        token0Allowance: EthereumConstants.uint256Max,
+        token1Allowance: EthereumConstants.uint256Max,
+      ),
+    );
+
+    when(() => cubit.stream).thenAnswer((_) {
+      return Stream.value(PreviewDepositModalState.initial(
+        token0Allowance: EthereumConstants.uint256Max,
+        token1Allowance: EthereumConstants.uint256Max,
+      ));
+    });
+
+    await tester.pumpDeviceBuilder(
+        await goldenBuilder(
+          token0DepositAmountController: token0DepositAmountController,
+          token1DepositAmountController: token1DepositAmountController,
+        ),
+        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey));
+
+    await tester.pumpAndSettle();
+
+    token0DepositAmountController.text = "1200";
+    token1DepositAmountController.text = "4300";
+    await tester.pumpAndSettle();
+  });
 }

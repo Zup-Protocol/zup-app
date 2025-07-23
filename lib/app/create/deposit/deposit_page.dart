@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:decimal/decimal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -104,6 +106,7 @@ class _DepositPageState extends State<DepositPage>
   double maxPrice = 0;
   RangeController minRangeController = RangeController();
   RangeController maxRangeController = RangeController();
+  StreamSubscription<BigInt?>? _poolTickStreamSubscription;
 
   late Slippage selectedSlippage = _cubit.depositSettings.slippage;
   late Duration selectedDeadline = _cubit.depositSettings.deadline;
@@ -243,7 +246,7 @@ class _DepositPageState extends State<DepositPage>
       getMinPrice(),
       getMaxPrice(),
     ).toString())
-        .toString();
+        ?.toStringAsFixed(quoteToken.decimals[_cubit.selectedYield!.network.chainId]!);
 
     final newBaseTokenAmount = Decimal.tryParse(calculateToken0AmountFromToken1(
       double.tryParse(quoteTokenAmountController.text) ?? 0,
@@ -251,17 +254,17 @@ class _DepositPageState extends State<DepositPage>
       getMinPrice(),
       getMaxPrice(),
     ).toString())
-        .toString();
+        ?.toStringAsFixed(baseToken.decimals[_cubit.selectedYield!.network.chainId]!);
 
     if (isBaseTokenAmountUserInput) {
-      if (newQuoteTokenAmount.isEmptyOrZero) return quoteTokenAmountController.clear();
-      quoteTokenAmountController.text = newQuoteTokenAmount;
+      if (newQuoteTokenAmount?.isEmptyOrZero ?? true) return quoteTokenAmountController.clear();
+      quoteTokenAmountController.text = newQuoteTokenAmount!;
 
       return;
     }
 
-    if (newBaseTokenAmount.isEmptyOrZero) return baseTokenAmountController.clear();
-    baseTokenAmountController.text = newBaseTokenAmount;
+    if (newBaseTokenAmount?.isEmptyOrZero ?? true) return baseTokenAmountController.clear();
+    baseTokenAmountController.text = newBaseTokenAmount!;
   }
 
   Future<({String title, Widget? icon, Function()? onPressed})> depositButtonState() async {
@@ -320,14 +323,8 @@ class _DepositPageState extends State<DepositPage>
           maxSlippage: selectedSlippage,
           currentYield: _cubit.selectedYield!,
           isReversed: areTokensReversed,
-          token0DepositAmount: double.tryParse(
-                areTokensReversed ? quoteTokenAmountController.text : baseTokenAmountController.text,
-              ) ??
-              0,
-          token1DepositAmount: double.tryParse(
-                areTokensReversed ? baseTokenAmountController.text : quoteTokenAmountController.text,
-              ) ??
-              0,
+          token0DepositAmountController: areTokensReversed ? quoteTokenAmountController : baseTokenAmountController,
+          token1DepositAmountController: areTokensReversed ? baseTokenAmountController : quoteTokenAmountController,
           maxPrice: (isInfinity: isMaxRangeInfinity, price: maxPrice),
           minPrice: (isInfinity: isMinRangeInfinity, price: minPrice),
         ).show(
@@ -355,6 +352,14 @@ class _DepositPageState extends State<DepositPage>
       _cubit.getBestPools(token0AddressOrId: token0Address, token1AddressOrId: token1Address);
     });
 
+    _poolTickStreamSubscription = _cubit.poolTickStream.listen((poolTick) {
+      if (poolTick != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() => calculateDepositTokensAmount());
+        });
+      }
+    });
+
     super.initState();
   }
 
@@ -362,6 +367,7 @@ class _DepositPageState extends State<DepositPage>
   void dispose() {
     minRangeController.dispose();
     maxRangeController.dispose();
+    _poolTickStreamSubscription?.cancel();
     super.dispose();
   }
 

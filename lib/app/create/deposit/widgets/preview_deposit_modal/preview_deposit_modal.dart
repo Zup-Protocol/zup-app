@@ -24,6 +24,7 @@ import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/token_avatar.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/extensions/text_edititing_controller_extension.dart';
 import 'package:zup_core/zup_core.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
@@ -34,8 +35,8 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
     required this.isReversed,
     required this.minPrice,
     required this.maxPrice,
-    required this.token0DepositAmount,
-    required this.token1DepositAmount,
+    required this.token0DepositAmountController,
+    required this.token1DepositAmountController,
     required this.deadline,
     required this.maxSlippage,
     required this.yieldTimeFrame,
@@ -46,8 +47,8 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
   final bool isReversed;
   final ({double price, bool isInfinity}) minPrice;
   final ({double price, bool isInfinity}) maxPrice;
-  final double token0DepositAmount;
-  final double token1DepositAmount;
+  final TextEditingController token0DepositAmountController;
+  final TextEditingController token1DepositAmountController;
   final Duration deadline;
   final Slippage maxSlippage;
 
@@ -75,8 +76,8 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
         child: PreviewDepositModal(
           deadline: deadline,
           maxSlippage: maxSlippage,
-          token0DepositAmount: token0DepositAmount,
-          token1DepositAmount: token1DepositAmount,
+          token0DepositAmountController: token0DepositAmountController,
+          token1DepositAmountController: token1DepositAmountController,
           minPrice: minPrice,
           maxPrice: maxPrice,
           currentYield: currentYield,
@@ -100,6 +101,10 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
     instanceName: InjectInstanceNames.appScrollController,
   );
 
+  late VoidCallback tokenDepositAmountChangeAction = () {
+    WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
+  };
+
   TokenDto get baseToken {
     if (isReversedLocal) {
       return widget.currentYield.token1;
@@ -116,13 +121,21 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
     return widget.currentYield.token1;
   }
 
-  double get baseTokenAmount => isReversedLocal ? widget.token1DepositAmount : widget.token0DepositAmount;
-  double get quoteTokenAmount => isReversedLocal ? widget.token0DepositAmount : widget.token1DepositAmount;
   PreviewDepositModalCubit get cubit => context.read<PreviewDepositModalCubit>();
-  BigInt get token0DepositAmount =>
-      widget.token0DepositAmount.parseTokenAmount(decimals: widget.currentYield.token0NetworkDecimals);
-  BigInt get token1DepositAmount =>
-      widget.token1DepositAmount.parseTokenAmount(decimals: widget.currentYield.token1NetworkDecimals);
+
+  double get baseTokenAmount => isReversedLocal
+      ? widget.token1DepositAmountController.parseTextToDouble
+      : widget.token0DepositAmountController.parseTextToDouble;
+
+  double get quoteTokenAmount => isReversedLocal
+      ? widget.token0DepositAmountController.parseTextToDouble
+      : widget.token1DepositAmountController.parseTextToDouble;
+
+  BigInt get token0DepositAmount => widget.token0DepositAmountController.parseTextToDouble
+      .parseTokenAmount(decimals: widget.currentYield.token0NetworkDecimals);
+
+  BigInt get token1DepositAmount => widget.token1DepositAmountController.parseTextToDouble
+      .parseTokenAmount(decimals: widget.currentYield.token1NetworkDecimals);
 
   double get currentPrice {
     final currentTick = cubit.latestPoolTick;
@@ -316,7 +329,19 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) => cubit.setup());
+
+    widget.token0DepositAmountController.addListener(tokenDepositAmountChangeAction);
+    widget.token1DepositAmountController.addListener(tokenDepositAmountChangeAction);
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.token0DepositAmountController.removeListener(tokenDepositAmountChangeAction);
+    widget.token1DepositAmountController.removeListener(tokenDepositAmountChangeAction);
+
+    super.dispose();
   }
 
   @override
@@ -492,7 +517,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                         Text(
                             "${baseTokenAmount.maybeFormatCompactCurrency(
                               isUSD: false,
-                              useLessThan: true,
+                              useLessThan: false,
                               useMoreThan: true,
                             )} ${baseToken.symbol}",
                             style: const TextStyle(fontWeight: FontWeight.w500)),
@@ -519,7 +544,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                         Text(
                             "${quoteTokenAmount.maybeFormatCompactCurrency(
                               isUSD: false,
-                              useLessThan: true,
+                              useLessThan: false,
                               useMoreThan: true,
                             )} ${quoteToken.symbol}",
                             style: const TextStyle(fontWeight: FontWeight.w500)),

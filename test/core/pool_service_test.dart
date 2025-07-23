@@ -85,9 +85,6 @@ void main() {
       pancakeSwapInfinityCLPoolManager,
     );
 
-    when(() => stateView.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
-        .thenReturn(stateViewImpl);
-
     when(() => uniswapV3Pool.fromRpcProvider(
           contractAddress: any(named: "contractAddress"),
           rpcUrl: any(named: "rpcUrl"),
@@ -105,6 +102,9 @@ void main() {
             positionManagerV4.fromSigner(contractAddress: any(named: "contractAddress"), signer: any(named: "signer")))
         .thenReturn(positionManagerV4Impl);
 
+    when(() => stateView.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
+        .thenReturn(stateViewImpl);
+
     when(() => positionManagerV4.fromRpcProvider(
         contractAddress: any(named: "contractAddress"),
         rpcUrl: any(named: "rpcUrl"))).thenReturn(positionManagerV4Impl);
@@ -113,6 +113,12 @@ void main() {
 
     when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async => TransactionReceipt(hash: "0x123"));
     when(() => transactionResponse.hash).thenReturn("0x123");
+    when(() => stateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer((_) async => (
+          lpFee: BigInt.from(0),
+          protocolFee: BigInt.from(0),
+          sqrtPriceX96: BigInt.from(0),
+          tick: BigInt.from(0),
+        ));
   });
 
   test(
@@ -538,9 +544,11 @@ void main() {
     final recipient = await signer.address;
     final tickLower = BigInt.from(321);
     final tickUpper = BigInt.from(1222);
-    final currentPoolTick = BigInt.from(123);
+
     final currentYield0 = currentYield.copyWith(
       chainId: network.chainId,
+      poolType: PoolType.v4,
+      v4StateView: "0x1",
       token0: TokenDto.fixture().copyWith(addresses: {network.chainId: EthereumConstants.zeroAddress}),
       token1: TokenDto.fixture().copyWith(addresses: {network.chainId: "0x1"}),
     );
@@ -556,7 +564,6 @@ void main() {
       maxAmount0ToDeposit: amount0Max,
       maxAmount1ToDeposit: amount1Max,
       recipient: recipient,
-      currentPoolTick: currentPoolTick,
     );
 
     verify(() => ethereumAbiCoder.encodePacked([
@@ -589,9 +596,11 @@ void main() {
     final recipient = await signer.address;
     final tickLower = BigInt.from(321);
     final tickUpper = BigInt.from(1222);
-    final currentPoolTick = BigInt.from(123);
+
     final currentYield0 = currentYield.copyWith(
       chainId: network.chainId,
+      v4StateView: "0x1",
+      poolType: PoolType.v4,
       token1: TokenDto.fixture().copyWith(addresses: {network.chainId: EthereumConstants.zeroAddress}),
       token0: TokenDto.fixture().copyWith(addresses: {network.chainId: "0x1"}),
     );
@@ -607,7 +616,6 @@ void main() {
       maxAmount0ToDeposit: amount0Max,
       maxAmount1ToDeposit: amount1Max,
       recipient: recipient,
-      currentPoolTick: currentPoolTick,
     );
 
     verify(() => ethereumAbiCoder.encodePacked([
@@ -640,9 +648,11 @@ void main() {
     final recipient = await signer.address;
     final tickLower = BigInt.from(321);
     final tickUpper = BigInt.from(1222);
-    final currentPoolTick = BigInt.from(123);
+
     final currentYield0 = currentYield.copyWith(
       chainId: network.chainId,
+      v4StateView: "0x1",
+      poolType: PoolType.v4,
       token0: TokenDto.fixture().copyWith(addresses: {network.chainId: "0x2"}),
       token1: TokenDto.fixture().copyWith(addresses: {network.chainId: "0x1"}),
     );
@@ -658,7 +668,6 @@ void main() {
       maxAmount0ToDeposit: amount0Max,
       maxAmount1ToDeposit: amount1Max,
       recipient: recipient,
-      currentPoolTick: currentPoolTick,
     );
 
     verify(() => ethereumAbiCoder.encodePacked([
@@ -673,13 +682,6 @@ void main() {
   test(
     "When calling `sendV4PoolDepositTransaction` the mint action params should be correctly encoded",
     () async {
-      when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
-      when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
-      when(
-        () => positionManagerV4Impl.modifyLiquidities(
-            unlockData: any(named: "unlockData"), deadline: any(named: "deadline"), ethValue: any(named: "ethValue")),
-      ).thenAnswer((_) async => transactionResponse);
-
       const token0Address = "0x1";
       const token1Address = "0x2";
       const network = AppNetworks.mainnet;
@@ -691,9 +693,26 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+      final sqrtPriceX96 = BigInt.from(2167212171927187);
+
+      when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
+      when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
+      when(
+        () => positionManagerV4Impl.modifyLiquidities(
+            unlockData: any(named: "unlockData"), deadline: any(named: "deadline"), ethValue: any(named: "ethValue")),
+      ).thenAnswer((_) async => transactionResponse);
+
+      when(() => stateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer((_) async => (
+            lpFee: BigInt.from(0),
+            protocolFee: BigInt.from(0),
+            sqrtPriceX96: sqrtPriceX96,
+            tick: BigInt.from(0),
+          ));
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
       );
@@ -709,7 +728,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(() => ethereumAbiCoder.encode([
@@ -732,7 +750,7 @@ void main() {
             tickLower,
             tickUpper,
             _V4PoolLiquidityCalculationsMixinWrapper().getLiquidityForAmounts(
-              _V4PoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(currentPoolTick),
+              sqrtPriceX96,
               _V4PoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(tickLower),
               _V4PoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(tickUpper),
               amount0Desired,
@@ -767,9 +785,11 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
       );
@@ -785,7 +805,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(() => ethereumAbiCoder.encode(["address", "address"], [token0Address, token1Address])).called(1);
@@ -813,9 +832,11 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
       );
@@ -831,7 +852,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(
@@ -864,9 +884,11 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
       );
@@ -882,7 +904,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(
@@ -915,9 +936,11 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
       );
@@ -963,7 +986,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(
@@ -997,9 +1019,11 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
       );
@@ -1045,7 +1069,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(
@@ -1078,9 +1101,11 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
       );
@@ -1123,7 +1148,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(
@@ -1152,9 +1176,11 @@ void main() {
         final recipient = await signer.address;
         final tickLower = BigInt.from(321);
         final tickUpper = BigInt.from(1222);
-        final currentPoolTick = BigInt.from(123);
+
         final currentYield0 = currentYield.copyWith(
           chainId: network.chainId,
+          v4StateView: "0x1",
+          poolType: PoolType.v4,
           token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
           token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
         );
@@ -1178,7 +1204,6 @@ void main() {
           maxAmount0ToDeposit: amount0Max,
           maxAmount1ToDeposit: amount1Max,
           recipient: recipient,
-          currentPoolTick: currentPoolTick,
         );
 
         verify(
@@ -1206,9 +1231,11 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
       );
@@ -1232,7 +1259,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(
@@ -1260,9 +1286,11 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
       );
@@ -1286,7 +1314,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(
@@ -1314,9 +1341,11 @@ void main() {
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
-      final currentPoolTick = BigInt.from(123);
+
       final currentYield0 = currentYield.copyWith(
         chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
         token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
         token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
       );
@@ -1340,7 +1369,6 @@ void main() {
         maxAmount0ToDeposit: amount0Max,
         maxAmount1ToDeposit: amount1Max,
         recipient: recipient,
-        currentPoolTick: currentPoolTick,
       );
 
       verify(
@@ -1382,4 +1410,98 @@ void main() {
       verify(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: yield0.poolAddress)).called(1);
     },
   );
+
+  test("""When calling `getSqrtPriceX96` and the yield protocol is pancakeswap infinity cl,
+  it should use the pancakeswap inifity cl pool manager to get the sqrtPriceX96 from the
+  slot0""", () async {
+    final expectedSqrtPriceX96 = BigInt.parse("3256723627823257362");
+
+    final yield0 = currentYield.copyWith(
+      protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.pancakeSwapInfinityCL),
+      v4PoolManager: "0x0000001",
+    );
+
+    when(() => pancakeSwapInfinityCLPoolManager.fromRpcProvider(
+        contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl"))).thenReturn(
+      pancakeSwapInfinityCLPoolManagerImpl,
+    );
+
+    when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer((_) async => (
+          sqrtPriceX96: expectedSqrtPriceX96,
+          tick: BigInt.from(0),
+          protocolFee: BigInt.from(0),
+          lpFee: BigInt.from(0),
+        ));
+
+    final receivedSqrtPriceX96 = await sut.getSqrtPriceX96(yield0);
+
+    expect(receivedSqrtPriceX96, expectedSqrtPriceX96);
+  });
+
+  test("""When calling `getSqrtPriceX96` and the yield pool is v4,
+  it should use the v4 state view get the sqrtPriceX96 from the
+  slot0""", () async {
+    final expectedSqrtPriceX96 = BigInt.parse("1216426515276100");
+
+    final yield0 = currentYield.copyWith(
+      poolType: PoolType.v4,
+      v4StateView: "0x0000001",
+    );
+
+    when(() => stateView.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
+        .thenReturn(
+      stateViewImpl,
+    );
+
+    when(() => stateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer((_) async => (
+          sqrtPriceX96: expectedSqrtPriceX96,
+          tick: BigInt.from(0),
+          protocolFee: BigInt.from(0),
+          lpFee: BigInt.from(0),
+        ));
+
+    final receivedSqrtPriceX96 = await sut.getSqrtPriceX96(yield0);
+
+    expect(receivedSqrtPriceX96, expectedSqrtPriceX96);
+  });
+
+  test("""When calling `getSqrtPriceX96` and the yield pool is v3,
+  it should use the pool contract get the sqrtPriceX96 from the
+  slot0""", () async {
+    final expectedSqrtPriceX96 = BigInt.parse("907219862715267517621");
+
+    final yield0 = currentYield.copyWith(
+      poolType: PoolType.v3,
+      poolAddress: "0x0000001",
+    );
+
+    when(() =>
+            uniswapV3Pool.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
+        .thenReturn(
+      uniswapV3PoolImpl,
+    );
+
+    when(() => uniswapV3PoolImpl.slot0()).thenAnswer((_) async => (
+          feeProtocol: BigInt.from(0),
+          observationCardinality: BigInt.from(0),
+          observationCardinalityNext: BigInt.from(0),
+          observationIndex: BigInt.from(0),
+          sqrtPriceX96: expectedSqrtPriceX96,
+          tick: BigInt.from(0),
+          unlocked: true,
+        ));
+
+    final receivedSqrtPriceX96 = await sut.getSqrtPriceX96(yield0);
+
+    expect(receivedSqrtPriceX96, expectedSqrtPriceX96);
+  });
+
+  test("""When calling `getSqrtPriceX96` and the yield pool type
+    is unknown, it should throw an error""", () async {
+    final yield0 = currentYield.copyWith(
+      poolType: PoolType.unknown,
+    );
+
+    expect(() async => await sut.getSqrtPriceX96(yield0), throwsA(isA<Exception>()));
+  });
 }

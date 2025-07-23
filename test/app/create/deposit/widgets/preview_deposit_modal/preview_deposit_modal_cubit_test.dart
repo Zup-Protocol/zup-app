@@ -1985,7 +1985,6 @@ void main() {
         tickLower: tickLower,
         tickUpper: tickUpper,
         recipient: recipient,
-        currentPoolTick: initialPoolTick,
       ),
     ).called(1);
   });

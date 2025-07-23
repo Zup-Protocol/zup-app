@@ -43,6 +43,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
   final StreamController<BigInt?> _pooltickStreamController = StreamController.broadcast();
   final StreamController<YieldDto?> _selectedYieldStreamController = StreamController.broadcast();
+  final Duration _poolTickExpiration = const Duration(seconds: 30);
 
   BigInt? _latestPoolTick;
   YieldDto? _selectedYield;
@@ -58,7 +59,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
   PoolSearchSettingsDto get poolSearchSettings => _cache.getPoolSearchSettings();
 
   void setup() async {
-    Timer.periodic(const Duration(minutes: 1), (timer) {
+    Timer.periodic(_poolTickExpiration, (timer) {
       if (_pooltickStreamController.isClosed) return timer.cancel();
 
       if (selectedYield != null) getSelectedPoolTick();
@@ -126,7 +127,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
     final tick = await _zupSingletonCache.run(
       () => _poolService.getPoolTick(selectedYieldBeforeCall!),
-      expiration: const Duration(minutes: 1),
+      expiration: _poolTickExpiration - const Duration(seconds: 1),
       ignoreCache: forceRefresh,
       key: poolTickCacheKey(
         network: selectedYield!.network,

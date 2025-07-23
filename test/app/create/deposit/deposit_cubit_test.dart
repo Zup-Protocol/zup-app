@@ -101,7 +101,7 @@ void main() {
     await zupSingletonCache.clear();
   });
 
-  group("When calling `setup`, the cubit should register a periodic task to get the pool tick every minute. ", () {
+  group("When calling `setup`, the cubit should register a periodic task to get the pool tick every half minute. ", () {
     test("And if the selected yield is not null, it should execute the task to get the pool tick", () async {
       BigInt? actualLastEmittedPoolTick;
       int eventsCounter = 0;
@@ -122,7 +122,7 @@ void main() {
         async.elapse(const Duration(minutes: minutesPassed));
 
         expect(actualLastEmittedPoolTick, poolTick);
-        expect(eventsCounter, minutesPassed);
+        expect(eventsCounter, minutesPassed * 2);
       });
     });
 
@@ -463,7 +463,8 @@ void main() {
   );
 
   test(
-    """When calling 'getSelectedPoolTick', it should use the zup singleton cache with a expiration of 1 minute""",
+    """When calling 'getSelectedPoolTick', it should use the zup singleton cache
+    with a expiration of half a minute (-1 second to not cause race conditions)""",
     () async {
       final selectedYield = YieldDto.fixture();
 
@@ -484,7 +485,7 @@ void main() {
       verify(() => zupSingletonCache.run<BigInt>(
             any(),
             key: "poolTick-${selectedYield.poolAddress}-${selectedYield.network.name}",
-            expiration: const Duration(minutes: 1),
+            expiration: const Duration(seconds: 30 - 1),
             ignoreCache: false,
           )).called(1);
     },
