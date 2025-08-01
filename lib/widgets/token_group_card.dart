@@ -49,7 +49,7 @@ class _TokenGroupCardState extends State<TokenGroupCard> {
             ),
             placeholder: const Skeleton.ignore(
               child: ZupCircularLoadingIndicator(
-                size: 50,
+                size: 35,
                 backgroundColor: ZupColors.brand5,
                 indicatorColor: ZupColors.brand,
               ),
