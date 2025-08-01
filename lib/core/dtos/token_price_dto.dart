@@ -4,7 +4,7 @@ part 'token_price_dto.freezed.dart';
 part 'token_price_dto.g.dart';
 
 @freezed
-class TokenPriceDto with _$TokenPriceDto {
+sealed class TokenPriceDto with _$TokenPriceDto {
   @JsonSerializable(explicitToJson: true)
   factory TokenPriceDto({
     @Default(0) num usdPrice,

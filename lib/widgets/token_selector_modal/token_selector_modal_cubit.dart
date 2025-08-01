@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
+import 'package:zup_app/core/dtos/token_list_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/repositories/tokens_repository.dart';
 
@@ -18,8 +19,8 @@ class TokenSelectorModalCubit extends Cubit<TokenSelectorModalState> {
   final AppCubit _appCubit;
   final Wallet _wallet;
 
-  final Map<AppNetworks, Map<String, List<TokenDto>>> _tokenListCachedPerNetworkByAddress = {};
-  Future<List<TokenDto>?> get tokenList async => _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork]
+  final Map<AppNetworks, Map<String, TokenListDto>> _tokenListCachedPerNetworkByAddress = {};
+  Future<TokenListDto?> get tokenList async => _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork]
       ?[await _wallet.signer?.address ?? EthereumConstants.zeroAddress];
 
   Future<void> _emitSuccessCached() async => emit(TokenSelectorModalState.success((await tokenList)!));
@@ -41,7 +42,7 @@ class TokenSelectorModalCubit extends Cubit<TokenSelectorModalState> {
       emit(const TokenSelectorModalState.loading());
 
       _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork]![userAddress] =
-          await _tokensRepository.getPopularTokens(_appCubit.selectedNetwork);
+          await _tokensRepository.getTokenList(_appCubit.selectedNetwork);
 
       if (_shouldDiscardTokenListLoadedState) return;
 

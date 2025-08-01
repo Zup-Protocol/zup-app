@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:routefly/routefly.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
+import 'package:zup_app/core/zup_route_params_names.dart';
 
 class ZupNavigator {
   Listenable get listenable => Routefly.listenable;
@@ -13,11 +14,24 @@ class ZupNavigator {
 
   Future<void> navigateToNewPosition() async => await Routefly.navigate(ZupNavigatorPaths.newPosition.path);
 
-  Future<void> navigateToDeposit(String token0, String token1, AppNetworks network) async {
+  Future<void> navigateToDeposit({
+    required String? token0,
+    required String? token1,
+    required String? group0,
+    required String? group1,
+    required AppNetworks network,
+  }) async {
     const depositPath = ZupNavigatorPaths.deposit;
+    final depositPathParams = depositPath.routeParamsNames<ZupDepositRouteParamsNames>();
+
+    final token0UrlParam = token0 != null ? "${depositPathParams.token0}=$token0" : "";
+    final token1UrlParam = token1 != null ? "${depositPathParams.token1}=$token1" : "";
+    final group0UrlParam = group0 != null ? "${depositPathParams.group0}=$group0" : "";
+    final group1UrlParam = group1 != null ? "${depositPathParams.group1}=$group1" : "";
+    final networkUrlParam = "${depositPathParams.network}=${network.name}";
 
     await Routefly.pushNavigate(
-      "${depositPath.path}?${depositPath.routeParamsName!.param0}=$token0&${depositPath.routeParamsName!.param1}=$token1&${depositPath.routeParamsName!.param3}=${network.name}",
+      "${depositPath.path}?$token0UrlParam&$token1UrlParam&$group0UrlParam&$group1UrlParam&$networkUrlParam",
     );
   }
 

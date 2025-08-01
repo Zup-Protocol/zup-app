@@ -68,15 +68,19 @@ class ZupAnalytics {
   }
 
   Future<void> logSearch({
-    required String token0,
-    required String token1,
+    required String? token0,
+    required String? token1,
+    required String? group0,
+    required String? group1,
     required String network,
   }) async {
     await _log(
       "user_searched_yields",
       {
-        "token0_address": "hex:$token0",
-        "token1_address": "hex:$token1",
+        "token0": "id:$token0",
+        "token1": "id:$token1",
+        "group0": "id:$group0",
+        "group1": "id:$group1",
         "network": network,
       },
     );

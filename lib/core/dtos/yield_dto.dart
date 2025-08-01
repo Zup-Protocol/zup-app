@@ -1,39 +1,16 @@
-import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/core/ethereum_constants.dart';
 import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/pool_type.dart';
-import 'package:zup_app/l10n/gen/app_localizations.dart';
+import 'package:zup_app/core/enums/yield_timeframe.dart';
 
 part 'yield_dto.freezed.dart';
 part 'yield_dto.g.dart';
 
-enum YieldTimeFrame { day, month, threeMonth, unknown }
-
-extension YieldTimeFrameExtension on YieldTimeFrame {
-  bool get isDay => this == YieldTimeFrame.day;
-  bool get isMonth => this == YieldTimeFrame.month;
-  bool get isThreeMonth => this == YieldTimeFrame.threeMonth;
-
-  String label(BuildContext context) => [
-        S.of(context).twentyFourHours,
-        S.of(context).month,
-        S.of(context).threeMonths,
-        "???",
-      ][index];
-
-  String compactDaysLabel(BuildContext context) => [
-        S.of(context).twentyFourHoursCompact,
-        S.of(context).monthCompact,
-        S.of(context).threeMonthsCompact,
-        "???",
-      ][index];
-}
-
 @freezed
-class YieldDto with _$YieldDto {
+sealed class YieldDto with _$YieldDto {
   const YieldDto._();
   @JsonSerializable(explicitToJson: true)
   const factory YieldDto({
@@ -45,6 +22,7 @@ class YieldDto with _$YieldDto {
     required ProtocolDto protocol,
     required int feeTier,
     required num yield24h,
+    required num yield7d,
     required num yield30d,
     required num yield90d,
     required int chainId,
@@ -65,41 +43,47 @@ class YieldDto with _$YieldDto {
   int get token0NetworkDecimals => token0.decimals[network.chainId]!;
   int get token1NetworkDecimals => token1.decimals[network.chainId]!;
 
+  num yieldTimeframed(YieldTimeFrame yieldTimeFrame) {
+    switch (yieldTimeFrame) {
+      case YieldTimeFrame.day:
+        return yield24h;
+      case YieldTimeFrame.week:
+        return yield7d;
+      case YieldTimeFrame.month:
+        return yield30d;
+      case YieldTimeFrame.threeMonth:
+        return yield90d;
+    }
+  }
+
   factory YieldDto.fromJson(Map<String, dynamic> json) => _$YieldDtoFromJson(json);
 
   factory YieldDto.fixture() => YieldDto(
-        feeTier: 0,
-        yield24h: 32.2,
-        yield30d: 32.2,
-        yield90d: 32.2,
-        latestTick: "1567241",
-        positionManagerAddress: "0x5Df2f0aFb5b5bB2Df9D1e9C7b6f5f0DD5f9eD5e0",
-        poolAddress: "0x5Df2f0aFb5b5bB2Df9D1e9C7b6f5f0DD5f9eD5e0",
-        poolType: PoolType.v3,
-        token0: TokenDto.fixture().copyWith(
-          symbol: "USDC",
-          decimals: {
-            AppNetworks.sepolia.chainId: 6,
-          },
-          addresses: {
-            AppNetworks.sepolia.chainId: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-          },
-          logoUrl:
-              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
-        ),
-        token1: TokenDto.fixture().copyWith(
-          symbol: "WETH",
-          decimals: {
-            AppNetworks.sepolia.chainId: 18,
-          },
-          addresses: {
-            AppNetworks.sepolia.chainId: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-          },
-          logoUrl:
-              "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
-        ),
-        tickSpacing: 10,
-        protocol: ProtocolDto.fixture(),
-        chainId: AppNetworks.sepolia.chainId,
-      );
+    feeTier: 0,
+    yield24h: 32.2,
+    yield30d: 32.2,
+    yield90d: 32.2,
+    yield7d: 12,
+    latestTick: "1567241",
+    positionManagerAddress: "0x5Df2f0aFb5b5bB2Df9D1e9C7b6f5f0DD5f9eD5e0",
+    poolAddress: "0x5Df2f0aFb5b5bB2Df9D1e9C7b6f5f0DD5f9eD5e0",
+    poolType: PoolType.v3,
+    token0: TokenDto.fixture().copyWith(
+      symbol: "USDC",
+      decimals: {AppNetworks.sepolia.chainId: 6},
+      addresses: {AppNetworks.sepolia.chainId: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"},
+      logoUrl:
+          "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
+    ),
+    token1: TokenDto.fixture().copyWith(
+      symbol: "WETH",
+      decimals: {AppNetworks.sepolia.chainId: 18},
+      addresses: {AppNetworks.sepolia.chainId: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"},
+      logoUrl:
+          "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
+    ),
+    tickSpacing: 10,
+    protocol: ProtocolDto.fixture(),
+    chainId: AppNetworks.sepolia.chainId,
+  );
 }

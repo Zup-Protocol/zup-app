@@ -4,7 +4,7 @@ part 'pool_search_filters_dto.freezed.dart';
 part 'pool_search_filters_dto.g.dart';
 
 @freezed
-class PoolSearchFiltersDto with _$PoolSearchFiltersDto {
+sealed class PoolSearchFiltersDto with _$PoolSearchFiltersDto {
   @JsonSerializable(explicitToJson: true)
   const factory PoolSearchFiltersDto({
     @Default(0) num minTvlUsd,

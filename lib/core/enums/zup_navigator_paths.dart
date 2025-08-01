@@ -1,3 +1,4 @@
+import 'package:zup_app/core/zup_route_params_names.dart';
 import 'package:zup_app/zup_app.dart';
 
 enum ZupNavigatorPaths {
@@ -6,14 +7,18 @@ enum ZupNavigatorPaths {
   deposit;
 
   String get path => switch (this) {
-        initial => routePaths.create.path,
-        newPosition => routePaths.create.path,
-        deposit => routePaths.create.deposit,
-      };
+    initial => routePaths.create.path,
+    newPosition => routePaths.create.path,
+    deposit => routePaths.create.deposit,
+  };
 
-  ({String param0, String param1, String param3})? get routeParamsName => switch (this) {
-        initial => null,
-        newPosition => null,
-        deposit => (param0: "token0", param1: "token1", param3: "network"),
-      };
+  T routeParamsNames<T extends ZupRouteParamsNames>() {
+    final params = switch (this) {
+      initial => ZupInitialRouteParamsNames(),
+      newPosition => ZupNewPositionRouteParamsNames(),
+      deposit => ZupDepositRouteParamsNames(),
+    };
+
+    return params as T;
+  }
 }

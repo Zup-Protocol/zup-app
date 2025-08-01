@@ -21,8 +21,12 @@ void main() {
     tokensRepository = TokensRepositoryMock();
     sut = ZupAnalytics(firebaseAnalytics, tokensRepository);
 
-    when(() => firebaseAnalytics.logEvent(name: any(named: "name"), parameters: any(named: "parameters")))
-        .thenAnswer((_) async {});
+    when(
+      () => firebaseAnalytics.logEvent(
+        name: any(named: "name"),
+        parameters: any(named: "parameters"),
+      ),
+    ).thenAnswer((_) async {});
   });
 
   test("when calling `logDeposit` it should log the event with the correct name and params", () async {
@@ -34,10 +38,12 @@ void main() {
     final token0Price = TokenPriceDto.fixture().copyWith(usdPrice: 2100);
     final token1Price = TokenPriceDto.fixture().copyWith(usdPrice: 21);
 
-    when(() => tokensRepository.getTokenPrice(depositedYield.token0.addresses[depositedYield.network.chainId]!, any()))
-        .thenAnswer((_) async => token0Price);
-    when(() => tokensRepository.getTokenPrice(depositedYield.token1.addresses[depositedYield.network.chainId]!, any()))
-        .thenAnswer((_) async => token1Price);
+    when(
+      () => tokensRepository.getTokenPrice(depositedYield.token0.addresses[depositedYield.network.chainId]!, any()),
+    ).thenAnswer((_) async => token0Price);
+    when(
+      () => tokensRepository.getTokenPrice(depositedYield.token1.addresses[depositedYield.network.chainId]!, any()),
+    ).thenAnswer((_) async => token1Price);
 
     await sut.logDeposit(
       depositedYield: depositedYield,
@@ -58,7 +64,7 @@ void main() {
           "wallet_address": "hex:$walletAddress",
           "pool_address": "hex:${depositedYield.poolAddress}",
           "protocol_name": depositedYield.protocol.name,
-          "amount_usd": (amount0 * token0Price.usdPrice) + (amount1 * token1Price.usdPrice)
+          "amount_usd": (amount0 * token0Price.usdPrice) + (amount1 * token1Price.usdPrice),
         },
       ),
     ).called(1);
@@ -67,20 +73,33 @@ void main() {
   test("when calling `logSearch` it should log the event with the correct name and params", () async {
     const token0 = "token0";
     const token1 = "token1";
+    const group0 = "group0";
+    const group1 = "group1";
     const network = "network";
 
-    await sut.logSearch(token0: token0, token1: token1, network: network);
+    await sut.logSearch(token0: token0, token1: token1, network: network, group0: group0, group1: group1);
 
-    verify(() => firebaseAnalytics.logEvent(name: "user_searched_yields", parameters: {
-          "token0_address": "hex:$token0",
-          "token1_address": "hex:$token1",
+    verify(
+      () => firebaseAnalytics.logEvent(
+        name: "user_searched_yields",
+        parameters: {
+          "token0": "id:$token0",
+          "token1": "id:$token1",
+          "group0": "id:$group0",
+          "group1": "id:$group1",
           "network": network,
-        })).called(1);
+        },
+      ),
+    ).called(1);
   });
 
   test("When calling to log any event and it throws, it should not stop the app", () async {
-    when(() => firebaseAnalytics.logEvent(name: any(named: "name"), parameters: any(named: "parameters")))
-        .thenThrow(Exception());
+    when(
+      () => firebaseAnalytics.logEvent(
+        name: any(named: "name"),
+        parameters: any(named: "parameters"),
+      ),
+    ).thenThrow(Exception());
 
     await sut.logDeposit(
       depositedYield: YieldDto.fixture(),

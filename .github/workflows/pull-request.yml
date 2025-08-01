@@ -30,7 +30,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
-          flutter-version: 3.32.2
+          flutter-version: 3.32.8
       - name: Install dependencies
         run: flutter pub get && dart run build_runner build --delete-conflicting-outputs && flutter gen-l10n && dart run routefly && dart run web3kit:generate_abis
       - name: Run tests

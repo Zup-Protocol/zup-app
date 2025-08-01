@@ -7,7 +7,7 @@ part 'protocol_dto.g.dart';
 String _readRawProtocolId(Map map, String key) => map['id'];
 
 @freezed
-class ProtocolDto with _$ProtocolDto {
+sealed class ProtocolDto with _$ProtocolDto {
   const ProtocolDto._();
 
   @JsonSerializable(explicitToJson: true)

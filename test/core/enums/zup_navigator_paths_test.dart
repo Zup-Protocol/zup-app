@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
+import 'package:zup_app/core/zup_route_params_names.dart';
 import 'package:zup_app/zup_app.dart';
 
 void main() {
@@ -15,10 +16,15 @@ void main() {
     );
   });
 
-  test("The route params name for deposit page, should be `token0`, `token1` and network", () {
-    expect(
-      ZupNavigatorPaths.deposit.routeParamsName,
-      (param0: "token0", param1: "token1", param3: "network"),
-    );
+  test("The route params names type for deposit should be correct", () {
+    expect(ZupNavigatorPaths.deposit.routeParamsNames().runtimeType, ZupDepositRouteParamsNames);
+  });
+
+  test("The route params names type for new position should be correct", () {
+    expect(ZupNavigatorPaths.newPosition.routeParamsNames().runtimeType, ZupNewPositionRouteParamsNames);
+  });
+
+  test("The route params names type for initial should be correct", () {
+    expect(ZupNavigatorPaths.initial.routeParamsNames().runtimeType, ZupInitialRouteParamsNames);
   });
 }

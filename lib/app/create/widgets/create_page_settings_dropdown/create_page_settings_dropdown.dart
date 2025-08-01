@@ -88,7 +88,7 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
             children: [
               sectionTitle(S.of(context).createPageSettingsDropdownMinimumLiquidity),
               const SizedBox(width: 8),
-              ZupTooltip(
+              ZupTooltip.text(
                 key: const Key("min-liquidity-tooltip"),
                 message: S.of(context).createPageSettingsDropdownMinimumLiquidityExplanation,
                 child: Assets.icons.infoCircle.svg(
@@ -170,7 +170,7 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
             children: [
               sectionTitle(S.of(context).createPageSettingsDropdownAllowedPoolTypes),
               const SizedBox(width: 8),
-              ZupTooltip(
+              ZupTooltip.text(
                 key: const Key("pool-types-allowed-tooltip"),
                 message: S.of(context).createPageSettingsDropdownAllowedPoolTypesDescription,
                 child: Assets.icons.infoCircle.svg(
