@@ -13,11 +13,10 @@ sealed class TokenGroupDto with _$TokenGroupDto {
   const factory TokenGroupDto({
     @Default("") String id,
     @Default("") String name,
-    @Default('000000') String hexColorCode,
     @Default(<TokenDto>[]) List<TokenDto> tokens,
   }) = _TokenGroupDto;
 
-  String get logoUrl => "${AppEnvironment.current.apiUrl}/static/group-icons/$id.svg";
+  String get logoUrl => "${AppEnvironment.current.apiUrl}/static/group-icons/$id.png";
 
   factory TokenGroupDto.fromJson(Map<String, dynamic> json) => _$TokenGroupDtoFromJson(json);
 

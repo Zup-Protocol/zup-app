@@ -87,7 +87,14 @@ class _TokenSelectorButtonState extends State<TokenSelectorButton> with DeviceIn
                         height: 30,
                         width: 30,
                         radius: 50,
-                        errorWidget: (_, __, ___) => const Text("data"),
+                        errorWidget: (_, __, ___) => Container(
+                          height: 30,
+                          width: 30,
+                          color: ZupColors.gray6,
+                          child: const Center(
+                            child: Text("?", style: TextStyle(color: ZupColors.gray, fontSize: 16)),
+                          ),
+                        ),
                       ),
                   ],
                   const SizedBox(width: 10),

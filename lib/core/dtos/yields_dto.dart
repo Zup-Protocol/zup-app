@@ -23,27 +23,19 @@ sealed class YieldsDto with _$YieldsDto {
   bool get isEmpty => pools.isEmpty;
 
   List<YieldDto> get poolsSortedBy24hYield {
-    return [...pools]
-      ..removeWhere((yields) => yields.yield24h == 0)
-      ..sort((a, b) => b.yield24h.compareTo(a.yield24h));
+    return [...pools]..sort((a, b) => b.yield24h.compareTo(a.yield24h));
   }
 
   List<YieldDto> get poolsSortedBy7dYield {
-    return [...pools]
-      ..removeWhere((yields) => yields.yield7d == 0)
-      ..sort((a, b) => b.yield7d.compareTo(a.yield7d));
+    return [...pools]..sort((a, b) => b.yield7d.compareTo(a.yield7d));
   }
 
   List<YieldDto> get poolsSortedBy30dYield {
-    return [...pools]
-      ..removeWhere((yields) => yields.yield30d == 0)
-      ..sort((a, b) => b.yield30d.compareTo(a.yield30d));
+    return [...pools]..sort((a, b) => b.yield30d.compareTo(a.yield30d));
   }
 
   List<YieldDto> get poolsSortedBy90dYield {
-    return [...pools]
-      ..removeWhere((yields) => yields.yield90d == 0)
-      ..sort((a, b) => b.yield90d.compareTo(a.yield90d));
+    return [...pools]..sort((a, b) => b.yield90d.compareTo(a.yield90d));
   }
 
   List<YieldDto> poolsSortedByTimeframe(YieldTimeFrame timeframe) {

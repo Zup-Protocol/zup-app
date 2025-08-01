@@ -18,19 +18,20 @@ class ZupCachedImage {
     Widget? placeholder,
     ImageErrorWidgetBuilder? errorWidget,
   }) {
-    return ClipRRect(
-      key: Key(url),
-      borderRadius: BorderRadius.circular(radius ?? 0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius ?? 0),
-          border: Border.all(width: 0.5, color: ZupColors.gray5),
-        ),
-        // cache not implemented yet because of web issue rendering images from other domains (https://github.com/Baseflow/flutter_cached_network_image/issues/972)
+    return Container(
+      key: ValueKey(url),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius ?? 0),
+        border: Border.all(width: 0.5, color: ZupColors.gray5),
+      ),
+      // cache not implemented yet because of web issue rendering images from other domains (https://github.com/Baseflow/flutter_cached_network_image/issues/972)
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius ?? 0),
         child: Image.network(
           _parseImageUrl(url),
           height: height,
           width: width,
+
           fit: BoxFit.cover,
           errorBuilder: errorWidget,
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {

@@ -194,18 +194,6 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
     return isReversedLocal ? price().priceAsQuoteToken : price().priceAsBaseToken;
   }
 
-  num get yieldTimeframed {
-    if (widget.yieldTimeFrame.isDay) {
-      return widget.currentYield.yield24h;
-    }
-
-    if (widget.yieldTimeFrame.isMonth) {
-      return widget.currentYield.yield30d;
-    }
-
-    return widget.currentYield.yield90d;
-  }
-
   ({bool minPrice, bool maxPrice, bool any}) get isOutOfRange {
     final isMinPriceOutOfRange = !widget.minPrice.isInfinity && (minPrice) > currentPrice;
     final isMaxPriceOutOfRanfe = !widget.maxPrice.isInfinity && (maxPrice) < currentPrice;
@@ -560,7 +548,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                       spacing: 0,
                       title:
                           "${S.of(context).previewDepositModalYearlyYield} (${widget.yieldTimeFrame.label(context)})",
-                      value: yieldTimeframed.formatPercent,
+                      value: widget.currentYield.yieldTimeframed(widget.yieldTimeFrame).formatPercent,
                     ),
                     const SizedBox(height: 10),
                     const ZupDivider(),

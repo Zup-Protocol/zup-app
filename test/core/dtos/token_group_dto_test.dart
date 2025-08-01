@@ -8,7 +8,7 @@ void main() {
     () {
       final tokenGroup = TokenGroupDto.fixture();
 
-      expect(tokenGroup.logoUrl, '${AppEnvironment.current.apiUrl}/static/group-icons/${tokenGroup.id}.svg');
+      expect(tokenGroup.logoUrl, '${AppEnvironment.current.apiUrl}/static/group-icons/${tokenGroup.id}.png');
     },
   );
 }
