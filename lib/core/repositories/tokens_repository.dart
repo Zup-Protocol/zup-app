@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
+import 'package:zup_app/core/dtos/token_list_dto.dart';
 import 'package:zup_app/core/dtos/token_price_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
@@ -10,15 +11,15 @@ class TokensRepository {
   bool isSearchingTokens = false;
   CancelToken? _searchTokenLastCancelToken;
 
-  Future<List<TokenDto>> getPopularTokens(AppNetworks network) async {
+  Future<TokenListDto> getTokenList(AppNetworks network) async {
     final request = await _zupAPIDio.get(
-      "/tokens/popular",
+      "/tokens/list",
       queryParameters: {
         if (!network.isAllNetworks) "chainId": int.parse(network.chainInfo.hexChainId),
       },
     );
 
-    return request.data.map<TokenDto>((token) => TokenDto.fromJson(token)).toList();
+    return TokenListDto.fromJson(request.data);
   }
 
   Future<List<TokenDto>> searchToken(String query, AppNetworks network) async {

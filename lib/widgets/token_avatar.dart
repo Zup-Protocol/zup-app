@@ -30,7 +30,8 @@ class TokenAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return asset.logoUrl.isEmpty
         ? genericAvatar()
-        : zupCachedImage.build(asset.logoUrl,
+        : zupCachedImage.build(
+            asset.logoUrl,
             height: size,
             width: size,
             radius: 50,
@@ -41,6 +42,7 @@ class TokenAvatar extends StatelessWidget {
                 backgroundColor: ZupColors.brand5,
                 indicatorColor: ZupColors.brand,
               ),
-            ));
+            ),
+          );
   }
 }

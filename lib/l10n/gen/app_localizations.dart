@@ -62,7 +62,7 @@ import 'app_localizations_en.dart';
 /// property.
 abstract class S {
   S(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -84,11 +84,11 @@ abstract class S {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en')];
@@ -104,6 +104,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'24h'**
   String get twentyFourHours;
+
+  /// No description provided for @week.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get week;
+
+  /// No description provided for @weekCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'7d'**
+  String get weekCompact;
 
   /// No description provided for @appFooterTermsOfUse.
   ///
@@ -151,8 +163,9 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Showing only liquidity pools with more than {minLiquidity}.'**
-  String depositPageShowingOnlyPoolsWithMoreThan(
-      {required String minLiquidity});
+  String depositPageShowingOnlyPoolsWithMoreThan({
+    required String minLiquidity,
+  });
 
   /// No description provided for @depositPageShowingAllPools.
   ///
@@ -170,8 +183,9 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Search only for pools with more than {minLiquidity}?'**
-  String depositPageSearchOnlyForPoolsWithMorethan(
-      {required String minLiquidity});
+  String depositPageSearchOnlyForPoolsWithMorethan({
+    required String minLiquidity,
+  });
 
   /// No description provided for @depositPageTrySearchAllPools.
   ///
@@ -285,8 +299,10 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Depositing into {baseTokenSymbol}/{quoteTokenSymbol} pool'**
-  String previewDepositModalDepositingIntoPool(
-      {required String baseTokenSymbol, required String quoteTokenSymbol});
+  String previewDepositModalDepositingIntoPool({
+    required String baseTokenSymbol,
+    required String quoteTokenSymbol,
+  });
 
   /// No description provided for @previewDepositModalApproveToken.
   ///
@@ -340,8 +356,9 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'{tokenSymbol} approved successfully. '**
-  String previewDepositModalApproveSuccessSnackBarMessage(
-      {required String tokenSymbol});
+  String previewDepositModalApproveSuccessSnackBarMessage({
+    required String tokenSymbol,
+  });
 
   /// No description provided for @previewDepositModalMyPosition.
   ///
@@ -395,10 +412,11 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool at {protocol}. '**
-  String previewDepositModalDepositSuccessSnackBarMessage(
-      {required String baseTokenSymbol,
-      required String quoteTokenSymbol,
-      required String protocol});
+  String previewDepositModalDepositSuccessSnackBarMessage({
+    required String baseTokenSymbol,
+    required String quoteTokenSymbol,
+    required String protocol,
+  });
 
   /// No description provided for @yieldCardTimeFrameBest.
   ///
@@ -412,11 +430,17 @@ abstract class S {
   /// **'This pool is at {network}'**
   String yieldCardThisPoolIsAtNetwork({required String network});
 
-  /// No description provided for @yieldCardYieldYearly.
+  /// No description provided for @yieldCardYearlyYield.
   ///
   /// In en, this message translates to:
-  /// **'Yield (Yearly)'**
-  String get yieldCardYieldYearly;
+  /// **'Yearly Yield'**
+  String get yieldCardYearlyYield;
+
+  /// No description provided for @yieldCardVisitProtocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit {protocolName}'**
+  String yieldCardVisitProtocol({required String protocolName});
 
   /// No description provided for @yieldCardAverageYieldYearly.
   ///
@@ -542,8 +566,9 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Exchanges ({exchangesCount})'**
-  String exchangesFilterDropdownButtonTitleNumered(
-      {required String exchangesCount});
+  String exchangesFilterDropdownButtonTitleNumered({
+    required String exchangesCount,
+  });
 
   /// No description provided for @createPageSelectTokensStageTokenA.
   ///
@@ -578,26 +603,44 @@ abstract class S {
   /// No description provided for @depositPageLoadingStep2Title.
   ///
   /// In en, this message translates to:
-  /// **'Scanning the Pools...'**
+  /// **'Pair hunting…'**
   String get depositPageLoadingStep2Title;
 
   /// No description provided for @depositPageLoadingStep2Description.
   ///
   /// In en, this message translates to:
-  /// **'Searching through the sea of pools for the best yields, hang tight!'**
+  /// **'Searching through more than a thousand pool combos… so you don\'t have to'**
   String get depositPageLoadingStep2Description;
 
   /// No description provided for @depositPageLoadingStep3Title.
   ///
   /// In en, this message translates to:
-  /// **'Fetching the Best yields for you...'**
+  /// **'Yield optimizer at work…'**
   String get depositPageLoadingStep3Title;
 
   /// No description provided for @depositPageLoadingStep3Description.
   ///
   /// In en, this message translates to:
-  /// **'Got it! Just adding a touch of sparkle to your perfect match!'**
+  /// **'Scanning pools, calculating returns, and filtering the noise'**
   String get depositPageLoadingStep3Description;
+
+  /// No description provided for @depositPageBestYieldsIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Best Yields in'**
+  String get depositPageBestYieldsIn;
+
+  /// No description provided for @depositPageLoadingStep4Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching the Best yields for you...'**
+  String get depositPageLoadingStep4Title;
+
+  /// No description provided for @depositPageLoadingStep4Description.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it! Just adding a touch of sparkle to your perfect match!'**
+  String get depositPageLoadingStep4Description;
 
   /// No description provided for @depositPageErrorStateTitle.
   ///
@@ -644,7 +687,7 @@ abstract class S {
   /// No description provided for @depositPageTimeFrameTooltipMessage.
   ///
   /// In en, this message translates to:
-  /// **'Select a time-frame that matches your goal with this pool: a quick win (Short term), a balanced approach (Medium term), or a long haul (Long term).'**
+  /// **'Each time frame shows yields based on past performance. Shorter terms (24h, 7d) reflect recent trends and may suit short-term strategies. Longer terms (30d, 90d) offer a broader performance view for long-term decisions.'**
   String get depositPageTimeFrameTooltipMessage;
 
   /// No description provided for @depositPageTimeFrameTooltipHelperButtonTitle.
@@ -719,6 +762,18 @@ abstract class S {
   /// **'Select a token'**
   String get tokenSelectorModalTitle;
 
+  /// No description provided for @tokenSelectorModalTokenGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Token Groups'**
+  String get tokenSelectorModalTokenGroups;
+
+  /// No description provided for @tokenSelectorModalTokenGroupsTooltipMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Token groups let you search pools using multiple tokens in one go. Think of them like batch queries, want all USD stablecoins? Pick the group and we\'ll surface every relevant pool. You can also match groups against single tokens or other groups to discover deep liquidity.'**
+  String get tokenSelectorModalTokenGroupsTooltipMessage;
+
   /// No description provided for @tokenSelectorModalDescription.
   ///
   /// In en, this message translates to:
@@ -753,8 +808,9 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'We hit a snag while searching for a token matching {searchedTerm}. Give it another go, and if it keeps happening, feel free to reach us'**
-  String tokenSelectorModalSearchErrorDescription(
-      {required String searchedTerm});
+  String tokenSelectorModalSearchErrorDescription({
+    required String searchedTerm,
+  });
 
   /// No description provided for @noResultsFor.
   ///
@@ -862,17 +918,19 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'It looks like you don’t have any positions in {network} yet.\nGo ahead and create one to get started!'**
-  String positionsPageNoPositionsInNetworkDescription(
-      {required String network});
+  String positionsPageNoPositionsInNetworkDescription({
+    required String network,
+  });
 
   /// No description provided for @positionCardTokenPerToken.
   ///
   /// In en, this message translates to:
   /// **'{token0Qtd} {token0Symbol} per {token1Symbol}'**
-  String positionCardTokenPerToken(
-      {required String token0Qtd,
-      required String token0Symbol,
-      required String token1Symbol});
+  String positionCardTokenPerToken({
+    required String token0Qtd,
+    required String token0Symbol,
+    required String token1Symbol,
+  });
 
   /// No description provided for @positionsPageMyPositions.
   ///
@@ -992,8 +1050,10 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Depositing into {token0Symbol}/{token1Symbol} Pool...'**
-  String previewDepositModalCubitDepositingSnackBarMessage(
-      {required String token0Symbol, required String token1Symbol});
+  String previewDepositModalCubitDepositingSnackBarMessage({
+    required String token0Symbol,
+    required String token1Symbol,
+  });
 
   /// No description provided for @previewDepositModalCubitApprovingSnackBarMessage.
   ///
@@ -1005,8 +1065,9 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Successfully approved {tokenSymbol}'**
-  String previewDepositModalCubitApprovedSnackBarMessage(
-      {required String tokenSymbol});
+  String previewDepositModalCubitApprovedSnackBarMessage({
+    required String tokenSymbol,
+  });
 
   /// No description provided for @depositSuccessModalViewPositionOnDEX.
   ///
@@ -1129,8 +1190,9 @@ S lookupS(Locale locale) {
   }
 
   throw FlutterError(
-      'S.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'S.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

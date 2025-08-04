@@ -11,6 +11,7 @@ import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
+import 'package:zup_app/core/enums/yield_timeframe.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
@@ -131,11 +132,13 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
       ? widget.token0DepositAmountController.parseTextToDouble
       : widget.token1DepositAmountController.parseTextToDouble;
 
-  BigInt get token0DepositAmount => widget.token0DepositAmountController.parseTextToDouble
-      .parseTokenAmount(decimals: widget.currentYield.token0NetworkDecimals);
+  BigInt get token0DepositAmount => widget.token0DepositAmountController.parseTextToDouble.parseTokenAmount(
+    decimals: widget.currentYield.token0NetworkDecimals,
+  );
 
-  BigInt get token1DepositAmount => widget.token1DepositAmountController.parseTextToDouble
-      .parseTokenAmount(decimals: widget.currentYield.token1NetworkDecimals);
+  BigInt get token1DepositAmount => widget.token1DepositAmountController.parseTextToDouble.parseTokenAmount(
+    decimals: widget.currentYield.token1NetworkDecimals,
+  );
 
   double get currentPrice {
     final currentTick = cubit.latestPoolTick;
@@ -162,10 +165,10 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
     }
 
     ({double priceAsBaseToken, double priceAsQuoteToken}) price() => tickToPrice(
-          tick: tick(),
-          poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
-          poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
-        );
+      tick: tick(),
+      poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
+      poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
+    );
 
     return isReversedLocal ? price().priceAsQuoteToken : price().priceAsBaseToken;
   }
@@ -183,24 +186,12 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
     }
 
     ({double priceAsBaseToken, double priceAsQuoteToken}) price() => tickToPrice(
-          tick: tick(),
-          poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
-          poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
-        );
+      tick: tick(),
+      poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
+      poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
+    );
 
     return isReversedLocal ? price().priceAsQuoteToken : price().priceAsBaseToken;
-  }
-
-  num get yieldTimeframed {
-    if (widget.yieldTimeFrame.isDay) {
-      return widget.currentYield.yield24h;
-    }
-
-    if (widget.yieldTimeFrame.isMonth) {
-      return widget.currentYield.yield30d;
-    }
-
-    return widget.currentYield.yield90d;
   }
 
   ({bool minPrice, bool maxPrice, bool any}) get isOutOfRange {
@@ -210,24 +201,15 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
     return (
       minPrice: isMinPriceOutOfRange,
       maxPrice: isMaxPriceOutOfRanfe,
-      any: isMinPriceOutOfRange || isMaxPriceOutOfRanfe
+      any: isMinPriceOutOfRange || isMaxPriceOutOfRanfe,
     );
   }
 
   ({String title, Widget? icon, Function()? onPressed, bool? isLoading}) get depositButtonState {
     return cubit.state.maybeWhen(
-      loading: () => (
-        title: S.of(context).loading,
-        icon: null,
-        onPressed: null,
-        isLoading: true,
-      ),
-      waitingTransaction: (txId, type) => (
-        title: S.of(context).previewDepositModalWaitingTransaction,
-        icon: null,
-        onPressed: null,
-        isLoading: true,
-      ),
+      loading: () => (title: S.of(context).loading, icon: null, onPressed: null, isLoading: true),
+      waitingTransaction: (txId, type) =>
+          (title: S.of(context).previewDepositModalWaitingTransaction, icon: null, onPressed: null, isLoading: true),
       approvingToken: (symbol) => (
         title: S.of(context).previewDepositModalApprovingToken(tokenSymbol: symbol),
         icon: null,
@@ -235,7 +217,9 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
         isLoading: true,
       ),
       depositing: () => (
-        title: S.of(context).previewDepositModalDepositingIntoPool(
+        title: S
+            .of(context)
+            .previewDepositModalDepositingIntoPool(
               baseTokenSymbol: baseToken.symbol,
               quoteTokenSymbol: quoteToken.symbol,
             ),
@@ -250,7 +234,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token0.symbol),
               icon: Assets.icons.lockOpen.svg(),
               isLoading: false,
-              onPressed: () => cubit.approveToken(widget.currentYield.token0, token0DepositAmount)
+              onPressed: () => cubit.approveToken(widget.currentYield.token0, token0DepositAmount),
             );
           }
         }
@@ -261,7 +245,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               title: S.of(context).previewDepositModalApproveToken(tokenSymbol: widget.currentYield.token1.symbol),
               icon: Assets.icons.lockOpen.svg(),
               isLoading: false,
-              onPressed: () => cubit.approveToken(widget.currentYield.token1, token1DepositAmount)
+              onPressed: () => cubit.approveToken(widget.currentYield.token1, token1DepositAmount),
             );
           }
         }
@@ -271,60 +255,47 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
           icon: Assets.icons.paperplaneFill.svg(),
           isLoading: false,
           onPressed: () => cubit.deposit(
-                deadline: widget.deadline,
-                slippage: widget.maxSlippage,
-                token0Amount: token0DepositAmount,
-                token1Amount: token1DepositAmount,
-                minPrice: widget.minPrice.price,
-                maxPrice: widget.maxPrice.price,
-                isMinPriceInfinity: widget.minPrice.isInfinity,
-                isMaxPriceInfinity: widget.maxPrice.isInfinity,
-                isReversed: widget.isReversed,
-              ),
+            deadline: widget.deadline,
+            slippage: widget.maxSlippage,
+            token0Amount: token0DepositAmount,
+            token1Amount: token1DepositAmount,
+            minPrice: widget.minPrice.price,
+            maxPrice: widget.maxPrice.price,
+            isMinPriceInfinity: widget.minPrice.isInfinity,
+            isMaxPriceInfinity: widget.maxPrice.isInfinity,
+            isReversed: widget.isReversed,
+          ),
         );
       },
-      depositSuccess: (txId) => (
-        title: S.of(context).loading,
-        icon: null,
-        isLoading: true,
-        onPressed: null,
-      ),
-      orElse: () => (
-        title: S.of(context).previewDepositModalError,
-        icon: null,
-        onPressed: null,
-        isLoading: false,
-      ),
+      depositSuccess: (txId) => (title: S.of(context).loading, icon: null, isLoading: true, onPressed: null),
+      orElse: () => (title: S.of(context).previewDepositModalError, icon: null, onPressed: null, isLoading: false),
     );
   }
 
   late bool isReversedLocal = widget.isReversed;
 
   Widget _sectionTitle(String title) => Text(
-        title,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: ZupColors.gray),
-      );
+    title,
+    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: ZupColors.gray),
+  );
 
   Widget _fieldColumn({required String title, Widget? image, required String value, double spacing = 8}) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _sectionTitle(title),
+      SizedBox(height: spacing),
+      Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _sectionTitle(title),
-          SizedBox(height: spacing),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (image != null) ...[
-                image,
-                const SizedBox(width: 8),
-              ],
-              Flexible(
-                fit: FlexFit.loose,
-                child: Text(value, overflow: TextOverflow.ellipsis),
-              ),
-            ],
+          if (image != null) ...[image, const SizedBox(width: 8)],
+          Flexible(
+            fit: FlexFit.loose,
+            child: Text(value, overflow: TextOverflow.ellipsis),
           ),
         ],
-      );
+      ),
+    ],
+  );
 
   @override
   void initState() {
@@ -356,7 +327,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               type: ZupSnackBarType.info,
               helperButton: (
                 title: S.of(context).previewDepositModalWaitingTransactionSnackBarHelperButtonTitle,
-                onButtonTap: () => widget.currentYield.network.openTx(txId)
+                onButtonTap: () => widget.currentYield.network.openTx(txId),
               ),
               customIcon: const ZupCircularLoadingIndicator(size: 20),
               snackDuration: const Duration(minutes: 10),
@@ -368,9 +339,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
             ScaffoldMessenger.of(context).showSnackBar(
               ZupSnackBar(
                 context,
-                message: S.of(context).previewDepositModalApproveSuccessSnackBarMessage(
-                      tokenSymbol: tokenSymbol,
-                    ),
+                message: S.of(context).previewDepositModalApproveSuccessSnackBarMessage(tokenSymbol: tokenSymbol),
                 type: ZupSnackBarType.success,
                 helperButton: (
                   title: S.of(context).previewDepositModalApproveSuccessSnackBarHelperButtonTitle,
@@ -409,7 +378,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                 context,
                 helperButton: (
                   title: S.of(context).previewDepositModalTransactionErrorSnackBarHelperButtonTitle,
-                  onButtonTap: () => zupLinks.launchZupContactUs()
+                  onButtonTap: () => zupLinks.launchZupContactUs(),
                 ),
                 message: S.of(context).previewDepositModalTransactionErrorSnackBarMessage,
                 type: ZupSnackBarType.error,
@@ -446,15 +415,16 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                         ),
                         const SizedBox(width: 10),
                         StreamBuilder(
-                            stream: cubit.poolTickStream,
-                            builder: (context, tickSnapshot) {
-                              return ZupTag(
-                                title: isOutOfRange.any
-                                    ? S.of(context).previewDepositModalOutOfRange
-                                    : S.of(context).previewDepositModalInRange,
-                                color: isOutOfRange.any ? ZupColors.orange : ZupColors.green,
-                              );
-                            }),
+                          stream: cubit.poolTickStream,
+                          builder: (context, tickSnapshot) {
+                            return ZupTag(
+                              title: isOutOfRange.any
+                                  ? S.of(context).previewDepositModalOutOfRange
+                                  : S.of(context).previewDepositModalInRange,
+                              color: isOutOfRange.any ? ZupColors.orange : ZupColors.green,
+                            );
+                          },
+                        ),
                         const Spacer(),
                       ],
                     ),
@@ -483,10 +453,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                               height: 16,
                               child: Text(
                                 "${widget.currentYield.token1.symbol} / ${widget.currentYield.token0.symbol}",
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ),
@@ -515,12 +482,9 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                         Text(baseToken.symbol),
                         const Spacer(),
                         Text(
-                            "${baseTokenAmount.maybeFormatCompactCurrency(
-                              isUSD: false,
-                              useLessThan: false,
-                              useMoreThan: true,
-                            )} ${baseToken.symbol}",
-                            style: const TextStyle(fontWeight: FontWeight.w500)),
+                          "${baseTokenAmount.maybeFormatCompactCurrency(isUSD: false, useLessThan: false, useMoreThan: true)} ${baseToken.symbol}",
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 15),
@@ -542,12 +506,9 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                         Text(quoteToken.symbol),
                         const Spacer(),
                         Text(
-                            "${quoteTokenAmount.maybeFormatCompactCurrency(
-                              isUSD: false,
-                              useLessThan: false,
-                              useMoreThan: true,
-                            )} ${quoteToken.symbol}",
-                            style: const TextStyle(fontWeight: FontWeight.w500)),
+                          "${quoteTokenAmount.maybeFormatCompactCurrency(isUSD: false, useLessThan: false, useMoreThan: true)} ${quoteToken.symbol}",
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -572,12 +533,13 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                         ),
                         const SizedBox(width: 40),
                         Flexible(
-                            fit: FlexFit.loose,
-                            child: _fieldColumn(
-                              title: S.of(context).previewDepositModalNetwork,
-                              image: SizedBox(width: 30, height: 30, child: widget.currentYield.network.icon),
-                              value: widget.currentYield.network.label,
-                            )),
+                          fit: FlexFit.loose,
+                          child: _fieldColumn(
+                            title: S.of(context).previewDepositModalNetwork,
+                            image: SizedBox(width: 30, height: 30, child: widget.currentYield.network.icon),
+                            value: widget.currentYield.network.label,
+                          ),
+                        ),
                         const SizedBox(width: 40),
                       ],
                     ),
@@ -586,7 +548,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                       spacing: 0,
                       title:
                           "${S.of(context).previewDepositModalYearlyYield} (${widget.yieldTimeFrame.label(context)})",
-                      value: yieldTimeframed.formatPercent,
+                      value: widget.currentYield.yieldTimeframed(widget.yieldTimeFrame).formatPercent,
                     ),
                     const SizedBox(height: 10),
                     const ZupDivider(),
@@ -612,7 +574,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                       isLoading: depositButtonState.isLoading ?? false,
                       width: double.maxFinite,
                     ),
-                    const SizedBox(height: 20)
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -624,61 +586,52 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
   }
 
   Widget rangeInfoCard({required bool isMinPrice}) => Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: ZupColors.brand.withValues(alpha: 0.02),
-          border: Border.all(color: ZupColors.brand5, width: 0.5),
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: ZupColors.brand.withValues(alpha: 0.02),
+      border: Border.all(color: ZupColors.brand5, width: 0.5),
+      borderRadius: const BorderRadius.all(Radius.circular(12)),
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          isMinPrice ? S.of(context).previewDepositModalMinPrice : S.of(context).previewDepositModalMaxPrice,
+          style: const TextStyle(color: ZupColors.gray, fontWeight: FontWeight.w500),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              isMinPrice ? S.of(context).previewDepositModalMinPrice : S.of(context).previewDepositModalMaxPrice,
-              style: const TextStyle(
-                color: ZupColors.gray,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-                () {
-                  if (isMinPrice) {
-                    return widget.minPrice.isInfinity
-                        ? "0"
-                        : minPrice.maybeFormatCompactCurrency(
-                            isUSD: false,
-                            maxBeforeCompact: pow(10, 6),
-                            useLessThan: true,
-                            useMoreThan: true,
-                          );
-                  }
+        const SizedBox(height: 5),
+        Text(
+          () {
+            if (isMinPrice) {
+              return widget.minPrice.isInfinity
+                  ? "0"
+                  : minPrice.maybeFormatCompactCurrency(
+                      isUSD: false,
+                      maxBeforeCompact: pow(10, 6),
+                      useLessThan: true,
+                      useMoreThan: true,
+                    );
+            }
 
-                  return widget.maxPrice.isInfinity
-                      ? "∞"
-                      : maxPrice.maybeFormatCompactCurrency(
-                          isUSD: false,
-                          maxBeforeCompact: pow(10, 6),
-                          useLessThan: true,
-                          useMoreThan: true,
-                        );
-                }.call(),
-                maxLines: 1,
-                overflow: TextOverflow.clip,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18,
-                  color: ZupColors.black,
-                )),
-            const SizedBox(height: 5),
-            Text(
-              "${baseToken.symbol} / ${quoteToken.symbol}",
-              style: const TextStyle(
-                color: ZupColors.gray,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
+            return widget.maxPrice.isInfinity
+                ? "∞"
+                : maxPrice.maybeFormatCompactCurrency(
+                    isUSD: false,
+                    maxBeforeCompact: pow(10, 6),
+                    useLessThan: true,
+                    useMoreThan: true,
+                  );
+          }.call(),
+          maxLines: 1,
+          overflow: TextOverflow.clip,
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18, color: ZupColors.black),
         ),
-      );
+        const SizedBox(height: 5),
+        Text(
+          "${baseToken.symbol} / ${quoteToken.symbol}",
+          style: const TextStyle(color: ZupColors.gray, fontWeight: FontWeight.w500),
+        ),
+      ],
+    ),
+  );
 }

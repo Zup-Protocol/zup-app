@@ -47,13 +47,11 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
   BigInt? _latestPoolTick;
   YieldDto? _selectedYield;
-  YieldTimeFrame? _selectedYieldTimeframe;
 
   late final Stream<YieldDto?> selectedYieldStream = _selectedYieldStreamController.stream;
   late final Stream<BigInt?> poolTickStream = _pooltickStreamController.stream;
 
   YieldDto? get selectedYield => _selectedYield;
-  YieldTimeFrame? get selectedYieldTimeframe => _selectedYieldTimeframe;
   BigInt? get latestPoolTick => _latestPoolTick;
   DepositSettingsDto get depositSettings => _cache.getDepositSettings();
   PoolSearchSettingsDto get poolSearchSettings => _cache.getPoolSearchSettings();
@@ -67,14 +65,18 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
   }
 
   Future<void> getBestPools({
-    required String token0AddressOrId,
-    required String token1AddressOrId,
+    required String? token0AddressOrId,
+    required String? token1AddressOrId,
+    required String? group0Id,
+    required String? group1Id,
     bool ignoreMinLiquidity = false,
   }) async {
     try {
       _zupAnalytics.logSearch(
         token0: token0AddressOrId,
         token1: token1AddressOrId,
+        group0: group0Id,
+        group1: group1Id,
         network: _appCubit.selectedNetwork.label,
       );
 
@@ -84,6 +86,8 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
               blockedProtocolIds: _cache.blockedProtocolsIds,
               token0InternalId: token0AddressOrId,
               token1InternalId: token1AddressOrId,
+              group0Id: group0Id,
+              group1Id: group1Id,
               searchSettings: ignoreMinLiquidity ? poolSearchSettings.copyWith(minLiquidityUSD: 0) : poolSearchSettings,
               testnetMode: _appCubit.isTestnetMode,
             )
@@ -91,14 +95,14 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
               blockedProtocolIds: _cache.blockedProtocolsIds,
               token0Address: token0AddressOrId,
               token1Address: token1AddressOrId,
+              group0Id: group0Id,
+              group1Id: group1Id,
               network: _appCubit.selectedNetwork,
               searchSettings: ignoreMinLiquidity ? poolSearchSettings.copyWith(minLiquidityUSD: 0) : poolSearchSettings,
             );
 
       if (yields.isEmpty) {
-        return emit(
-          DepositState.noYields(filtersApplied: yields.filters),
-        );
+        return emit(DepositState.noYields(filtersApplied: yields.filters));
       }
 
       emit(DepositState.success(yields));
@@ -107,9 +111,8 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
     }
   }
 
-  Future<void> selectYield(YieldDto? yieldDto, YieldTimeFrame? yieldTimeFrame) async {
+  Future<void> selectYield(YieldDto? yieldDto) async {
     _selectedYield = yieldDto;
-    _selectedYieldTimeframe = yieldTimeFrame;
     _selectedYieldStreamController.add(selectedYield);
 
     if (selectedYield != null) {
@@ -129,10 +132,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
       () => _poolService.getPoolTick(selectedYieldBeforeCall!),
       expiration: _poolTickExpiration - const Duration(seconds: 1),
       ignoreCache: forceRefresh,
-      key: poolTickCacheKey(
-        network: selectedYield!.network,
-        poolAddress: selectedYield!.poolAddress,
-      ),
+      key: poolTickCacheKey(network: selectedYield!.network, poolAddress: selectedYield!.poolAddress),
     );
 
     if (selectedYieldBeforeCall != selectedYield) return await getSelectedPoolTick();
@@ -166,10 +166,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, V3PoolConversorsM
 
   Future<void> saveDepositSettings(Slippage slippage, Duration deadline) async {
     await _cache.saveDepositSettings(
-      DepositSettingsDto(
-        deadlineMinutes: deadline.inMinutes,
-        maxSlippage: slippage.value.toDouble(),
-      ),
+      DepositSettingsDto(deadlineMinutes: deadline.inMinutes, maxSlippage: slippage.value.toDouble()),
     );
   }
 

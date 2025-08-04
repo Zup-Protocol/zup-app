@@ -39,21 +39,22 @@ abstract class InjectInstanceNames {
   static final lottieClick = Assets.lotties.click.path;
   static final lottieEmpty = Assets.lotties.empty.path;
   static final lottieRadar = Assets.lotties.radar.path;
+  static final lottieNumbers = Assets.lotties.numbers.path;
   static final lottieMatching = Assets.lotties.matching.path;
   static final lottieSearching = Assets.lotties.seaching.path;
   static const zupAPIDio = 'zup_api_dio';
   static const confettiController10s = 'confetti_controller_10s';
   static const zupHolderFactory = 'zup_holder_factory';
+  static const infinityAnimationAutoPlay = 'infinity_animation_auto_play';
 }
 
 Future<void> setupInjections() async {
   await inject.reset();
 
   inject.registerLazySingleton<Dio>(
-    () => Dio(BaseOptions(baseUrl: AppEnvironment.current.apiUrl))
-      ..interceptors.add(
-        LogInterceptor(request: true, requestBody: true, responseBody: true, error: true),
-      ),
+    () =>
+        Dio(BaseOptions(baseUrl: AppEnvironment.current.apiUrl))
+          ..interceptors.add(LogInterceptor(request: true, requestBody: true, responseBody: true, error: true)),
     instanceName: InjectInstanceNames.zupAPIDio,
   );
 
@@ -68,8 +69,10 @@ Future<void> setupInjections() async {
   inject.registerLazySingleton<AppCubit>(() => AppCubit(inject<Wallet>(), inject<Cache>()));
   inject.registerLazySingleton<PositionsRepository>(() => PositionsRepository());
   inject.registerLazySingleton<ZupCachedImage>(() => ZupCachedImage());
+  inject.registerLazySingleton<bool>(() => true, instanceName: InjectInstanceNames.infinityAnimationAutoPlay);
   inject.registerLazySingleton<TokensRepository>(
-      () => TokensRepository(inject<Dio>(instanceName: InjectInstanceNames.zupAPIDio)));
+    () => TokensRepository(inject<Dio>(instanceName: InjectInstanceNames.zupAPIDio)),
+  );
   inject.registerLazySingleton<TokenSelectorModalCubit>(
     () => TokenSelectorModalCubit(inject<TokensRepository>(), inject<AppCubit>(), inject<Wallet>()),
   );
@@ -79,10 +82,7 @@ Future<void> setupInjections() async {
   );
   inject.registerLazySingleton<FirebaseAnalytics>(() => FirebaseAnalytics.instance);
   inject.registerLazySingleton<ZupAnalytics>(
-    () => ZupAnalytics(
-      inject<FirebaseAnalytics>(),
-      inject<TokensRepository>(),
-    ),
+    () => ZupAnalytics(inject<FirebaseAnalytics>(), inject<TokensRepository>()),
   );
   inject.registerLazySingleton<ZupHolder>(() => ZupHolder());
   inject.registerFactory<ZupHolder>(() => ZupHolder(), instanceName: InjectInstanceNames.zupHolderFactory);
@@ -109,6 +109,10 @@ Future<void> setupInjections() async {
     instanceName: InjectInstanceNames.lottieRadar,
   );
   inject.registerLazySingleton<LottieBuilder>(
+    () => Assets.lotties.numbers.lottie(),
+    instanceName: InjectInstanceNames.lottieNumbers,
+  );
+  inject.registerLazySingleton<LottieBuilder>(
     () => Assets.lotties.matching.lottie(),
     instanceName: InjectInstanceNames.lottieMatching,
   );
@@ -116,28 +120,26 @@ Future<void> setupInjections() async {
     () => Assets.lotties.seaching.lottie(),
     instanceName: InjectInstanceNames.lottieSearching,
   );
-  inject.registerLazySingleton<UniswapV4StateView>(
-    () => UniswapV4StateView(),
-  );
+  inject.registerLazySingleton<UniswapV4StateView>(() => UniswapV4StateView());
 
   inject.registerLazySingleton<EthereumAbiCoder>(() => EthereumAbiCoder());
 
-  inject.registerLazySingleton<PancakeSwapInfinityClPoolManager>(
-    () => PancakeSwapInfinityClPoolManager(),
-  );
+  inject.registerLazySingleton<PancakeSwapInfinityClPoolManager>(() => PancakeSwapInfinityClPoolManager());
 
   inject.registerLazySingleton<PoolService>(
-    () => PoolService(inject<UniswapV4StateView>(), inject<UniswapV3Pool>(), inject<UniswapV3PositionManager>(),
-        inject<UniswapV4PositionManager>(), inject<EthereumAbiCoder>(), inject<PancakeSwapInfinityClPoolManager>()),
+    () => PoolService(
+      inject<UniswapV4StateView>(),
+      inject<UniswapV3Pool>(),
+      inject<UniswapV3PositionManager>(),
+      inject<UniswapV4PositionManager>(),
+      inject<EthereumAbiCoder>(),
+      inject<PancakeSwapInfinityClPoolManager>(),
+    ),
   );
 
-  inject.registerLazySingleton<UniswapPermit2>(
-    () => UniswapPermit2(),
-  );
+  inject.registerLazySingleton<UniswapPermit2>(() => UniswapPermit2());
 
-  inject.registerLazySingleton<UniswapV4PositionManager>(
-    () => UniswapV4PositionManager(),
-  );
+  inject.registerLazySingleton<UniswapV4PositionManager>(() => UniswapV4PositionManager());
 
   // WARNING: this should always be factory following the instructions
   inject.registerFactory(

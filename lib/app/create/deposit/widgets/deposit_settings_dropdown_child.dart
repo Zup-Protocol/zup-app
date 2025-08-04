@@ -67,7 +67,7 @@ class _DepositSettingsDropdownChildState extends State<DepositSettingsDropdownCh
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ZupTooltip(
+            ZupTooltip.text(
               key: const Key("slippage-tooltip"),
               message: S.of(context).slippageExplanation,
               child: Row(
@@ -224,7 +224,7 @@ class _DepositSettingsDropdownChildState extends State<DepositSettingsDropdownCh
             const SizedBox(height: 10),
             Row(
               children: [
-                ZupTooltip(
+                ZupTooltip.text(
                   message: S.of(context).depositSettingsDropdownChildTransactionDeadlineExplanation,
                   key: const Key("deadline-tooltip"),
                   child: Row(

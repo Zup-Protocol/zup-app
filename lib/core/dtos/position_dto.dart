@@ -8,7 +8,7 @@ part 'position_dto.freezed.dart';
 part 'position_dto.g.dart';
 
 @freezed
-class PositionDto with _$PositionDto {
+sealed class PositionDto with _$PositionDto {
   const PositionDto._();
 
   @JsonSerializable(explicitToJson: true)

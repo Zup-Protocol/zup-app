@@ -9,6 +9,8 @@
         }
     },
     "twentyFourHours": "24h",
+    "week": "Week",
+    "weekCompact": "7d",
     "appFooterTermsOfUse": "Terms of Use",
     "privacyPolicy": "Privacy Policy",
     "appFooterContactUs": "Contact Us",
@@ -152,7 +154,15 @@
             }
         }
     },
-    "yieldCardYieldYearly": "Yield (Yearly)",
+    "yieldCardYearlyYield": "Yearly Yield",
+    "yieldCardVisitProtocol": "Visit {protocolName}",
+    "@yieldCardVisitProtocol": {
+        "placeholders": {
+            "protocolName": {
+                "type": "String"
+            }
+        }
+    },
     "yieldCardAverageYieldYearly": "Average Yield (Yearly)",
     "previewDepositModalDepositSuccessSnackBarHelperButtonTitle": "View Transaction",
     "previewDepositModalApproveSuccessSnackBarHelperButtonTitle": "View Transaction",
@@ -186,10 +196,13 @@
     "createPageSelectTokensStageSearchSettings": "Search Settings",
     "depositPageLoadingStep1Title": "Matching Tokens...",
     "depositPageLoadingStep1Description": "Pairing Token A and Token B to kick off the search for top yields!",
-    "depositPageLoadingStep2Title": "Scanning the Pools...",
-    "depositPageLoadingStep2Description": "Searching through the sea of pools for the best yields, hang tight!",
-    "depositPageLoadingStep3Title": "Fetching the Best yields for you...",
-    "depositPageLoadingStep3Description": "Got it! Just adding a touch of sparkle to your perfect match!",
+    "depositPageLoadingStep2Title": "Pair hunting…",
+    "depositPageLoadingStep2Description": "Searching through more than a thousand pool combos… so you don't have to",
+    "depositPageLoadingStep3Title": "Yield optimizer at work…",
+    "depositPageLoadingStep3Description": "Scanning pools, calculating returns, and filtering the noise",
+    "depositPageBestYieldsIn": "Best Yields in",
+    "depositPageLoadingStep4Title": "Fetching the Best yields for you...",
+    "depositPageLoadingStep4Description": "Got it! Just adding a touch of sparkle to your perfect match!",
     "depositPageErrorStateTitle": "Oops! Something went wrong!",
     "depositPageErrorStateDescription": "We ran into a issue while trying to find the best pool. Give it another shot, and if it keeps happening, don’t hesitate to reach out to us!",
     "depositPageEmptyStateTitle": "No Pools Found",
@@ -197,7 +210,7 @@
     "depositPageEmptyStateHelpButtonTitle": "Go Back to New Position",
     "depositPageBackButtonTitle": "Select Pair",
     "depositPageTitle": "Add liquidity",
-    "depositPageTimeFrameTooltipMessage": "Select a time-frame that matches your goal with this pool: a quick win (Short term), a balanced approach (Medium term), or a long haul (Long term).",
+    "depositPageTimeFrameTooltipMessage": "Each time frame shows yields based on past performance. Shorter terms (24h, 7d) reflect recent trends and may suit short-term strategies. Longer terms (30d, 90d) offer a broader performance view for long-term decisions.",
     "depositPageTimeFrameTooltipHelperButtonTitle": " Learn more",
     "depositPageTimeFrameTitle": "Preferred time frame",
     "depositPageNoYieldSelectedTitle": "Pick a yield to deposit",
@@ -231,6 +244,8 @@
     "depositPageDeposit": "Deposit",
     "connectYourWallet": "Connect your wallet",
     "tokenSelectorModalTitle": "Select a token",
+    "tokenSelectorModalTokenGroups": "Token Groups",
+    "tokenSelectorModalTokenGroupsTooltipMessage": "Token groups let you search pools using multiple tokens in one go. Think of them like batch queries, want all USD stablecoins? Pick the group and we'll surface every relevant pool. You can also match groups against single tokens or other groups to discover deep liquidity.",
     "tokenSelectorModalDescription": "Pick a token from our list or search by symbol or address to build your ideal liquidity pool!",
     "tokenSelectorModalSearchTitle": "Search token or paste address",
     "tokenSelectorModalSearchTitleAllNetworks": "Search token by symbol or name",

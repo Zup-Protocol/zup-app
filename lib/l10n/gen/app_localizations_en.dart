@@ -17,6 +17,12 @@ class SEn extends S {
   String get twentyFourHours => '24h';
 
   @override
+  String get week => 'Week';
+
+  @override
+  String get weekCompact => '7d';
+
+  @override
   String get appFooterTermsOfUse => 'Terms of Use';
 
   @override
@@ -39,8 +45,9 @@ class SEn extends S {
   String get understood => 'Understood';
 
   @override
-  String depositPageShowingOnlyPoolsWithMoreThan(
-      {required String minLiquidity}) {
+  String depositPageShowingOnlyPoolsWithMoreThan({
+    required String minLiquidity,
+  }) {
     return 'Showing only liquidity pools with more than $minLiquidity.';
   }
 
@@ -51,8 +58,9 @@ class SEn extends S {
   String get depositPageSearchAllPools => 'Search all pools?';
 
   @override
-  String depositPageSearchOnlyForPoolsWithMorethan(
-      {required String minLiquidity}) {
+  String depositPageSearchOnlyForPoolsWithMorethan({
+    required String minLiquidity,
+  }) {
     return 'Search only for pools with more than $minLiquidity?';
   }
 
@@ -121,8 +129,10 @@ class SEn extends S {
   }
 
   @override
-  String previewDepositModalDepositingIntoPool(
-      {required String baseTokenSymbol, required String quoteTokenSymbol}) {
+  String previewDepositModalDepositingIntoPool({
+    required String baseTokenSymbol,
+    required String quoteTokenSymbol,
+  }) {
     return 'Depositing into $baseTokenSymbol/$quoteTokenSymbol pool';
   }
 
@@ -141,8 +151,9 @@ class SEn extends S {
   String get previewDepositModalCurrentPrice => 'Current Price';
 
   @override
-  String depositPageDepositSectionTokenNotNeeded(
-      {required String tokenSymbol}) {
+  String depositPageDepositSectionTokenNotNeeded({
+    required String tokenSymbol,
+  }) {
     return '$tokenSymbol is not necessary for your selected range';
   }
 
@@ -157,8 +168,9 @@ class SEn extends S {
       'Waiting transaction to be confirmed. ';
 
   @override
-  String previewDepositModalApproveSuccessSnackBarMessage(
-      {required String tokenSymbol}) {
+  String previewDepositModalApproveSuccessSnackBarMessage({
+    required String tokenSymbol,
+  }) {
     return '$tokenSymbol approved successfully. ';
   }
 
@@ -189,10 +201,11 @@ class SEn extends S {
       'Contact us';
 
   @override
-  String previewDepositModalDepositSuccessSnackBarMessage(
-      {required String baseTokenSymbol,
-      required String quoteTokenSymbol,
-      required String protocol}) {
+  String previewDepositModalDepositSuccessSnackBarMessage({
+    required String baseTokenSymbol,
+    required String quoteTokenSymbol,
+    required String protocol,
+  }) {
     return 'Successfully Deposited into the $baseTokenSymbol/$quoteTokenSymbol Pool at $protocol. ';
   }
 
@@ -207,7 +220,12 @@ class SEn extends S {
   }
 
   @override
-  String get yieldCardYieldYearly => 'Yield (Yearly)';
+  String get yieldCardYearlyYield => 'Yearly Yield';
+
+  @override
+  String yieldCardVisitProtocol({required String protocolName}) {
+    return 'Visit $protocolName';
+  }
 
   @override
   String get yieldCardAverageYieldYearly => 'Average Yield (Yearly)';
@@ -280,8 +298,9 @@ class SEn extends S {
   String get exchangesFilterDropdownButtonTitle => 'Exchanges';
 
   @override
-  String exchangesFilterDropdownButtonTitleNumered(
-      {required String exchangesCount}) {
+  String exchangesFilterDropdownButtonTitleNumered({
+    required String exchangesCount,
+  }) {
     return 'Exchanges ($exchangesCount)';
   }
 
@@ -302,18 +321,28 @@ class SEn extends S {
       'Pairing Token A and Token B to kick off the search for top yields!';
 
   @override
-  String get depositPageLoadingStep2Title => 'Scanning the Pools...';
+  String get depositPageLoadingStep2Title => 'Pair hunting…';
 
   @override
   String get depositPageLoadingStep2Description =>
-      'Searching through the sea of pools for the best yields, hang tight!';
+      'Searching through more than a thousand pool combos… so you don\'t have to';
 
   @override
-  String get depositPageLoadingStep3Title =>
-      'Fetching the Best yields for you...';
+  String get depositPageLoadingStep3Title => 'Yield optimizer at work…';
 
   @override
   String get depositPageLoadingStep3Description =>
+      'Scanning pools, calculating returns, and filtering the noise';
+
+  @override
+  String get depositPageBestYieldsIn => 'Best Yields in';
+
+  @override
+  String get depositPageLoadingStep4Title =>
+      'Fetching the Best yields for you...';
+
+  @override
+  String get depositPageLoadingStep4Description =>
       'Got it! Just adding a touch of sparkle to your perfect match!';
 
   @override
@@ -341,7 +370,7 @@ class SEn extends S {
 
   @override
   String get depositPageTimeFrameTooltipMessage =>
-      'Select a time-frame that matches your goal with this pool: a quick win (Short term), a balanced approach (Medium term), or a long haul (Long term).';
+      'Each time frame shows yields based on past performance. Shorter terms (24h, 7d) reflect recent trends and may suit short-term strategies. Longer terms (30d, 90d) offer a broader performance view for long-term decisions.';
 
   @override
   String get depositPageTimeFrameTooltipHelperButtonTitle => ' Learn more';
@@ -387,6 +416,13 @@ class SEn extends S {
   String get tokenSelectorModalTitle => 'Select a token';
 
   @override
+  String get tokenSelectorModalTokenGroups => 'Token Groups';
+
+  @override
+  String get tokenSelectorModalTokenGroupsTooltipMessage =>
+      'Token groups let you search pools using multiple tokens in one go. Think of them like batch queries, want all USD stablecoins? Pick the group and we\'ll surface every relevant pool. You can also match groups against single tokens or other groups to discover deep liquidity.';
+
+  @override
   String get tokenSelectorModalDescription =>
       'Pick a token from our list or search by symbol or address to build your ideal liquidity pool!';
 
@@ -406,8 +442,9 @@ class SEn extends S {
       'We hit a snag loading your token list. Give it another go, and if it keeps happening, feel free to reach us';
 
   @override
-  String tokenSelectorModalSearchErrorDescription(
-      {required String searchedTerm}) {
+  String tokenSelectorModalSearchErrorDescription({
+    required String searchedTerm,
+  }) {
     return 'We hit a snag while searching for a token matching $searchedTerm. Give it another go, and if it keeps happening, feel free to reach us';
   }
 
@@ -466,28 +503,27 @@ class SEn extends S {
 
   @override
   String positionsPageShowHideClosedPositions({required String isHidden}) {
-    String _temp0 = intl.Intl.selectLogic(
-      isHidden,
-      {
-        'true': 'Show',
-        'false': 'Hide',
-        'other': 'Show/Hide',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(isHidden, {
+      'true': 'Show',
+      'false': 'Hide',
+      'other': 'Show/Hide',
+    });
     return '$_temp0 closed positions';
   }
 
   @override
-  String positionsPageNoPositionsInNetworkDescription(
-      {required String network}) {
+  String positionsPageNoPositionsInNetworkDescription({
+    required String network,
+  }) {
     return 'It looks like you don’t have any positions in $network yet.\nGo ahead and create one to get started!';
   }
 
   @override
-  String positionCardTokenPerToken(
-      {required String token0Qtd,
-      required String token0Symbol,
-      required String token1Symbol}) {
+  String positionCardTokenPerToken({
+    required String token0Qtd,
+    required String token0Symbol,
+    required String token1Symbol,
+  }) {
     return '$token0Qtd $token0Symbol per $token1Symbol';
   }
 
@@ -552,8 +588,10 @@ class SEn extends S {
   String get depositSuccessModalDescriptionPart3 => 'on';
 
   @override
-  String previewDepositModalCubitDepositingSnackBarMessage(
-      {required String token0Symbol, required String token1Symbol}) {
+  String previewDepositModalCubitDepositingSnackBarMessage({
+    required String token0Symbol,
+    required String token1Symbol,
+  }) {
     return 'Depositing into $token0Symbol/$token1Symbol Pool...';
   }
 
@@ -561,8 +599,9 @@ class SEn extends S {
   String get previewDepositModalCubitApprovingSnackBarMessage => 'Approving...';
 
   @override
-  String previewDepositModalCubitApprovedSnackBarMessage(
-      {required String tokenSymbol}) {
+  String previewDepositModalCubitApprovedSnackBarMessage({
+    required String tokenSymbol,
+  }) {
     return 'Successfully approved $tokenSymbol';
   }
 

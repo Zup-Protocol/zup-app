@@ -17,6 +17,7 @@ import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
+import 'package:zup_app/core/enums/yield_timeframe.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
@@ -80,19 +81,13 @@ void main() {
     when(() => cubit.setup()).thenAnswer((_) async {});
     when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(V3V4PoolConstants.maxTick));
     when(() => cubit.latestPoolTick).thenReturn(BigInt.from(3247));
-    when(() => cubit.stream).thenAnswer((_) => Stream.value(
-          PreviewDepositModalState.initial(
-            token0Allowance: BigInt.zero,
-            token1Allowance: BigInt.zero,
-          ),
-        ));
-
-    when(() => cubit.state).thenReturn(
-      PreviewDepositModalState.initial(
-        token0Allowance: BigInt.zero,
-        token1Allowance: BigInt.zero,
-      ),
+    when(() => cubit.stream).thenAnswer(
+      (_) => Stream.value(PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero)),
     );
+
+    when(
+      () => cubit.state,
+    ).thenReturn(PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero));
 
     when(
       () => cubit.deposit(
@@ -126,43 +121,43 @@ void main() {
     TextEditingController? token1DepositAmountController,
     Duration deadline = const Duration(minutes: 30),
     Slippage slippage = Slippage.halfPercent,
-  }) =>
-      goldenDeviceBuilder(
-        Builder(builder: (context) {
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            await ZupModal.show(context,
-                size: const Size(450, 650),
-                padding: const EdgeInsets.only(left: 20),
-                title: "Preview Deposit",
-                content: BlocProvider.value(
-                  value: cubit,
-                  child: PreviewDepositModal(
-                    yieldTimeFrame: YieldTimeFrame.day,
-                    deadline: deadline,
-                    maxSlippage: slippage,
-                    currentYield: customYield ?? currentYield,
-                    isReversed: isReversed,
-                    minPrice: minPrice,
-                    maxPrice: maxPrice,
-                    token0DepositAmountController: token0DepositAmountController ?? TextEditingController(text: "1"),
-                    token1DepositAmountController: token1DepositAmountController ?? TextEditingController(text: "3"),
-                  ),
-                ));
-          });
+  }) => goldenDeviceBuilder(
+    Builder(
+      builder: (context) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await ZupModal.show(
+            context,
+            size: const Size(450, 650),
+            padding: const EdgeInsets.only(left: 20),
+            title: "Preview Deposit",
+            content: BlocProvider.value(
+              value: cubit,
+              child: PreviewDepositModal(
+                yieldTimeFrame: YieldTimeFrame.day,
+                deadline: deadline,
+                maxSlippage: slippage,
+                currentYield: customYield ?? currentYield,
+                isReversed: isReversed,
+                minPrice: minPrice,
+                maxPrice: maxPrice,
+                token0DepositAmountController: token0DepositAmountController ?? TextEditingController(text: "1"),
+                token1DepositAmountController: token1DepositAmountController ?? TextEditingController(text: "3"),
+              ),
+            ),
+          );
+        });
 
-          return const SizedBox();
-        }),
-      );
-
-  zGoldenTest(
-    "When initializing the widget, it should call setup in the cubit",
-    (tester) async {
-      await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
-      await tester.pumpAndSettle();
-
-      verify(() => cubit.setup()).called(1);
-    },
+        return const SizedBox();
+      },
+    ),
   );
+
+  zGoldenTest("When initializing the widget, it should call setup in the cubit", (tester) async {
+    await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
+    await tester.pumpAndSettle();
+
+    verify(() => cubit.setup()).called(1);
+  });
 
   zGoldenTest(
     "When the state is waiting transaction, it should show a snackbar",
@@ -189,10 +184,12 @@ void main() {
     goldenFileName: "preview_deposit_modal_waiting_transaction_button",
     (tester) async {
       when(() => cubit.state).thenReturn(
-          const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit));
+        const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit),
+      );
       when(() => cubit.stream).thenAnswer(
         (_) => Stream.value(
-            const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit)),
+          const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit),
+        ),
       );
 
       await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
@@ -211,10 +208,12 @@ void main() {
       const yieldNetwork = AppNetworks.sepolia;
 
       when(() => cubit.state).thenReturn(
-          const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit));
+        const PreviewDepositModalState.waitingTransaction(txId: "txID", type: WaitingTransactionType.deposit),
+      );
       when(() => cubit.stream).thenAnswer(
         (_) => Stream.value(
-            const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.deposit)),
+          const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.deposit),
+        ),
       );
 
       await tester.pumpDeviceBuilder(
@@ -256,10 +255,7 @@ void main() {
       when(() => cubit.stream).thenAnswer((_) {
         return Stream.fromFutures([
           Future.value(
-            const PreviewDepositModalState.waitingTransaction(
-              txId: '',
-              type: WaitingTransactionType.approve,
-            ),
+            const PreviewDepositModalState.waitingTransaction(txId: '', type: WaitingTransactionType.approve),
           ), // Assuming that the waiting transaction state will display a snackbar
 
           Future.value(const PreviewDepositModalState.approveSuccess(txId: '', symbol: "TOKE SYM")),
@@ -290,11 +286,9 @@ void main() {
     goldenFileName: "preview_deposit_modal_in_range",
     (tester) async {
       await tester.pumpDeviceBuilder(
-          await goldenBuilder(
-            minPrice: (price: 0, isInfinity: true),
-            maxPrice: (price: 0, isInfinity: true),
-          ),
-          wrapper: GoldenConfig.localizationsWrapper());
+        await goldenBuilder(minPrice: (price: 0, isInfinity: true), maxPrice: (price: 0, isInfinity: true)),
+        wrapper: GoldenConfig.localizationsWrapper(),
+      );
 
       await tester.pumpAndSettle();
     },
@@ -316,11 +310,9 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(
-          await goldenBuilder(
-            minPrice: (price: minPrice, isInfinity: false),
-            maxPrice: (price: 0, isInfinity: true),
-          ),
-          wrapper: GoldenConfig.localizationsWrapper());
+        await goldenBuilder(minPrice: (price: minPrice, isInfinity: false), maxPrice: (price: 0, isInfinity: true)),
+        wrapper: GoldenConfig.localizationsWrapper(),
+      );
 
       await tester.pumpAndSettle();
     },
@@ -342,11 +334,9 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(
-          await goldenBuilder(
-            minPrice: (price: 0, isInfinity: true),
-            maxPrice: (price: maxPrice, isInfinity: false),
-          ),
-          wrapper: GoldenConfig.localizationsWrapper());
+        await goldenBuilder(minPrice: (price: 0, isInfinity: true), maxPrice: (price: maxPrice, isInfinity: false)),
+        wrapper: GoldenConfig.localizationsWrapper(),
+      );
 
       await tester.pumpAndSettle();
     },
@@ -371,11 +361,12 @@ void main() {
       when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(
-          await goldenBuilder(
-            minPrice: (price: minPrice, isInfinity: false),
-            maxPrice: (price: maxPrice, isInfinity: false),
-          ),
-          wrapper: GoldenConfig.localizationsWrapper());
+        await goldenBuilder(
+          minPrice: (price: minPrice, isInfinity: false),
+          maxPrice: (price: maxPrice, isInfinity: false),
+        ),
+        wrapper: GoldenConfig.localizationsWrapper(),
+      );
 
       await tester.pumpAndSettle();
     },
@@ -385,8 +376,10 @@ void main() {
     "When initializing with isReversed true, it should start with the tokens reversed",
     goldenFileName: "preview_deposit_modal_reversed",
     (tester) async {
-      await tester.pumpDeviceBuilder(await goldenBuilder(isReversed: true),
-          wrapper: GoldenConfig.localizationsWrapper());
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(isReversed: true),
+        wrapper: GoldenConfig.localizationsWrapper(),
+      );
 
       await tester.pumpAndSettle();
     },
@@ -482,24 +475,21 @@ void main() {
       final token0Allowance = BigInt.from(100);
       const depositAmount = 200.43;
 
-      when(() => cubit.state).thenReturn(
-        PreviewDepositModalState.initial(
-          token0Allowance: token0Allowance,
-          token1Allowance: BigInt.zero,
-        ),
-      );
+      when(
+        () => cubit.state,
+      ).thenReturn(PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: BigInt.zero));
 
       when(() => cubit.stream).thenAnswer((_) {
-        return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: token0Allowance,
-          token1Allowance: BigInt.zero,
-        ));
+        return Stream.value(
+          PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: BigInt.zero),
+        );
       });
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(
-            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
-            token1DepositAmountController: TextEditingController(text: "0")),
+          token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+          token1DepositAmountController: TextEditingController(text: "0"),
+        ),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -517,24 +507,21 @@ void main() {
 
       when(() => cubit.approveToken(any(), any())).thenAnswer((_) => Future.value());
 
-      when(() => cubit.state).thenReturn(
-        PreviewDepositModalState.initial(
-          token0Allowance: token0Allowance,
-          token1Allowance: BigInt.zero,
-        ),
-      );
+      when(
+        () => cubit.state,
+      ).thenReturn(PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: BigInt.zero));
 
       when(() => cubit.stream).thenAnswer((_) {
-        return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: token0Allowance,
-          token1Allowance: BigInt.zero,
-        ));
+        return Stream.value(
+          PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: BigInt.zero),
+        );
       });
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(
-            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
-            token1DepositAmountController: TextEditingController(text: "0")),
+          token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+          token1DepositAmountController: TextEditingController(text: "0"),
+        ),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -568,16 +555,19 @@ void main() {
       );
 
       when(() => cubit.stream).thenAnswer((_) {
-        return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
-          token1Allowance: token1Allowance,
-        ));
+        return Stream.value(
+          PreviewDepositModalState.initial(
+            token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
+            token1Allowance: token1Allowance,
+          ),
+        );
       });
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(
-            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
-            token1DepositAmountController: TextEditingController(text: depositAmount.toString())),
+          token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+          token1DepositAmountController: TextEditingController(text: depositAmount.toString()),
+        ),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -605,16 +595,19 @@ void main() {
       );
 
       when(() => cubit.stream).thenAnswer((_) {
-        return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
-          token1Allowance: token1Allowance,
-        ));
+        return Stream.value(
+          PreviewDepositModalState.initial(
+            token0Allowance: depositAmount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
+            token1Allowance: token1Allowance,
+          ),
+        );
       });
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(
-            token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
-            token1DepositAmountController: TextEditingController(text: depositAmount.toString())),
+          token0DepositAmountController: TextEditingController(text: depositAmount.toString()),
+          token1DepositAmountController: TextEditingController(text: depositAmount.toString()),
+        ),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -644,23 +637,20 @@ void main() {
       const deposit1Amount = 110.2;
 
       when(() => cubit.state).thenReturn(
-        PreviewDepositModalState.initial(
-          token0Allowance: token0Allowance,
-          token1Allowance: token1Allowance,
-        ),
+        PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: token1Allowance),
       );
 
       when(() => cubit.stream).thenAnswer((_) {
-        return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: token0Allowance,
-          token1Allowance: token1Allowance,
-        ));
+        return Stream.value(
+          PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: token1Allowance),
+        );
       });
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(
-            token0DepositAmountController: TextEditingController(text: deposit0Amount.toString()),
-            token1DepositAmountController: TextEditingController(text: deposit1Amount.toString())),
+          token0DepositAmountController: TextEditingController(text: deposit0Amount.toString()),
+          token1DepositAmountController: TextEditingController(text: deposit1Amount.toString()),
+        ),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -687,17 +677,13 @@ void main() {
       const isMinPriceInfinity = false;
 
       when(() => cubit.state).thenReturn(
-        PreviewDepositModalState.initial(
-          token0Allowance: token0Allowance,
-          token1Allowance: token1Allowance,
-        ),
+        PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: token1Allowance),
       );
 
       when(() => cubit.stream).thenAnswer((_) {
-        return Stream.value(PreviewDepositModalState.initial(
-          token0Allowance: token0Allowance,
-          token1Allowance: token1Allowance,
-        ));
+        return Stream.value(
+          PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: token1Allowance),
+        );
       });
 
       await tester.pumpDeviceBuilder(
@@ -858,16 +844,7 @@ void main() {
     goldenFileName: "preview_deposit_modal_range_prices_reversed_manually",
     (tester) async {
       await tester.pumpDeviceBuilder(
-        await goldenBuilder(
-          minPrice: (
-            isInfinity: false,
-            price: 0.04,
-          ),
-          maxPrice: (
-            isInfinity: false,
-            price: 1.2,
-          ),
-        ),
+        await goldenBuilder(minPrice: (isInfinity: false, price: 0.04), maxPrice: (isInfinity: false, price: 1.2)),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
       await tester.pumpAndSettle();
@@ -907,14 +884,8 @@ void main() {
       await tester.pumpDeviceBuilder(
         await goldenBuilder(
           isReversed: true,
-          minPrice: (
-            isInfinity: false,
-            price: 1200,
-          ),
-          maxPrice: (
-            isInfinity: false,
-            price: 3000,
-          ),
+          minPrice: (isInfinity: false, price: 1200),
+          maxPrice: (isInfinity: false, price: 3000),
         ),
         wrapper: GoldenConfig.localizationsWrapper(),
       );
@@ -931,23 +902,25 @@ void main() {
       await tester.runAsync(() async {
         await tester.pumpDeviceBuilder(
           await goldenDeviceBuilder(
-            Builder(builder: (context) {
-              WidgetsBinding.instance.addPostFrameCallback((_) async {
-                PreviewDepositModal(
-                  yieldTimeFrame: YieldTimeFrame.day,
-                  currentYield: currentYield,
-                  isReversed: true,
-                  minPrice: (isInfinity: true, price: 0),
-                  maxPrice: (isInfinity: true, price: 0),
-                  token0DepositAmountController: TextEditingController(text: "1200"),
-                  token1DepositAmountController: TextEditingController(text: "4300"),
-                  deadline: const Duration(minutes: 30),
-                  maxSlippage: Slippage.halfPercent,
-                ).show(context, currentPoolTick: BigInt.from(121475));
-              });
+            Builder(
+              builder: (context) {
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  PreviewDepositModal(
+                    yieldTimeFrame: YieldTimeFrame.day,
+                    currentYield: currentYield,
+                    isReversed: true,
+                    minPrice: (isInfinity: true, price: 0),
+                    maxPrice: (isInfinity: true, price: 0),
+                    token0DepositAmountController: TextEditingController(text: "1200"),
+                    token1DepositAmountController: TextEditingController(text: "4300"),
+                    deadline: const Duration(minutes: 30),
+                    maxSlippage: Slippage.halfPercent,
+                  ).show(context, currentPoolTick: BigInt.from(121475));
+                });
 
-              return const SizedBox();
-            }),
+                return const SizedBox();
+              },
+            ),
             device: GoldenDevice.mobile,
           ),
           wrapper: GoldenConfig.localizationsWrapper(),
@@ -964,23 +937,25 @@ void main() {
       await tester.runAsync(() async {
         await tester.pumpDeviceBuilder(
           await goldenDeviceBuilder(
-            Builder(builder: (context) {
-              WidgetsBinding.instance.addPostFrameCallback((_) async {
-                PreviewDepositModal(
-                  yieldTimeFrame: YieldTimeFrame.day,
-                  currentYield: currentYield,
-                  isReversed: true,
-                  minPrice: (isInfinity: true, price: 0),
-                  maxPrice: (isInfinity: true, price: 0),
-                  token0DepositAmountController: TextEditingController(text: "1200"),
-                  token1DepositAmountController: TextEditingController(text: "4300"),
-                  deadline: const Duration(minutes: 30),
-                  maxSlippage: Slippage.halfPercent,
-                ).show(context, currentPoolTick: BigInt.from(121475));
-              });
+            Builder(
+              builder: (context) {
+                WidgetsBinding.instance.addPostFrameCallback((_) async {
+                  PreviewDepositModal(
+                    yieldTimeFrame: YieldTimeFrame.day,
+                    currentYield: currentYield,
+                    isReversed: true,
+                    minPrice: (isInfinity: true, price: 0),
+                    maxPrice: (isInfinity: true, price: 0),
+                    token0DepositAmountController: TextEditingController(text: "1200"),
+                    token1DepositAmountController: TextEditingController(text: "4300"),
+                    deadline: const Duration(minutes: 30),
+                    maxSlippage: Slippage.halfPercent,
+                  ).show(context, currentPoolTick: BigInt.from(121475));
+                });
 
-              return const SizedBox();
-            }),
+                return const SizedBox();
+              },
+            ),
             device: GoldenDevice.pc,
           ),
           wrapper: GoldenConfig.localizationsWrapper(),
@@ -1030,36 +1005,42 @@ void main() {
     },
   );
 
-  zGoldenTest("When the token amounts controllers change its amount, it should reflect in the UI",
-      goldenFileName: "preview_deposit_modal_token_amounts_change", (tester) async {
-    final token0DepositAmountController = TextEditingController(text: "0");
-    final token1DepositAmountController = TextEditingController(text: "0");
+  zGoldenTest(
+    "When the token amounts controllers change its amount, it should reflect in the UI",
+    goldenFileName: "preview_deposit_modal_token_amounts_change",
+    (tester) async {
+      final token0DepositAmountController = TextEditingController(text: "0");
+      final token1DepositAmountController = TextEditingController(text: "0");
 
-    when(() => cubit.state).thenReturn(
-      PreviewDepositModalState.initial(
-        token0Allowance: EthereumConstants.uint256Max,
-        token1Allowance: EthereumConstants.uint256Max,
-      ),
-    );
+      when(() => cubit.state).thenReturn(
+        PreviewDepositModalState.initial(
+          token0Allowance: EthereumConstants.uint256Max,
+          token1Allowance: EthereumConstants.uint256Max,
+        ),
+      );
 
-    when(() => cubit.stream).thenAnswer((_) {
-      return Stream.value(PreviewDepositModalState.initial(
-        token0Allowance: EthereumConstants.uint256Max,
-        token1Allowance: EthereumConstants.uint256Max,
-      ));
-    });
+      when(() => cubit.stream).thenAnswer((_) {
+        return Stream.value(
+          PreviewDepositModalState.initial(
+            token0Allowance: EthereumConstants.uint256Max,
+            token1Allowance: EthereumConstants.uint256Max,
+          ),
+        );
+      });
 
-    await tester.pumpDeviceBuilder(
+      await tester.pumpDeviceBuilder(
         await goldenBuilder(
           token0DepositAmountController: token0DepositAmountController,
           token1DepositAmountController: token1DepositAmountController,
         ),
-        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey));
+        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
+      );
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    token0DepositAmountController.text = "1200";
-    token1DepositAmountController.text = "4300";
-    await tester.pumpAndSettle();
-  });
+      token0DepositAmountController.text = "1200";
+      token1DepositAmountController.text = "4300";
+      await tester.pumpAndSettle();
+    },
+  );
 }

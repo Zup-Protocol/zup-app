@@ -37,11 +37,7 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
             alignment: Alignment.bottomRight,
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: SelectionArea(
-                child: AppCookieConsentWidget(
-                  onAccept: () => overlayEntry.remove(),
-                ),
-              ),
+              child: SelectionArea(child: AppCookieConsentWidget(onAccept: () => overlayEntry.remove())),
             ),
           );
         },
@@ -73,19 +69,10 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
                 title: AppHeader(height: appBarHeight),
                 toolbarHeight: appBarHeight,
               ),
-              SliverToBoxAdapter(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height - appBarHeight),
-                  child: const RouterOutlet(
-                    key: Key("screen"),
-                  ),
-                ),
-              ),
+              const SliverFillRemaining(hasScrollBody: false, child: RouterOutlet(key: Key("screen"))),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: shouldShowBottomNavigationBar ? AppBottomNavigationBar.height : 0,
-                  ),
+                  padding: EdgeInsets.only(bottom: shouldShowBottomNavigationBar ? AppBottomNavigationBar.height : 0),
                   child: const AppFooter(),
                 ),
               ),

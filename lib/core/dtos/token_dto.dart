@@ -5,7 +5,7 @@ part 'token_dto.freezed.dart';
 part 'token_dto.g.dart';
 
 @freezed
-class TokenDto with _$TokenDto {
+sealed class TokenDto with _$TokenDto {
   @JsonSerializable(explicitToJson: true)
   const factory TokenDto({
     @JsonKey(name: "id") String? internalId,

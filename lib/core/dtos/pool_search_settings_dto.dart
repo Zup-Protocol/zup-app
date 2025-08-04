@@ -4,7 +4,7 @@ part 'pool_search_settings_dto.freezed.dart';
 part 'pool_search_settings_dto.g.dart';
 
 @freezed
-class PoolSearchSettingsDto with _$PoolSearchSettingsDto {
+sealed class PoolSearchSettingsDto with _$PoolSearchSettingsDto {
   static const num defaultMinLiquidityUSD = 1000;
 
   @JsonSerializable(explicitToJson: true)

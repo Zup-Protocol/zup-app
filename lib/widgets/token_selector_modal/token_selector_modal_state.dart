@@ -5,7 +5,7 @@ class TokenSelectorModalState with _$TokenSelectorModalState {
   const factory TokenSelectorModalState.initial() = _Initial;
   const factory TokenSelectorModalState.loading() = _Loading;
   const factory TokenSelectorModalState.searchLoading() = _SearchLoading;
-  const factory TokenSelectorModalState.success(List<TokenDto> popularTokens) = _Success;
+  const factory TokenSelectorModalState.success(TokenListDto popularTokens) = _Success;
   const factory TokenSelectorModalState.searchSuccess(List<TokenDto> result) = _SearchSuccess;
   const factory TokenSelectorModalState.error() = _Error;
   const factory TokenSelectorModalState.searchError(String searchedTerm) = _SearchError;

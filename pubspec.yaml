@@ -2,18 +2,18 @@ name: zup_app
 publish_to: none
 
 environment:
-  sdk: ^3.5.2
-  flutter: 3.32.2
+  sdk: ^3.8.0
+  flutter: 3.32.8
 
 dependencies:
   build_runner: ^2.4.12
   flutter:
     sdk: flutter
-  flutter_gen_runner: ^5.7.0
-  flutter_svg: ^2.0.10+1
+  flutter_gen_runner: ^5.11.0
+  flutter_svg: ^2.2.0
   routefly:
     git:
-      url: https://github.com/RyanHolanda/routefly.git # TODO: Pull request sent to the original repo, wait for merge and then update the dependency for the original.
+      url: https://github.com/RyanHolanda/routefly.git # TODO: Issue sent to the original repo, to fix vercel build (https://github.com/Flutterando/routefly/issues/28`)
       ref: hotfix-vercel
   flutter_web_plugins:
     sdk: flutter
@@ -32,48 +32,52 @@ dependencies:
     git:
       url: https://github.com/Zup-Protocol/zup-core.git
       ref: main
-  freezed_annotation: ^2.4.4
+  freezed_annotation: ^3.1.0
   flutter_bloc: ^8.1.6
   collection: ^1.18.0
   json_annotation: ^4.9.0
   url_launcher: ^6.3.0
   cached_network_image: ^3.4.1
-  skeletonizer: ^2.0.1
+  skeletonizer: ^2.1.0+1
   shared_preferences: ^2.3.2
   dio: ^5.7.0
   intl: ^0.20.2
-  lottie: ^3.1.2
+  lottie: ^3.3.1
   equatable: ^2.0.5
-  decimal: ^3.0.2
-  flutter_animate: ^4.5.0
+  decimal: ^3.2.4
+  flutter_animate: ^4.5.2
   clock: ^1.1.1
   confetti: ^0.8.0
   currency_text_input_formatter: ^2.3.0
   firebase_core: ^3.13.0
   firebase_analytics: ^11.4.5
   envied: ^1.1.1
+  async: ^2.13.0
 
 # dependency_overrides:
-#   zup_core:
-#     path: ../zup-core
-#   web3kit:
-#     path: ../web3kit
-#   zup_ui_kit:
-#     path: ../zup-ui-kit
+# zup_core:
+#   path: ../zup-core
+# web3kit:
+#   path: ../web3kit
+# zup_ui_kit:
+#   path: ../zup-ui-kit
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   fake_async: ^1.3.1
   flutter_lints: ^4.0.0
-  freezed: ^2.5.7
+  freezed: ^3.2.0
   golden_toolkit: ^0.15.0
   mocktail_image_network: ^1.2.0
   mocktail: ^1.0.4
-  json_serializable: ^6.8.0
+  json_serializable: ^6.10.0
   url_launcher_platform_interface: ^2.3.2
   plugin_platform_interface: ^2.1.8
-  envied_generator: ^1.1.1
+  envied_generator:
+    git:
+      url: https://github.com/petercinibulk/envied.git
+      path: packages/envied_generator
 
 flutter_gen:
   output: lib/gen/

@@ -9,15 +9,19 @@ class YieldRepository {
   final Dio _zupAPIDio;
 
   Future<YieldsDto> getSingleNetworkYield({
-    required String token0Address,
-    required String token1Address,
+    required String? token0Address,
+    required String? token1Address,
+    required String? group0Id,
+    required String? group1Id,
     required AppNetworks network,
     required PoolSearchSettingsDto searchSettings,
     required List<String> blockedProtocolIds,
   }) async {
     final response = await _zupAPIDio.post("/pools/search/${network.chainId}", queryParameters: {
-      "token0Address": token0Address,
-      "token1Address": token1Address,
+      if (token0Address != null) "token0Address": token0Address,
+      if (token1Address != null) "token1Address": token1Address,
+      if (group0Id != null) "group0Id": group0Id,
+      if (group1Id != null) "group1Id": group1Id,
     }, data: {
       "filters": {
         "minTvlUsd": searchSettings.minLiquidityUSD,
@@ -33,15 +37,19 @@ class YieldRepository {
   }
 
   Future<YieldsDto> getAllNetworksYield({
-    required String token0InternalId,
-    required String token1InternalId,
+    required String? token0InternalId,
+    required String? token1InternalId,
+    required String? group0Id,
+    required String? group1Id,
     required PoolSearchSettingsDto searchSettings,
     required List<String> blockedProtocolIds,
     bool testnetMode = false,
   }) async {
     final response = await _zupAPIDio.post("/pools/search/all", queryParameters: {
-      "token0Id": token0InternalId,
-      "token1Id": token1InternalId,
+      if (token0InternalId != null) "token0Id": token0InternalId,
+      if (token1InternalId != null) "token1Id": token1InternalId,
+      if (group0Id != null) "group0Id": group0Id,
+      if (group1Id != null) "group1Id": group1Id,
     }, data: {
       "filters": {
         "minTvlUsd": searchSettings.minLiquidityUSD,

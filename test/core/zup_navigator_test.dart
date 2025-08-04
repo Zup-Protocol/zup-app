@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:routefly/routefly.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/zup_navigator_paths.dart';
 import 'package:zup_app/core/zup_navigator.dart';
+import 'package:zup_app/core/zup_route_params_names.dart';
 import 'package:zup_app/zup_app.dart';
 
 void main() {
@@ -13,15 +15,14 @@ void main() {
     routerConfig: Routefly.routerConfig(
       routes: routes,
       initialPath: ZupNavigatorPaths.initial.path,
-      routeBuilder: (context, settings, child) => PageRouteBuilder(
-        settings: settings,
-        pageBuilder: (context, __, ___) => const SizedBox(),
-      ),
+      routeBuilder: (context, settings, child) =>
+          PageRouteBuilder(settings: settings, pageBuilder: (context, __, ___) => const SizedBox()),
     ),
   );
 
-  testWidgets("When calling `navigateToNewPosition` it should use routefly to navigate to the new position page",
-      (tester) async {
+  testWidgets("When calling `navigateToNewPosition` it should use routefly to navigate to the new position page", (
+    tester,
+  ) async {
     await tester.pumpWidget(material);
 
     await ZupNavigator().navigateToNewPosition();
@@ -29,8 +30,9 @@ void main() {
     expect(Routefly.currentUri.path, ZupNavigatorPaths.newPosition.path);
   });
 
-  testWidgets("When calling `navigateToInitial` it should use routefly to navigate to the initial page",
-      (tester) async {
+  testWidgets("When calling `navigateToInitial` it should use routefly to navigate to the initial page", (
+    tester,
+  ) async {
     runApp(material);
 
     await ZupNavigator().navigateToInitial();
@@ -46,8 +48,9 @@ void main() {
     expect(ZupNavigator().currentRoute, ZupNavigatorPaths.newPosition.path);
   });
 
-  testWidgets("When using `listenable` to listen route change events, it should delegate to Routefly listenable",
-      (tester) async {
+  testWidgets("When using `listenable` to listen route change events, it should delegate to Routefly listenable", (
+    tester,
+  ) async {
     runApp(material);
 
     bool listenerCalled = false;
@@ -57,5 +60,167 @@ void main() {
     await Routefly.navigate(ZupNavigatorPaths.newPosition.path);
 
     expect(listenerCalled, true);
+  });
+
+  testWidgets("When calling `navigateToDeposit` it should pass the params to the query", (tester) async {
+    runApp(material);
+    const group0 = "0x123";
+    const group1 = "0x456";
+    const token0 = "0x789";
+    const token1 = "0xabc";
+    const network = AppNetworks.mainnet;
+
+    await ZupNavigator().navigateToDeposit(
+      group0: group0,
+      group1: group1,
+      token0: token0,
+      token1: token1,
+      network: network,
+    );
+
+    expect(Routefly.query.params, {
+      ZupDepositRouteParamsNames().group0: group0,
+      ZupDepositRouteParamsNames().group1: group1,
+      ZupDepositRouteParamsNames().token0: token0,
+      ZupDepositRouteParamsNames().token1: token1,
+      ZupDepositRouteParamsNames().network: network.name,
+    });
+  });
+
+  testWidgets("When calling `navigateToDeposit` without group0, it should not pass it to the query", (tester) async {
+    runApp(material);
+
+    const group1 = "0x456";
+    const token0 = "0x789";
+    const token1 = "0xabc";
+    const network = AppNetworks.mainnet;
+
+    await ZupNavigator().navigateToDeposit(
+      group0: null,
+      group1: group1,
+      token0: token0,
+      token1: token1,
+      network: network,
+    );
+
+    expect(Routefly.query.params, {
+      ZupDepositRouteParamsNames().group1: group1,
+      ZupDepositRouteParamsNames().token0: token0,
+      ZupDepositRouteParamsNames().token1: token1,
+      ZupDepositRouteParamsNames().network: network.name,
+    });
+  });
+
+  testWidgets("When calling `navigateToDeposit` without group1, it should not pass it to the query", (tester) async {
+    runApp(material);
+
+    const group0 = "0x456";
+    const token0 = "0x789";
+    const token1 = "0xabc";
+    const network = AppNetworks.mainnet;
+
+    await ZupNavigator().navigateToDeposit(
+      group0: group0,
+      group1: null,
+      token0: token0,
+      token1: token1,
+      network: network,
+    );
+
+    expect(Routefly.query.params, {
+      ZupDepositRouteParamsNames().group0: group0,
+      ZupDepositRouteParamsNames().token0: token0,
+      ZupDepositRouteParamsNames().token1: token1,
+      ZupDepositRouteParamsNames().network: network.name,
+    });
+  });
+
+  testWidgets("When calling `navigateToDeposit` without groups, it should not pass it to the query", (tester) async {
+    runApp(material);
+
+    const token0 = "0x789";
+    const token1 = "0xabc";
+    const network = AppNetworks.mainnet;
+
+    await ZupNavigator().navigateToDeposit(
+      group0: null,
+      group1: null,
+      token0: token0,
+      token1: token1,
+      network: network,
+    );
+
+    expect(Routefly.query.params, {
+      ZupDepositRouteParamsNames().token0: token0,
+      ZupDepositRouteParamsNames().token1: token1,
+      ZupDepositRouteParamsNames().network: network.name,
+    });
+  });
+
+  testWidgets("When calling `navigateToDeposit` without token0, it should not pass it to the query", (tester) async {
+    runApp(material);
+    const group0 = "0x123";
+    const group1 = "0x456";
+    const token1 = "0xabc";
+    const network = AppNetworks.mainnet;
+
+    await ZupNavigator().navigateToDeposit(
+      group0: group0,
+      group1: group1,
+      token0: null,
+      token1: token1,
+      network: network,
+    );
+
+    expect(Routefly.query.params, {
+      ZupDepositRouteParamsNames().group0: group0,
+      ZupDepositRouteParamsNames().group1: group1,
+      ZupDepositRouteParamsNames().token1: token1,
+      ZupDepositRouteParamsNames().network: network.name,
+    });
+  });
+
+  testWidgets("When calling `navigateToDeposit` without token1, it should not pass it to the query", (tester) async {
+    runApp(material);
+    const group0 = "0x123";
+    const group1 = "0x456";
+    const token0 = "0xabc";
+    const network = AppNetworks.mainnet;
+
+    await ZupNavigator().navigateToDeposit(
+      group0: group0,
+      group1: group1,
+      token0: token0,
+      token1: null,
+      network: network,
+    );
+
+    expect(Routefly.query.params, {
+      ZupDepositRouteParamsNames().group0: group0,
+      ZupDepositRouteParamsNames().group1: group1,
+      ZupDepositRouteParamsNames().token0: token0,
+      ZupDepositRouteParamsNames().network: network.name,
+    });
+  });
+
+  testWidgets("When calling `navigateToDeposit` without tokens, it should not pass it to the query", (tester) async {
+    runApp(material);
+    const group0 = "0x123";
+    const group1 = "0x456";
+    const network = AppNetworks.mainnet;
+
+    await ZupNavigator().navigateToDeposit(
+      group0: group0,
+      group1: group1,
+      token0: null,
+      token1: null,
+      network: network,
+    );
+
+    expect(Routefly.query.params, {
+      ZupDepositRouteParamsNames().group0: group0,
+      ZupDepositRouteParamsNames().group1: group1,
+      ZupDepositRouteParamsNames().network: network.name,
+    });
   });
 }
