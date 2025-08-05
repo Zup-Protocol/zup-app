@@ -7,6 +7,7 @@ import 'package:zup_app/core/repositories/protocol_repository.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/extensions/extensions.dart';
 import 'package:zup_core/zup_singleton_cache.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
@@ -25,17 +26,16 @@ class _ExchangesFilterDropdownButtonState extends State<ExchangesFilterDropdownB
 
   ExchangesFilterDropdownButtonCubit? cubit;
 
-  num get allowedProtocolsCount => cubit!.protocols
-      .where(
-        (protocol) => !cache.blockedProtocolsIds.contains(protocol.rawId),
-      )
-      .length;
+  num get allowedProtocolsCount =>
+      cubit!.protocols.where((protocol) => !cache.blockedProtocolsIds.contains(protocol.rawId)).length;
 
   Color get buttonForegroundColor {
-    if (allowedProtocolsCount == 0 && cubit!.protocols.isNotEmpty) return ZupColors.red;
+    if (allowedProtocolsCount == 0 && cubit!.protocols.isNotEmpty) {
+      return ZupThemeColors.error.themed(context.brightness);
+    }
 
     if (allowedProtocolsCount == cubit!.protocols.length) return ZupColors.gray;
-    return ZupColors.brand;
+    return context.brightness.isLight ? ZupColors.brand : ZupColors.brand5;
   }
 
   String get protocolCounter {
@@ -61,77 +61,83 @@ class _ExchangesFilterDropdownButtonState extends State<ExchangesFilterDropdownB
       builder: (context, state) {
         return ZupPrimaryButton(
           key: const Key("exchanges-filter-dropdown-button"),
-          backgroundColor: Colors.transparent,
+          backgroundColor: ZupThemeColors.background.themed(context.brightness),
+          hoverColor: ZupThemeColors.hoverOnBackgroundSurface.themed(context.brightness),
           foregroundColor: buttonForegroundColor,
-          border: const BorderSide(color: ZupColors.gray4),
+          border: BorderSide(color: ZupThemeColors.borderOnBackground.themed(context.brightness)),
           hoverElevation: 0,
           icon: Assets.icons.switch2.svg(),
           title: state.maybeWhen(
-            success: (protocols) => S.of(context).exchangesFilterDropdownButtonTitleNumered(
-                  exchangesCount: protocolCounter,
-                ),
+            success: (protocols) =>
+                S.of(context).exchangesFilterDropdownButtonTitleNumered(exchangesCount: protocolCounter),
             orElse: () => S.of(context).exchangesFilterDropdownButtonTitle,
           ),
           height: 40,
-          isLoading: state.maybeWhen(
-            loading: () => true,
-            orElse: () => false,
-          ),
+          isLoading: state.maybeWhen(loading: () => true, orElse: () => false),
           onPressed: state == const ExchangesFilterDropdownButtonState.loading()
               ? null
               : (buttonContext) => state.whenOrNull(
-                    error: () async {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          ZupSnackBar(
-                            context,
-                            message: S.of(context).exchangesFilterDropdownButtonErrorSnackBarMessage,
-                            type: ZupSnackBarType.error,
-                            maxWidth: 400,
-                          ),
+                  error: () async {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        ZupSnackBar(
+                          context,
+                          message: S.of(context).exchangesFilterDropdownButtonErrorSnackBarMessage,
+                          type: ZupSnackBarType.error,
+                          maxWidth: 400,
+                        ),
+                      );
+                    });
+                    return null;
+                  },
+                  success: (protocols) => ZupCheckboxListPopover.show(
+                    buttonContext,
+                    positionAdjustment: const Offset(-130, 10),
+                    allSelectionButtonText: (
+                      clearAll: S.of(context).exchangesFilterDropdownButtonDropdownClearAll,
+                      selectAll: S.of(context).exchangesFilterDropdownButtonDropdownSelectAll,
+                    ),
+                    searchHintText: S.of(context).exchangesFilterDropdownButtonDropdownSearchHint,
+                    searchNotFoundStateText: (
+                      description: S.of(context).exchangesFilterDropdownButtonDropdownNotFoundStateDescription,
+                      title: S.of(context).exchangesFilterDropdownButtonDropdownNotFoundStateTitle,
+                    ),
+                    onValueChanged: (items) {
+                      setState(() {
+                        cache.saveBlockedProtocolIds(
+                          blockedProtocolIds: items.where((item) => !item.isChecked).map((item) => item.id!).toList(),
                         );
                       });
-                      return null;
                     },
-                    success: (protocols) => ZupCheckboxListPopover.show(
-                      buttonContext,
-                      positionAdjustment: const Offset(-130, 10),
-                      allSelectionButtonText: (
-                        clearAll: S.of(context).exchangesFilterDropdownButtonDropdownClearAll,
-                        selectAll: S.of(context).exchangesFilterDropdownButtonDropdownSelectAll
-                      ),
-                      searchHintText: S.of(context).exchangesFilterDropdownButtonDropdownSearchHint,
-                      searchNotFoundStateText: (
-                        description: S.of(context).exchangesFilterDropdownButtonDropdownNotFoundStateDescription,
-                        title: S.of(context).exchangesFilterDropdownButtonDropdownNotFoundStateTitle
-                      ),
-                      onValueChanged: (items) {
-                        setState(
-                          () {
-                            cache.saveBlockedProtocolIds(
-                              blockedProtocolIds: items
-                                  .where((item) => !item.isChecked)
-                                  .map(
-                                    (item) => item.id!,
-                                  )
-                                  .toList(),
-                            );
-                          },
-                        );
-                      },
-                      items: protocols
-                          .map(
-                            (protocol) => ZupCheckboxItem(
-                              id: protocol.rawId,
-                              title: protocol.name,
-                              icon: zupCachedImage.build(protocol.logo, radius: 50),
-                              isChecked: !cache.blockedProtocolsIds.contains(protocol.rawId),
-                              isDisabled: false,
+                    items: protocols
+                        .map(
+                          (protocol) => ZupCheckboxItem(
+                            id: protocol.rawId,
+                            title: protocol.name,
+                            icon: zupCachedImage.build(
+                              context,
+                              protocol.logo,
+                              radius: 20,
+                              height: 20,
+                              width: 20,
+                              backgroundColor: Colors.white,
+                              errorWidget: (context, error, stackTrace) => const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircleAvatar(
+                                  backgroundColor: ZupColors.gray5,
+                                  foregroundColor: ZupColors.gray,
+                                  child: Text("?"),
+                                ),
+                              ),
                             ),
-                          )
-                          .toList(),
-                    ),
+                            isChecked: !cache.blockedProtocolsIds.contains(protocol.rawId),
+                            isDisabled: false,
+                          ),
+                        )
+                        .toList(),
                   ),
+                ),
         );
       },
     );

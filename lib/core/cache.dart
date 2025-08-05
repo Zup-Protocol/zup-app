@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
+import 'package:zup_app/core/dtos/theme_mode_dto.dart';
+import 'package:zup_app/core/enums/app_theme_mode.dart';
 
 enum CacheKey {
   hidingClosedPositions,
@@ -10,6 +12,7 @@ enum CacheKey {
   poolSearchSettings,
   areCookiesConsented,
   blockedProtocolsIds,
+  themeMode,
   isTestnetMode;
 
   String get key => name;
@@ -21,6 +24,16 @@ class Cache {
   Cache(this._cache);
 
   final SharedPreferencesWithCache _cache;
+
+  Future<void> saveThemeMode(AppThemeMode themeMode) async {
+    await _cache.setString(CacheKey.themeMode.key, jsonEncode(ThemeModeDto(themeMode: themeMode).toJson()));
+  }
+
+  AppThemeMode get themeMode {
+    final storedThemeMode = _cache.getString(CacheKey.themeMode.key) ?? "{}";
+
+    return ThemeModeDto.fromJson(jsonDecode(storedThemeMode)).themeMode;
+  }
 
   Future<void> saveHidingClosedPositionsStatus({required bool status}) async {
     await _cache.setBool(CacheKey.hidingClosedPositions.key, status);

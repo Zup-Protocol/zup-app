@@ -15,22 +15,23 @@ class TokenAvatar extends StatelessWidget {
   final zupCachedImage = inject<ZupCachedImage>();
 
   Widget genericAvatar() => SizedBox(
-        height: size,
-        width: size,
-        child: FittedBox(
-          child: CircleAvatar(
-            backgroundColor: ZupColors.brand7,
-            foregroundColor: ZupColors.brand,
-            child: Text(asset.name.isNotEmpty ? asset.name[0] : ""),
-          ),
-        ),
-      );
+    height: size,
+    width: size,
+    child: FittedBox(
+      child: CircleAvatar(
+        backgroundColor: ZupColors.brand7,
+        foregroundColor: ZupColors.brand,
+        child: Text(asset.name.isNotEmpty ? asset.name[0] : ""),
+      ),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     return asset.logoUrl.isEmpty
         ? genericAvatar()
         : zupCachedImage.build(
+            context,
             asset.logoUrl,
             height: size,
             width: size,

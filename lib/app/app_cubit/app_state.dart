@@ -6,4 +6,5 @@ class AppState with _$AppState {
 
   const factory AppState.networkChanged(AppNetworks newNetwork) = _NetworkChanged;
   const factory AppState.testnetModeChanged(bool isTestnetMode) = _TestnetModeChanged;
+  const factory AppState.themeChanged(AppThemeMode newThemeMode) = _ThemeChanged;
 }

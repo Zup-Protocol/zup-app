@@ -41,7 +41,7 @@ abstract class InjectInstanceNames {
   static final lottieRadar = Assets.lotties.radar.path;
   static final lottieNumbers = Assets.lotties.numbers.path;
   static final lottieMatching = Assets.lotties.matching.path;
-  static final lottieSearching = Assets.lotties.seaching.path;
+  static final lottieList = Assets.lotties.list.path;
   static const zupAPIDio = 'zup_api_dio';
   static const confettiController10s = 'confetti_controller_10s';
   static const zupHolderFactory = 'zup_holder_factory';
@@ -117,8 +117,8 @@ Future<void> setupInjections() async {
     instanceName: InjectInstanceNames.lottieMatching,
   );
   inject.registerLazySingleton<LottieBuilder>(
-    () => Assets.lotties.seaching.lottie(),
-    instanceName: InjectInstanceNames.lottieSearching,
+    () => Assets.lotties.list.lottie(),
+    instanceName: InjectInstanceNames.lottieList,
   );
   inject.registerLazySingleton<UniswapV4StateView>(() => UniswapV4StateView());
 

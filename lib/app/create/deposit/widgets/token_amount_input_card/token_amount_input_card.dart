@@ -65,10 +65,7 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
     refreshBalanceAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
 
     WidgetsBinding.instance.addPostFrameCallback((tester) {
-      userBalanceCubit.updateNativeTokenAndFetch(
-        isNative: widget.isNative,
-        network: widget.network,
-      );
+      userBalanceCubit.updateNativeTokenAndFetch(isNative: widget.isNative, network: widget.network);
     });
 
     super.initState();
@@ -79,10 +76,7 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
     if ((widget.isNative != oldWidget.isNative || widget.network != oldWidget.network) &&
         (widget.token.addresses[widget.network.chainId] ?? "").lowercasedEquals(EthereumConstants.zeroAddress)) {
       WidgetsBinding.instance.addPostFrameCallback(
-        (_) => userBalanceCubit.updateNativeTokenAndFetch(
-          isNative: widget.isNative,
-          network: widget.network,
-        ),
+        (_) => userBalanceCubit.updateNativeTokenAndFetch(isNative: widget.isNative, network: widget.network),
       );
 
       return super.didUpdateWidget(oldWidget);
@@ -108,17 +102,18 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
         Container(
           padding: EdgeInsets.all(paddingValue).copyWith(left: 0),
           decoration: BoxDecoration(
+            color: ZupThemeColors.background.themed(context.brightness),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(width: 0.5, color: ZupColors.gray5),
+            border: Border.all(
+              width: context.brightness.isDark ? 1.0 : 0.5,
+              color: ZupThemeColors.borderOnBackground.themed(context.brightness),
+            ),
           ),
           child: Stack(
             alignment: Alignment.center,
             children: [
               if (widget.disabledText != null)
-                Text(
-                  widget.disabledText!,
-                  style: const TextStyle(color: ZupColors.gray, fontSize: 14),
-                ),
+                Text(widget.disabledText!, style: const TextStyle(color: ZupColors.gray, fontSize: 14)),
               IgnorePointer(
                 ignoring: widget.disabledText != null,
                 child: AnimatedOpacity(
@@ -141,16 +136,16 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                     controller: widget.controller,
                                     onChanged: (value) => widget.onInput(double.tryParse(value) ?? 0),
                                     style: const TextStyle(fontSize: 28),
-                                    inputFormatters: [
-                                      TokenAmountInputFormatter(),
-                                    ],
+                                    inputFormatters: [TokenAmountInputFormatter()],
                                     decoration: InputDecoration(
                                       contentPadding: EdgeInsets.only(right: paddingValue + 5, left: paddingValue),
                                       focusedBorder: InputBorder.none,
                                       enabledBorder: InputBorder.none,
                                       border: InputBorder.none,
                                       hintText: "0",
-                                      hintStyle: const TextStyle(color: ZupColors.gray5),
+                                      hintStyle: TextStyle(
+                                        color: ZupThemeColors.disabledText.themed(context.brightness),
+                                      ),
                                     ),
                                   ),
                                   Align(
@@ -163,9 +158,13 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
                                             colors: [
-                                              ZupColors.white,
-                                              ZupColors.white.withValues(alpha: 0.8),
-                                              ZupColors.white.withValues(alpha: 0.0)
+                                              ZupThemeColors.background.themed(context.brightness),
+                                              ZupThemeColors.background
+                                                  .themed(context.brightness)
+                                                  .withValues(alpha: 0.8),
+                                              ZupThemeColors.background
+                                                  .themed(context.brightness)
+                                                  .withValues(alpha: 0.0),
                                             ],
                                             stops: const [0.1, 0.5, 1.0],
                                             begin: Alignment.centerRight,
@@ -184,7 +183,12 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                         height: 50,
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
-                                            colors: [ZupColors.white, ZupColors.white.withValues(alpha: 0.0)],
+                                            colors: [
+                                              ZupThemeColors.background.themed(context.brightness),
+                                              ZupThemeColors.background
+                                                  .themed(context.brightness)
+                                                  .withValues(alpha: 0.0),
+                                            ],
                                             stops: const [0.5, 1.0],
                                             begin: Alignment.centerLeft,
                                             end: Alignment.centerRight,
@@ -192,7 +196,7 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                         ),
                                       ),
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -204,42 +208,43 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 width: 0.5,
-                                color: ZupColors.gray5,
+                                color: ZupThemeColors.borderOnBackgroundSurface.themed(context.brightness),
                               ),
                             ),
                             child: PositionToken(token: widget.token),
-                          )
+                          ),
                         ],
                       ),
                       const SizedBox(height: 5),
                       Row(
                         children: [
                           Padding(
-                              padding: EdgeInsets.only(left: paddingValue),
-                              child: StreamBuilder<num>(
-                                stream: (() async* {
+                            padding: EdgeInsets.only(left: paddingValue),
+                            child: StreamBuilder<num>(
+                              stream: (() async* {
+                                yield await cubit!.getTokenPrice(token: widget.token, network: widget.network);
+
+                                await for (final _ in Stream.periodic(const Duration(seconds: 30))) {
                                   yield await cubit!.getTokenPrice(token: widget.token, network: widget.network);
+                                }
+                              })(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) return const ZupCircularLoadingIndicator(size: 10);
 
-                                  await for (final _ in Stream.periodic(const Duration(seconds: 30))) {
-                                    yield await cubit!.getTokenPrice(token: widget.token, network: widget.network);
-                                  }
-                                })(),
-                                builder: (context, snapshot) {
-                                  if (!snapshot.hasData) return const ZupCircularLoadingIndicator(size: 10);
-
-                                  return Text(
-                                    widget.controller.value.text.isEmpty
-                                        ? "\$-"
-                                        : ((double.tryParse(widget.controller.value.text) ?? 0) * snapshot.data!)
+                                return Text(
+                                  widget.controller.value.text.isEmpty
+                                      ? "\$-"
+                                      : ((double.tryParse(widget.controller.value.text) ?? 0) * snapshot.data!)
                                             .formatCurrency(),
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                      color: ZupColors.gray,
-                                    ),
-                                  );
-                                },
-                              )),
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: ZupColors.gray,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                           const Spacer(),
                           BlocProvider.value(
                             value: userBalanceCubit,
@@ -269,17 +274,12 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                           alignLeft: false,
                                           icon: Assets.icons.walletBifold.svg(),
                                           label: state.maybeWhen(
-                                            orElse: () => userBalanceCubit.userBalance.toAmount(
-                                              useLessThan: true,
-                                            ),
+                                            orElse: () => userBalanceCubit.userBalance.toAmount(useLessThan: true),
                                             loadingUserBalance: () => "........",
                                             error: () => "Error",
                                           ),
                                         ).redacted(
-                                          enabled: state.maybeWhen(
-                                            orElse: () => false,
-                                            loadingUserBalance: () => true,
-                                          ),
+                                          enabled: state.maybeWhen(orElse: () => false, loadingUserBalance: () => true),
                                         ),
                                         const SizedBox(width: 5),
                                         ZupRefreshButton(
@@ -302,7 +302,7 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                 );
                               },
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ],

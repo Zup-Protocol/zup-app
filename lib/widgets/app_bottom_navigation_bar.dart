@@ -7,6 +7,7 @@ import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
+import 'package:zup_core/zup_core.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 class _AppBottomNavigationBarItem {
@@ -43,7 +44,10 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
       label: S.of(context).appBottomNavigationBarNewPosition,
       path: ZupNavigatorPaths.newPosition.path,
       icon: Assets.icons.plus.svg(
-        colorFilter: const ColorFilter.mode(ZupColors.gray, BlendMode.srcIn),
+        colorFilter: ColorFilter.mode(
+          ZupThemeColors.disabledButtonBackground.themed(context.brightness),
+          BlendMode.srcIn,
+        ),
         height: 16,
       ),
       navigateCallback: () => _navigator.navigateToNewPosition(),
@@ -52,7 +56,10 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
       label: S.of(context).appBottomNavigationBarMyPositions,
       path: "",
       icon: Assets.icons.waterWaves.svg(
-        colorFilter: const ColorFilter.mode(ZupColors.gray5, BlendMode.srcIn),
+        colorFilter: ColorFilter.mode(
+          ZupThemeColors.disabledButtonBackground.themed(context.brightness),
+          BlendMode.srcIn,
+        ),
         height: 16,
       ),
       navigateCallback: null,
@@ -94,21 +101,18 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
           ClipRect(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.white.withValues(alpha: 0.85)),
+              child: Container(color: ZupThemeColors.background.themed(context.brightness).withValues(alpha: 0.85)),
             ),
           ),
           Column(
             children: [
-              const Divider(
-                color: ZupColors.gray6,
-                height: 1,
-              ),
+              Divider(color: ZupThemeColors.borderOnBackground.themed(context.brightness), thickness: 0.5, height: 1),
               SizedBox(
                 height: AppBottomNavigationBar.height - 1,
                 child: BottomNavigationBar(
                   backgroundColor: Colors.transparent,
                   selectedItemColor: ZupColors.brand,
-                  unselectedItemColor: ZupColors.gray5,
+                  unselectedItemColor: ZupThemeColors.disabledButtonBackground.themed(context.brightness),
                   selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 12, height: 2.1),
                   unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 12, height: 2.1),
                   elevation: 0,
