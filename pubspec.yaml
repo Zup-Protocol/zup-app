@@ -55,12 +55,12 @@ dependencies:
   async: ^2.13.0
 
 # dependency_overrides:
-# zup_core:
-#   path: ../zup-core
-# web3kit:
-#   path: ../web3kit
-# zup_ui_kit:
-#   path: ../zup-ui-kit
+#   zup_core:
+#     path: ../zup-core
+#   web3kit:
+#     path: ../web3kit
+#   zup_ui_kit:
+#     path: ../zup-ui-kit
 
 dev_dependencies:
   flutter_test:

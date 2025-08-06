@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/core/core.dart';
 import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/enums/app_theme_mode.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
 part 'app_cubit.freezed.dart';
@@ -13,6 +14,7 @@ class AppCubit extends Cubit<AppState> {
   AppCubit(this._wallet, this._cache) : super(const AppState.standard()) {
     _setupStreams();
     _isTestnetMode = _cache.getTestnetMode();
+    _themeMode = _cache.themeMode;
 
     if (_isTestnetMode) {
       updateAppNetwork(AppNetworks.sepolia);
@@ -25,6 +27,7 @@ class AppCubit extends Cubit<AppState> {
 
   AppNetworks _selectedNetwork = AppNetworks.allNetworks;
   bool _isTestnetMode = false;
+  AppThemeMode _themeMode = AppThemeMode.system;
 
   final StreamController<AppNetworks> _selectedNetworkStreamController = StreamController<AppNetworks>.broadcast();
 
@@ -33,6 +36,7 @@ class AppCubit extends Cubit<AppState> {
   AppNetworks get selectedNetwork => _selectedNetwork;
   int get currentChainId => _selectedNetwork.chainId;
   bool get isTestnetMode => _isTestnetMode;
+  AppThemeMode get currentThemeMode => _themeMode;
 
   void _setupStreams() {
     _wallet.signerStream.listen((signer) async {
@@ -46,6 +50,15 @@ class AppCubit extends Cubit<AppState> {
     if (walletNetwork.hexChainId != _selectedNetwork.chainInfo.hexChainId) {
       await _wallet.switchOrAddNetwork(_selectedNetwork.chainInfo);
     }
+  }
+
+  Future<void> updateAppThemeMode(AppThemeMode newThemeMode) async {
+    if (newThemeMode == _themeMode) return;
+
+    await _cache.saveThemeMode(newThemeMode);
+    _themeMode = newThemeMode;
+
+    emit(AppState.themeChanged(_themeMode));
   }
 
   void updateAppNetwork(AppNetworks newNetwork) async {

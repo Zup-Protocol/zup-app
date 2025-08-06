@@ -144,7 +144,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                               Badge(
                                 alignment: const Alignment(1.05, -1.05),
                                 smallSize: cache.getPoolSearchSettings().isDefault ? 0 : 6,
-                                backgroundColor: ZupColors.orange,
+                                backgroundColor: ZupThemeColors.alert.themed(context.brightness),
                                 child: ZupMiniButton(
                                   key: const Key("pool-search-settings-button"),
                                   onPressed: (buttonContext) => CreatePageSettingsDropdown.show(
@@ -156,10 +156,7 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
                                     },
                                   ),
                                   title: S.of(context).createPageSelectTokensStageSearchSettings,
-                                  icon: Assets.icons.gear.svg(
-                                    height: 18,
-                                    colorFilter: const ColorFilter.mode(ZupColors.white, BlendMode.srcIn),
-                                  ),
+                                  icon: Assets.icons.gear.svg(height: 18),
                                 ),
                               ),
                             ],

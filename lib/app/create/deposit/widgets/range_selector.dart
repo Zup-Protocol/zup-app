@@ -5,6 +5,7 @@ import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/token_amount_input_formatter.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
+import 'package:zup_core/extensions/extensions.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 enum RangeSelectorStateType {
@@ -12,24 +13,39 @@ enum RangeSelectorStateType {
   warning,
   error;
 
-  Color get borderColor => [ZupColors.gray5, ZupColors.orange, ZupColors.red][index];
+  Color borderColor(BuildContext context) => [
+    ZupThemeColors.borderOnBackground.themed(context.brightness),
+    ZupThemeColors.alert.themed(context.brightness),
+    ZupThemeColors.error.themed(context.brightness),
+  ][index];
 
-  double get borderSize => [0.5, 1.5, 1.5][index];
+  double borderSize(BuildContext context) => [context.brightness.isDark ? 1.0 : 0.5, 1.5, 1.5][index];
 
-  Color get textColor => [ZupColors.gray, ZupColors.orange, ZupColors.red][index];
+  Color textColor(BuildContext context) => [
+    ZupColors.gray,
+    ZupThemeColors.alert.themed(context.brightness),
+    ZupThemeColors.error.themed(context.brightness),
+  ][index];
 
-  Color get adjustmentIconBackgroundColor => [ZupColors.brand7, ZupColors.orange5, ZupColors.red5][index];
-  Color get adjustmentIconForegroundColor => [ZupColors.brand, ZupColors.orange, ZupColors.red][index];
+  Color adjustmentIconBackgroundColor(BuildContext context) {
+    if (context.brightness.isDark) return ZupColors.black2;
+
+    return [ZupColors.brand7, ZupColors.orange5, ZupColors.red5][index];
+  }
+
+  Color adjustmentIconForegroundColor(BuildContext context) => [
+    ZupColors.brand,
+    ZupThemeColors.alert.themed(context.brightness),
+    ZupThemeColors.error.themed(context.brightness),
+  ][index];
 }
 
 enum RangeSelectorType {
   minPrice,
   maxPrice;
 
-  String label(BuildContext context) => [
-        S.of(context).rangeSelectorMinRange,
-        S.of(context).rangeSelectorMaxRange,
-      ][index];
+  String label(BuildContext context) =>
+      [S.of(context).rangeSelectorMinRange, S.of(context).rangeSelectorMaxRange][index];
 
   String get infinityLabel => ["0", "∞"][index];
 }
@@ -234,10 +250,11 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
       padding: EdgeInsets.all(padding).copyWith(left: 0, bottom: 0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
+        color: ZupThemeColors.background.themed(context.brightness),
         border: Border.all(
           strokeAlign: 1,
-          width: widget.state.type.borderSize,
-          color: widget.state.type.borderColor,
+          width: widget.state.type.borderSize(context),
+          color: widget.state.type.borderColor(context),
         ),
       ),
       child: Column(
@@ -247,7 +264,11 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
             padding: EdgeInsets.only(left: padding),
             child: Text(
               widget.type.label(context),
-              style: const TextStyle(color: ZupColors.black, fontSize: 17, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: ZupThemeColors.primaryText.themed(context.brightness),
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           Padding(
@@ -276,12 +297,15 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
                             userTypedValue = value;
                             widget.onUserType?.call();
                           },
-                          style: const TextStyle(fontSize: 28),
-                          decoration: const InputDecoration(
+                          style: TextStyle(
+                            fontSize: 28,
+                            color: ZupThemeColors.backgroundInverse.themed(context.brightness),
+                          ),
+                          decoration: InputDecoration(
                             enabledBorder: InputBorder.none,
                             focusedBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.only(right: 20, left: 20),
-                            hintStyle: TextStyle(color: ZupColors.gray5),
+                            contentPadding: const EdgeInsets.only(right: 20, left: 20),
+                            hintStyle: TextStyle(color: ZupThemeColors.disabledText.themed(context.brightness)),
                             hintText: "0",
                             border: InputBorder.none,
                           ),
@@ -298,9 +322,9 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  ZupColors.white,
-                                  ZupColors.white.withValues(alpha: 0.8),
-                                  ZupColors.white.withValues(alpha: 0.0)
+                                  ZupThemeColors.background.themed(context.brightness),
+                                  ZupThemeColors.background.themed(context.brightness).withValues(alpha: 0.8),
+                                  ZupThemeColors.background.themed(context.brightness).withValues(alpha: 0.0),
                                 ],
                                 stops: const [0.1, 0.5, 1.0],
                                 begin: Alignment.centerRight,
@@ -319,7 +343,10 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
                             height: 50,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [ZupColors.white, ZupColors.white.withValues(alpha: 0.0)],
+                                colors: [
+                                  ZupThemeColors.background.themed(context.brightness),
+                                  ZupThemeColors.background.themed(context.brightness).withValues(alpha: 0.0),
+                                ],
                                 stops: const [0.5, 1.0],
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
@@ -327,7 +354,7 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
                             ),
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -336,20 +363,24 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
               ZupIconButton(
                 key: const Key("increase-button"),
                 icon: Assets.icons.plus.svg(),
-                iconColor: widget.state.type.adjustmentIconForegroundColor,
-                backgroundColor: widget.state.type.adjustmentIconBackgroundColor,
+                circle: false,
+                minimumHeight: 40,
+                padding: const EdgeInsets.all(12),
+                iconColor: widget.state.type.adjustmentIconForegroundColor(context),
+                backgroundColor: widget.state.type.adjustmentIconBackgroundColor(context),
                 onPressed: (_) => increaseOrDecrease(increasing: true),
               ),
               const SizedBox(width: 8),
               ZupIconButton(
                 key: const Key("decrease-button"),
-                circle: true,
+                circle: false,
                 padding: const EdgeInsets.all(12),
+                minimumHeight: 40,
                 icon: Assets.icons.minus.svg(),
-                backgroundColor: widget.state.type.adjustmentIconBackgroundColor,
-                iconColor: widget.state.type.adjustmentIconForegroundColor,
+                backgroundColor: widget.state.type.adjustmentIconBackgroundColor(context),
+                iconColor: widget.state.type.adjustmentIconForegroundColor(context),
                 onPressed: (_) => increaseOrDecrease(increasing: false),
-              )
+              ),
             ],
           ),
           Padding(
@@ -362,9 +393,7 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
                 setState(() => showError = widget.state.message != null);
               },
               child: AnimatedOpacity(
-                duration: Duration(
-                  milliseconds: widget.state.message == null ? 0 : 200,
-                ),
+                duration: Duration(milliseconds: widget.state.message == null ? 0 : 200),
                 curve: Curves.decelerate,
                 opacity: () {
                   if (widget.state.message == null) return 0.0;
@@ -373,7 +402,7 @@ class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixi
                 }.call(),
                 child: Text(
                   widget.state.message ?? "",
-                  style: TextStyle(color: widget.state.type.textColor, fontSize: 14),
+                  style: TextStyle(color: widget.state.type.textColor(context), fontSize: 14),
                 ),
               ),
             ),

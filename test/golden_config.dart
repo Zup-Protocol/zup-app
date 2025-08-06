@@ -52,36 +52,32 @@ class GoldenConfig {
       ],
       home: Scaffold(
         backgroundColor: Colors.white,
-        body: CustomScrollView(controller: scrollController, slivers: [
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: child,
-          )
-        ]),
+        body: CustomScrollView(
+          controller: scrollController,
+          slivers: [SliverFillRemaining(hasScrollBody: false, child: child)],
+        ),
       ),
-      theme: ZupTheme.lightTheme,
+      theme: AppTheme.lightTheme,
     );
   }
 
   static Widget Function(Widget) localizationsWrapper({GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey}) {
     return (child) => MaterialApp(
-          scaffoldMessengerKey: scaffoldMessengerKey,
-          localizationsDelegates: const [
-            S.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            Web3KitLocalizations.delegate,
-          ],
-          theme: ZupTheme.lightTheme,
-          home: Scaffold(
-            body: CustomScrollView(controller: scrollController, slivers: [
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: child,
-              )
-            ]),
-          ),
-        );
+      scaffoldMessengerKey: scaffoldMessengerKey,
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        Web3KitLocalizations.delegate,
+      ],
+      theme: AppTheme.lightTheme,
+      home: Scaffold(
+        body: CustomScrollView(
+          controller: scrollController,
+          slivers: [SliverFillRemaining(hasScrollBody: false, child: child)],
+        ),
+      ),
+    );
   }
 }
 

@@ -5,9 +5,11 @@ import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/token_avatar.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/extensions/extensions.dart';
 import 'package:zup_ui_kit/zup_circular_loading_indicator.dart';
 import 'package:zup_ui_kit/zup_colors.dart';
 import 'package:zup_ui_kit/zup_selectable_card.dart';
+import 'package:zup_ui_kit/zup_theme_colors.dart';
 import 'package:zup_ui_kit/zup_tooltip.dart';
 
 class TokenGroupCard extends StatefulWidget {
@@ -29,12 +31,12 @@ class _TokenGroupCardState extends State<TokenGroupCard> {
     return ZupSelectableCard(
       onPressed: () => widget.onClick(),
       onHoverChanged: (value) => setState(() => isHovering = value),
-      boxShadow: const [],
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           zupCachedImage.build(
+            context,
             widget.group.logoUrl,
             height: 35,
             width: 35,
@@ -70,8 +72,8 @@ class _TokenGroupCardState extends State<TokenGroupCard> {
               data: ScrollbarThemeData(
                 thumbVisibility: WidgetStateProperty.all(true),
                 thickness: WidgetStateProperty.all(4.0),
-                thumbColor: WidgetStateProperty.all(ZupColors.gray5),
-                trackColor: WidgetStateProperty.all(ZupColors.gray5),
+                thumbColor: WidgetStateProperty.all(context.brightness.isDark ? ZupColors.black5 : ZupColors.gray5),
+                trackColor: WidgetStateProperty.all(context.brightness.isDark ? ZupColors.black5 : ZupColors.gray5),
                 mainAxisMargin: 10,
               ),
               child: GridView.builder(
@@ -85,7 +87,10 @@ class _TokenGroupCardState extends State<TokenGroupCard> {
                   child: Container(
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      border: Border.all(color: ZupColors.gray5),
+                      border: Border.all(
+                        color: ZupThemeColors.borderOnBackgroundSurface.themed(context.brightness),
+                        width: 0.5,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(

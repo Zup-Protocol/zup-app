@@ -7,6 +7,7 @@ import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
+import 'package:zup_core/extensions/extensions.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 class CreatePageSettingsDropdown extends StatefulWidget {
@@ -14,15 +15,11 @@ class CreatePageSettingsDropdown extends StatefulWidget {
 
   final void Function() onClose;
 
-  static void show(
-    BuildContext showBelowContext, {
-    required void Function() onClose,
-  }) =>
-      ZupPopover.show(
-        showBasedOnContext: showBelowContext,
-        adjustment: const Offset(0, 10),
-        child: CreatePageSettingsDropdown(onClose: onClose),
-      );
+  static void show(BuildContext showBelowContext, {required void Function() onClose}) => ZupPopover.show(
+    showBasedOnContext: showBelowContext,
+    adjustment: const Offset(0, 10),
+    child: CreatePageSettingsDropdown(onClose: onClose),
+  );
 
   @override
   State<CreatePageSettingsDropdown> createState() => _CreatePageSettingsDropdownState();
@@ -48,12 +45,13 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
   }
 
   Widget sectionTitle(String title) => Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-        ),
-      );
+    title,
+    style: TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 15,
+      color: ZupThemeColors.primaryText.themed(context.brightness),
+    ),
+  );
 
   @override
   void initState() {
@@ -75,9 +73,9 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: ZupColors.white,
+        color: ZupThemeColors.background.themed(context.brightness),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: ZupColors.gray5),
+        border: Border.all(color: ZupThemeColors.borderOnBackground.themed(context.brightness)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,22 +106,22 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
                 debouncer.run(() async {
                   await cache.savePoolSearchSettings(
                     settings: cache.getPoolSearchSettings().copyWith(
-                          minLiquidityUSD:
-                              num.tryParse(value.replaceAll(",", "")) ?? PoolSearchSettingsDto.defaultMinLiquidityUSD,
-                        ),
+                      minLiquidityUSD:
+                          num.tryParse(value.replaceAll(",", "")) ?? PoolSearchSettingsDto.defaultMinLiquidityUSD,
+                    ),
                   );
                 });
               },
               controller: minTVLController,
               keyboardType: const TextInputType.numberWithOptions(decimal: false),
               inputFormatters: [
-                CurrencyTextInputFormatter.simpleCurrency(name: "", enableNegative: false, decimalDigits: 0)
+                CurrencyTextInputFormatter.simpleCurrency(name: "", enableNegative: false, decimalDigits: 0),
               ],
               decoration: InputDecoration(
                 hintText: PoolSearchSettingsDto.defaultMinLiquidityUSD.formatCurrency(isUSD: false),
-                hintStyle: const TextStyle(color: ZupColors.gray4),
+                hintStyle: TextStyle(color: ZupThemeColors.disabledText.themed(context.brightness)),
                 enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: ZupColors.gray5),
+                  borderSide: BorderSide(color: ZupThemeColors.borderOnBackground.themed(context.brightness)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 focusedBorder: OutlineInputBorder(
@@ -151,14 +149,14 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
                       Assets.icons.exclamationmarkTriangle.svg(
                         width: 16,
                         height: 16,
-                        colorFilter: const ColorFilter.mode(ZupColors.orange, BlendMode.srcIn),
+                        colorFilter: ColorFilter.mode(ZupThemeColors.alert.themed(context.brightness), BlendMode.srcIn),
                       ),
                       const SizedBox(width: 10),
                       SizedBox(
                         width: 170,
                         child: Text(
                           S.of(context).createPageSettingsDropdownMiniumLiquidityLowWarning,
-                          style: const TextStyle(color: ZupColors.orange, fontSize: 14),
+                          style: TextStyle(color: ZupThemeColors.alert.themed(context.brightness), fontSize: 14),
                         ),
                       ),
                     ],
@@ -182,7 +180,14 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
           const SizedBox(height: 5),
           Row(
             children: [
-              const Text("V4", style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
+              Text(
+                "V4",
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 15,
+                  color: ZupThemeColors.primaryText.themed(context.brightness),
+                ),
+              ),
               const SizedBox(width: 5),
               ZupSwitch(
                 key: const Key("pool-types-allowed-v4-switch"),
@@ -196,7 +201,13 @@ class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown>
                 },
               ),
               const SizedBox(width: 12),
-              const Text("V3", style: TextStyle(fontWeight: FontWeight.w500)),
+              Text(
+                "V3",
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: ZupThemeColors.primaryText.themed(context.brightness),
+                ),
+              ),
               const SizedBox(width: 5),
               ZupSwitch(
                 key: const Key("pool-types-allowed-v3-switch"),

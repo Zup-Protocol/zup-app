@@ -34,8 +34,7 @@ import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
-import 'package:zup_core/zup_holder.dart';
-import 'package:zup_core/zup_singleton_cache.dart';
+import 'package:zup_core/zup_core.dart';
 
 class $AssetsLottiesGenMock extends Mock implements $AssetsLottiesGen {}
 
@@ -173,15 +172,21 @@ T mockHttpImage<T>(T Function() on, {Uint8List? overrideImage}) {
 
 ZupCachedImage mockZupCachedImage() {
   final zupCachedImage = ZupCachedImageMock();
+  final context = BuildContextMock();
+  registerFallbackValue(context);
 
-  when(() => zupCachedImage.build(
-        any(),
-        height: any(named: "height"),
-        width: any(named: "width"),
-        radius: any(named: "radius"),
-        errorWidget: any(named: "errorWidget"),
-        placeholder: any(named: "placeholder"),
-      )).thenReturn(const SizedBox(child: Text("IMAGE")));
+  when(
+    () => zupCachedImage.build(
+      any(),
+      any(),
+      height: any(named: "height"),
+      width: any(named: "width"),
+      radius: any(named: "radius"),
+      errorWidget: any(named: "errorWidget"),
+      placeholder: any(named: "placeholder"),
+      backgroundColor: any(named: "backgroundColor"),
+    ),
+  ).thenReturn(const SizedBox(child: Text("IMAGE")));
 
   return zupCachedImage;
 }
