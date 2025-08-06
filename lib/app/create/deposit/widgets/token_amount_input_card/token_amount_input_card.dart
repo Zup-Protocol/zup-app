@@ -135,7 +135,10 @@ class _TokenAmountInputCardState extends State<TokenAmountInputCard> with Single
                                     clipBehavior: Clip.none,
                                     controller: widget.controller,
                                     onChanged: (value) => widget.onInput(double.tryParse(value) ?? 0),
-                                    style: const TextStyle(fontSize: 28),
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      color: ZupThemeColors.backgroundInverse.themed(context.brightness),
+                                    ),
                                     inputFormatters: [TokenAmountInputFormatter()],
                                     decoration: InputDecoration(
                                       contentPadding: EdgeInsets.only(right: paddingValue + 5, left: paddingValue),
