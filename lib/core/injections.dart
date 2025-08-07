@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/aerodrome_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
@@ -126,6 +127,8 @@ Future<void> setupInjections() async {
 
   inject.registerLazySingleton<PancakeSwapInfinityClPoolManager>(() => PancakeSwapInfinityClPoolManager());
 
+  inject.registerLazySingleton<AerodromeV3PositionManager>(() => AerodromeV3PositionManager());
+
   inject.registerLazySingleton<PoolService>(
     () => PoolService(
       inject<UniswapV4StateView>(),
@@ -134,6 +137,7 @@ Future<void> setupInjections() async {
       inject<UniswapV4PositionManager>(),
       inject<EthereumAbiCoder>(),
       inject<PancakeSwapInfinityClPoolManager>(),
+      inject<AerodromeV3PositionManager>(),
     ),
   );
 

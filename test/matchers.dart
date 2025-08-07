@@ -15,3 +15,17 @@ class ExpectedMatcher extends Matcher {
     return true;
   }
 }
+
+class ObjectParamMatcher extends Matcher {
+  ObjectParamMatcher(this.matching);
+
+  final bool Function(dynamic object) matching;
+
+  @override
+  Description describe(Description description) => description.add("dale");
+
+  @override
+  bool matches(item, Map matchState) {
+    return matching(item);
+  }
+}

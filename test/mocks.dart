@@ -11,6 +11,7 @@ import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/aerodrome_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
@@ -119,6 +120,10 @@ class FirebaseAnalyticsMock extends Mock implements FirebaseAnalytics {}
 class ZupHolderMock extends Mock implements ZupHolder {}
 
 class ProtocolRepositoryMock extends Mock implements ProtocolRepository {}
+
+class AerodromeV3PositionManagerMock extends Mock implements AerodromeV3PositionManager {}
+
+class AerodromeV3PositionManagerImplMock extends Mock implements AerodromeV3PositionManagerImpl {}
 
 class ChangeNotifierMock extends Mock with ChangeNotifier {
   void notify() => notifyListeners();
