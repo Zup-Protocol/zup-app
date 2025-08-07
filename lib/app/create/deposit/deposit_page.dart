@@ -79,7 +79,7 @@ class _DepositPageState extends State<DepositPage>
   final lottieRadar = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieRadar);
   final lottieNumbers = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieNumbers);
   final lottieMatching = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieMatching);
-  final lottieSearching = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieSearching);
+  final lottieSearching = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieList);
 
   final baseTokenAmountController = TextEditingController();
   final quoteTokenAmountController = TextEditingController();
@@ -439,8 +439,12 @@ class _DepositPageState extends State<DepositPage>
                               const SizedBox(width: 14),
                               ZupPillButton(
                                 key: const Key("deposit-settings-button"),
-                                backgroundColor: selectedSlippage.riskBackgroundColor,
-                                foregroundColor: selectedSlippage.riskForegroundColor,
+                                backgroundColor:
+                                    selectedSlippage.riskBackgroundColor(context.brightness) ??
+                                    ZupThemeColors.tertiaryButtonBackground.themed(context.brightness),
+                                foregroundColor:
+                                    selectedSlippage.riskForegroundColor(context.brightness) ??
+                                    ZupColors.brand.lighter(0.3),
                                 title: selectedSlippage.value != DepositSettingsDto.defaultMaxSlippage
                                     ? S
                                           .of(context)
@@ -466,7 +470,10 @@ class _DepositPageState extends State<DepositPage>
                                   ),
                                 ),
                                 icon: Assets.icons.gear.svg(
-                                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                  colorFilter: ColorFilter.mode(
+                                    ZupThemeColors.background.themed(context.brightness),
+                                    BlendMode.srcIn,
+                                  ),
                                   height: 20,
                                   width: 20,
                                 ),
@@ -495,7 +502,14 @@ class _DepositPageState extends State<DepositPage>
     );
   }
 
-  Widget _sectionTitle(String title) => Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600));
+  Widget _sectionTitle(String title) => Text(
+    title,
+    style: TextStyle(
+      fontSize: 17,
+      fontWeight: FontWeight.w600,
+      color: ZupThemeColors.primaryText.themed(context.brightness),
+    ),
+  );
 
   Widget _buildNoYieldsState({required PoolSearchFiltersDto filtersApplied}) => Center(
     child: Column(
@@ -591,7 +605,7 @@ class _DepositPageState extends State<DepositPage>
     bool isGroupSearch = group0Id != null || group1Id != null;
 
     return Container(
-      color: ZupColors.white,
+      color: ZupThemeColors.background.themed(context.brightness),
       child: Center(
         child: ZupSteppedLoading(
           stepDuration: Duration(seconds: isGroupSearch ? 8 : 6),
@@ -599,25 +613,37 @@ class _DepositPageState extends State<DepositPage>
             ZupSteppedLoadingStep(
               title: S.of(context).depositPageLoadingStep1Title,
               description: S.of(context).depositPageLoadingStep1Description,
-              icon: lottieMatching,
+              icon: ColorFiltered(
+                colorFilter: const ColorFilter.mode(ZupColors.brand, BlendMode.srcIn),
+                child: lottieMatching,
+              ),
               iconSize: 200,
             ),
             ZupSteppedLoadingStep(
               title: S.of(context).depositPageLoadingStep2Title,
               description: S.of(context).depositPageLoadingStep2Description,
-              icon: lottieRadar,
+              icon: ColorFiltered(
+                colorFilter: const ColorFilter.mode(ZupColors.brand, BlendMode.srcIn),
+                child: lottieRadar,
+              ),
               iconSize: 200,
             ),
             ZupSteppedLoadingStep(
               title: S.of(context).depositPageLoadingStep3Title,
               description: S.of(context).depositPageLoadingStep3Description,
-              icon: lottieNumbers,
+              icon: ColorFiltered(
+                colorFilter: const ColorFilter.mode(ZupColors.brand, BlendMode.srcIn),
+                child: lottieNumbers,
+              ),
               iconSize: 200,
             ),
             ZupSteppedLoadingStep(
               title: S.of(context).depositPageLoadingStep4Title,
               description: S.of(context).depositPageLoadingStep4Description,
-              icon: lottieSearching,
+              icon: ColorFiltered(
+                colorFilter: const ColorFilter.mode(ZupColors.brand, BlendMode.srcIn),
+                child: lottieSearching,
+              ),
               iconSize: 200,
             ),
           ],
@@ -636,14 +662,21 @@ class _DepositPageState extends State<DepositPage>
       children: [
         Container(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-          decoration: BoxDecoration(color: ZupColors.gray6, borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(
+            color: ZupThemeColors.tertiaryButtonBackground.themed(context.brightness),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Wrap(
             runSpacing: 10,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 S.of(context).depositPageBestYieldsIn,
-                style: const TextStyle(color: ZupColors.black, fontSize: 14, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: ZupThemeColors.primaryText.themed(context.brightness),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(width: 5),
               Row(
@@ -667,8 +700,8 @@ class _DepositPageState extends State<DepositPage>
                                 key: Key("${timeframe.name}-timeframe-button"),
                                 child: Text(
                                   timeframe.compactDaysLabel(context),
-                                  style: const TextStyle(
-                                    color: ZupColors.black,
+                                  style: TextStyle(
+                                    color: ZupThemeColors.primaryText.themed(context.brightness),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -698,9 +731,9 @@ class _DepositPageState extends State<DepositPage>
         SizedBox(
           height: 150,
           child: PageView.builder(
-            physics: const NeverScrollableScrollPhysics(),
+            physics: isMobileSize(context) ? const BouncingScrollPhysics() : const NeverScrollableScrollPhysics(),
             controller: yieldsPageController,
-            pageSnapping: false,
+            pageSnapping: true,
             padEnds: false,
             scrollDirection: Axis.horizontal,
             itemCount: yieldsPagesCount,
@@ -790,7 +823,9 @@ class _DepositPageState extends State<DepositPage>
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2),
                         child: CircleAvatar(
-                          backgroundColor: (currentYieldPage.truncate() == index) ? ZupColors.brand : ZupColors.gray5,
+                          backgroundColor: (currentYieldPage.truncate() == index)
+                              ? ZupColors.brand
+                              : ZupThemeColors.disabledButtonBackground.themed(context.brightness),
                         ),
                       ),
                     ).animatedHover(animationValue: index != currentYieldPage ? 4 : 1),
@@ -923,7 +958,11 @@ class _DepositPageState extends State<DepositPage>
 
                 return areTokensReversed ? currentPrice.priceAsQuoteToken : currentPrice.priceAsBaseToken;
               }.call().formatCurrency(useLessThan: true, maxDecimals: 4, isUSD: false)} ${quoteToken.symbol}",
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                color: ZupThemeColors.primaryText.themed(context.brightness),
+              ),
             ).redacted(enabled: poolTickSnapshot.data == null);
           },
         ),
@@ -1152,7 +1191,7 @@ class _DepositPageState extends State<DepositPage>
                             fixedIcon: true,
                             alignCenter: true,
                             hoverElevation: 0,
-                            backgroundColor: ZupColors.brand7,
+                            backgroundColor: ZupColors.brand.withValues(alpha: 0.1),
                             foregroundColor: ZupColors.brand,
                             onPressed: (buttonContext) => ConnectModal().show(context),
                           );

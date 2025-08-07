@@ -401,12 +401,10 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                   children: [
                     Row(
                       children: [
-                        SizedBox(
-                          height: 30,
-                          child: ZupMergedWidgets(
-                            firstWidget: TokenAvatar(asset: baseToken, size: 35),
-                            secondWidget: TokenAvatar(asset: quoteToken, size: 35),
-                          ),
+                        ZupMergedWidgets(
+                          spacing: 0,
+                          firstWidget: TokenAvatar(asset: baseToken, size: 35),
+                          secondWidget: TokenAvatar(asset: quoteToken, size: 35),
                         ),
                         const SizedBox(width: 5),
                         Text(
@@ -421,7 +419,9 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                               title: isOutOfRange.any
                                   ? S.of(context).previewDepositModalOutOfRange
                                   : S.of(context).previewDepositModalInRange,
-                              color: isOutOfRange.any ? ZupColors.orange : ZupColors.green,
+                              color: isOutOfRange.any
+                                  ? ZupThemeColors.alert.themed(context.brightness)
+                                  : ZupThemeColors.success.themed(context.brightness),
                             );
                           },
                         ),
@@ -466,8 +466,13 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        if (baseToken.logoUrl.isEmpty)
-                          SizedBox(
+                        zupCachedImage.build(
+                          context,
+                          baseToken.logoUrl,
+                          height: 30,
+                          width: 30,
+                          radius: 50,
+                          errorWidget: (context, error, stackTrace) => SizedBox(
                             height: 30,
                             width: 30,
                             child: CircleAvatar(
@@ -475,9 +480,8 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                               foregroundColor: ZupColors.brand,
                               child: Text(baseToken.name[0]),
                             ),
-                          )
-                        else
-                          zupCachedImage.build(baseToken.logoUrl, height: 30, width: 30, radius: 50),
+                          ),
+                        ),
                         const SizedBox(width: 10),
                         Text(baseToken.symbol),
                         const Spacer(),
@@ -490,18 +494,22 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                     const SizedBox(height: 15),
                     Row(
                       children: [
-                        if (quoteToken.logoUrl.isEmpty)
-                          SizedBox(
+                        zupCachedImage.build(
+                          context,
+                          quoteToken.logoUrl,
+                          height: 30,
+                          width: 30,
+                          radius: 50,
+                          errorWidget: (context, error, stackTrace) => SizedBox(
                             height: 30,
                             width: 30,
                             child: CircleAvatar(
                               backgroundColor: ZupColors.brand7,
                               foregroundColor: ZupColors.brand,
-                              child: Text(quoteToken.name[0]),
+                              child: Text(baseToken.name[0]),
                             ),
-                          )
-                        else
-                          zupCachedImage.build(quoteToken.logoUrl, height: 30, width: 30, radius: 50),
+                          ),
+                        ),
                         const SizedBox(width: 10),
                         Text(quoteToken.symbol),
                         const Spacer(),
@@ -523,10 +531,20 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                           child: _fieldColumn(
                             title: S.of(context).previewDepositModalProtocol,
                             image: zupCachedImage.build(
+                              context,
                               widget.currentYield.protocol.logo,
                               width: 30,
                               height: 30,
                               radius: 100,
+                              errorWidget: (context, error, stackTrace) => const SizedBox(
+                                height: 26,
+                                width: 26,
+                                child: CircleAvatar(
+                                  backgroundColor: ZupColors.gray5,
+                                  foregroundColor: ZupColors.gray,
+                                  child: Text("?"),
+                                ),
+                              ),
                             ),
                             value: widget.currentYield.protocol.name,
                           ),
@@ -588,8 +606,8 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
   Widget rangeInfoCard({required bool isMinPrice}) => Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: ZupColors.brand.withValues(alpha: 0.02),
-      border: Border.all(color: ZupColors.brand5, width: 0.5),
+      color: ZupThemeColors.tertiaryButtonBackground.themed(context.brightness),
+      border: Border.all(color: ZupThemeColors.borderOnBackground.themed(context.brightness), width: 0.5),
       borderRadius: const BorderRadius.all(Radius.circular(12)),
     ),
     child: Column(
@@ -624,7 +642,11 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
           }.call(),
           maxLines: 1,
           overflow: TextOverflow.clip,
-          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 18, color: ZupColors.black),
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 18,
+            color: ZupThemeColors.primaryText.themed(context.brightness),
+          ),
         ),
         const SizedBox(height: 5),
         Text(

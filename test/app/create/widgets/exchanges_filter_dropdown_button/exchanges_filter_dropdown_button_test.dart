@@ -39,24 +39,29 @@ void main() {
     zupSingletonCache.clear();
   });
 
-  Future<DeviceBuilder> goldenBuilder() async => await goldenDeviceBuilder(
-        const Center(child: ExchangesFilterDropdownButton()),
-      );
+  Future<DeviceBuilder> goldenBuilder() async =>
+      await goldenDeviceBuilder(const Center(child: ExchangesFilterDropdownButton()));
 
-  zGoldenTest("""When the widget is created, it should call the cubit to get the exchanges
-  and show a preview of the exchanges count""", goldenFileName: "exchanges_filter_dropdown_button", (tester) async {
-    when(() => protocolRepository.getAllSupportedProtocols()).thenAnswer((_) async => [
+  zGoldenTest(
+    """When the widget is created, it should call the cubit to get the exchanges
+  and show a preview of the exchanges count""",
+    goldenFileName: "exchanges_filter_dropdown_button",
+    (tester) async {
+      when(() => protocolRepository.getAllSupportedProtocols()).thenAnswer(
+        (_) async => [
           const ProtocolDto(name: "C"),
           const ProtocolDto(name: "A"),
           const ProtocolDto(name: "B"),
           const ProtocolDto(name: "A"),
-        ]);
+        ],
+      );
 
-    await tester.pumpDeviceBuilder(await goldenBuilder());
-    await tester.pumpAndSettle();
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
 
-    verify(() => protocolRepository.getAllSupportedProtocols()).called(1);
-  });
+      verify(() => protocolRepository.getAllSupportedProtocols()).called(1);
+    },
+  );
 
   zGoldenTest(
     """When the widget is created, it should call the cubit to get the exchanges.
@@ -67,12 +72,14 @@ void main() {
       final blockedProtocolsIds = ["32983", "sag", "nnnn", "dale"];
       when(() => cache.blockedProtocolsIds).thenReturn(blockedProtocolsIds);
 
-      when(() => protocolRepository.getAllSupportedProtocols()).thenAnswer((_) async => [
-            ProtocolDto(name: "C", rawId: blockedProtocolsIds[0]),
-            ProtocolDto(name: "A", rawId: blockedProtocolsIds[1]),
-            ProtocolDto(name: "B", rawId: blockedProtocolsIds[2]),
-            const ProtocolDto(name: "A", rawId: "some other id not blocked"),
-          ]);
+      when(() => protocolRepository.getAllSupportedProtocols()).thenAnswer(
+        (_) async => [
+          ProtocolDto(name: "C", rawId: blockedProtocolsIds[0]),
+          ProtocolDto(name: "A", rawId: blockedProtocolsIds[1]),
+          ProtocolDto(name: "B", rawId: blockedProtocolsIds[2]),
+          const ProtocolDto(name: "A", rawId: "some other id not blocked"),
+        ],
+      );
 
       await tester.pumpDeviceBuilder(await goldenBuilder());
       await tester.pumpAndSettle();
@@ -166,9 +173,9 @@ void main() {
         const ProtocolDto(name: "D", rawId: "some other id not blocked"),
       ];
 
-      when(() => cache.saveBlockedProtocolIds(blockedProtocolIds: any(named: "blockedProtocolIds"))).thenAnswer(
-        (_) async => {},
-      );
+      when(
+        () => cache.saveBlockedProtocolIds(blockedProtocolIds: any(named: "blockedProtocolIds")),
+      ).thenAnswer((_) async => {});
       when(() => cache.blockedProtocolsIds).thenReturn(blockedProtocolsIds);
       when(() => protocolRepository.getAllSupportedProtocols()).thenAnswer((_) async => allProtocols);
 
@@ -182,11 +189,9 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(
-        () => cache.saveBlockedProtocolIds(blockedProtocolIds: [
-          blockedProtocolsIds[0],
-          "some other id not blocked",
-          blockedProtocolsIds[2],
-        ]),
+        () => cache.saveBlockedProtocolIds(
+          blockedProtocolIds: [blockedProtocolsIds[0], "some other id not blocked", blockedProtocolsIds[2]],
+        ),
       ).called(1);
     },
   );
@@ -204,9 +209,9 @@ void main() {
         const ProtocolDto(name: "D", rawId: "some other id not blocked"),
       ];
 
-      when(() => cache.saveBlockedProtocolIds(blockedProtocolIds: any(named: "blockedProtocolIds"))).thenAnswer(
-        (_) async => {},
-      );
+      when(
+        () => cache.saveBlockedProtocolIds(blockedProtocolIds: any(named: "blockedProtocolIds")),
+      ).thenAnswer((_) async => {});
       when(() => cache.blockedProtocolsIds).thenReturn(blockedProtocolsIds);
       when(() => protocolRepository.getAllSupportedProtocols()).thenAnswer((_) async => allProtocols);
 
@@ -219,9 +224,7 @@ void main() {
       await tester.tap(find.byKey(const Key("checkbox-item-0")));
       await tester.pumpAndSettle();
 
-      verify(
-        () => cache.saveBlockedProtocolIds(blockedProtocolIds: ["nnnn"]),
-      ).called(1);
+      verify(() => cache.saveBlockedProtocolIds(blockedProtocolIds: ["nnnn"])).called(1);
     },
   );
 }

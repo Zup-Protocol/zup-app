@@ -11,6 +11,7 @@ import 'package:zup_app/widgets/token_card.dart';
 import 'package:zup_app/widgets/token_group_card.dart';
 import 'package:zup_app/widgets/token_selector_modal/token_selector_modal_cubit.dart';
 import 'package:zup_app/widgets/zup_skeletonizer.dart';
+import 'package:zup_core/extensions/extensions.dart';
 import 'package:zup_core/mixins/device_info_mixin.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
@@ -106,56 +107,53 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
   Widget build(BuildContext context) {
     return BlocBuilder<TokenSelectorModalCubit, TokenSelectorModalState>(
       builder: (context, state) {
-        return ScrollbarTheme(
-          data: const ScrollbarThemeData(mainAxisMargin: 20, crossAxisMargin: 3),
-          child: CustomScrollView(
-            physics: const ClampingScrollPhysics(),
-            slivers: [
-              SliverAppBar(
-                leading: const SizedBox.shrink(),
-                backgroundColor: Colors.white,
-                surfaceTintColor: Colors.white,
-                titleSpacing: 20,
-                toolbarHeight: _appCubit.selectedNetwork.isAllNetworks ? 100 : 60,
-                automaticallyImplyLeading: false,
-                leadingWidth: 0,
-                floating: true,
-                snap: true,
-                title: Column(
-                  children: [
-                    ZupTextField(
-                      key: const Key("search-token-field"),
-                      hintText: _appCubit.selectedNetwork.isAllNetworks
-                          ? S.of(context).tokenSelectorModalSearchTitleAllNetworks
-                          : S.of(context).tokenSelectorModalSearchTitle,
-                      onChanged: (query) {
-                        _debouncer.run(() async {
-                          if (query.isEmpty) return _cubit.fetchTokenList();
-                          _cubit.searchToken(query);
-                        });
-                      },
+        return CustomScrollView(
+          physics: const ClampingScrollPhysics(),
+          slivers: [
+            SliverAppBar(
+              leading: const SizedBox.shrink(),
+              backgroundColor: ZupThemeColors.background.themed(context.brightness),
+              surfaceTintColor: ZupThemeColors.background.themed(context.brightness),
+              titleSpacing: 20,
+              toolbarHeight: _appCubit.selectedNetwork.isAllNetworks ? 100 : 60,
+              automaticallyImplyLeading: false,
+              leadingWidth: 0,
+              floating: true,
+              snap: true,
+              title: Column(
+                children: [
+                  ZupTextField(
+                    key: const Key("search-token-field"),
+                    hintText: _appCubit.selectedNetwork.isAllNetworks
+                        ? S.of(context).tokenSelectorModalSearchTitleAllNetworks
+                        : S.of(context).tokenSelectorModalSearchTitle,
+                    onChanged: (query) {
+                      _debouncer.run(() async {
+                        if (query.isEmpty) return _cubit.fetchTokenList();
+                        _cubit.searchToken(query);
+                      });
+                    },
+                  ),
+                  if (_appCubit.selectedNetwork.isAllNetworks) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      maxLines: 4,
+                      S.of(context).tokenSelectorModalSearchAlertForAllNetworks,
+                      style: const TextStyle(color: ZupColors.gray, fontSize: 12),
                     ),
-                    if (_appCubit.selectedNetwork.isAllNetworks) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        maxLines: 4,
-                        S.of(context).tokenSelectorModalSearchAlertForAllNetworks,
-                        style: const TextStyle(color: ZupColors.gray, fontSize: 12),
-                      ),
-                    ],
                   ],
-                ),
+                ],
               ),
-              ...state.maybeWhen(
-                orElse: () => _buildSuccessOrLoadingSlivers(state),
-                error: () => _buildErrorStateSlivers(),
-                searchSuccess: (_) => _buildSearchSuccessOrSearchLoadingSlivers(state),
-                searchLoading: () => _buildSearchSuccessOrSearchLoadingSlivers(state),
-                searchNotFound: (searchedTerm) => _buildSearchNotFoundSlivers(searchedTerm),
-                searchError: (searchedTerm) => _buildSearchErrorSlivers(searchedTerm),
-              ),
-            ],
-          ),
+            ),
+            ...state.maybeWhen(
+              orElse: () => _buildSuccessOrLoadingSlivers(state),
+              error: () => _buildErrorStateSlivers(),
+              searchSuccess: (_) => _buildSearchSuccessOrSearchLoadingSlivers(state),
+              searchLoading: () => _buildSearchSuccessOrSearchLoadingSlivers(state),
+              searchNotFound: (searchedTerm) => _buildSearchNotFoundSlivers(searchedTerm),
+              searchError: (searchedTerm) => _buildSearchErrorSlivers(searchedTerm),
+            ),
+          ],
         );
       },
     );
@@ -220,7 +218,10 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
                 ),
                 TextSpan(
                   text: " \"$searchedTerm\"",
-                  style: const TextStyle(color: ZupColors.black, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    color: ZupThemeColors.primaryText.themed(context.brightness),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -234,7 +235,7 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
     ZupSkeletonizer(
       enabled: state == const TokenSelectorModalState.searchLoading(),
       child: _buildSliverSectionTitle(S.of(context).searchResults, topPadding: 10),
-    ).sliver(),
+    ).sliver(context),
     SliverPadding(
       padding: EdgeInsets.symmetric(horizontal: _horizontalPadding),
       sliver: state.maybeWhen(
@@ -257,7 +258,7 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
               ),
             ),
           ),
-        ).sliver(),
+        ).sliver(context),
       ),
     ),
   ];
@@ -310,7 +311,7 @@ class _TokenSelectorModalState extends State<TokenSelectorModal> with DeviceInfo
               ),
             ),
           ),
-        ).sliver(),
+        ).sliver(context),
         success: (tokenList) => SliverList.builder(
           itemCount: tokenList.popularTokens.length,
           itemBuilder: (context, index) {

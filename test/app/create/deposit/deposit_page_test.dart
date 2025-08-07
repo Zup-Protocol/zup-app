@@ -99,8 +99,8 @@ void main() {
       instanceName: InjectInstanceNames.lottieMatching,
     );
     inject.registerFactory<LottieBuilder>(
-      () => Assets.lotties.seaching.lottie(animate: false),
-      instanceName: InjectInstanceNames.lottieSearching,
+      () => Assets.lotties.list.lottie(animate: false),
+      instanceName: InjectInstanceNames.lottieList,
     );
     inject.registerFactory<ScrollController>(
       () => ScrollController(),

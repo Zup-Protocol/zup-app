@@ -105,6 +105,24 @@ abstract class S {
   /// **'24h'**
   String get twentyFourHours;
 
+  /// No description provided for @light.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get light;
+
+  /// No description provided for @dark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get dark;
+
+  /// No description provided for @system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get system;
+
   /// No description provided for @week.
   ///
   /// In en, this message translates to:
@@ -633,13 +651,13 @@ abstract class S {
   /// No description provided for @depositPageLoadingStep4Title.
   ///
   /// In en, this message translates to:
-  /// **'Fetching the Best yields for you...'**
+  /// **'Organizing the best pools for you…'**
   String get depositPageLoadingStep4Title;
 
   /// No description provided for @depositPageLoadingStep4Description.
   ///
   /// In en, this message translates to:
-  /// **'Got it! Just adding a touch of sparkle to your perfect match!'**
+  /// **'Hang tight, we\'re filtering and organizing the best pools for you'**
   String get depositPageLoadingStep4Description;
 
   /// No description provided for @depositPageErrorStateTitle.

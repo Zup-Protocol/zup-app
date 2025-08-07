@@ -1,41 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:zup_app/theme/themes/zup_text_button_theme.dart';
 import 'package:zup_ui_kit/zup_colors.dart';
+import 'package:zup_ui_kit/zup_theme.dart';
 
-abstract class ZupTheme {
+abstract class AppTheme {
   static String get fontFamily => "SNPro";
+  static Color get primaryColor => ZupColors.brand;
 
-  static ThemeData get lightTheme => ThemeData(
-    fontFamily: ZupTheme.fontFamily,
-    primaryColor: ZupColors.brand,
-    badgeTheme: const BadgeThemeData(backgroundColor: ZupColors.brand, textColor: ZupColors.white),
-    inputDecorationTheme: const InputDecorationTheme(
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
-        borderSide: BorderSide(color: ZupColors.red, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
-        borderSide: BorderSide(color: ZupColors.red, width: 1.5),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
-        borderSide: BorderSide(color: ZupColors.brand, width: 1.5),
-      ),
-    ),
-    scrollbarTheme: const ScrollbarThemeData(
-      mainAxisMargin: 10,
-      crossAxisMargin: 3,
-      thickness: WidgetStatePropertyAll(5),
-      thumbVisibility: WidgetStatePropertyAll(false),
-    ),
-    scaffoldBackgroundColor: Colors.transparent,
-    textButtonTheme: ZupTextButtonTheme.lightTheme,
+  static ThemeData get lightTheme => ZupTheme.lightTheme.copyWith(
+    primaryColor: primaryColor,
     textSelectionTheme: const TextSelectionThemeData(selectionColor: ZupColors.brand5),
-    textTheme: const TextTheme(
-      titleSmall: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: ZupColors.black),
-      bodySmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: ZupColors.black),
-      bodyMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: ZupColors.black),
-    ),
+    textTheme: ZupTheme.lightTheme.textTheme.apply(fontFamily: fontFamily),
+  );
+
+  static ThemeData get darkTheme => ZupTheme.darkTheme.copyWith(
+    primaryColor: primaryColor,
+    textTheme: ZupTheme.darkTheme.textTheme.apply(fontFamily: fontFamily),
+    textSelectionTheme: TextSelectionThemeData(selectionColor: ZupColors.brand.withValues(alpha: 0.3)),
   );
 }

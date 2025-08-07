@@ -1,6 +1,6 @@
-import 'dart:ui';
-
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:zup_core/extensions/extensions.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 class Slippage extends Equatable {
@@ -11,7 +11,7 @@ class Slippage extends Equatable {
   static const Slippage zeroPointOnePercent = Slippage._(0.1);
   static const Slippage halfPercent = Slippage._(0.5);
   static const Slippage onePercent = Slippage._(1.0);
-  static custom(num value) => Slippage._(value);
+  static Slippage custom(num value) => Slippage._(value);
 
   factory Slippage.fromValue(num value) {
     if (value == zeroPointOnePercent.value) return zeroPointOnePercent;
@@ -21,18 +21,20 @@ class Slippage extends Equatable {
     return custom(value);
   }
 
-  Color get riskBackgroundColor {
+  Color? riskBackgroundColor(Brightness brightness) {
+    if (brightness.isDark) return ZupColors.black3;
+
     if (value > 10) return ZupColors.red6;
     if (value > 1) return ZupColors.orange6;
 
-    return ZupColors.gray6;
+    return null;
   }
 
-  Color get riskForegroundColor {
-    if (value > 10) return ZupColors.red;
-    if (value > 1) return ZupColors.orange;
+  Color? riskForegroundColor(Brightness brightness) {
+    if (value > 10) return ZupThemeColors.error.themed(brightness);
+    if (value > 1) return ZupThemeColors.alert.themed(brightness);
 
-    return ZupColors.brand;
+    return null;
   }
 
   BigInt calculateMinTokenAmountFromSlippage(BigInt amount) {

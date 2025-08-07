@@ -17,6 +17,15 @@ class SEn extends S {
   String get twentyFourHours => '24h';
 
   @override
+  String get light => 'Light';
+
+  @override
+  String get dark => 'Dark';
+
+  @override
+  String get system => 'System';
+
+  @override
   String get week => 'Week';
 
   @override
@@ -339,11 +348,11 @@ class SEn extends S {
 
   @override
   String get depositPageLoadingStep4Title =>
-      'Fetching the Best yields for you...';
+      'Organizing the best pools for you…';
 
   @override
   String get depositPageLoadingStep4Description =>
-      'Got it! Just adding a touch of sparkle to your perfect match!';
+      'Hang tight, we\'re filtering and organizing the best pools for you';
 
   @override
   String get depositPageErrorStateTitle => 'Oops! Something went wrong!';

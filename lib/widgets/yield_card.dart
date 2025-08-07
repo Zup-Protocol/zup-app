@@ -10,6 +10,7 @@ import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_app/widgets/token_avatar.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
+import 'package:zup_core/extensions/extensions.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 class YieldCard extends StatefulWidget {
@@ -41,7 +42,11 @@ class _YieldCardState extends State<YieldCard> {
 
   Widget get yieldText => Text(
     widget.currentYield.yieldTimeframed(widget.timeFrame).formatPercent,
-    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: ZupColors.black),
+    style: TextStyle(
+      fontSize: 26,
+      fontWeight: FontWeight.w600,
+      color: ZupThemeColors.backgroundInverse.themed(context.brightness),
+    ),
   );
 
   @override
@@ -50,11 +55,10 @@ class _YieldCardState extends State<YieldCard> {
       isSelected: widget.isSelected,
       selectionAnimationDuration: selectionAnimationDuration,
 
-      boxShadow: const [],
       onPressed: () {
         return widget.onChangeSelection(widget.isSelected ? null : widget.currentYield);
       },
-      padding: const EdgeInsets.all(10).copyWith(right: 0, top: 0, bottom: 0),
+      padding: const EdgeInsets.all(10).copyWith(right: 2, top: 2, bottom: 0),
       child: Stack(
         children: [
           if (appCubit.selectedNetwork.isAllNetworks)
@@ -64,27 +68,14 @@ class _YieldCardState extends State<YieldCard> {
               child: ZupTooltip.text(
                 message: S.of(context).yieldCardThisPoolIsAtNetwork(network: widget.currentYield.network.label),
                 trailingIcon: widget.currentYield.network.icon,
-                child: AnimatedContainer(
-                  duration: selectionAnimationDuration,
+                child: Container(
                   height: 40,
                   padding: const EdgeInsets.all(6),
                   width: 40,
                   decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        blurStyle: BlurStyle.inner,
-                        color: widget.isSelected ? ZupColors.brand5 : ZupColors.gray5,
-                        blurRadius: 2,
-                        spreadRadius: -2,
-                        offset: const Offset(0, 0),
-                      ),
-                      BoxShadow(
-                        color: widget.isSelected ? ZupColors.brand7 : ZupColors.white,
-                        blurRadius: 5,
-                        spreadRadius: -1,
-                        offset: const Offset(2, -2),
-                      ),
-                    ],
+                    color: widget.isSelected
+                        ? ZupColors.brand.withValues(alpha: 0.1)
+                        : (context.brightness.isDark ? ZupColors.black2 : ZupColors.gray6),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: widget.currentYield.network.icon,
@@ -96,7 +87,10 @@ class _YieldCardState extends State<YieldCard> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 10),
-                child: Text(S.of(context).yieldCardYearlyYield, style: const TextStyle(fontSize: 14)),
+                child: Text(
+                  S.of(context).yieldCardYearlyYield,
+                  style: TextStyle(fontSize: 14, color: ZupThemeColors.primaryText.themed(context.brightness)),
+                ),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -110,9 +104,9 @@ class _YieldCardState extends State<YieldCard> {
                           begin: Offset(1.1, 1.1),
                           end: Offset(1, 1),
                         ),
-                        const ShimmerEffect(
-                          duration: Duration(seconds: 2),
-                          color: ZupColors.white,
+                        ShimmerEffect(
+                          duration: const Duration(seconds: 2),
+                          color: ZupThemeColors.shimmer.themed(context.brightness),
                           curve: Curves.decelerate,
                           angle: 90,
                           size: 1,
@@ -133,11 +127,12 @@ class _YieldCardState extends State<YieldCard> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  AnimatedContainer(
+                  Container(
                     padding: const EdgeInsets.all(6),
-                    duration: selectionAnimationDuration,
                     decoration: BoxDecoration(
-                      color: widget.isSelected ? ZupColors.brand5 : ZupColors.gray6,
+                      color: widget.isSelected
+                          ? (context.brightness.isDark ? ZupColors.brand.withValues(alpha: 0.1) : ZupColors.brand5)
+                          : (context.brightness.isDark ? ZupColors.black2 : ZupColors.gray6),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -151,7 +146,11 @@ class _YieldCardState extends State<YieldCard> {
                         const SizedBox(width: 10),
                         Text(
                           "${widget.currentYield.token0.symbol}/${widget.currentYield.token1.symbol}",
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: ZupThemeColors.primaryText.themed(context.brightness),
+                          ),
                         ),
                       ],
                     ),
@@ -161,6 +160,7 @@ class _YieldCardState extends State<YieldCard> {
                   const SizedBox(width: 10),
                   if (widget.currentYield.protocol.logo.isNotEmpty)
                     zupCachedImage.build(
+                      context,
                       widget.currentYield.protocol.logo,
                       height: 25,
                       width: 25,
@@ -185,7 +185,11 @@ class _YieldCardState extends State<YieldCard> {
                         widget.currentYield.protocol.name,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: ZupThemeColors.backgroundInverse.themed(context.brightness),
+                        ),
                       ),
                     ),
                   ),

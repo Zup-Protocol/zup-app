@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
+import 'package:zup_app/core/enums/app_theme_mode.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/widgets/app_settings_dropdown.dart';
 
@@ -20,6 +21,7 @@ void main() {
     when(() => appCubit.toggleTestnetMode()).thenAnswer((_) async {});
     when(() => appCubit.state).thenReturn(const AppState.standard());
     when(() => appCubit.stream).thenAnswer((_) => const Stream.empty());
+    when(() => appCubit.currentThemeMode).thenAnswer((_) => AppThemeMode.light);
   });
 
   tearDown(() {
@@ -32,8 +34,9 @@ void main() {
     await tester.pumpDeviceBuilder(await goldenBuilder());
   });
 
-  zGoldenTest("When clicking the testnet mode switch, it should call the app cubit to toggle the testnet mode",
-      (tester) async {
+  zGoldenTest("When clicking the testnet mode switch, it should call the app cubit to toggle the testnet mode", (
+    tester,
+  ) async {
     await tester.pumpDeviceBuilder(await goldenBuilder());
 
     await tester.tap(find.byKey(const Key("testnet-mode-switch")));
@@ -42,16 +45,20 @@ void main() {
     verify(() => appCubit.toggleTestnetMode()).called(1);
   });
 
-  zGoldenTest("When the app is in testnet mode, the switch should be on",
-      goldenFileName: "app_settings_dropdown_testnet_mode_on", (tester) async {
-    when(() => appCubit.isTestnetMode).thenReturn(true);
+  zGoldenTest(
+    "When the app is in testnet mode, the switch should be on",
+    goldenFileName: "app_settings_dropdown_testnet_mode_on",
+    (tester) async {
+      when(() => appCubit.isTestnetMode).thenReturn(true);
 
-    await tester.pumpDeviceBuilder(await goldenBuilder());
-    await tester.pumpAndSettle();
-  });
+      await tester.pumpDeviceBuilder(await goldenBuilder());
+      await tester.pumpAndSettle();
+    },
+  );
 
-  zGoldenTest("When clicking the testnet mode text, it should call the app cubit to toggle the testnet mode",
-      (tester) async {
+  zGoldenTest("When clicking the testnet mode text, it should call the app cubit to toggle the testnet mode", (
+    tester,
+  ) async {
     await tester.pumpDeviceBuilder(await goldenBuilder());
 
     await tester.tap(find.byKey(const Key("testnet-mode-text")));
