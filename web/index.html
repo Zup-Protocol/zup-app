@@ -39,7 +39,12 @@
     path: "loading.json",
    };
    
-   lottie.loadAnimation(animationData);
+  var animation = lottie.loadAnimation(animationData);
+
+  window.addEventListener('flutter-first-frame', function () {
+    animationContainer.remove();
+    document.body.style.backgroundColor = 'transparent'
+    });
    });
    </script>
    
@@ -61,6 +66,6 @@
     inject();
   </script>
 
-  <script src="flutter_bootstrap.js?v=14" async></script>
+  <script src="flutter_bootstrap.js?v=15" async></script>
 </body>
 </html>
