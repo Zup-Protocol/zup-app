@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web3kit/core/ethereum_constants.dart';
+import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
@@ -84,5 +85,37 @@ void main() {
     final currentYield = YieldDto.fixture().copyWith(yield90d: yield90d);
 
     expect(currentYield.yieldTimeframed(YieldTimeFrame.threeMonth), yield90d);
+  });
+
+  test("When building the yield dto with default variables, the deployerAddress should be zero address by default", () {
+    expect(
+      YieldDto(
+        token0: TokenDto.fixture(),
+        token1: TokenDto.fixture(),
+        poolAddress: "0x1",
+        chainId: AppNetworks.sepolia.chainId,
+        positionManagerAddress: "0x2",
+        tickSpacing: 1,
+        protocol: ProtocolDto.fixture(),
+        feeTier: 0,
+      ).deployerAddress,
+      EthereumConstants.zeroAddress,
+    );
+  });
+
+  test("When building the yield dto with default variables, the hooks should be zero address by default", () {
+    expect(
+      YieldDto(
+        token0: TokenDto.fixture(),
+        token1: TokenDto.fixture(),
+        poolAddress: "0x1",
+        chainId: AppNetworks.sepolia.chainId,
+        positionManagerAddress: "0x2",
+        tickSpacing: 1,
+        protocol: ProtocolDto.fixture(),
+        feeTier: 0,
+      ).v4Hooks,
+      EthereumConstants.zeroAddress,
+    );
   });
 }

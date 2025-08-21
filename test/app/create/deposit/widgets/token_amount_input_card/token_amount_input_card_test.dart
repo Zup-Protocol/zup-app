@@ -381,6 +381,39 @@ void main() {
   );
 
   zGoldenTest(
+    """When updating the widget from one network, for a different network,
+    it should update the token in the cubit and get the balance again""",
+    (tester) async {
+      await tester.runAsync(() async {
+        const key = Key("token-amount-card");
+
+        const oldTokenNetwork = AppNetworks.scroll;
+        const newTokenNetwork = AppNetworks.sepolia;
+
+        final token = TokenDto.fixture().copyWith(
+          addresses: {
+            AppNetworks.scroll.chainId: AppNetworks.scroll.wrappedNativeTokenAddress,
+            AppNetworks.sepolia.chainId: AppNetworks.sepolia.wrappedNativeTokenAddress,
+          },
+          symbol: "OLD_TOKEN",
+        );
+
+        await tester.pumpDeviceBuilder(
+          await goldenBuilder(key: key, token: token, isNative: false, network: oldTokenNetwork),
+        );
+        await tester.pumpDeviceBuilder(
+          await goldenBuilder(key: key, token: token, isNative: false, network: newTokenNetwork),
+        );
+        await tester.pumpAndSettle();
+
+        verify(
+          () => wallet.nativeOrTokenBalance(token.addresses[newTokenNetwork.chainId]!, rpcUrl: newTokenNetwork.rpcUrl),
+        ).called(1);
+      });
+    },
+  );
+
+  zGoldenTest(
     """When there's a large number typed, it should not hard clip it in the left border,
     but instead do a soft clip with a gradient""",
     goldenFileName: "token_amount_card_large_number_left_border",
