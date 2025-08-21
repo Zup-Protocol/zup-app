@@ -39,7 +39,12 @@ class ZupCachedImage {
             fit: BoxFit.cover,
             errorBuilder: errorWidget,
             frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-              if (frame == null) return placeholder ?? ZupCircularLoadingIndicator(size: height ?? 20);
+              if (frame == null) {
+                return Container(
+                  color: ZupThemeColors.background.themed(context.brightness),
+                  child: placeholder ?? ZupCircularLoadingIndicator(size: height ?? 20),
+                );
+              }
               return child;
             },
             webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
