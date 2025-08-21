@@ -8,10 +8,16 @@ enum ProtocolId {
   pancakeSwapInfinityCL,
   @JsonValue("aerodrome-v3")
   aerodromeSlipstream,
+  @JsonValue("velodrome-v3")
+  velodromeSlipstream,
+  @JsonValue("gliquid-v3")
+  gliquidV3,
   unknown;
 
   bool get isPancakeSwapInfinityCL => this == ProtocolId.pancakeSwapInfinityCL;
-  bool get isAerodromeSlipstream => this == ProtocolId.aerodromeSlipstream;
+  bool get isAerodromeOrVelodromeSlipstream =>
+      (this == ProtocolId.aerodromeSlipstream || this == ProtocolId.velodromeSlipstream);
+  bool get isGLiquidV3 => this == ProtocolId.gliquidV3;
 
   String get toRawJsonValue => _$ProtocolIdEnumMap[this]!;
 }

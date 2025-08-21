@@ -11,7 +11,10 @@ import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/aerodrome_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/aerodrome_v3_position_manager.abi.g.dart';
+import 'package:zup_app/abis/algebra/v1.2.1/pool.abi.g.dart' as algebra_1_2_1_pool;
+import 'package:zup_app/abis/algebra/v1.2.1/position_manager.abi.g.dart' as algebra_1_2_1_position_manager;
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
@@ -95,6 +98,14 @@ class PancakeSwapInfinityCLPoolManagerImplMock extends Mock implements PancakeSw
 
 class UniswapV3PoolImplMock extends Mock implements UniswapV3PoolImpl {}
 
+class Algebra121PositionManagerMock extends Mock implements algebra_1_2_1_position_manager.PositionManager {}
+
+class Algebra121PositionManagerImplMock extends Mock implements algebra_1_2_1_position_manager.PositionManagerImpl {}
+
+class Algebra121PoolMock extends Mock implements algebra_1_2_1_pool.Pool {}
+
+class Algebra121PoolImplMock extends Mock implements algebra_1_2_1_pool.PoolImpl {}
+
 class UniswapV3PoolMock extends Mock implements UniswapV3Pool {}
 
 class WalletMock extends Mock implements Wallet {}
@@ -122,6 +133,10 @@ class ZupHolderMock extends Mock implements ZupHolder {}
 class ProtocolRepositoryMock extends Mock implements ProtocolRepository {}
 
 class AerodromeV3PositionManagerMock extends Mock implements AerodromeV3PositionManager {}
+
+class AerodromeV3PoolMock extends Mock implements AerodromeV3Pool {}
+
+class AerodromeV3PoolImplMock extends Mock implements AerodromeV3PoolImpl {}
 
 class AerodromeV3PositionManagerImplMock extends Mock implements AerodromeV3PositionManagerImpl {}
 

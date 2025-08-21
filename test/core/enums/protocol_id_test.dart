@@ -10,15 +10,25 @@ void main() {
   );
 
   test(
-    "when calling 'isAerodromeSlipstream' and the protocol is indeed aerodromeSlipstream, it should return true",
+    "when calling 'isAerodromeOrVelodromeSlipstream' and the protocol is indeed aerodromeSlipstream, it should return true",
     () {
-      expect(ProtocolId.aerodromeSlipstream.isAerodromeSlipstream, true);
+      expect(ProtocolId.aerodromeSlipstream.isAerodromeOrVelodromeSlipstream, true);
     },
   );
 
-  test("when calling 'isAerodromeSlipstream' and the protocol is not aerodromeSlipstream, it should return false", () {
-    expect(ProtocolId.unknown.isAerodromeSlipstream, false);
-  });
+  test(
+    "when calling 'isAerodromeOrVelodromeSlipstream' and the protocol is indeed velodromeSlipstream, it should return true",
+    () {
+      expect(ProtocolId.velodromeSlipstream.isAerodromeOrVelodromeSlipstream, true);
+    },
+  );
+
+  test(
+    "when calling 'isAerodromeOrVelodromeSlipstream' and the protocol is not aerodromeSlipstream or velodromeSlipstream, it should return false",
+    () {
+      expect(ProtocolId.unknown.isAerodromeOrVelodromeSlipstream, false);
+    },
+  );
 
   test(
     "When calling `isPancakeSwapInfinityCL` and the protocol is not pancakeSwapInfinityCL, it should return false",

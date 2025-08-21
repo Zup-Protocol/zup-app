@@ -4,7 +4,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/core/dtos/transaction_receipt.dart';
 import 'package:web3kit/core/dtos/transaction_response.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/aerodrome_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/aerodrome_v3_position_manager.abi.g.dart';
+import 'package:zup_app/abis/algebra/v1.2.1/pool.abi.g.dart' as algebra_1_2_1_pool;
+import 'package:zup_app/abis/algebra/v1.2.1/position_manager.abi.g.dart' as algebra_1_2_1_position_manager;
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
@@ -36,6 +39,9 @@ void main() {
   late YieldDto currentYield;
   late TransactionResponse transactionResponse;
   late AerodromeV3PositionManager aerodromePositionManagerV3;
+  late AerodromeV3Pool aerodromeV3Pool;
+  late algebra_1_2_1_position_manager.PositionManager algebra121PositionManager;
+  late algebra_1_2_1_pool.Pool algebra121Pool;
 
   late UniswapV4StateViewImpl stateViewImpl;
   late UniswapV3PoolImpl uniswapV3PoolImpl;
@@ -44,6 +50,9 @@ void main() {
   late PancakeSwapInfinityClPoolManagerImpl pancakeSwapInfinityCLPoolManagerImpl;
   late EthereumAbiCoder ethereumAbiCoder;
   late AerodromeV3PositionManagerImpl aerodromePositionManagerV3Impl;
+  late algebra_1_2_1_position_manager.PositionManagerImpl algebra121PositionManagerImpl;
+  late algebra_1_2_1_pool.PoolImpl algebra121PoolImpl;
+  late AerodromeV3PoolImpl aerodromeV3PoolImpl;
 
   setUp(() {
     registerFallbackValue((
@@ -71,14 +80,19 @@ void main() {
     ethereumAbiCoder = EthereumAbiCoderMock();
     signer = SignerMock();
     aerodromePositionManagerV3 = AerodromeV3PositionManagerMock();
+    algebra121PositionManager = Algebra121PositionManagerMock();
+    algebra121Pool = Algebra121PoolMock();
+    aerodromeV3Pool = AerodromeV3PoolMock();
 
     pancakeSwapInfinityCLPoolManagerImpl = PancakeSwapInfinityCLPoolManagerImplMock();
-
     stateViewImpl = UniswapV4StateViewImplMock();
     uniswapV3PoolImpl = UniswapV3PoolImplMock();
     positionManagerV3Impl = UniswapV3PositionManagerImplMock();
     positionManagerV4Impl = UniswapV4PositionManagerImplMock();
     aerodromePositionManagerV3Impl = AerodromeV3PositionManagerImplMock();
+    algebra121PositionManagerImpl = Algebra121PositionManagerImplMock();
+    algebra121PoolImpl = Algebra121PoolImplMock();
+    aerodromeV3PoolImpl = AerodromeV3PoolImplMock();
 
     currentYield = YieldDto.fixture();
 
@@ -90,6 +104,9 @@ void main() {
       ethereumAbiCoder,
       pancakeSwapInfinityCLPoolManager,
       aerodromePositionManagerV3,
+      aerodromeV3Pool,
+      algebra121Pool,
+      algebra121PositionManager,
     );
 
     when(
@@ -1629,7 +1646,7 @@ void main() {
   );
 
   group(
-    'When calling sendV3PoolDepositTransaction and the protocol is aerodrome, it should use aerodrome smart contracts to send deposits',
+    'When the protocol is aerodrome v3 or velodrome v3, it should use aerodrome smart contracts to interact with pools',
     () {
       setUp(() {
         registerFallbackValue((
@@ -1657,6 +1674,13 @@ void main() {
         ).thenReturn(aerodromePositionManagerV3Impl);
 
         when(
+          () => aerodromeV3Pool.fromRpcProvider(
+            contractAddress: any(named: "contractAddress"),
+            rpcUrl: any(named: "rpcUrl"),
+          ),
+        ).thenReturn(aerodromeV3PoolImpl);
+
+        when(
           () => aerodromePositionManagerV3.getMintCalldata(params: any(named: "params")),
         ).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
         when(
@@ -1669,6 +1693,60 @@ void main() {
             ethValue: any(named: "ethValue"),
           ),
         ).thenAnswer((_) => Future.value(transactionResponse));
+      });
+
+      test("When the protocol is aerodrome v3 it should use aerodrome v3 pool to get the pool tick", () async {
+        final expectedTick = BigInt.from(1271897);
+
+        when(() => aerodromeV3PoolImpl.slot0()).thenAnswer(
+          (_) async => (
+            observationCardinality: BigInt.from(0),
+            observationCardinalityNext: BigInt.from(0),
+            observationIndex: BigInt.from(0),
+            sqrtPriceX96: BigInt.from(0),
+            tick: expectedTick,
+            unlocked: true,
+          ),
+        );
+
+        final yield0 = currentYield.copyWith(
+          protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.aerodromeSlipstream),
+          poolType: PoolType.v3,
+          chainId: AppNetworks.mainnet.chainId,
+        );
+
+        final receivedTick = await sut.getPoolTick(yield0);
+
+        expect(receivedTick, expectedTick);
+
+        verify(() => aerodromeV3PoolImpl.slot0()).called(1);
+      });
+
+      test("When the protocol is velodrome v3 it should use aerodrome v3 pool to get the pool tick", () async {
+        final expectedTick = BigInt.from(11111);
+
+        when(() => aerodromeV3PoolImpl.slot0()).thenAnswer(
+          (_) async => (
+            observationCardinality: BigInt.from(0),
+            observationCardinalityNext: BigInt.from(0),
+            observationIndex: BigInt.from(0),
+            sqrtPriceX96: BigInt.from(0),
+            tick: expectedTick,
+            unlocked: true,
+          ),
+        );
+
+        final yield0 = currentYield.copyWith(
+          protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.velodromeSlipstream),
+          poolType: PoolType.v3,
+          chainId: AppNetworks.mainnet.chainId,
+        );
+
+        final receivedTick = await sut.getPoolTick(yield0);
+
+        expect(receivedTick, expectedTick);
+
+        verify(() => aerodromeV3PoolImpl.slot0()).called(1);
       });
 
       test(
@@ -2055,12 +2133,12 @@ void main() {
 
       test(
         """When the yield protocol is aerodrome v3 and the pool does not have native token,
-        it should get the sqrtPriceX96 from the pool and pass it correctly to the mint function""",
+        it should set the sqrtPriceX96 as 0 for the pool and pass it correctly to the mint function""",
         () {
           withClock(Clock.fixed(DateTime(2028)), () async {
             const token1Address = "0x315768";
             const token0Address = "0x20172891";
-            final expectedSqrtPriceX96 = BigInt.from(329836725432);
+            final expectedSqrtPriceX96 = BigInt.from(0);
 
             when(
               () => aerodromePositionManagerV3Impl.mint(
@@ -2127,12 +2205,12 @@ void main() {
 
       test(
         """When the yield protocol is aerodrome v3 and the pool does have a native token,
-        it should get the sqrtPriceX96 from the pool and pass it correctly to the mint calldata""",
+        it should set the sqrtPriceX96 as 0 for the pool and pass it correctly to the mint calldata""",
         () {
           withClock(Clock.fixed(DateTime(2028)), () async {
             const token1Address = EthereumConstants.zeroAddress;
             const token0Address = EthereumConstants.zeroAddress;
-            final expectedSqrtPriceX96 = BigInt.from(329836725432);
+            final expectedSqrtPriceX96 = BigInt.from(0);
 
             when(
               () => aerodromePositionManagerV3Impl.mint(
@@ -2195,6 +2273,622 @@ void main() {
           });
         },
       );
+
+      test(
+        "When the protocol is aerodrome v3, it should use the aerodrome pool contract to get the sqrtPriceX96",
+        () async {
+          final expectedSqrtPriceX96 = BigInt.from(12718271);
+          when(() => aerodromeV3PoolImpl.slot0()).thenAnswer(
+            (_) async => (
+              sqrtPriceX96: expectedSqrtPriceX96,
+              tick: BigInt.from(0),
+              observationIndex: BigInt.from(0),
+              observationCardinality: BigInt.from(0),
+              observationCardinalityNext: BigInt.from(0),
+              unlocked: false,
+            ),
+          );
+
+          const network = AppNetworks.mainnet;
+          final currentYield0 = currentYield.copyWith(
+            protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.aerodromeSlipstream),
+            feeTier: 3982,
+            poolType: PoolType.v3,
+            chainId: network.chainId,
+          );
+
+          final actualSqrtPriceX96 = await sut.getSqrtPriceX96(currentYield0);
+          expect(actualSqrtPriceX96, expectedSqrtPriceX96);
+
+          verify(() => aerodromeV3PoolImpl.slot0()).called(1);
+        },
+      );
+
+      test(
+        "When the protocol is velodrome v3, it should use the aerodrome pool contract to get the sqrtPriceX96",
+        () async {
+          final expectedSqrtPriceX96 = BigInt.from(90876543);
+          when(() => aerodromeV3PoolImpl.slot0()).thenAnswer(
+            (_) async => (
+              sqrtPriceX96: expectedSqrtPriceX96,
+              tick: BigInt.from(0),
+              observationIndex: BigInt.from(0),
+              observationCardinality: BigInt.from(0),
+              observationCardinalityNext: BigInt.from(0),
+              unlocked: false,
+            ),
+          );
+
+          const network = AppNetworks.mainnet;
+          final currentYield0 = currentYield.copyWith(
+            protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.velodromeSlipstream),
+            feeTier: 3982,
+            poolType: PoolType.v3,
+            chainId: network.chainId,
+          );
+
+          final actualSqrtPriceX96 = await sut.getSqrtPriceX96(currentYield0);
+          expect(actualSqrtPriceX96, expectedSqrtPriceX96);
+
+          verify(() => aerodromeV3PoolImpl.slot0()).called(1);
+        },
+      );
     },
   );
+
+  group("When the protocol is GLiquid, it should use algebra 1.2.1 smart contracts to interact with the pool", () {
+    setUp(() async {
+      registerFallbackValue((
+        amount0Desired: BigInt.from(0),
+        amount1Desired: BigInt.from(0),
+        deadline: BigInt.from(0),
+        amount0Min: BigInt.from(0),
+        amount1Min: BigInt.from(0),
+        recipient: "",
+        tickLower: BigInt.from(0),
+        tickUpper: BigInt.from(0),
+        deployer: "",
+        token0: "",
+        token1: "",
+      ));
+
+      currentYield = currentYield.copyWith(protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3));
+      when(
+        () => algebra121Pool.fromRpcProvider(
+          contractAddress: any(named: "contractAddress"),
+          rpcUrl: any(named: "rpcUrl"),
+        ),
+      ).thenReturn(algebra121PoolImpl);
+
+      when(
+        () => algebra121PositionManager.fromSigner(
+          contractAddress: any(named: "contractAddress"),
+          signer: any(named: "signer"),
+        ),
+      ).thenReturn(algebra121PositionManagerImpl);
+    });
+
+    test("When calling 'getPoolTick' it should return the pool tick got from algebra pool 1.2.1", () async {
+      final expectedTick = BigInt.from(12871);
+      when(() => algebra121PoolImpl.globalState()).thenAnswer(
+        (_) async => (
+          price: BigInt.from(0),
+          tick: expectedTick,
+          lastFee: BigInt.from(0),
+          pluginConfig: BigInt.from(0),
+          communityFee: BigInt.from(0),
+          unlocked: false,
+        ),
+      );
+
+      final actualTick = await sut.getPoolTick(currentYield);
+
+      expect(actualTick, expectedTick);
+
+      verify(() => algebra121PoolImpl.globalState()).called(1);
+    });
+
+    test("When calling 'getSqrtPriceX96' it should return the price from algebra pool 1.2.1", () async {
+      final expectedSqrtPriceX96 = BigInt.from(12617826517);
+
+      when(() => algebra121PoolImpl.globalState()).thenAnswer(
+        (_) async => (
+          price: expectedSqrtPriceX96,
+          tick: BigInt.from(0),
+          lastFee: BigInt.from(0),
+          pluginConfig: BigInt.from(0),
+          communityFee: BigInt.from(0),
+          unlocked: false,
+        ),
+      );
+
+      final actualSqrtPriceX96 = await sut.getSqrtPriceX96(currentYield);
+
+      expect(actualSqrtPriceX96, expectedSqrtPriceX96);
+
+      verify(() => algebra121PoolImpl.globalState()).called(1);
+    });
+
+    test(
+      "when calling with token0 native, it should send a multicall transaction with the mint calldata and a native refund calldata",
+      () async {
+        const mintCalldata = "0x25";
+        const refundCalldata = "0x26";
+
+        const network = AppNetworks.mainnet;
+        final currentYield0 = currentYield.copyWith(
+          protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3),
+          poolType: PoolType.v3,
+          chainId: network.chainId,
+          token0: TokenDto.fixture().copyWith(addresses: {network.chainId: EthereumConstants.zeroAddress}),
+          token1: TokenDto.fixture().copyWith(addresses: {network.chainId: "0x123"}),
+        );
+
+        when(() => algebra121PositionManager.getMintCalldata(params: any(named: "params"))).thenReturn(mintCalldata);
+        when(() => algebra121PositionManager.getRefundNativeTokenCalldata()).thenReturn(refundCalldata);
+        when(
+          () => algebra121PositionManagerImpl.multicall(
+            data: any(named: "data"),
+            ethValue: any(named: "ethValue"),
+          ),
+        ).thenAnswer((_) async => transactionResponse);
+
+        final amount0Desired = BigInt.from(100);
+        final amount1Desired = BigInt.from(100);
+        const deadline = Duration.zero;
+        final amount0Min = BigInt.from(12);
+        final amount1Min = BigInt.from(12);
+        final recipient = await signer.address;
+        final tickLower = BigInt.from(0);
+        final tickUpper = BigInt.from(0);
+
+        await sut.sendV3PoolDepositTransaction(
+          currentYield0,
+          signer,
+          amount0Desired: amount0Desired,
+          amount1Desired: amount1Desired,
+          deadline: deadline,
+          amount0Min: amount0Min,
+          amount1Min: amount1Min,
+          recipient: recipient,
+          tickLower: tickLower,
+          tickUpper: tickUpper,
+        );
+
+        verify(
+          () => algebra121PositionManagerImpl.multicall(
+            data: [mintCalldata, refundCalldata],
+            ethValue: any(named: "ethValue"),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
+      "when calling with token0 native, it should correctly pass the params to get the mint calldata, with the token0 being the wrapped native address",
+      () async {
+        withClock(Clock.fixed(DateTime(2028)), () async {
+          const mintCalldata = "0x25";
+          const refundCalldata = "0x26";
+          const token0Address = EthereumConstants.zeroAddress;
+          const token1Address = "0x20172891";
+
+          const network = AppNetworks.mainnet;
+          final currentYield0 = currentYield.copyWith(
+            protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3),
+            poolType: PoolType.v3,
+            chainId: network.chainId,
+            token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+            token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+          );
+
+          when(() => algebra121PositionManager.getMintCalldata(params: any(named: "params"))).thenReturn(mintCalldata);
+          when(() => algebra121PositionManager.getRefundNativeTokenCalldata()).thenReturn(refundCalldata);
+          when(
+            () => algebra121PositionManagerImpl.multicall(
+              data: any(named: "data"),
+              ethValue: any(named: "ethValue"),
+            ),
+          ).thenAnswer((_) async => transactionResponse);
+
+          final amount0Desired = BigInt.from(4311);
+          final amount1Desired = BigInt.from(1031900);
+          const deadline = Duration(days: 1);
+          final amount0Min = BigInt.from(1390);
+          final amount1Min = BigInt.from(432);
+          final recipient = await signer.address;
+          final tickLower = BigInt.from(321);
+          final tickUpper = BigInt.from(1222);
+
+          await sut.sendV3PoolDepositTransaction(
+            currentYield0,
+            signer,
+            amount0Desired: amount0Desired,
+            amount1Desired: amount1Desired,
+            deadline: deadline,
+            amount0Min: amount0Min,
+            amount1Min: amount1Min,
+            recipient: recipient,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+          );
+
+          verify(
+            () => algebra121PositionManager.getMintCalldata(
+              params: (
+                amount0Desired: amount0Desired,
+                amount0Min: amount0Min,
+                amount1Desired: amount1Desired,
+                amount1Min: amount1Min,
+                deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
+                recipient: recipient,
+                tickLower: tickLower,
+                tickUpper: tickUpper,
+                deployer: currentYield0.deployerAddress,
+                token0: network.wrappedNativeTokenAddress,
+                token1: token1Address,
+              ),
+            ),
+          ).called(1);
+        });
+      },
+    );
+
+    test(
+      "when calling with token1 native, it should correctly pass the params to get the mint calldata, with the token1 being the wrapped native address",
+      () async {
+        withClock(Clock.fixed(DateTime(2028)), () async {
+          const mintCalldata = "0x25";
+          const refundCalldata = "0x26";
+          const token0Address = "0x20172891";
+          const token1Address = EthereumConstants.zeroAddress;
+
+          const network = AppNetworks.mainnet;
+          final currentYield0 = currentYield.copyWith(
+            protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3),
+            poolType: PoolType.v3,
+            chainId: network.chainId,
+            token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+            token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+          );
+
+          when(() => algebra121PositionManager.getMintCalldata(params: any(named: "params"))).thenReturn(mintCalldata);
+          when(() => algebra121PositionManager.getRefundNativeTokenCalldata()).thenReturn(refundCalldata);
+          when(
+            () => algebra121PositionManagerImpl.multicall(
+              data: any(named: "data"),
+              ethValue: any(named: "ethValue"),
+            ),
+          ).thenAnswer((_) async => transactionResponse);
+
+          final amount0Desired = BigInt.from(100);
+          final amount1Desired = BigInt.from(31);
+          const deadline = Duration.zero;
+          final amount0Min = BigInt.from(320);
+          final amount1Min = BigInt.from(12);
+          final recipient = await signer.address;
+          final tickLower = BigInt.from(32);
+          final tickUpper = BigInt.from(14489);
+
+          await sut.sendV3PoolDepositTransaction(
+            currentYield0,
+            signer,
+            amount0Desired: amount0Desired,
+            amount1Desired: amount1Desired,
+            deadline: deadline,
+            amount0Min: amount0Min,
+            amount1Min: amount1Min,
+            recipient: recipient,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+          );
+
+          verify(
+            () => algebra121PositionManager.getMintCalldata(
+              params: (
+                amount0Desired: amount0Desired,
+                amount0Min: amount0Min,
+                amount1Desired: amount1Desired,
+                amount1Min: amount1Min,
+                deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
+                recipient: recipient,
+                tickLower: tickLower,
+                tickUpper: tickUpper,
+                deployer: currentYield0.deployerAddress,
+                token0: token0Address,
+                token1: network.wrappedNativeTokenAddress,
+              ),
+            ),
+          ).called(1);
+        });
+      },
+    );
+
+    test("when calling with token0 native, it should correctly send the token0amount as ethValue", () async {
+      withClock(Clock.fixed(DateTime(2028)), () async {
+        const mintCalldata = "0x25";
+        const refundCalldata = "0x26";
+        const token0Address = EthereumConstants.zeroAddress;
+        const token1Address = "0x20172891";
+
+        const network = AppNetworks.mainnet;
+        final currentYield0 = currentYield.copyWith(
+          protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3),
+          poolType: PoolType.v3,
+          chainId: network.chainId,
+          token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+          token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+        );
+
+        when(() => algebra121PositionManager.getMintCalldata(params: any(named: "params"))).thenReturn(mintCalldata);
+        when(() => algebra121PositionManager.getRefundNativeTokenCalldata()).thenReturn(refundCalldata);
+        when(
+          () => algebra121PositionManagerImpl.multicall(
+            data: any(named: "data"),
+            ethValue: any(named: "ethValue"),
+          ),
+        ).thenAnswer((_) async => transactionResponse);
+
+        final amount0Desired = BigInt.from(4311);
+        final amount1Desired = BigInt.from(1031900);
+        const deadline = Duration(days: 1);
+        final amount0Min = BigInt.from(1390);
+        final amount1Min = BigInt.from(432);
+        final recipient = await signer.address;
+        final tickLower = BigInt.from(321);
+        final tickUpper = BigInt.from(1222);
+
+        await sut.sendV3PoolDepositTransaction(
+          currentYield0,
+          signer,
+          amount0Desired: amount0Desired,
+          amount1Desired: amount1Desired,
+          deadline: deadline,
+          amount0Min: amount0Min,
+          amount1Min: amount1Min,
+          recipient: recipient,
+          tickLower: tickLower,
+          tickUpper: tickUpper,
+        );
+
+        verify(
+          () => algebra121PositionManagerImpl.multicall(
+            ethValue: amount0Desired,
+            data: any(named: "data"),
+          ),
+        ).called(1);
+      });
+    });
+
+    test(
+      "when the yield has a deployer address set, and the deposit is it a native token, it should pass it to the mint calldata",
+      () async {
+        withClock(Clock.fixed(DateTime(2028)), () async {
+          const mintCalldata = "0x25";
+          const refundCalldata = "0x26";
+          const token0Address = EthereumConstants.zeroAddress;
+          const token1Address = "0x20172891";
+          const expectedDeployer = "0xdale";
+
+          const network = AppNetworks.mainnet;
+          final currentYield0 = currentYield.copyWith(
+            protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3),
+            poolType: PoolType.v3,
+            chainId: network.chainId,
+            token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+            token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+            deployerAddress: expectedDeployer,
+          );
+
+          when(() => algebra121PositionManager.getMintCalldata(params: any(named: "params"))).thenReturn(mintCalldata);
+          when(() => algebra121PositionManager.getRefundNativeTokenCalldata()).thenReturn(refundCalldata);
+          when(
+            () => algebra121PositionManagerImpl.multicall(
+              data: any(named: "data"),
+              ethValue: any(named: "ethValue"),
+            ),
+          ).thenAnswer((_) async => transactionResponse);
+
+          final amount0Desired = BigInt.from(4311);
+          final amount1Desired = BigInt.from(1031900);
+          const deadline = Duration(days: 1);
+          final amount0Min = BigInt.from(1390);
+          final amount1Min = BigInt.from(432);
+          final recipient = await signer.address;
+          final tickLower = BigInt.from(321);
+          final tickUpper = BigInt.from(1222);
+
+          await sut.sendV3PoolDepositTransaction(
+            currentYield0,
+            signer,
+            amount0Desired: amount0Desired,
+            amount1Desired: amount1Desired,
+            deadline: deadline,
+            amount0Min: amount0Min,
+            amount1Min: amount1Min,
+            recipient: recipient,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+          );
+
+          verify(
+            () => algebra121PositionManager.getMintCalldata(
+              params: any(named: "params", that: ObjectParamMatcher((object) => object.deployer == expectedDeployer)),
+            ),
+          ).called(1);
+        });
+      },
+    );
+
+    test(
+      "when the yield has a deployer address set, and the deposit is with erc20, it should pass it to the mint function",
+      () async {
+        withClock(Clock.fixed(DateTime(2028)), () async {
+          const token0Address = "0x123";
+          const token1Address = "0x20172891";
+          const expectedDeployer = "0xdalepapi";
+
+          const network = AppNetworks.mainnet;
+          final currentYield0 = currentYield.copyWith(
+            protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3),
+            poolType: PoolType.v3,
+            chainId: network.chainId,
+            token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+            token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+            deployerAddress: expectedDeployer,
+          );
+
+          when(
+            () => algebra121PositionManagerImpl.mint(params: any(named: "params")),
+          ).thenAnswer((_) async => transactionResponse);
+
+          final amount0Desired = BigInt.from(4311);
+          final amount1Desired = BigInt.from(1031900);
+          const deadline = Duration(days: 1);
+          final amount0Min = BigInt.from(1390);
+          final amount1Min = BigInt.from(432);
+          final recipient = await signer.address;
+          final tickLower = BigInt.from(321);
+          final tickUpper = BigInt.from(1222);
+
+          await sut.sendV3PoolDepositTransaction(
+            currentYield0,
+            signer,
+            amount0Desired: amount0Desired,
+            amount1Desired: amount1Desired,
+            deadline: deadline,
+            amount0Min: amount0Min,
+            amount1Min: amount1Min,
+            recipient: recipient,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+          );
+
+          verify(
+            () => algebra121PositionManagerImpl.mint(
+              params: any(named: "params", that: ObjectParamMatcher((object) => object.deployer == expectedDeployer)),
+            ),
+          ).called(1);
+        });
+      },
+    );
+
+    test(
+      "when the yield has a deployer address as zero address, and the deposit is with erc20, it should pass it to the mint function",
+      () async {
+        withClock(Clock.fixed(DateTime(2028)), () async {
+          const token0Address = "0x123";
+          const token1Address = "0x20172891";
+          const expectedDeployer = EthereumConstants.zeroAddress;
+
+          const network = AppNetworks.mainnet;
+          final currentYield0 = currentYield.copyWith(
+            protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3),
+            poolType: PoolType.v3,
+            chainId: network.chainId,
+            token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+            token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+            deployerAddress: expectedDeployer,
+          );
+
+          when(
+            () => algebra121PositionManagerImpl.mint(params: any(named: "params")),
+          ).thenAnswer((_) async => transactionResponse);
+
+          final amount0Desired = BigInt.from(4311);
+          final amount1Desired = BigInt.from(1031900);
+          const deadline = Duration(days: 1);
+          final amount0Min = BigInt.from(1390);
+          final amount1Min = BigInt.from(432);
+          final recipient = await signer.address;
+          final tickLower = BigInt.from(321);
+          final tickUpper = BigInt.from(1222);
+
+          await sut.sendV3PoolDepositTransaction(
+            currentYield0,
+            signer,
+            amount0Desired: amount0Desired,
+            amount1Desired: amount1Desired,
+            deadline: deadline,
+            amount0Min: amount0Min,
+            amount1Min: amount1Min,
+            recipient: recipient,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+          );
+
+          verify(
+            () => algebra121PositionManagerImpl.mint(
+              params: any(
+                named: "params",
+                that: ObjectParamMatcher((object) => object.deployer == EthereumConstants.zeroAddress),
+              ),
+            ),
+          ).called(1);
+        });
+      },
+    );
+
+    test(
+      "when the yield has a deployer address of address zero, and the deposit is it a native token, it should pass it to the mint calldata",
+      () async {
+        withClock(Clock.fixed(DateTime(2028)), () async {
+          const mintCalldata = "0x25";
+          const refundCalldata = "0x26";
+          const token0Address = EthereumConstants.zeroAddress;
+          const token1Address = "0x20172891";
+
+          const network = AppNetworks.mainnet;
+          final currentYield0 = currentYield.copyWith(
+            protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3),
+            poolType: PoolType.v3,
+            chainId: network.chainId,
+            token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+            token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+            deployerAddress: EthereumConstants.zeroAddress,
+          );
+
+          when(() => algebra121PositionManager.getMintCalldata(params: any(named: "params"))).thenReturn(mintCalldata);
+          when(() => algebra121PositionManager.getRefundNativeTokenCalldata()).thenReturn(refundCalldata);
+          when(
+            () => algebra121PositionManagerImpl.multicall(
+              data: any(named: "data"),
+              ethValue: any(named: "ethValue"),
+            ),
+          ).thenAnswer((_) async => transactionResponse);
+
+          final amount0Desired = BigInt.from(4311);
+          final amount1Desired = BigInt.from(1031900);
+          const deadline = Duration(days: 1);
+          final amount0Min = BigInt.from(1390);
+          final amount1Min = BigInt.from(432);
+          final recipient = await signer.address;
+          final tickLower = BigInt.from(321);
+          final tickUpper = BigInt.from(1222);
+
+          await sut.sendV3PoolDepositTransaction(
+            currentYield0,
+            signer,
+            amount0Desired: amount0Desired,
+            amount1Desired: amount1Desired,
+            deadline: deadline,
+            amount0Min: amount0Min,
+            amount1Min: amount1Min,
+            recipient: recipient,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+          );
+
+          verify(
+            () => algebra121PositionManager.getMintCalldata(
+              params: any(
+                named: "params",
+                that: ObjectParamMatcher((object) => object.deployer == EthereumConstants.zeroAddress),
+              ),
+            ),
+          ).called(1);
+        });
+      },
+    );
+  });
 }

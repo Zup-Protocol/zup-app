@@ -13,15 +13,16 @@ part 'token_selector_modal_state.dart';
 
 class TokenSelectorModalCubit extends Cubit<TokenSelectorModalState> {
   TokenSelectorModalCubit(this._tokensRepository, this._appCubit, this._wallet)
-      : super(const TokenSelectorModalState.initial());
+    : super(const TokenSelectorModalState.initial());
 
   final TokensRepository _tokensRepository;
   final AppCubit _appCubit;
   final Wallet _wallet;
 
   final Map<AppNetworks, Map<String, TokenListDto>> _tokenListCachedPerNetworkByAddress = {};
-  Future<TokenListDto?> get tokenList async => _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork]
-      ?[await _wallet.signer?.address ?? EthereumConstants.zeroAddress];
+  Future<TokenListDto?> get tokenList async =>
+      _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork]?[await _wallet.signer?.address ??
+          EthereumConstants.zeroAddress];
 
   Future<void> _emitSuccessCached() async => emit(TokenSelectorModalState.success((await tokenList)!));
   bool get _shouldDiscardSearchState => state != const TokenSelectorModalState.searchLoading();
@@ -41,8 +42,8 @@ class TokenSelectorModalCubit extends Cubit<TokenSelectorModalState> {
     try {
       emit(const TokenSelectorModalState.loading());
 
-      _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork]![userAddress] =
-          await _tokensRepository.getTokenList(_appCubit.selectedNetwork);
+      _tokenListCachedPerNetworkByAddress[_appCubit.selectedNetwork]![userAddress] = await _tokensRepository
+          .getTokenList(_appCubit.selectedNetwork);
 
       if (_shouldDiscardTokenListLoadedState) return;
 
