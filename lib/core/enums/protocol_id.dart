@@ -4,7 +4,7 @@ part 'protocol_id.g.dart';
 
 @JsonEnum(alwaysCreate: true)
 enum ProtocolId {
-  @JsonValue("pancake-v4-cl")
+  @JsonValue("pancakeswap-infinity-cl")
   pancakeSwapInfinityCL,
   @JsonValue("aerodrome-v3")
   aerodromeSlipstream,

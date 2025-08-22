@@ -9,6 +9,7 @@ import 'package:zup_app/abis/aerodrome_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/algebra/v1.2.1/pool.abi.g.dart' as algebra_1_2_1_pool;
 import 'package:zup_app/abis/algebra/v1.2.1/position_manager.abi.g.dart' as algebra_1_2_1_position_manager;
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
@@ -42,17 +43,19 @@ void main() {
   late AerodromeV3Pool aerodromeV3Pool;
   late algebra_1_2_1_position_manager.PositionManager algebra121PositionManager;
   late algebra_1_2_1_pool.Pool algebra121Pool;
+  late PancakeSwapInfinityClPositionManager pancakeSwapInfinityCLPositionManager;
 
-  late UniswapV4StateViewImpl stateViewImpl;
+  late UniswapV4StateViewImpl uniswapV4StateViewImpl;
   late UniswapV3PoolImpl uniswapV3PoolImpl;
   late UniswapV3PositionManagerImpl positionManagerV3Impl;
-  late UniswapV4PositionManagerImpl positionManagerV4Impl;
+  late UniswapV4PositionManagerImpl uniswapPositionManagerV4Impl;
   late PancakeSwapInfinityClPoolManagerImpl pancakeSwapInfinityCLPoolManagerImpl;
   late EthereumAbiCoder ethereumAbiCoder;
   late AerodromeV3PositionManagerImpl aerodromePositionManagerV3Impl;
   late algebra_1_2_1_position_manager.PositionManagerImpl algebra121PositionManagerImpl;
   late algebra_1_2_1_pool.PoolImpl algebra121PoolImpl;
   late AerodromeV3PoolImpl aerodromeV3PoolImpl;
+  late PancakeSwapInfinityClPositionManagerImpl pancakeSwapInfinityCLPositionManagerImpl;
 
   setUp(() {
     registerFallbackValue((
@@ -83,16 +86,18 @@ void main() {
     algebra121PositionManager = Algebra121PositionManagerMock();
     algebra121Pool = Algebra121PoolMock();
     aerodromeV3Pool = AerodromeV3PoolMock();
+    pancakeSwapInfinityCLPositionManager = PancakeSwapInfinityCLPositionManagerMock();
 
     pancakeSwapInfinityCLPoolManagerImpl = PancakeSwapInfinityCLPoolManagerImplMock();
-    stateViewImpl = UniswapV4StateViewImplMock();
+    uniswapV4StateViewImpl = UniswapV4StateViewImplMock();
     uniswapV3PoolImpl = UniswapV3PoolImplMock();
     positionManagerV3Impl = UniswapV3PositionManagerImplMock();
-    positionManagerV4Impl = UniswapV4PositionManagerImplMock();
+    uniswapPositionManagerV4Impl = UniswapV4PositionManagerImplMock();
     aerodromePositionManagerV3Impl = AerodromeV3PositionManagerImplMock();
     algebra121PositionManagerImpl = Algebra121PositionManagerImplMock();
     algebra121PoolImpl = Algebra121PoolImplMock();
     aerodromeV3PoolImpl = AerodromeV3PoolImplMock();
+    pancakeSwapInfinityCLPositionManagerImpl = PancakeSwapInfinityCLPositionManagerImplMock();
 
     currentYield = YieldDto.fixture();
 
@@ -103,6 +108,7 @@ void main() {
       positionManagerV4,
       ethereumAbiCoder,
       pancakeSwapInfinityCLPoolManager,
+      pancakeSwapInfinityCLPositionManager,
       aerodromePositionManagerV3,
       aerodromeV3Pool,
       algebra121Pool,
@@ -135,21 +141,21 @@ void main() {
         contractAddress: any(named: "contractAddress"),
         signer: any(named: "signer"),
       ),
-    ).thenReturn(positionManagerV4Impl);
+    ).thenReturn(uniswapPositionManagerV4Impl);
 
     when(
       () => stateView.fromRpcProvider(
         contractAddress: any(named: "contractAddress"),
         rpcUrl: any(named: "rpcUrl"),
       ),
-    ).thenReturn(stateViewImpl);
+    ).thenReturn(uniswapV4StateViewImpl);
 
     when(
       () => positionManagerV4.fromRpcProvider(
         contractAddress: any(named: "contractAddress"),
         rpcUrl: any(named: "rpcUrl"),
       ),
-    ).thenReturn(positionManagerV4Impl);
+    ).thenReturn(uniswapPositionManagerV4Impl);
 
     when(() => uniswapV3PoolImpl.slot0()).thenAnswer(
       (_) async => (
@@ -163,11 +169,39 @@ void main() {
       ),
     );
 
+    when(
+      () => pancakeSwapInfinityCLPoolManager.fromRpcProvider(
+        contractAddress: any(named: "contractAddress"),
+        rpcUrl: any(named: "rpcUrl"),
+      ),
+    ).thenReturn(pancakeSwapInfinityCLPoolManagerImpl);
+
+    when(
+      () => pancakeSwapInfinityCLPoolManager.fromSigner(
+        contractAddress: any(named: "contractAddress"),
+        signer: any(named: "signer"),
+      ),
+    ).thenReturn(pancakeSwapInfinityCLPoolManagerImpl);
+
+    when(
+      () => pancakeSwapInfinityCLPositionManager.fromSigner(
+        contractAddress: any(named: "contractAddress"),
+        signer: any(named: "signer"),
+      ),
+    ).thenReturn(pancakeSwapInfinityCLPositionManagerImpl);
+
+    when(
+      () => pancakeSwapInfinityCLPositionManager.fromRpcProvider(
+        contractAddress: any(named: "contractAddress"),
+        rpcUrl: any(named: "rpcUrl"),
+      ),
+    ).thenReturn(pancakeSwapInfinityCLPositionManagerImpl);
+
     when(() => signer.address).thenAnswer((_) async => "0xS0M3_4ddr355");
 
     when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async => TransactionReceipt(hash: "0x123"));
     when(() => transactionResponse.hash).thenReturn("0x123");
-    when(() => stateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer(
+    when(() => uniswapV4StateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer(
       (_) async =>
           (lpFee: BigInt.from(0), protocolFee: BigInt.from(0), sqrtPriceX96: BigInt.from(0), tick: BigInt.from(0)),
     );
@@ -175,7 +209,7 @@ void main() {
 
   test("When calling `getPoolTick` and the pool is v4, it should use the state view contract to get it", () async {
     final expectedTick = BigInt.from(87654);
-    when(() => stateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer(
+    when(() => uniswapV4StateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer(
       (_) async =>
           (lpFee: BigInt.from(0), protocolFee: BigInt.from(0), sqrtPriceX96: BigInt.from(0), tick: expectedTick),
     );
@@ -187,7 +221,7 @@ void main() {
     final result = await sut.getPoolTick(currentYield0);
 
     expect(result, expectedTick);
-    verify(() => stateViewImpl.getSlot0(poolId: currentYield0.poolAddress)).called(1);
+    verify(() => uniswapV4StateViewImpl.getSlot0(poolId: currentYield0.poolAddress)).called(1);
   });
 
   test("When calling `getPoolTick` and the pool is v3, it should use the v3 pool contract to get it", () async {
@@ -324,7 +358,7 @@ void main() {
               amount1Desired: amount1Desired,
               amount1Min: amount1Min,
               deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
-              fee: BigInt.from(currentYield0.feeTier),
+              fee: BigInt.from(currentYield0.initialFeeTier),
               recipient: recipient,
               tickLower: tickLower,
               tickUpper: tickUpper,
@@ -394,7 +428,7 @@ void main() {
               amount1Desired: amount1Desired,
               amount1Min: amount1Min,
               deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
-              fee: BigInt.from(currentYield0.feeTier),
+              fee: BigInt.from(currentYield0.initialFeeTier),
               recipient: recipient,
               tickLower: tickLower,
               tickUpper: tickUpper,
@@ -542,7 +576,7 @@ void main() {
 
         const network = AppNetworks.mainnet;
         final currentYield0 = currentYield.copyWith(
-          feeTier: 3982,
+          initialFeeTier: 3982,
           poolType: PoolType.v3,
           chainId: network.chainId,
           token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
@@ -576,7 +610,7 @@ void main() {
             params: (
               token0: token0Address,
               token1: token1Address,
-              fee: BigInt.from(currentYield0.feeTier),
+              fee: BigInt.from(currentYield0.initialFeeTier),
               tickLower: tickLower,
               tickUpper: tickUpper,
               amount0Desired: amount0Desired,
@@ -599,7 +633,7 @@ void main() {
       when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -642,8 +676,8 @@ void main() {
           ["uint8", "uint8", "uint8"],
           [
             V4PoolConstants.mintPositionActionValue,
-            V4PoolConstants.settlePairActionValue,
-            V4PoolConstants.sweepActionValue,
+            V4PoolConstants.uniswapSettlePairActionValue,
+            V4PoolConstants.uniswapSweepActionValue,
           ],
         ),
       ).called(1);
@@ -656,7 +690,7 @@ void main() {
       when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -699,8 +733,8 @@ void main() {
           ["uint8", "uint8", "uint8"],
           [
             V4PoolConstants.mintPositionActionValue,
-            V4PoolConstants.settlePairActionValue,
-            V4PoolConstants.sweepActionValue,
+            V4PoolConstants.uniswapSettlePairActionValue,
+            V4PoolConstants.uniswapSweepActionValue,
           ],
         ),
       ).called(1);
@@ -713,7 +747,7 @@ void main() {
       when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -754,7 +788,7 @@ void main() {
       verify(
         () => ethereumAbiCoder.encodePacked(
           ["uint8", "uint8"],
-          [V4PoolConstants.mintPositionActionValue, V4PoolConstants.settlePairActionValue],
+          [V4PoolConstants.mintPositionActionValue, V4PoolConstants.uniswapSettlePairActionValue],
         ),
       ).called(1);
     },
@@ -777,14 +811,14 @@ void main() {
     when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
     when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
     when(
-      () => positionManagerV4Impl.modifyLiquidities(
+      () => uniswapPositionManagerV4Impl.modifyLiquidities(
         unlockData: any(named: "unlockData"),
         deadline: any(named: "deadline"),
         ethValue: any(named: "ethValue"),
       ),
     ).thenAnswer((_) async => transactionResponse);
 
-    when(() => stateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer(
+    when(() => uniswapV4StateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer(
       (_) async =>
           (lpFee: BigInt.from(0), protocolFee: BigInt.from(0), sqrtPriceX96: sqrtPriceX96, tick: BigInt.from(0)),
     );
@@ -826,7 +860,7 @@ void main() {
           [
             token0Address,
             token1Address,
-            BigInt.from(currentYield0.feeTier),
+            BigInt.from(currentYield0.initialFeeTier),
             BigInt.from(currentYield0.tickSpacing),
             currentYield0.v4Hooks,
           ],
@@ -849,12 +883,355 @@ void main() {
   });
 
   test(
+    """When calling `sendV4PoolDepositTransaction` and the protocol is Pancake Swap
+    infinity the mint action params should be correctly encoded""",
+    () async {
+      const token0Address = "0x1";
+      const token1Address = "0x2";
+      const network = AppNetworks.mainnet;
+      final amount0Desired = BigInt.from(4311);
+      final amount1Desired = BigInt.from(1031900);
+      const deadline = Duration(days: 1);
+      final amount0Max = BigInt.from(4312);
+      final amount1Max = BigInt.from(1031901);
+      final recipient = await signer.address;
+      final tickLower = BigInt.from(321);
+      final tickUpper = BigInt.from(1222);
+      final sqrtPriceX96 = BigInt.from(2167212171927187);
+      const parameters = "0x2186271217625167f2ffff";
+      const hooks = "0x2111";
+      const poolManager = "0xAAABbbaaa";
+
+      when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
+      when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
+      when(
+        () => pancakeSwapInfinityCLPositionManagerImpl.modifyLiquidities(
+          payload: any(named: "payload"),
+          deadline: any(named: "deadline"),
+          ethValue: any(named: "ethValue"),
+        ),
+      ).thenAnswer((_) async => transactionResponse);
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer(
+        (_) async =>
+            (lpFee: BigInt.from(0), protocolFee: BigInt.from(0), sqrtPriceX96: sqrtPriceX96, tick: BigInt.from(0)),
+      );
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.poolIdToPoolKey(id: any(named: "id"))).thenAnswer(
+        (_) async => (
+          currency0: token0Address,
+          currency1: token1Address,
+          fee: BigInt.from(21),
+          hooks: hooks,
+          parameters: parameters,
+          poolManager: poolManager,
+        ),
+      );
+
+      final currentYield0 = currentYield.copyWith(
+        chainId: network.chainId,
+        v4PoolManager: poolManager,
+        v4Hooks: hooks,
+        poolType: PoolType.v4,
+        protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.pancakeSwapInfinityCL),
+        token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+        token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+      );
+
+      await sut.sendV4PoolDepositTransaction(
+        currentYield0,
+        signer,
+        deadline: deadline,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        amount0toDeposit: amount0Desired,
+        amount1ToDeposit: amount1Desired,
+        maxAmount0ToDeposit: amount0Max,
+        maxAmount1ToDeposit: amount1Max,
+        recipient: recipient,
+      );
+
+      verify(
+        () => ethereumAbiCoder.encode(
+          [
+            "tuple(address,address,address,address,uint24,bytes32)",
+            "int24",
+            "int24",
+            "uint256",
+            "uint128",
+            "uint128",
+            "address",
+            "bytes",
+          ],
+          [
+            [token0Address, token1Address, hooks, poolManager, currentYield0.initialFeeTier, parameters],
+            tickLower,
+            tickUpper,
+            _V4PoolLiquidityCalculationsMixinWrapper().getLiquidityForAmounts(
+              sqrtPriceX96,
+              _V4PoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(tickLower),
+              _V4PoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(tickUpper),
+              amount0Desired,
+              amount1Desired,
+            ),
+            amount0Max,
+            amount1Max,
+            recipient,
+            EthereumConstants.emptyBytes,
+          ],
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    """When calling `sendV4PoolDepositTransaction` and the protocol is Pancake Swap
+    infinity, it should get the pool parameters from the pool manager and
+    encode it correctly in the mint action""",
+    () async {
+      const token0Address = "0x1";
+      const token1Address = "0x2";
+      const network = AppNetworks.mainnet;
+      final amount0Desired = BigInt.from(4311);
+      final amount1Desired = BigInt.from(1031900);
+      const deadline = Duration(days: 1);
+      final amount0Max = BigInt.from(4312);
+      final amount1Max = BigInt.from(1031901);
+      final recipient = await signer.address;
+      final tickLower = BigInt.from(321);
+      final tickUpper = BigInt.from(1222);
+      final sqrtPriceX96 = BigInt.from(2167212171927187);
+      const parameters = "0x2186271217625167f2ffff";
+      const hooks = "0x2111";
+      const poolManager = "0xAAABbbaaa";
+
+      when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
+      when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
+      when(
+        () => pancakeSwapInfinityCLPositionManagerImpl.modifyLiquidities(
+          payload: any(named: "payload"),
+          deadline: any(named: "deadline"),
+          ethValue: any(named: "ethValue"),
+        ),
+      ).thenAnswer((_) async => transactionResponse);
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer(
+        (_) async =>
+            (lpFee: BigInt.from(0), protocolFee: BigInt.from(0), sqrtPriceX96: sqrtPriceX96, tick: BigInt.from(0)),
+      );
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.poolIdToPoolKey(id: any(named: "id"))).thenAnswer(
+        (_) async => (
+          currency0: token0Address,
+          currency1: token1Address,
+          fee: BigInt.from(21),
+          hooks: hooks,
+          parameters: parameters,
+          poolManager: poolManager,
+        ),
+      );
+
+      final currentYield0 = currentYield.copyWith(
+        chainId: network.chainId,
+        v4PoolManager: poolManager,
+        v4Hooks: hooks,
+        poolType: PoolType.v4,
+        protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.pancakeSwapInfinityCL),
+        token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+        token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+      );
+
+      await sut.sendV4PoolDepositTransaction(
+        currentYield0,
+        signer,
+        deadline: deadline,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        amount0toDeposit: amount0Desired,
+        amount1ToDeposit: amount1Desired,
+        maxAmount0ToDeposit: amount0Max,
+        maxAmount1ToDeposit: amount1Max,
+        recipient: recipient,
+      );
+
+      verify(
+        () => ethereumAbiCoder.encode([
+          "tuple(address,address,address,address,uint24,bytes32)",
+          "int24",
+          "int24",
+          "uint256",
+          "uint128",
+          "uint128",
+          "address",
+          "bytes",
+        ], any(that: ObjectParamMatcher((object) => object[0].last == parameters))),
+      ).called(1);
+    },
+  );
+
+  test(
+    """When calling `sendV4PoolDepositTransaction` and the protocol is Pancake Swap
+    infinity the actions should be correctly encoded""",
+    () async {
+      const token0Address = "0x1";
+      const token1Address = "0x2";
+      const network = AppNetworks.mainnet;
+      final amount0Desired = BigInt.from(4311);
+      final amount1Desired = BigInt.from(1031900);
+      const deadline = Duration(days: 1);
+      final amount0Max = BigInt.from(4312);
+      final amount1Max = BigInt.from(1031901);
+      final recipient = await signer.address;
+      final tickLower = BigInt.from(321);
+      final tickUpper = BigInt.from(1222);
+      final sqrtPriceX96 = BigInt.from(2167212171927187);
+      const parameters = "0x2186271217625167f2ffff";
+      const hooks = "0x2111";
+      const poolManager = "0xAAABbbaaa";
+
+      when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
+      when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
+      when(
+        () => pancakeSwapInfinityCLPositionManagerImpl.modifyLiquidities(
+          payload: any(named: "payload"),
+          deadline: any(named: "deadline"),
+          ethValue: any(named: "ethValue"),
+        ),
+      ).thenAnswer((_) async => transactionResponse);
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer(
+        (_) async =>
+            (lpFee: BigInt.from(0), protocolFee: BigInt.from(0), sqrtPriceX96: sqrtPriceX96, tick: BigInt.from(0)),
+      );
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.poolIdToPoolKey(id: any(named: "id"))).thenAnswer(
+        (_) async => (
+          currency0: token0Address,
+          currency1: token1Address,
+          fee: BigInt.from(21),
+          hooks: hooks,
+          parameters: parameters,
+          poolManager: poolManager,
+        ),
+      );
+
+      final currentYield0 = currentYield.copyWith(
+        chainId: network.chainId,
+        v4PoolManager: poolManager,
+        v4Hooks: hooks,
+        poolType: PoolType.v4,
+        protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.pancakeSwapInfinityCL),
+        token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+        token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+      );
+
+      await sut.sendV4PoolDepositTransaction(
+        currentYield0,
+        signer,
+        deadline: deadline,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        amount0toDeposit: amount0Desired,
+        amount1ToDeposit: amount1Desired,
+        maxAmount0ToDeposit: amount0Max,
+        maxAmount1ToDeposit: amount1Max,
+        recipient: recipient,
+      );
+
+      verify(
+        () => ethereumAbiCoder.encodePacked(
+          ["uint8", "uint8", "uint8"],
+          [
+            V4PoolConstants.mintPositionActionValue,
+            V4PoolConstants.pancakeSwapCloseCurrencyActionValue,
+            V4PoolConstants.pancakeSwapCloseCurrencyActionValue,
+          ],
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    """When calling `sendV4PoolDepositTransaction` and the protocol is Pancake Swap
+    infinity the close currency action should be correctly encoded for token1 and token0""",
+    () async {
+      const token0Address = "0x1";
+      const token1Address = "0x2";
+      const network = AppNetworks.mainnet;
+      final amount0Desired = BigInt.from(4311);
+      final amount1Desired = BigInt.from(1031900);
+      const deadline = Duration(days: 1);
+      final amount0Max = BigInt.from(4312);
+      final amount1Max = BigInt.from(1031901);
+      final recipient = await signer.address;
+      final tickLower = BigInt.from(321);
+      final tickUpper = BigInt.from(1222);
+      final sqrtPriceX96 = BigInt.from(2167212171927187);
+      const parameters = "0x2186271217625167f2ffff";
+      const hooks = "0x2111";
+      const poolManager = "0xAAABbbaaa";
+
+      when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
+      when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
+      when(
+        () => pancakeSwapInfinityCLPositionManagerImpl.modifyLiquidities(
+          payload: any(named: "payload"),
+          deadline: any(named: "deadline"),
+          ethValue: any(named: "ethValue"),
+        ),
+      ).thenAnswer((_) async => transactionResponse);
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer(
+        (_) async =>
+            (lpFee: BigInt.from(0), protocolFee: BigInt.from(0), sqrtPriceX96: sqrtPriceX96, tick: BigInt.from(0)),
+      );
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.poolIdToPoolKey(id: any(named: "id"))).thenAnswer(
+        (_) async => (
+          currency0: token0Address,
+          currency1: token1Address,
+          fee: BigInt.from(21),
+          hooks: hooks,
+          parameters: parameters,
+          poolManager: poolManager,
+        ),
+      );
+
+      final currentYield0 = currentYield.copyWith(
+        chainId: network.chainId,
+        v4PoolManager: poolManager,
+        v4Hooks: hooks,
+        poolType: PoolType.v4,
+        protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.pancakeSwapInfinityCL),
+        token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+        token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+      );
+
+      await sut.sendV4PoolDepositTransaction(
+        currentYield0,
+        signer,
+        deadline: deadline,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        amount0toDeposit: amount0Desired,
+        amount1ToDeposit: amount1Desired,
+        maxAmount0ToDeposit: amount0Max,
+        maxAmount1ToDeposit: amount1Max,
+        recipient: recipient,
+      );
+
+      verify(() => ethereumAbiCoder.encode(["address"], [token0Address])).called(1);
+      verify(() => ethereumAbiCoder.encode(["address"], [token1Address])).called(1);
+    },
+  );
+
+  test(
     "When calling `sendV4PoolDepositTransaction` the settle pair action params should be correctly encoded",
     () async {
       when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -904,7 +1281,7 @@ void main() {
       when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -956,7 +1333,7 @@ void main() {
       when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -1064,7 +1441,7 @@ void main() {
       ).thenReturn(unlockData);
 
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -1085,8 +1462,228 @@ void main() {
       );
 
       verify(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: unlockData,
+          deadline: any(named: "deadline"),
+          ethValue: any(named: "ethValue"),
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    """When calling `sendV4PoolDepositTransaction`, the protocol is pancake swap
+    infinity CL and the token0 is native,
+    it should send the correct payload data to the contract to add liquidity""",
+    () async {
+      const actionsEncoded = "0xhvaaa";
+      const mintPositionActionParamsEncoded = "0xaaaa";
+      const closeCurrency0ActionParamsEncoded = "0xbbbb";
+      const closeCurrency1ActionParamsEncoded = "0xxxx";
+      const payloadData = "0xaaaaa77777AAA";
+
+      const token0Address = EthereumConstants.zeroAddress;
+      const token1Address = "0x2";
+      const network = AppNetworks.mainnet;
+      final amount0Desired = BigInt.from(4311);
+      final amount1Desired = BigInt.from(1031900);
+      const deadline = Duration(days: 1);
+      final amount0Max = BigInt.from(4312);
+      final amount1Max = BigInt.from(1031901);
+      final recipient = await signer.address;
+      final tickLower = BigInt.from(321);
+      final tickUpper = BigInt.from(1222);
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.poolIdToPoolKey(id: any(named: "id"))).thenAnswer(
+        (_) async => (
+          currency0: token0Address,
+          currency1: token1Address,
+          fee: BigInt.from(21),
+          hooks: "",
+          parameters: "",
+          poolManager: "",
+        ),
+      );
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer(
+        (_) async => (
+          lpFee: BigInt.from(21),
+          protocolFee: BigInt.from(21),
+          sqrtPriceX96: BigInt.from(21),
+          tick: BigInt.from(21),
+        ),
+      );
+
+      final currentYield0 = currentYield.copyWith(
+        chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
+        v4PoolManager: "0xbvv",
+        protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.pancakeSwapInfinityCL),
+        token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+        token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+      );
+
+      when(() => ethereumAbiCoder.encodePacked(["uint8", "uint8", "uint8"], any())).thenReturn(actionsEncoded);
+      when(
+        () => ethereumAbiCoder.encode([
+          "tuple(address,address,address,address,uint24,bytes32)",
+          "int24",
+          "int24",
+          "uint256",
+          "uint128",
+          "uint128",
+          "address",
+          "bytes",
+        ], any()),
+      ).thenReturn(mintPositionActionParamsEncoded);
+
+      when(() => ethereumAbiCoder.encode(["address"], [token0Address])).thenReturn(closeCurrency0ActionParamsEncoded);
+      when(() => ethereumAbiCoder.encode(["address"], [token1Address])).thenReturn(closeCurrency1ActionParamsEncoded);
+
+      when(
+        () => ethereumAbiCoder.encode(
+          ["bytes", "bytes[]"],
+          [
+            actionsEncoded,
+            [mintPositionActionParamsEncoded, closeCurrency0ActionParamsEncoded, closeCurrency1ActionParamsEncoded],
+          ],
+        ),
+      ).thenReturn(payloadData);
+
+      when(
+        () => pancakeSwapInfinityCLPositionManagerImpl.modifyLiquidities(
+          payload: any(named: "payload"),
+          deadline: any(named: "deadline"),
+          ethValue: any(named: "ethValue"),
+        ),
+      ).thenAnswer((_) async => transactionResponse);
+
+      await sut.sendV4PoolDepositTransaction(
+        currentYield0,
+        signer,
+        deadline: deadline,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        amount0toDeposit: amount0Desired,
+        amount1ToDeposit: amount1Desired,
+        maxAmount0ToDeposit: amount0Max,
+        maxAmount1ToDeposit: amount1Max,
+        recipient: recipient,
+      );
+
+      verify(
+        () => pancakeSwapInfinityCLPositionManagerImpl.modifyLiquidities(
+          payload: payloadData,
+          deadline: any(named: "deadline"),
+          ethValue: any(named: "ethValue"),
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    """When calling `sendV4PoolDepositTransaction`, the protocol is pancake swap
+    infinity CL and the token1 is native,
+    it should send the correct payload data to the contract to add liquidity""",
+    () async {
+      const actionsEncoded = "0xhvaaa";
+      const mintPositionActionParamsEncoded = "0xaaaa";
+      const closeCurrency0ActionParamsEncoded = "0xbbbb";
+      const closeCurrency1ActionParamsEncoded = "0xxxx";
+      const payloadData = "0xaaaaa77777AAA";
+
+      const token1Address = EthereumConstants.zeroAddress;
+      const token0Address = "0x2";
+      const network = AppNetworks.mainnet;
+      final amount0Desired = BigInt.from(4311);
+      final amount1Desired = BigInt.from(1031900);
+      const deadline = Duration(days: 1);
+      final amount0Max = BigInt.from(4312);
+      final amount1Max = BigInt.from(1031901);
+      final recipient = await signer.address;
+      final tickLower = BigInt.from(321);
+      final tickUpper = BigInt.from(1222);
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.poolIdToPoolKey(id: any(named: "id"))).thenAnswer(
+        (_) async => (
+          currency0: token0Address,
+          currency1: token1Address,
+          fee: BigInt.from(21),
+          hooks: "",
+          parameters: "",
+          poolManager: "",
+        ),
+      );
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer(
+        (_) async => (
+          lpFee: BigInt.from(21),
+          protocolFee: BigInt.from(21),
+          sqrtPriceX96: BigInt.from(21),
+          tick: BigInt.from(21),
+        ),
+      );
+
+      final currentYield0 = currentYield.copyWith(
+        chainId: network.chainId,
+        v4StateView: "0x1",
+        poolType: PoolType.v4,
+        v4PoolManager: "0xbvv",
+        protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.pancakeSwapInfinityCL),
+        token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
+        token1: TokenDto.fixture().copyWith(addresses: {network.chainId: token1Address}),
+      );
+
+      when(() => ethereumAbiCoder.encodePacked(["uint8", "uint8", "uint8"], any())).thenReturn(actionsEncoded);
+      when(
+        () => ethereumAbiCoder.encode([
+          "tuple(address,address,address,address,uint24,bytes32)",
+          "int24",
+          "int24",
+          "uint256",
+          "uint128",
+          "uint128",
+          "address",
+          "bytes",
+        ], any()),
+      ).thenReturn(mintPositionActionParamsEncoded);
+
+      when(() => ethereumAbiCoder.encode(["address"], [token0Address])).thenReturn(closeCurrency0ActionParamsEncoded);
+      when(() => ethereumAbiCoder.encode(["address"], [token1Address])).thenReturn(closeCurrency1ActionParamsEncoded);
+
+      when(
+        () => ethereumAbiCoder.encode(
+          ["bytes", "bytes[]"],
+          [
+            actionsEncoded,
+            [mintPositionActionParamsEncoded, closeCurrency0ActionParamsEncoded, closeCurrency1ActionParamsEncoded],
+          ],
+        ),
+      ).thenReturn(payloadData);
+
+      when(
+        () => pancakeSwapInfinityCLPositionManagerImpl.modifyLiquidities(
+          payload: any(named: "payload"),
+          deadline: any(named: "deadline"),
+          ethValue: any(named: "ethValue"),
+        ),
+      ).thenAnswer((_) async => transactionResponse);
+
+      await sut.sendV4PoolDepositTransaction(
+        currentYield0,
+        signer,
+        deadline: deadline,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        amount0toDeposit: amount0Desired,
+        amount1ToDeposit: amount1Desired,
+        maxAmount0ToDeposit: amount0Max,
+        maxAmount1ToDeposit: amount1Max,
+        recipient: recipient,
+      );
+
+      verify(
+        () => pancakeSwapInfinityCLPositionManagerImpl.modifyLiquidities(
+          payload: payloadData,
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
         ),
@@ -1156,7 +1753,7 @@ void main() {
       ).thenReturn(unlockData);
 
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -1177,7 +1774,7 @@ void main() {
       );
 
       verify(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: unlockData,
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -1243,7 +1840,7 @@ void main() {
       ).thenReturn(unlockData);
 
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -1264,7 +1861,7 @@ void main() {
       );
 
       verify(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: unlockData,
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -1302,7 +1899,7 @@ void main() {
         when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
 
         when(
-          () => positionManagerV4Impl.modifyLiquidities(
+          () => uniswapPositionManagerV4Impl.modifyLiquidities(
             unlockData: any(named: "unlockData"),
             deadline: any(named: "deadline"),
             ethValue: any(named: "ethValue"),
@@ -1323,7 +1920,7 @@ void main() {
         );
 
         verify(
-          () => positionManagerV4Impl.modifyLiquidities(
+          () => uniswapPositionManagerV4Impl.modifyLiquidities(
             unlockData: any(named: "unlockData"),
             deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
             ethValue: any(named: "ethValue"),
@@ -1360,7 +1957,7 @@ void main() {
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
 
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -1381,7 +1978,7 @@ void main() {
       );
 
       verify(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: null,
@@ -1418,7 +2015,7 @@ void main() {
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
 
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -1439,7 +2036,7 @@ void main() {
       );
 
       verify(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: amount0Desired,
@@ -1476,7 +2073,7 @@ void main() {
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
 
       when(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: any(named: "ethValue"),
@@ -1497,7 +2094,7 @@ void main() {
       );
 
       verify(
-        () => positionManagerV4Impl.modifyLiquidities(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
           unlockData: any(named: "unlockData"),
           deadline: any(named: "deadline"),
           ethValue: amount1Desired,
@@ -1584,9 +2181,9 @@ void main() {
           contractAddress: any(named: "contractAddress"),
           rpcUrl: any(named: "rpcUrl"),
         ),
-      ).thenReturn(stateViewImpl);
+      ).thenReturn(uniswapV4StateViewImpl);
 
-      when(() => stateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer(
+      when(() => uniswapV4StateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer(
         (_) async => (
           sqrtPriceX96: expectedSqrtPriceX96,
           tick: BigInt.from(0),
@@ -2079,7 +2676,7 @@ void main() {
             const network = AppNetworks.mainnet;
             final currentYield0 = currentYield.copyWith(
               protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.aerodromeSlipstream),
-              feeTier: 3982,
+              initialFeeTier: 3982,
               poolType: PoolType.v3,
               chainId: network.chainId,
               token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
@@ -2161,7 +2758,7 @@ void main() {
             const network = AppNetworks.mainnet;
             final currentYield0 = currentYield.copyWith(
               protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.aerodromeSlipstream),
-              feeTier: 3982,
+              initialFeeTier: 3982,
               poolType: PoolType.v3,
               chainId: network.chainId,
               token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
@@ -2233,7 +2830,7 @@ void main() {
             const network = AppNetworks.mainnet;
             final currentYield0 = currentYield.copyWith(
               protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.aerodromeSlipstream),
-              feeTier: 3982,
+              initialFeeTier: 3982,
               poolType: PoolType.v3,
               chainId: network.chainId,
               token0: TokenDto.fixture().copyWith(addresses: {network.chainId: token0Address}),
@@ -2292,7 +2889,7 @@ void main() {
           const network = AppNetworks.mainnet;
           final currentYield0 = currentYield.copyWith(
             protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.aerodromeSlipstream),
-            feeTier: 3982,
+            initialFeeTier: 3982,
             poolType: PoolType.v3,
             chainId: network.chainId,
           );
@@ -2322,7 +2919,7 @@ void main() {
           const network = AppNetworks.mainnet;
           final currentYield0 = currentYield.copyWith(
             protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.velodromeSlipstream),
-            feeTier: 3982,
+            initialFeeTier: 3982,
             poolType: PoolType.v3,
             chainId: network.chainId,
           );

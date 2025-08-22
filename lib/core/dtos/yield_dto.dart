@@ -20,7 +20,8 @@ sealed class YieldDto with _$YieldDto {
     required String positionManagerAddress,
     required int tickSpacing,
     required ProtocolDto protocol,
-    required int feeTier,
+    required int initialFeeTier,
+    required int currentFeeTier,
     required int chainId,
     @Default(0) num yield24h,
     @Default(0) num yield7d,
@@ -60,7 +61,8 @@ sealed class YieldDto with _$YieldDto {
   factory YieldDto.fromJson(Map<String, dynamic> json) => _$YieldDtoFromJson(json);
 
   factory YieldDto.fixture() => YieldDto(
-    feeTier: 0,
+    initialFeeTier: 0,
+    currentFeeTier: 0,
     yield24h: 32.2,
     yield30d: 32.2,
     yield90d: 32.2,

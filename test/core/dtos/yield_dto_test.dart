@@ -97,7 +97,8 @@ void main() {
         positionManagerAddress: "0x2",
         tickSpacing: 1,
         protocol: ProtocolDto.fixture(),
-        feeTier: 0,
+        initialFeeTier: 0,
+        currentFeeTier: 0,
       ).deployerAddress,
       EthereumConstants.zeroAddress,
     );
@@ -113,7 +114,8 @@ void main() {
         positionManagerAddress: "0x2",
         tickSpacing: 1,
         protocol: ProtocolDto.fixture(),
-        feeTier: 0,
+        initialFeeTier: 0,
+        currentFeeTier: 0,
       ).v4Hooks,
       EthereumConstants.zeroAddress,
     );

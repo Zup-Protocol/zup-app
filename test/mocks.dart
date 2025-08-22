@@ -17,6 +17,7 @@ import 'package:zup_app/abis/algebra/v1.2.1/pool.abi.g.dart' as algebra_1_2_1_po
 import 'package:zup_app/abis/algebra/v1.2.1/position_manager.abi.g.dart' as algebra_1_2_1_position_manager;
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
@@ -95,6 +96,10 @@ class UniswapV4PositionManagerImplMock extends Mock implements UniswapV4Position
 class PancakeSwapInfinityCLPoolManagerMock extends Mock implements PancakeSwapInfinityClPoolManager {}
 
 class PancakeSwapInfinityCLPoolManagerImplMock extends Mock implements PancakeSwapInfinityClPoolManagerImpl {}
+
+class PancakeSwapInfinityCLPositionManagerMock extends Mock implements PancakeSwapInfinityClPositionManager {}
+
+class PancakeSwapInfinityCLPositionManagerImplMock extends Mock implements PancakeSwapInfinityClPositionManagerImpl {}
 
 class UniswapV3PoolImplMock extends Mock implements UniswapV3PoolImpl {}
 

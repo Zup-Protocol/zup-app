@@ -1281,7 +1281,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "9d85afed0795fd8ef79c238776d2d93ed3ab882f"
+      resolved-ref: "9a51f58425d80bd29886286a68571d653b4995d5"
       url: "https://github.com/Zup-Protocol/web3kit.git"
     source: git
     version: "0.0.1"

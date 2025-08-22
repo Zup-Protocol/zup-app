@@ -12,6 +12,7 @@ import 'package:zup_app/abis/algebra/v1.2.1/pool.abi.g.dart' as algebra_1_2_1_po
 import 'package:zup_app/abis/algebra/v1.2.1/position_manager.abi.g.dart' as algebra_1_2_1_position_manager;
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
@@ -140,6 +141,8 @@ Future<void> setupInjections() async {
     () => algebra_1_2_1_position_manager.PositionManager(),
   );
 
+  inject.registerLazySingleton<PancakeSwapInfinityClPositionManager>(() => PancakeSwapInfinityClPositionManager());
+
   inject.registerLazySingleton<PoolService>(
     () => PoolService(
       inject<UniswapV4StateView>(),
@@ -148,6 +151,7 @@ Future<void> setupInjections() async {
       inject<UniswapV4PositionManager>(),
       inject<EthereumAbiCoder>(),
       inject<PancakeSwapInfinityClPoolManager>(),
+      inject<PancakeSwapInfinityClPositionManager>(),
       inject<AerodromeV3PositionManager>(),
       inject<AerodromeV3Pool>(),
       inject<algebra_1_2_1_pool.Pool>(),

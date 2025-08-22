@@ -86,7 +86,8 @@ sealed class YieldsDto with _$YieldsDto {
         yield30d: 765.61,
         yield90d: 2022.99,
         totalValueLockedUSD: 65434567890.21,
-        feeTier: 500,
+        initialFeeTier: 500,
+        currentFeeTier: 500,
         protocol: ProtocolDto(
           id: ProtocolId.pancakeSwapInfinityCL,
           rawId: ProtocolId.pancakeSwapInfinityCL.toRawJsonValue,

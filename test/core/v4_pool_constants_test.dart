@@ -7,10 +7,14 @@ void main() {
   });
 
   test('settlePairActionValue should return the correct value', () {
-    expect(V4PoolConstants.settlePairActionValue, 0x0d);
+    expect(V4PoolConstants.uniswapSettlePairActionValue, 0x0d);
   });
 
   test('sweepActionValue should return the correct value', () {
-    expect(V4PoolConstants.sweepActionValue, 0x14);
+    expect(V4PoolConstants.uniswapSweepActionValue, 0x14);
+  });
+
+  test("close currency should return the correct value", () {
+    expect(V4PoolConstants.pancakeSwapCloseCurrencyActionValue, 0x12);
   });
 }
