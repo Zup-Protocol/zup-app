@@ -463,7 +463,7 @@ abstract class S {
   /// No description provided for @yieldCardAverageYieldYearly.
   ///
   /// In en, this message translates to:
-  /// **'Average Yield (Yearly)'**
+  /// **'Average Yearly Yield'**
   String get yieldCardAverageYieldYearly;
 
   /// No description provided for @previewDepositModalDepositSuccessSnackBarHelperButtonTitle.

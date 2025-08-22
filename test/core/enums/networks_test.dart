@@ -1,3 +1,4 @@
+import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -21,7 +22,8 @@ void main() {
     expect(AppNetworks.fromValue("mainnet"), AppNetworks.mainnet, reason: "Mainnet should match");
     expect(AppNetworks.fromValue("scroll"), AppNetworks.scroll, reason: "Scroll should match");
     expect(AppNetworks.fromValue("allNetworks"), AppNetworks.allNetworks, reason: "All networks should match");
-    // expect(AppNetworks.fromValue("base"), AppNetworks.base, reason: "Base should match");
+    expect(AppNetworks.fromValue("base"), AppNetworks.base, reason: "Base should match");
+    expect(AppNetworks.fromValue("hyperEvm"), AppNetworks.hyperEvm, reason: "HyperEVM should match");
     expect(AppNetworks.fromValue("unichain"), AppNetworks.unichain, reason: "Unichain should match");
     // expect(AppNetworks.fromValue("bnb"), AppNetworks.bnb, reason: "BNB should match");
   });
@@ -31,7 +33,8 @@ void main() {
     expect(AppNetworks.mainnet.label, "Ethereum", reason: "Ethereum Label should match");
     expect(AppNetworks.scroll.label, "Scroll", reason: "Scroll Label should match");
     expect(AppNetworks.allNetworks.label, "All Networks", reason: "All Networks Label should match");
-    // expect(AppNetworks.base.label, "Base", reason: "Base Label should match");
+    expect(AppNetworks.base.label, "Base", reason: "Base Label should match");
+    expect(AppNetworks.hyperEvm.label, "HyperEVM", reason: "HyperEVM Label should match");
     expect(AppNetworks.unichain.label, "Unichain", reason: "Unichain Label should match");
     // expect(AppNetworks.bnb.label, "BNB Chain", reason: "BNB Chain Label should match");
   });
@@ -47,7 +50,8 @@ void main() {
         AppNetworks.allNetworks,
         AppNetworks.mainnet,
         AppNetworks.scroll,
-        // AppNetworks.base,
+        AppNetworks.base,
+        AppNetworks.hyperEvm,
         AppNetworks.unichain,
         // AppNetworks.bnb
       ]),
@@ -67,7 +71,11 @@ void main() {
   });
 
   test("`isTestnet` method should return false for base", () {
-    // expect(AppNetworks.base.isTestnet, false);
+    expect(AppNetworks.base.isTestnet, false);
+  });
+
+  test("`isTestnet` method should return false for hyperEVM", () {
+    expect(AppNetworks.hyperEvm.isTestnet, false);
   });
 
   test("`isTestnet` method should return false for unichain", () {
@@ -114,17 +122,17 @@ void main() {
       reason: "Scroll ChainInfo should match",
     );
 
-    // expect(
-    //   AppNetworks.base.chainInfo,
-    //   ChainInfo(
-    //     hexChainId: "0x2105",
-    //     chainName: "Base",
-    //     blockExplorerUrls: const ["https://basescan.org"],
-    //     nativeCurrency: NativeCurrencies.eth.currencyInfo,
-    //     rpcUrls: const ["https://base-rpc.publicnode.com"],
-    //   ),
-    //   reason: "Base ChainInfo should match",
-    // );
+    expect(
+      AppNetworks.base.chainInfo,
+      ChainInfo(
+        hexChainId: "0x2105",
+        chainName: "Base",
+        blockExplorerUrls: const ["https://basescan.org"],
+        nativeCurrency: NativeCurrencies.eth.currencyInfo,
+        rpcUrls: const ["https://base-rpc.publicnode.com"],
+      ),
+      reason: "Base ChainInfo should match",
+    );
 
     expect(
       AppNetworks.unichain.chainInfo,
@@ -136,6 +144,18 @@ void main() {
         rpcUrls: const ["https://unichain-rpc.publicnode.com"],
       ),
       reason: "Unichain ChainInfo should match",
+    );
+
+    expect(
+      AppNetworks.hyperEvm.chainInfo,
+      ChainInfo(
+        hexChainId: "0x3e7",
+        chainName: "HyperEVM",
+        blockExplorerUrls: const ["https://hyperevmscan.io"],
+        nativeCurrency: NativeCurrencies.hype.currencyInfo,
+        rpcUrls: const ["https://rpc.hyperliquid.xyz/evm"],
+      ),
+      reason: "HyperEVM ChainInfo should match",
     );
 
     // expect(
@@ -190,17 +210,9 @@ void main() {
       reason: "Sepolia rpc url should match",
     );
 
-    expect(
-      AppNetworks.mainnet.rpcUrl,
-      "https://ethereum-rpc.publicnode.com",
-      reason: "Ethereum rpc url should match",
-    );
+    expect(AppNetworks.mainnet.rpcUrl, "https://ethereum-rpc.publicnode.com", reason: "Ethereum rpc url should match");
 
-    expect(
-      AppNetworks.scroll.rpcUrl,
-      "https://scroll-rpc.publicnode.com",
-      reason: "Scroll rpc url should match",
-    );
+    expect(AppNetworks.scroll.rpcUrl, "https://scroll-rpc.publicnode.com", reason: "Scroll rpc url should match");
 
     // expect(
     //   AppNetworks.base.rpcUrl,
@@ -208,11 +220,7 @@ void main() {
     //   reason: "Base rpc url should match",
     // );
 
-    expect(
-      AppNetworks.unichain.rpcUrl,
-      "https://unichain-rpc.publicnode.com",
-      reason: "Unichain rpc url should match",
-    );
+    expect(AppNetworks.unichain.rpcUrl, "https://unichain-rpc.publicnode.com", reason: "Unichain rpc url should match");
 
     // expect(
     //   AppNetworks.bnb.rpcUrl,
@@ -267,38 +275,32 @@ void main() {
   });
 
   zGoldenTest("Sepolia network icon should match", goldenFileName: "sepolia_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      AppNetworks.sepolia.icon,
-      device: GoldenDevice.square,
-    ));
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.sepolia.icon, device: GoldenDevice.square));
+  });
+
+  zGoldenTest("hyperEVM network icon should match", goldenFileName: "hyperEVM_network_icon", (tester) async {
+    await tester.pumpDeviceBuilder(
+      await goldenDeviceBuilder(
+        SizedBox(height: 100, child: Center(child: AppNetworks.hyperEvm.icon)),
+        device: GoldenDevice.square,
+      ),
+    );
   });
 
   zGoldenTest("Ethereum network icon should match", goldenFileName: "ethereum_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      AppNetworks.mainnet.icon,
-      device: GoldenDevice.square,
-    ));
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.mainnet.icon, device: GoldenDevice.square));
   });
 
-  // zGoldenTest("Base network icon should match", goldenFileName: "base_network_icon", (tester) async {
-  //   await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-  //     AppNetworks.base.icon,
-  //     device: GoldenDevice.square,
-  //   ));
-  // });
+  zGoldenTest("Base network icon should match", goldenFileName: "base_network_icon", (tester) async {
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.base.icon, device: GoldenDevice.square));
+  });
 
   zGoldenTest("Scroll network icon should match", goldenFileName: "scroll_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      AppNetworks.scroll.icon,
-      device: GoldenDevice.square,
-    ));
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.scroll.icon, device: GoldenDevice.square));
   });
 
   zGoldenTest("Unichain network icon should match", goldenFileName: "unichain_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
-      AppNetworks.unichain.icon,
-      device: GoldenDevice.square,
-    ));
+    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.unichain.icon, device: GoldenDevice.square));
   });
 
   // zGoldenTest("BNB network icon should match", goldenFileName: "bnb_network_icon", (tester) async {

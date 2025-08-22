@@ -6,8 +6,13 @@ import 'package:get_it/get_it.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3kit/web3kit.dart';
+import 'package:zup_app/abis/aerodrome_v3_pool.abi.g.dart';
+import 'package:zup_app/abis/aerodrome_v3_position_manager.abi.g.dart';
+import 'package:zup_app/abis/algebra/v1.2.1/pool.abi.g.dart' as algebra_1_2_1_pool;
+import 'package:zup_app/abis/algebra/v1.2.1/position_manager.abi.g.dart' as algebra_1_2_1_position_manager;
 import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/pancake_swap_infinity_cl_pool_manager.abi.g.dart';
+import 'package:zup_app/abis/pancake_swap_infinity_cl_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
@@ -126,6 +131,18 @@ Future<void> setupInjections() async {
 
   inject.registerLazySingleton<PancakeSwapInfinityClPoolManager>(() => PancakeSwapInfinityClPoolManager());
 
+  inject.registerLazySingleton<AerodromeV3PositionManager>(() => AerodromeV3PositionManager());
+
+  inject.registerLazySingleton<AerodromeV3Pool>(() => AerodromeV3Pool());
+
+  inject.registerLazySingleton<algebra_1_2_1_pool.Pool>(() => algebra_1_2_1_pool.Pool());
+
+  inject.registerLazySingleton<algebra_1_2_1_position_manager.PositionManager>(
+    () => algebra_1_2_1_position_manager.PositionManager(),
+  );
+
+  inject.registerLazySingleton<PancakeSwapInfinityClPositionManager>(() => PancakeSwapInfinityClPositionManager());
+
   inject.registerLazySingleton<PoolService>(
     () => PoolService(
       inject<UniswapV4StateView>(),
@@ -134,6 +151,11 @@ Future<void> setupInjections() async {
       inject<UniswapV4PositionManager>(),
       inject<EthereumAbiCoder>(),
       inject<PancakeSwapInfinityClPoolManager>(),
+      inject<PancakeSwapInfinityClPositionManager>(),
+      inject<AerodromeV3PositionManager>(),
+      inject<AerodromeV3Pool>(),
+      inject<algebra_1_2_1_pool.Pool>(),
+      inject<algebra_1_2_1_position_manager.PositionManager>(),
     ),
   );
 

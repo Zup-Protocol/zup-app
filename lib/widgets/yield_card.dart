@@ -88,7 +88,9 @@ class _YieldCardState extends State<YieldCard> {
               Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(
-                  S.of(context).yieldCardYearlyYield,
+                  widget.timeFrame.isDay
+                      ? S.of(context).yieldCardYearlyYield
+                      : S.of(context).yieldCardAverageYieldYearly,
                   style: TextStyle(fontSize: 14, color: ZupThemeColors.primaryText.themed(context.brightness)),
                 ),
               ),

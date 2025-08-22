@@ -35,15 +35,15 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     required UniswapPermit2 permit2,
     required GlobalKey<NavigatorState> navigatorKey,
     required ZupAnalytics zupAnalytics,
-  })  : _yield = currentYield,
-        _poolRepository = poolService,
-        _erc20 = erc20,
-        _wallet = wallet,
-        _latestPoolTick = initialPoolTick,
-        _navigatorKey = navigatorKey,
-        _zupAnalytics = zupAnalytics,
-        _permit2 = permit2,
-        super(const PreviewDepositModalState.loading());
+  }) : _yield = currentYield,
+       _poolRepository = poolService,
+       _erc20 = erc20,
+       _wallet = wallet,
+       _latestPoolTick = initialPoolTick,
+       _navigatorKey = navigatorKey,
+       _zupAnalytics = zupAnalytics,
+       _permit2 = permit2,
+       super(const PreviewDepositModalState.loading());
 
   final PoolService _poolRepository;
   final Erc20 _erc20;
@@ -76,12 +76,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
     await _getTokensAllowance();
 
-    emit(
-      PreviewDepositModalState.initial(
-        token0Allowance: _token0Allowance,
-        token1Allowance: _token1Allowance,
-      ),
-    );
+    emit(PreviewDepositModalState.initial(token0Allowance: _token0Allowance, token1Allowance: _token1Allowance));
   }
 
   Future<void> approveToken(TokenDto token, BigInt value) async {
@@ -92,10 +87,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       await _maybeSwitchNetwork();
 
-      final contract = _erc20.fromSigner(
-        contractAddress: tokenAddressInNetwork,
-        signer: _wallet.signer!,
-      );
+      final contract = _erc20.fromSigner(contractAddress: tokenAddressInNetwork, signer: _wallet.signer!);
 
       final tx = await contract.approve(spender: spender, value: value);
 
@@ -131,10 +123,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
     if (tokenAddressInNetwork == EthereumConstants.zeroAddress) return;
 
-    final permit2Contract = _permit2.fromSigner(
-      contractAddress: _yield.permit2!,
-      signer: _wallet.signer!,
-    );
+    final permit2Contract = _permit2.fromSigner(contractAddress: _yield.permit2!, signer: _wallet.signer!);
 
     final permit2CurrentAllowance = await permit2Contract.allowance(
       await _wallet.signer!.address,
@@ -183,10 +172,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
           );
         }
 
-        return tickToClosestValidTick(
-          tick: convertPriceToTickLower(),
-          tickSpacing: _yield.tickSpacing,
-        );
+        return tickToClosestValidTick(tick: convertPriceToTickLower(), tickSpacing: _yield.tickSpacing);
       }
 
       BigInt tickUpper() {
@@ -202,10 +188,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
           );
         }
 
-        return tickToClosestValidTick(
-          tick: convertPriceToTickUpper(),
-          tickSpacing: _yield.tickSpacing,
-        );
+        return tickToClosestValidTick(tick: convertPriceToTickUpper(), tickSpacing: _yield.tickSpacing);
       }
 
       final amount0Desired = token0Amount;
@@ -268,10 +251,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       if (e is UserRejectedAction) {
         return emit(
-          PreviewDepositModalState.initial(
-            token0Allowance: _token0Allowance,
-            token1Allowance: _token1Allowance,
-          ),
+          PreviewDepositModalState.initial(token0Allowance: _token0Allowance, token1Allowance: _token1Allowance),
         );
       }
 
@@ -301,10 +281,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
           rpcUrl: _yield.network.rpcUrl,
         );
 
-        _token0Allowance = await token0contract.allowance(
-          owner: owner,
-          spender: spender,
-        );
+        _token0Allowance = await token0contract.allowance(owner: owner, spender: spender);
       }
 
       if (!_yield.isToken1Native) {
@@ -313,10 +290,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
           rpcUrl: _yield.network.rpcUrl,
         );
 
-        _token1Allowance = await token1contract.allowance(
-          owner: owner,
-          spender: spender,
-        );
+        _token1Allowance = await token1contract.allowance(owner: owner, spender: spender);
       }
     } catch (e) {
       if (canThrow) rethrow;
@@ -339,14 +313,13 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     final stateAsWaitingTransaction = state as _WaitingTransaction;
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      ScaffoldMessenger.of(context).showSnackBar(() {
-        return switch (stateAsWaitingTransaction.type) {
-          WaitingTransactionType.deposit => ZupSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
+        () {
+          return switch (stateAsWaitingTransaction.type) {
+            WaitingTransactionType.deposit => ZupSnackBar(
               context,
-              message: "${S.of(context).previewDepositModalCubitDepositingSnackBarMessage(
-                    token0Symbol: _yield.token0.symbol,
-                    token1Symbol: _yield.token1.symbol,
-                  )} ",
+              message:
+                  "${S.of(context).previewDepositModalCubitDepositingSnackBarMessage(token0Symbol: _yield.token0.symbol, token1Symbol: _yield.token1.symbol)} ",
               customIcon: const ZupCircularLoadingIndicator(size: 20),
               type: ZupSnackBarType.info,
               maxWidth: 500,
@@ -356,20 +329,21 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
                 onButtonTap: () => _yield.network.openTx(stateAsWaitingTransaction.txId),
               ),
             ),
-          WaitingTransactionType.approve => ZupSnackBar(
+            WaitingTransactionType.approve => ZupSnackBar(
               context,
               message: "${S.of(context).previewDepositModalCubitApprovingSnackBarMessage} ",
               type: ZupSnackBarType.info,
               maxWidth: 400,
               helperButton: (
                 title: S.of(context).previewDepositModalWaitingTransactionSnackBarHelperButtonTitle,
-                onButtonTap: () => _yield.network.openTx(stateAsWaitingTransaction.txId)
+                onButtonTap: () => _yield.network.openTx(stateAsWaitingTransaction.txId),
               ),
               customIcon: const ZupCircularLoadingIndicator(size: 20),
               snackDuration: const Duration(minutes: 10),
-            )
-        };
-      }.call());
+            ),
+          };
+        }.call(),
+      );
     });
 
     stream.listen((state) async {
@@ -393,11 +367,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
             (_) async => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
           );
 
-          DepositSuccessModal.show(
-            context,
-            depositedYield: _yield,
-            showAsBottomSheet: isMobileSize(context),
-          );
+          DepositSuccessModal.show(context, depositedYield: _yield, showAsBottomSheet: isMobileSize(context));
         },
         orElse: () async {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();

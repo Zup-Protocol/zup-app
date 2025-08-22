@@ -32,5 +32,49 @@
         ],
         "stateMutability": "view",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "PoolId",
+                "name": "id",
+                "type": "bytes32"
+            }
+        ],
+        "name": "poolIdToPoolKey",
+        "outputs": [
+            {
+                "internalType": "Currency",
+                "name": "currency0",
+                "type": "address"
+            },
+            {
+                "internalType": "Currency",
+                "name": "currency1",
+                "type": "address"
+            },
+            {
+                "internalType": "contract IHooks",
+                "name": "hooks",
+                "type": "address"
+            },
+            {
+                "internalType": "contract IPoolManager",
+                "name": "poolManager",
+                "type": "address"
+            },
+            {
+                "internalType": "uint24",
+                "name": "fee",
+                "type": "uint24"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "parameters",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     }
 ]
