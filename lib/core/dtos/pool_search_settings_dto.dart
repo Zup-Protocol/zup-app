@@ -5,7 +5,7 @@ part 'pool_search_settings_dto.g.dart';
 
 @freezed
 sealed class PoolSearchSettingsDto with _$PoolSearchSettingsDto {
-  static const num defaultMinLiquidityUSD = 1000;
+  static const num defaultMinLiquidityUSD = 5000;
 
   @JsonSerializable(explicitToJson: true)
   factory PoolSearchSettingsDto({
@@ -22,7 +22,5 @@ sealed class PoolSearchSettingsDto with _$PoolSearchSettingsDto {
 
   factory PoolSearchSettingsDto.fromJson(Map<String, dynamic> json) => _$PoolSearchSettingsDtoFromJson(json);
 
-  factory PoolSearchSettingsDto.fixture() => PoolSearchSettingsDto(
-        minLiquidityUSD: 1200,
-      );
+  factory PoolSearchSettingsDto.fixture() => PoolSearchSettingsDto(minLiquidityUSD: 1200);
 }

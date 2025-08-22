@@ -166,7 +166,7 @@
             }
         }
     },
-    "yieldCardAverageYieldYearly": "Average Yield (Yearly)",
+    "yieldCardAverageYieldYearly": "Average Yearly Yield",
     "previewDepositModalDepositSuccessSnackBarHelperButtonTitle": "View Transaction",
     "previewDepositModalApproveSuccessSnackBarHelperButtonTitle": "View Transaction",
     "previewDepositModalWaitingTransactionSnackBarHelperButtonTitle": "View on Explorer",

@@ -237,7 +237,7 @@ class SEn extends S {
   }
 
   @override
-  String get yieldCardAverageYieldYearly => 'Average Yield (Yearly)';
+  String get yieldCardAverageYieldYearly => 'Average Yearly Yield';
 
   @override
   String get previewDepositModalDepositSuccessSnackBarHelperButtonTitle =>
