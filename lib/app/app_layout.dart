@@ -47,6 +47,25 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
       );
 
       if (cache.getCookiesConsentStatus() == null) Overlay.of(context).insert(overlayEntry);
+
+      ScaffoldMessenger.of(context).showMaterialBanner(
+        MaterialBanner(
+          backgroundColor: ZupColors.orange6,
+          dividerColor: Colors.transparent,
+          content: const Text(
+            "⚠️ 24h Yields on Base Network are temporarily unavailable, we’re on it! 🚧 7d, 30d, and 90d Yields are still running fine.",
+            style: TextStyle(color: ZupColors.orange),
+          ),
+          actions: [
+            ZupIconButton(
+              iconColor: ZupColors.orange,
+              backgroundColor: ZupColors.orange5,
+              icon: const Icon(Icons.close),
+              onPressed: (context) => ScaffoldMessenger.of(context).clearMaterialBanners(),
+            ),
+          ],
+        ),
+      );
     });
   }
 
