@@ -51,6 +51,7 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
       ScaffoldMessenger.of(context).showMaterialBanner(
         MaterialBanner(
           backgroundColor: ZupColors.orange6,
+          padding: const EdgeInsets.only(left: 20, right: 10, bottom: 12, top: 12),
           dividerColor: Colors.transparent,
           content: const Text(
             "⚠️ 24h Yields on Base Network are temporarily unavailable, we’re on it! 🚧 7d, 30d, and 90d Yields are still running fine.",
