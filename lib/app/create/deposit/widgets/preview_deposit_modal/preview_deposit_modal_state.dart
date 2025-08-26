@@ -1,9 +1,6 @@
 part of 'preview_deposit_modal_cubit.dart';
 
-enum WaitingTransactionType {
-  deposit,
-  approve,
-}
+enum WaitingTransactionType { deposit, approve }
 
 @freezed
 class PreviewDepositModalState with _$PreviewDepositModalState {
@@ -18,7 +15,7 @@ class PreviewDepositModalState with _$PreviewDepositModalState {
   const factory PreviewDepositModalState.approveSuccess({required String txId, required String symbol}) =
       _ApproveSuccess;
   const factory PreviewDepositModalState.transactionError() = _TransactionError;
-  const factory PreviewDepositModalState.slippageCheckError() = _SlippageCheckError;
+  const factory PreviewDepositModalState.slippageCheckError(bool isSlippageAutomatic) = _SlippageCheckError;
   const factory PreviewDepositModalState.approvingToken(String symbol) = _ApprovingToken;
   const factory PreviewDepositModalState.depositing() = _Depositing;
 }

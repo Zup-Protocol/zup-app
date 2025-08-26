@@ -14,6 +14,7 @@ import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_constants.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
@@ -21,7 +22,6 @@ import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/widgets/zup_cached_image.dart';
 
@@ -30,7 +30,7 @@ import '../../../../../mocks.dart';
 import '../../../../../wrappers.dart';
 
 void main() {
-  final BigInt initialPoolTick = BigInt.from(21765);
+  final BigInt initialPoolSqrtPriceX96 = BigInt.from(21765);
   final YieldDto currentYield = YieldDto.fixture();
   const transactionHash = "0x21";
 
@@ -65,7 +65,7 @@ void main() {
     poolService = PoolServiceMock();
 
     sut = PreviewDepositModalCubit(
-      initialPoolTick: initialPoolTick,
+      currentPriceX96: initialPoolSqrtPriceX96,
       currentYield: currentYield,
       erc20: erc20,
       wallet: wallet,
@@ -78,6 +78,7 @@ void main() {
 
     registerFallbackValue(const ChainInfo(hexChainId: "0x1"));
     registerFallbackValue(signer);
+    registerFallbackValue(Slippage.halfPercent);
     registerFallbackValue(BigInt.one);
     registerFallbackValue((amount: BigInt.from(1), token: ""));
     registerFallbackValue(YieldDto.fixture());
@@ -98,96 +99,136 @@ void main() {
 
     when(
       () => zupAnalytics.logDeposit(
-          depositedYield: any(named: "depositedYield"),
-          amount0Formatted: any(named: "amount0Formatted"),
-          amount1Formatted: any(named: "amount1Formatted"),
-          walletAddress: any(named: "walletAddress")),
+        depositedYield: any(named: "depositedYield"),
+        amount0Formatted: any(named: "amount0Formatted"),
+        amount1Formatted: any(named: "amount1Formatted"),
+        walletAddress: any(named: "walletAddress"),
+      ),
     ).thenAnswer((_) async {});
 
     when(() => wallet.signer).thenReturn(signer);
 
     when(() => signer.address).thenAnswer((_) async => "0x99E3CfADCD8Feecb5DdF91f88998cFfB3145F78c");
 
-    when(() =>
-            uniswapV3Pool.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
-        .thenReturn(uniswapV3PoolImpl);
+    when(
+      () => uniswapV3Pool.fromRpcProvider(
+        contractAddress: any(named: "contractAddress"),
+        rpcUrl: any(named: "rpcUrl"),
+      ),
+    ).thenReturn(uniswapV3PoolImpl);
 
-    when(() => uniswapV3PoolImpl.slot0()).thenAnswer((_) async => (
-          feeProtocol: BigInt.zero,
-          observationCardinality: BigInt.zero,
-          observationCardinalityNext: BigInt.zero,
-          observationIndex: BigInt.zero,
-          sqrtPriceX96: BigInt.zero,
-          tick: initialPoolTick,
-          unlocked: true,
-        ));
+    when(() => uniswapV3PoolImpl.slot0()).thenAnswer(
+      (_) async => (
+        feeProtocol: BigInt.zero,
+        observationCardinality: BigInt.zero,
+        observationCardinalityNext: BigInt.zero,
+        observationIndex: BigInt.zero,
+        sqrtPriceX96: initialPoolSqrtPriceX96,
+        tick: BigInt.zero,
+        unlocked: true,
+      ),
+    );
 
-    when(() => permit2.fromSigner(contractAddress: any(named: "contractAddress"), signer: any(named: "signer")))
-        .thenReturn(permit2Impl);
-    when(() => permit2.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
-        .thenReturn(permit2Impl);
+    when(
+      () => permit2.fromSigner(
+        contractAddress: any(named: "contractAddress"),
+        signer: any(named: "signer"),
+      ),
+    ).thenReturn(permit2Impl);
+    when(
+      () => permit2.fromRpcProvider(
+        contractAddress: any(named: "contractAddress"),
+        rpcUrl: any(named: "rpcUrl"),
+      ),
+    ).thenReturn(permit2Impl);
 
-    when(() => erc20.fromRpcProvider(contractAddress: any(named: "contractAddress"), rpcUrl: any(named: "rpcUrl")))
-        .thenReturn(erc20Impl);
+    when(
+      () => erc20.fromRpcProvider(
+        contractAddress: any(named: "contractAddress"),
+        rpcUrl: any(named: "rpcUrl"),
+      ),
+    ).thenReturn(erc20Impl);
 
-    when(() => erc20.fromSigner(contractAddress: any(named: "contractAddress"), signer: any(named: "signer")))
-        .thenReturn(erc20Impl);
+    when(
+      () => erc20.fromSigner(
+        contractAddress: any(named: "contractAddress"),
+        signer: any(named: "signer"),
+      ),
+    ).thenReturn(erc20Impl);
 
-    when(() => erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender")))
-        .thenAnswer((_) async => BigInt.zero);
+    when(
+      () => erc20Impl.allowance(
+        owner: any(named: "owner"),
+        spender: any(named: "spender"),
+      ),
+    ).thenAnswer((_) async => BigInt.zero);
 
-    when(() => erc20Impl.approve(spender: any(named: "spender"), value: any(named: "value")))
-        .thenAnswer((_) async => transactionResponse);
+    when(
+      () => erc20Impl.approve(
+        spender: any(named: "spender"),
+        value: any(named: "value"),
+      ),
+    ).thenAnswer((_) async => transactionResponse);
 
     when(() => transactionResponse.hash).thenReturn(transactionHash);
 
-    when(() => transactionResponse.waitConfirmation()).thenAnswer(
-      (_) async => TransactionReceipt(hash: transactionHash),
-    );
+    when(
+      () => transactionResponse.waitConfirmation(),
+    ).thenAnswer((_) async => TransactionReceipt(hash: transactionHash));
 
     when(
       () => permit2Impl.approve(
-          token: any(named: "token"),
-          spender: any(named: "spender"),
-          amount: any(named: "amount"),
-          expiration: any(named: "expiration")),
+        token: any(named: "token"),
+        spender: any(named: "spender"),
+        amount: any(named: "amount"),
+        expiration: any(named: "expiration"),
+      ),
     ).thenAnswer((_) async => transactionResponse);
 
-    when(() => permit2Impl.allowance(any(), any(), any())).thenAnswer(
-      (_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero),
-    );
+    when(
+      () => permit2Impl.allowance(any(), any(), any()),
+    ).thenAnswer((_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero));
 
     when(() => wallet.connectedNetwork).thenAnswer((_) async => currentYield.network.chainInfo);
 
-    when(() => uniswapPositionManager.fromRpcProvider(
+    when(
+      () => uniswapPositionManager.fromRpcProvider(
         contractAddress: any(named: "contractAddress"),
-        rpcUrl: any(named: "rpcUrl"))).thenReturn(uniswapPositionManagerImpl);
-
-    when(() => uniswapPositionManager.fromSigner(contractAddress: any(named: "contractAddress"), signer: signer))
-        .thenReturn(uniswapPositionManagerImpl);
+        rpcUrl: any(named: "rpcUrl"),
+      ),
+    ).thenReturn(uniswapPositionManagerImpl);
 
     when(
-      () => uniswapPositionManagerImpl.mint(
-        params: any(named: "params"),
+      () => uniswapPositionManager.fromSigner(
+        contractAddress: any(named: "contractAddress"),
+        signer: signer,
       ),
+    ).thenReturn(uniswapPositionManagerImpl);
+
+    when(
+      () => uniswapPositionManagerImpl.mint(params: any(named: "params")),
     ).thenAnswer((_) async => transactionResponse);
 
     when(() => uniswapPositionManager.getMintCalldata(params: any(named: "params"))).thenReturn("0x");
 
-    when(() => poolService.sendV3PoolDepositTransaction(any(), any(),
+    when(
+      () => poolService.sendV3PoolDepositTransaction(
+        any(),
+        any(),
         amount0Desired: any(named: "amount0Desired"),
         amount1Desired: any(named: "amount1Desired"),
-        amount0Min: any(named: "amount0Min"),
-        amount1Min: any(named: "amount1Min"),
+        slippage: any(named: "slippage"),
         deadline: any(named: "deadline"),
         recipient: any(named: "recipient"),
         tickLower: any(named: "tickLower"),
-        tickUpper: any(named: "tickUpper"))).thenAnswer((_) async => transactionResponse);
+        tickUpper: any(named: "tickUpper"),
+      ),
+    ).thenAnswer((_) async => transactionResponse);
   });
 
   void sutCopyWith({
     bool? customDepositWithNative,
-    BigInt? customInitialPoolTick,
+    BigInt? customInitialSqrtPriceX96,
     UniswapV3Pool? customUniswapV3Pool,
     Erc20? customErc20,
     Wallet? customWallet,
@@ -198,7 +239,7 @@ void main() {
     PoolService? customPoolService,
   }) {
     sut = PreviewDepositModalCubit(
-      initialPoolTick: customInitialPoolTick ?? initialPoolTick,
+      currentPriceX96: customInitialSqrtPriceX96 ?? initialPoolSqrtPriceX96,
       permit2: customPermit2 ?? permit2,
       poolService: customPoolService ?? poolService,
       currentYield: customYield ?? currentYield,
@@ -214,69 +255,55 @@ void main() {
     expect(sut.state, const PreviewDepositModalState.loading());
   });
 
-  test("After instanciating the cubit, the `latestPoolTick` should be equal to the initial pool tick", () {
-    expect(sut.latestPoolTick, initialPoolTick);
+  test("After instanciating the cubit, the `latestPriceX96` should be equal to the initial pool sqrtPriceX96", () {
+    expect(sut.latestPriceX96, initialPoolSqrtPriceX96);
+  });
+
+  test("When calling `setup` in the cubit, it should immediately emit the initial pool sqrtPriceX96", () async {
+    expectLater(sut.poolSqrtPriceX96Stream, emits(initialPoolSqrtPriceX96));
+
+    await sut.setup();
+  });
+
+  test("When calling `setup` it should setup a timer to update the pool sqrtPriceX96 every one minute", () async {
+    final expectedEmittedSqrtPriceX96 = BigInt.from(963287);
+    int updatedTimes = 0;
+    BigInt latestEmittedSqrtPriceX96 = BigInt.zero;
+    const minutesPassed = 2;
+
+    when(() => poolService.getSqrtPriceX96(any())).thenAnswer((_) async => expectedEmittedSqrtPriceX96);
+
+    fakeAsync((async) {
+      sut.setup();
+
+      sut.poolSqrtPriceX96Stream.listen((sqrtPriceX96) {
+        updatedTimes++;
+        latestEmittedSqrtPriceX96 = sqrtPriceX96;
+      });
+
+      async.elapse(const Duration(minutes: minutesPassed));
+    });
+
+    expect(updatedTimes, minutesPassed, reason: "`poolSqrtPriceX96Stream` should be emitted $minutesPassed times");
+    expect(
+      latestEmittedSqrtPriceX96,
+      expectedEmittedSqrtPriceX96,
+      reason: "`poolSqrtPriceX96Stream` should be emitted with the updated sqrtPriceX96",
+    );
+    expect(sut.latestPriceX96, expectedEmittedSqrtPriceX96, reason: "`latestPriceX96` should be updated");
+    verify(() => poolService.getSqrtPriceX96(any())).called(2);
   });
 
   test(
-    "When calling `setup` in the cubit, it should immediately emit the initial pool tick",
-    () async {
-      expectLater(sut.poolTickStream, emits(initialPoolTick));
-
-      await sut.setup();
-    },
-  );
-
-  test(
-    "When calling `setup` it should setup a timer to update the pool tick every one minute",
-    () async {
-      final expectedEmittedTick = BigInt.from(963287);
-      int updatedTimes = 0;
-      BigInt latestEmittedTick = BigInt.zero;
-      const minutesPassed = 2;
-
-      when(() => poolService.getPoolTick(any())).thenAnswer((_) async => expectedEmittedTick);
-
-      fakeAsync((async) {
-        sut.setup();
-
-        sut.poolTickStream.listen((tick) {
-          updatedTimes++;
-          latestEmittedTick = tick;
-        });
-
-        async.elapse(const Duration(minutes: minutesPassed));
-      });
-
-      expect(
-        updatedTimes,
-        minutesPassed,
-        reason: "`poolTickStream` should be emitted $minutesPassed times",
-      );
-      expect(
-        latestEmittedTick,
-        expectedEmittedTick,
-        reason: "`poolTickStream` should be emitted with the updated tick",
-      );
-      expect(
-        sut.latestPoolTick,
-        expectedEmittedTick,
-        reason: "`latestPoolTick` should be updated",
-      );
-      verify(() => poolService.getPoolTick(any())).called(2);
-    },
-  );
-
-  test(
-    """When the cubit is closed, but the timer to update the tick have been fired,
-     the timer should be canceled, and it should not update the tick""",
+    """When the cubit is closed, but the timer to update the sqrtPriceX96 have been fired,
+     the timer should be canceled, and it should not update the sqrtPriceX96""",
     () async {
       fakeAsync((async) {
         sut.setup();
         async.flushMicrotasks();
         sut.close();
 
-        expectLater(sut.poolTickStream, neverEmits(anything));
+        expectLater(sut.poolSqrtPriceX96Stream, neverEmits(anything));
         async.elapse(const Duration(minutes: 2));
 
         verifyNever(() => uniswapV3PoolImpl.slot0());
@@ -290,43 +317,54 @@ void main() {
     () async {
       final customYield = YieldDto.fixture().copyWith(
         chainId: AppNetworks.sepolia.chainId,
-        token0: TokenDto.fixture().copyWith(addresses: {
-          AppNetworks.sepolia.chainId: "Token 0 Address",
-        }),
-        token1: TokenDto.fixture().copyWith(addresses: {
-          AppNetworks.sepolia.chainId: "Token 1 Address",
-        }),
+        token0: TokenDto.fixture().copyWith(addresses: {AppNetworks.sepolia.chainId: "Token 0 Address"}),
+        token1: TokenDto.fixture().copyWith(addresses: {AppNetworks.sepolia.chainId: "Token 1 Address"}),
       );
 
       sut = PreviewDepositModalCubit(
-          uniswapPositionManager: uniswapPositionManager,
-          initialPoolTick: initialPoolTick,
-          permit2: permit2,
-          poolService: poolService,
-          currentYield: customYield,
-          erc20: erc20,
-          wallet: wallet,
-          navigatorKey: GlobalKey(),
-          zupAnalytics: zupAnalytics);
+        uniswapPositionManager: uniswapPositionManager,
+        currentPriceX96: initialPoolSqrtPriceX96,
+        permit2: permit2,
+        poolService: poolService,
+        currentYield: customYield,
+        erc20: erc20,
+        wallet: wallet,
+        navigatorKey: GlobalKey(),
+        zupAnalytics: zupAnalytics,
+      );
 
       final token0Contract = Erc20ImplMock();
       final token1Contract = Erc20ImplMock();
       final token0Allowance = BigInt.from(12345);
       final token1Allowance = BigInt.from(54321);
 
-      when(() => erc20.fromRpcProvider(
+      when(
+        () => erc20.fromRpcProvider(
           contractAddress: customYield.token0.addresses[customYield.network.chainId]!,
-          rpcUrl: any(named: "rpcUrl"))).thenReturn(token0Contract);
+          rpcUrl: any(named: "rpcUrl"),
+        ),
+      ).thenReturn(token0Contract);
 
-      when(() => erc20.fromRpcProvider(
+      when(
+        () => erc20.fromRpcProvider(
           contractAddress: customYield.token1.addresses[customYield.network.chainId]!,
-          rpcUrl: any(named: "rpcUrl"))).thenReturn(token1Contract);
+          rpcUrl: any(named: "rpcUrl"),
+        ),
+      ).thenReturn(token1Contract);
 
-      when(() => token0Contract.allowance(owner: any(named: "owner"), spender: any(named: "spender")))
-          .thenAnswer((_) async => token0Allowance);
+      when(
+        () => token0Contract.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).thenAnswer((_) async => token0Allowance);
 
-      when(() => token1Contract.allowance(owner: any(named: "owner"), spender: any(named: "spender")))
-          .thenAnswer((_) async => token1Allowance);
+      when(
+        () => token1Contract.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).thenAnswer((_) async => token1Allowance);
 
       await sut.setup();
 
@@ -340,15 +378,12 @@ void main() {
     },
   );
 
-  test(
-    "When calling `approveToken` it should emit the approving token state with the token symbol",
-    () async {
-      final token = TokenDto.fixture().copyWith(symbol: "TOKE SYMB");
+  test("When calling `approveToken` it should emit the approving token state with the token symbol", () async {
+    final token = TokenDto.fixture().copyWith(symbol: "TOKE SYMB");
 
-      expectLater(sut.stream, emits(PreviewDepositModalState.approvingToken(token.symbol)));
-      await sut.approveToken(token, BigInt.one);
-    },
-  );
+    expectLater(sut.stream, emits(PreviewDepositModalState.approvingToken(token.symbol)));
+    await sut.approveToken(token, BigInt.one);
+  });
 
   test(
     """When calling `approveToken` and the current user connected
@@ -359,21 +394,22 @@ void main() {
       final customYield = YieldDto.fixture().copyWith(chainId: yieldNetwork.chainId);
 
       sut = PreviewDepositModalCubit(
-          navigatorKey: GlobalKey(),
-          initialPoolTick: initialPoolTick,
-          permit2: permit2,
-          poolService: poolService,
-          currentYield: customYield,
-          erc20: erc20,
-          wallet: wallet,
-          uniswapPositionManager: uniswapPositionManager,
-          zupAnalytics: zupAnalytics);
+        navigatorKey: GlobalKey(),
+        currentPriceX96: initialPoolSqrtPriceX96,
+        permit2: permit2,
+        poolService: poolService,
+        currentYield: customYield,
+        erc20: erc20,
+        wallet: wallet,
+        uniswapPositionManager: uniswapPositionManager,
+        zupAnalytics: zupAnalytics,
+      );
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
       when(() => wallet.connectedNetwork).thenAnswer((_) async => AppNetworks.mainnet.chainInfo);
-      when(() => permit2Impl.allowance(any(), any(), any())).thenAnswer(
-        (_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero),
-      );
+      when(
+        () => permit2Impl.allowance(any(), any(), any()),
+      ).thenAnswer((_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero));
 
       await sut.approveToken(currentYield.token0, BigInt.from(32761));
 
@@ -390,15 +426,16 @@ void main() {
       final customYield = YieldDto.fixture().copyWith(chainId: yieldNetwork.chainId);
 
       sut = PreviewDepositModalCubit(
-          navigatorKey: GlobalKey(),
-          uniswapPositionManager: uniswapPositionManager,
-          initialPoolTick: initialPoolTick,
-          permit2: permit2,
-          poolService: poolService,
-          currentYield: customYield,
-          erc20: erc20,
-          wallet: wallet,
-          zupAnalytics: zupAnalytics);
+        navigatorKey: GlobalKey(),
+        uniswapPositionManager: uniswapPositionManager,
+        currentPriceX96: initialPoolSqrtPriceX96,
+        permit2: permit2,
+        poolService: poolService,
+        currentYield: customYield,
+        erc20: erc20,
+        wallet: wallet,
+        zupAnalytics: zupAnalytics,
+      );
 
       when(() => wallet.switchOrAddNetwork(any())).thenAnswer((_) async {});
       when(() => wallet.connectedNetwork).thenAnswer((_) async => yieldNetwork.chainInfo);
@@ -416,11 +453,19 @@ void main() {
       final token = currentYield.token0;
       final tokenAmount = BigInt.from(121);
 
-      when(() => erc20.fromSigner(contractAddress: any(named: "contractAddress"), signer: any(named: "signer")))
-          .thenReturn(erc20Impl);
+      when(
+        () => erc20.fromSigner(
+          contractAddress: any(named: "contractAddress"),
+          signer: any(named: "signer"),
+        ),
+      ).thenReturn(erc20Impl);
 
-      when(() => erc20Impl.approve(spender: any(named: "spender"), value: any(named: "value")))
-          .thenAnswer((_) async => transactionResponse);
+      when(
+        () => erc20Impl.approve(
+          spender: any(named: "spender"),
+          value: any(named: "value"),
+        ),
+      ).thenAnswer((_) async => transactionResponse);
 
       when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async => TransactionReceipt(hash: ""));
 
@@ -431,33 +476,37 @@ void main() {
     },
   );
 
-  test("""When calling `approve token`, after the transaction
+  test(
+    """When calling `approve token`, after the transaction
    to the contract it sent, it should emit the waiting transaction state
    with the transaction hash
-   """, () async {
-    bool callbackCalled = false;
+   """,
+    () async {
+      bool callbackCalled = false;
 
-    when(() => erc20Impl.approve(spender: any(named: "spender"), value: any(named: "value"))).thenAnswer(
-      (_) async {
+      when(
+        () => erc20Impl.approve(
+          spender: any(named: "spender"),
+          value: any(named: "value"),
+        ),
+      ).thenAnswer((_) async {
         const txId = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
         when(() => transactionResponse.hash).thenReturn(txId);
         expectLater(
           sut.stream,
-          emits(
-            const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.approve),
-          ),
+          emits(const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.approve)),
         );
 
         callbackCalled = true;
         return transactionResponse;
-      },
-    );
+      });
 
-    await sut.approveToken(currentYield.token0, BigInt.two);
+      await sut.approveToken(currentYield.token0, BigInt.two);
 
-    // Check that the callback above in the approval is called to validate the test
-    expect(callbackCalled, true);
-  });
+      // Check that the callback above in the approval is called to validate the test
+      expect(callbackCalled, true);
+    },
+  );
 
   test(
     """When calling `approveToken` it should wait for the transaction
@@ -492,13 +541,19 @@ void main() {
 
       final token0Erc20Impl = Erc20ImplMock();
 
-      when(() => erc20.fromRpcProvider(
+      when(
+        () => erc20.fromRpcProvider(
           contractAddress: currentYield.token0.addresses[currentYield.chainId]!,
-          rpcUrl: any(named: "rpcUrl"))).thenReturn(token0Erc20Impl);
+          rpcUrl: any(named: "rpcUrl"),
+        ),
+      ).thenReturn(token0Erc20Impl);
 
-      when(() => token0Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
-        (_) async => expectedToken0Allowance,
-      );
+      when(
+        () => token0Erc20Impl.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).thenAnswer((_) async => expectedToken0Allowance);
 
       await sut.approveToken(currentYield.token0, expectedToken0Allowance);
 
@@ -519,13 +574,19 @@ void main() {
 
       final token1Erc20Impl = Erc20ImplMock();
 
-      when(() => erc20.fromRpcProvider(
+      when(
+        () => erc20.fromRpcProvider(
           contractAddress: currentYield.token1.addresses[currentYield.chainId]!,
-          rpcUrl: any(named: "rpcUrl"))).thenReturn(token1Erc20Impl);
+          rpcUrl: any(named: "rpcUrl"),
+        ),
+      ).thenReturn(token1Erc20Impl);
 
-      when(() => token1Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
-        (_) async => expectedToken1Allowance,
-      );
+      when(
+        () => token1Erc20Impl.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).thenAnswer((_) async => expectedToken1Allowance);
 
       await sut.approveToken(currentYield.token1, expectedToken1Allowance);
 
@@ -547,26 +608,38 @@ void main() {
       final token0Allowance = BigInt.from(12345);
       final token0Erc20Impl = Erc20ImplMock();
 
-      when(() => erc20.fromRpcProvider(
+      when(
+        () => erc20.fromRpcProvider(
           contractAddress: currentYield.token0.addresses[currentYield.chainId]!,
-          rpcUrl: any(named: "rpcUrl"))).thenReturn(token0Erc20Impl);
+          rpcUrl: any(named: "rpcUrl"),
+        ),
+      ).thenReturn(token0Erc20Impl);
 
-      when(() => token0Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
-        (_) async => token0Allowance,
-      );
+      when(
+        () => token0Erc20Impl.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).thenAnswer((_) async => token0Allowance);
 
       expectLater(
-          sut.stream,
-          emitsInOrder([
-            anything,
-            anything,
-            PreviewDepositModalState.approveSuccess(txId: transactionResponse.hash, symbol: currentYield.token0.symbol),
-            PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: BigInt.zero),
-          ]));
+        sut.stream,
+        emitsInOrder([
+          anything,
+          anything,
+          PreviewDepositModalState.approveSuccess(txId: transactionResponse.hash, symbol: currentYield.token0.symbol),
+          PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: BigInt.zero),
+        ]),
+      );
 
       await sut.approveToken(currentYield.token0, token0Allowance);
 
-      verify(() => token0Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).called(1);
+      verify(
+        () => token0Erc20Impl.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).called(1);
     },
   );
 
@@ -579,26 +652,38 @@ void main() {
       final token1Allowance = BigInt.from(12345);
       final token1Erc20Impl = Erc20ImplMock();
 
-      when(() => erc20.fromRpcProvider(
+      when(
+        () => erc20.fromRpcProvider(
           contractAddress: currentYield.token1.addresses[currentYield.chainId]!,
-          rpcUrl: any(named: "rpcUrl"))).thenReturn(token1Erc20Impl);
+          rpcUrl: any(named: "rpcUrl"),
+        ),
+      ).thenReturn(token1Erc20Impl);
 
-      when(() => token1Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).thenAnswer(
-        (_) async => token1Allowance,
-      );
+      when(
+        () => token1Erc20Impl.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).thenAnswer((_) async => token1Allowance);
 
       expectLater(
-          sut.stream,
-          emitsInOrder([
-            anything,
-            anything,
-            PreviewDepositModalState.approveSuccess(txId: transactionResponse.hash, symbol: currentYield.token1.symbol),
-            PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: token1Allowance),
-          ]));
+        sut.stream,
+        emitsInOrder([
+          anything,
+          anything,
+          PreviewDepositModalState.approveSuccess(txId: transactionResponse.hash, symbol: currentYield.token1.symbol),
+          PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: token1Allowance),
+        ]),
+      );
 
       await sut.approveToken(currentYield.token1, token1Allowance);
 
-      verify(() => token1Erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender"))).called(1);
+      verify(
+        () => token1Erc20Impl.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).called(1);
     },
   );
 
@@ -610,17 +695,22 @@ void main() {
     () async {
       final token1Allowance = BigInt.from(12345);
 
-      when(() => erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender")))
-          .thenThrow("dale error");
+      when(
+        () => erc20Impl.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).thenThrow("dale error");
 
       expectLater(
-          sut.stream,
-          emitsInOrder([
-            anything,
-            anything,
-            anything,
-            PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: token1Allowance),
-          ]));
+        sut.stream,
+        emitsInOrder([
+          anything,
+          anything,
+          anything,
+          PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: token1Allowance),
+        ]),
+      );
 
       await sut.approveToken(currentYield.token1, token1Allowance);
     },
@@ -634,17 +724,22 @@ void main() {
     () async {
       final token0Allowance = BigInt.from(439868);
 
-      when(() => erc20Impl.allowance(owner: any(named: "owner"), spender: any(named: "spender")))
-          .thenThrow("dale error");
+      when(
+        () => erc20Impl.allowance(
+          owner: any(named: "owner"),
+          spender: any(named: "spender"),
+        ),
+      ).thenThrow("dale error");
 
       expectLater(
-          sut.stream,
-          emitsInOrder([
-            anything,
-            anything,
-            anything,
-            PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: BigInt.zero),
-          ]));
+        sut.stream,
+        emitsInOrder([
+          anything,
+          anything,
+          anything,
+          PreviewDepositModalState.initial(token0Allowance: token0Allowance, token1Allowance: BigInt.zero),
+        ]),
+      );
 
       await sut.approveToken(currentYield.token0, token0Allowance);
     },
@@ -654,16 +749,16 @@ void main() {
     """When calling `approveToken` an error is thrown, and it's
     that the user rejected the action, it should emit the initial state""",
     () async {
-      when(() => erc20Impl.approve(spender: any(named: "spender"), value: any(named: "value"))).thenThrow(
-        UserRejectedAction(),
-      );
+      when(
+        () => erc20Impl.approve(
+          spender: any(named: "spender"),
+          value: any(named: "value"),
+        ),
+      ).thenThrow(UserRejectedAction());
 
       await sut.approveToken(currentYield.token0, BigInt.one);
 
-      expect(
-        sut.state,
-        PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero),
-      );
+      expect(sut.state, PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero));
     },
   );
 
@@ -672,15 +767,21 @@ void main() {
     that the user rejected the action, it should emit the transaction error state,
     and right after the initial state""",
     () async {
-      when(() => erc20Impl.approve(spender: any(named: "spender"), value: any(named: "value"))).thenThrow(Exception());
+      when(
+        () => erc20Impl.approve(
+          spender: any(named: "spender"),
+          value: any(named: "value"),
+        ),
+      ).thenThrow(Exception());
 
       expectLater(
-          sut.stream,
-          emitsInOrder([
-            anything,
-            const PreviewDepositModalState.transactionError(),
-            PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero),
-          ]));
+        sut.stream,
+        emitsInOrder([
+          anything,
+          const PreviewDepositModalState.transactionError(),
+          PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero),
+        ]),
+      );
 
       await sut.approveToken(currentYield.token0, BigInt.one);
     },
@@ -775,8 +876,7 @@ void main() {
         any(),
         amount0Desired: token0Amount,
         amount1Desired: token1Amount,
-        amount0Min: any(named: "amount0Min"),
-        amount1Min: any(named: "amount1Min"),
+        slippage: any(named: "slippage"),
         deadline: any(named: "deadline"),
         recipient: any(named: "recipient"),
         tickLower: any(named: "tickLower"),
@@ -786,8 +886,8 @@ void main() {
   });
 
   test(
-    """When calling `deposit`, the amount1Min sent to the pool service to deposit
-    should be the one calculated from the slippage""",
+    """When calling `deposit`, the slippage sent to the pool service to deposit
+    should be the one sent by the user""",
     () async {
       final token1Amount = BigInt.from(6721);
       const slippage = Slippage.halfPercent;
@@ -814,47 +914,7 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: slippage.calculateMinTokenAmountFromSlippage(token1Amount),
-          deadline: any(named: "deadline"),
-          recipient: any(named: "recipient"),
-          tickLower: any(named: "tickLower"),
-          tickUpper: any(named: "tickUpper"),
-        ),
-      ).called(1);
-    },
-  );
-
-  test(
-    """When calling `deposit`, the amount0Min sent to the pool service to deposit
-    should be the one calculated from the slippage""",
-    () async {
-      final token0Amount = BigInt.from(32421);
-      final slippage = Slippage.fromValue(50);
-
-      when(() => uniswapPositionManager.getMintCalldata(params: any(named: "params"))).thenReturn("");
-      sutCopyWith(customDepositWithNative: true);
-
-      await sut.deposit(
-        token0Amount: token0Amount,
-        token1Amount: BigInt.one,
-        deadline: const Duration(minutes: 30),
-        slippage: slippage,
-        minPrice: 0,
-        maxPrice: 0,
-        isMinPriceInfinity: true,
-        isMaxPriceInfinity: true,
-        isReversed: false,
-      );
-
-      verify(
-        () => poolService.sendV3PoolDepositTransaction(
-          any(),
-          any(),
-          amount0Desired: any(named: "amount0Desired"),
-          amount1Desired: any(named: "amount1Desired"),
-          amount0Min: slippage.calculateMinTokenAmountFromSlippage(token0Amount),
-          amount1Min: any(named: "amount1Min"),
+          slippage: slippage,
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
           tickLower: any(named: "tickLower"),
@@ -890,8 +950,7 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: signerAddress,
           tickLower: any(named: "tickLower"),
@@ -901,76 +960,80 @@ void main() {
     },
   );
 
-  test("""When calling `deposit` the minPrice is infinity, and is not reversed,
-      the tick lower send to the pool service should be the min tick (adjusted for the tick spacing)""", () async {
-    sutCopyWith(customDepositWithNative: true);
+  test(
+    """When calling `deposit` the minPrice is infinity, and is not reversed,
+      the tick lower send to the pool service should be the min tick (adjusted for the tick spacing)""",
+    () async {
+      sutCopyWith(customDepositWithNative: true);
 
-    await sut.deposit(
-      token0Amount: BigInt.one,
-      token1Amount: BigInt.one,
-      deadline: const Duration(minutes: 30),
-      slippage: Slippage.halfPercent,
-      minPrice: 0,
-      maxPrice: 3000,
-      isMinPriceInfinity: true,
-      isMaxPriceInfinity: false,
-      isReversed: false,
-    );
+      await sut.deposit(
+        token0Amount: BigInt.one,
+        token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
+        minPrice: 0,
+        maxPrice: 3000,
+        isMinPriceInfinity: true,
+        isMaxPriceInfinity: false,
+        isReversed: false,
+      );
 
-    verify(
-      () => poolService.sendV3PoolDepositTransaction(
-        any(),
-        any(),
-        amount0Desired: any(named: "amount0Desired"),
-        amount1Desired: any(named: "amount1Desired"),
-        amount0Min: any(named: "amount0Min"),
-        amount1Min: any(named: "amount1Min"),
-        deadline: any(named: "deadline"),
-        recipient: any(named: "recipient"),
-        tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-          tick: V3V4PoolConstants.minTick,
-          tickSpacing: currentYield.tickSpacing,
+      verify(
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          slippage: any(named: "slippage"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: CLPoolConstants.minTick,
+            tickSpacing: currentYield.tickSpacing,
+          ),
+          tickUpper: any(named: "tickUpper"),
         ),
-        tickUpper: any(named: "tickUpper"),
-      ),
-    ).called(1);
-  });
+      ).called(1);
+    },
+  );
 
-  test("""When calling `deposit` with the maxPrice infinity, and reversed,
+  test(
+    """When calling `deposit` with the maxPrice infinity, and reversed,
       the tick lower sent to the pool service should be the min tick
-      (but adjusted for the tick spacing)""", () async {
-    sutCopyWith(customDepositWithNative: true);
+      (but adjusted for the tick spacing)""",
+    () async {
+      sutCopyWith(customDepositWithNative: true);
 
-    await sut.deposit(
-      token0Amount: BigInt.one,
-      token1Amount: BigInt.one,
-      deadline: const Duration(minutes: 30),
-      slippage: Slippage.halfPercent,
-      minPrice: 1200,
-      maxPrice: 0,
-      isMinPriceInfinity: false,
-      isMaxPriceInfinity: true,
-      isReversed: true,
-    );
+      await sut.deposit(
+        token0Amount: BigInt.one,
+        token1Amount: BigInt.one,
+        deadline: const Duration(minutes: 30),
+        slippage: Slippage.halfPercent,
+        minPrice: 1200,
+        maxPrice: 0,
+        isMinPriceInfinity: false,
+        isMaxPriceInfinity: true,
+        isReversed: true,
+      );
 
-    verify(
-      () => poolService.sendV3PoolDepositTransaction(
-        any(),
-        any(),
-        amount0Desired: any(named: "amount0Desired"),
-        amount1Desired: any(named: "amount1Desired"),
-        amount0Min: any(named: "amount0Min"),
-        amount1Min: any(named: "amount1Min"),
-        deadline: any(named: "deadline"),
-        recipient: any(named: "recipient"),
-        tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-          tick: V3V4PoolConstants.minTick,
-          tickSpacing: currentYield.tickSpacing,
+      verify(
+        () => poolService.sendV3PoolDepositTransaction(
+          any(),
+          any(),
+          amount0Desired: any(named: "amount0Desired"),
+          amount1Desired: any(named: "amount1Desired"),
+          slippage: any(named: "slippage"),
+          deadline: any(named: "deadline"),
+          recipient: any(named: "recipient"),
+          tickLower: CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: CLPoolConstants.minTick,
+            tickSpacing: currentYield.tickSpacing,
+          ),
+          tickUpper: any(named: "tickUpper"),
         ),
-        tickUpper: any(named: "tickUpper"),
-      ),
-    ).called(1);
-  });
+      ).called(1);
+    },
+  );
 
   test(
     "When calling `deposit` with a min price that is not infinity, it should calculate the correct tickLower and send it to the pool service",
@@ -997,12 +1060,11 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
-          tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-            tick: V3PoolConversorsMixinWrapper().priceToTick(
+          tickLower: CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: CLPoolConversorsMixinWrapper().priceToTick(
               price: minPrice,
               poolToken0Decimals: currentYield.token0NetworkDecimals,
               poolToken1Decimals: currentYield.token1NetworkDecimals,
@@ -1045,12 +1107,11 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
-          tickLower: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-            tick: V3PoolConversorsMixinWrapper().priceToTick(
+          tickLower: CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: CLPoolConversorsMixinWrapper().priceToTick(
               price: maxPrice,
               poolToken0Decimals: currentYield.token0NetworkDecimals,
               poolToken1Decimals: currentYield.token1NetworkDecimals,
@@ -1088,13 +1149,12 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
           tickLower: any(named: "tickLower"),
-          tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-            tick: V3V4PoolConstants.maxTick,
+          tickUpper: CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: CLPoolConstants.maxTick,
             tickSpacing: currentYield.tickSpacing,
           ),
         ),
@@ -1128,13 +1188,12 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
           tickLower: any(named: "tickLower"),
-          tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-            tick: V3V4PoolConstants.maxTick,
+          tickUpper: CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: CLPoolConstants.maxTick,
             tickSpacing: currentYield.tickSpacing,
           ),
         ),
@@ -1169,13 +1228,12 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
           tickLower: any(named: "tickLower"),
-          tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-            tick: V3PoolConversorsMixinWrapper().priceToTick(
+          tickUpper: CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: CLPoolConversorsMixinWrapper().priceToTick(
               price: maxPrice,
               poolToken0Decimals: currentYield.token0NetworkDecimals,
               poolToken1Decimals: currentYield.token1NetworkDecimals,
@@ -1216,13 +1274,12 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
           tickLower: any(named: "tickLower"),
-          tickUpper: V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-            tick: V3PoolConversorsMixinWrapper().priceToTick(
+          tickUpper: CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+            tick: CLPoolConversorsMixinWrapper().priceToTick(
               price: minPrice,
               poolToken0Decimals: currentYield.token0NetworkDecimals,
               poolToken1Decimals: currentYield.token1NetworkDecimals,
@@ -1248,8 +1305,7 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
           tickLower: any(named: "tickLower"),
@@ -1258,9 +1314,7 @@ void main() {
       ).thenAnswer((_) async {
         expectLater(
           sut.stream,
-          emits(
-            const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.deposit),
-          ),
+          emits(const PreviewDepositModalState.waitingTransaction(txId: txId, type: WaitingTransactionType.deposit)),
         );
 
         callbackCalled = true;
@@ -1355,8 +1409,7 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
           tickLower: any(named: "tickLower"),
@@ -1396,8 +1449,7 @@ void main() {
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
           tickLower: any(named: "tickLower"),
@@ -1435,8 +1487,9 @@ void main() {
       withClock(Clock(() => date), () async {
         const deadline = Duration(minutes: 54);
 
-        when(() => uniswapPositionManagerImpl.multicall(data: any(named: "data")))
-            .thenAnswer((_) async => transactionResponse);
+        when(
+          () => uniswapPositionManagerImpl.multicall(data: any(named: "data")),
+        ).thenAnswer((_) async => transactionResponse);
 
         sutCopyWith(customDepositWithNative: true);
 
@@ -1458,8 +1511,7 @@ void main() {
             any(),
             amount0Desired: any(named: "amount0Desired"),
             amount1Desired: any(named: "amount1Desired"),
-            amount0Min: any(named: "amount0Min"),
-            amount1Min: any(named: "amount1Min"),
+            slippage: any(named: "slippage"),
             deadline: deadline,
             recipient: any(named: "recipient"),
             tickLower: any(named: "tickLower"),
@@ -1470,187 +1522,184 @@ void main() {
     },
   );
 
-  group(
-    "Close golden tests",
-    () {
-      setUp(() {
-        final confettiController = ConfettiControllerMock();
+  group("Close golden tests", () {
+    setUp(() {
+      final confettiController = ConfettiControllerMock();
 
-        inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
-        inject.registerFactory<ConfettiController>(
-          () => confettiController,
-          instanceName: InjectInstanceNames.confettiController10s,
+      inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
+      inject.registerFactory<ConfettiController>(
+        () => confettiController,
+        instanceName: InjectInstanceNames.confettiController10s,
+      );
+
+      when(() => confettiController.duration).thenReturn(Duration.zero);
+      when(() => confettiController.play()).thenAnswer((_) async {});
+      when(() => confettiController.state).thenReturn(ConfettiControllerState.stoppedAndCleared);
+    });
+
+    tearDown(() => inject.reset());
+
+    zGoldenTest(
+      """When the state is waiting transation from a deposit and the cubit is trying to close,
+      it should show a snackbar about the deposit in progress""",
+      (tester) async {
+        bool tested = false;
+        sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
+
+        await tester.pumpDeviceBuilder(
+          await goldenDeviceBuilder(const SizedBox()),
+          wrapper: GoldenConfig.localizationsWrapper(),
         );
 
-        when(() => confettiController.duration).thenReturn(Duration.zero);
-        when(() => confettiController.play()).thenAnswer((_) async {});
-        when(() => confettiController.state).thenReturn(ConfettiControllerState.stoppedAndCleared);
-      });
+        when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
+          try {
+            await tester.pumpAndSettle();
 
-      tearDown(() => inject.reset());
+            await sut.close();
+            await screenMatchesGolden(tester, "preview_deposit_modal_cubit_close_depositing_snackbar");
+            tested = true; // if it does not reach here, the test have been failed
+          } catch (e) {
+            debugPrint(e.toString());
+          }
 
-      zGoldenTest(
-        """When the state is waiting transation from a deposit and the cubit is trying to close,
-      it should show a snackbar about the deposit in progress""",
-        (tester) async {
-          bool tested = false;
-          sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
+          return TransactionReceipt(hash: "");
+        });
 
-          await tester.pumpDeviceBuilder(
-            await goldenDeviceBuilder(const SizedBox()),
-            wrapper: GoldenConfig.localizationsWrapper(),
-          );
+        await sut.deposit(
+          deadline: const Duration(minutes: 30),
+          slippage: Slippage.halfPercent,
+          token0Amount: BigInt.one,
+          token1Amount: BigInt.one,
+          minPrice: 1200,
+          maxPrice: 3000.50,
+          isMinPriceInfinity: false,
+          isMaxPriceInfinity: false,
+          isReversed: false,
+        );
 
-          when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
-            try {
-              await tester.pumpAndSettle();
+        // if waitConfirmation its not called, the test will fail. As the real test is
+        // inside the stub of the waitConfirmation, it should change the `tested` variable
+        expect(tested, true);
+      },
+    );
 
-              await sut.close();
-              await screenMatchesGolden(tester, "preview_deposit_modal_cubit_close_depositing_snackbar");
-              tested = true; // if it does not reach here, the test have been failed
-            } catch (e) {
-              debugPrint(e.toString());
-            }
-
-            return TransactionReceipt(hash: "");
-          });
-
-          await sut.deposit(
-            deadline: const Duration(minutes: 30),
-            slippage: Slippage.halfPercent,
-            token0Amount: BigInt.one,
-            token1Amount: BigInt.one,
-            minPrice: 1200,
-            maxPrice: 3000.50,
-            isMinPriceInfinity: false,
-            isMaxPriceInfinity: false,
-            isReversed: false,
-          );
-
-          // if waitConfirmation its not called, the test will fail. As the real test is
-          // inside the stub of the waitConfirmation, it should change the `tested` variable
-          expect(tested, true);
-        },
-      );
-
-      zGoldenTest(
-        """When the state is waiting transation from a approval and the cubit is trying to close,
+    zGoldenTest(
+      """When the state is waiting transation from a approval and the cubit is trying to close,
       it should show a snackbar about the approval in progress""",
-        (tester) async {
-          bool tested = false;
-          sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
+      (tester) async {
+        bool tested = false;
+        sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
 
-          await tester.pumpDeviceBuilder(
-            await goldenDeviceBuilder(const SizedBox()),
-            wrapper: GoldenConfig.localizationsWrapper(),
-          );
+        await tester.pumpDeviceBuilder(
+          await goldenDeviceBuilder(const SizedBox()),
+          wrapper: GoldenConfig.localizationsWrapper(),
+        );
 
-          when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
-            try {
-              await sut.close();
-              await tester.pumpAndSettle();
+        when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
+          try {
+            await sut.close();
+            await tester.pumpAndSettle();
 
-              await screenMatchesGolden(tester, "preview_deposit_modal_cubit_close_approving_snackbar");
+            await screenMatchesGolden(tester, "preview_deposit_modal_cubit_close_approving_snackbar");
 
-              tested = true; // if it does not reach here, the test have been failed
-            } catch (e) {
-              debugPrint(e.toString());
-            }
-            return TransactionReceipt(hash: "");
-          });
+            tested = true; // if it does not reach here, the test have been failed
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+          return TransactionReceipt(hash: "");
+        });
 
-          await sut.approveToken(TokenDto.fixture(), BigInt.one);
+        await sut.approveToken(TokenDto.fixture(), BigInt.one);
 
-          // if waitConfirmation its not called, the test will fail. As the real test is
-          // inside the stub of the waitConfirmation, it should change the `tested` variable
-          expect(tested, true);
-        },
-      );
+        // if waitConfirmation its not called, the test will fail. As the real test is
+        // inside the stub of the waitConfirmation, it should change the `tested` variable
+        expect(tested, true);
+      },
+    );
 
-      zGoldenTest(
-        """When the state is waiting transation from a approval, the cubit is trying to close,
+    zGoldenTest(
+      """When the state is waiting transation from a approval, the cubit is trying to close,
           and the approve succes state is emitted, it should show a snackbar about the approval success
           and then close the cubit""",
-        goldenFileName: "preview_deposit_modal_cubit_close_approval_success_snackbar",
-        (tester) async {
-          sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
+      goldenFileName: "preview_deposit_modal_cubit_close_approval_success_snackbar",
+      (tester) async {
+        sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
 
-          await tester.pumpDeviceBuilder(
-            await goldenDeviceBuilder(const SizedBox()),
-            wrapper: GoldenConfig.localizationsWrapper(),
-          );
+        await tester.pumpDeviceBuilder(
+          await goldenDeviceBuilder(const SizedBox()),
+          wrapper: GoldenConfig.localizationsWrapper(),
+        );
 
-          when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
-            try {
-              await sut.close();
-            } catch (e) {
-              debugPrint(e.toString());
-            }
-            return TransactionReceipt(hash: "");
-          });
+        when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
+          try {
+            await sut.close();
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+          return TransactionReceipt(hash: "");
+        });
 
-          await sut.approveToken(TokenDto.fixture(), BigInt.one);
-          await tester.pumpAndSettle();
+        await sut.approveToken(TokenDto.fixture(), BigInt.one);
+        await tester.pumpAndSettle();
 
-          expect(sut.isClosed, true);
-        },
-      );
+        expect(sut.isClosed, true);
+      },
+    );
 
-      zGoldenTest(
-        """When the state is waiting transation from a deposit, the cubit is trying to close,
+    zGoldenTest(
+      """When the state is waiting transation from a deposit, the cubit is trying to close,
           and the deposit succes state is emitted, it should show the deposit success modal
           and then close the cubit""",
-        goldenFileName: "preview_deposit_modal_cubit_close_deposit_success_modal",
-        (tester) async {
-          sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
+      goldenFileName: "preview_deposit_modal_cubit_close_deposit_success_modal",
+      (tester) async {
+        sutCopyWith(customNavigatorKey: GoldenConfig.navigatorKey);
 
-          await tester.pumpDeviceBuilder(
-            await goldenDeviceBuilder(const SizedBox()),
-            wrapper: GoldenConfig.localizationsWrapper(),
-          );
+        await tester.pumpDeviceBuilder(
+          await goldenDeviceBuilder(const SizedBox()),
+          wrapper: GoldenConfig.localizationsWrapper(),
+        );
 
-          when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
-            try {
-              await sut.close();
-            } catch (e) {
-              debugPrint(e.toString());
-            }
-            return TransactionReceipt(hash: "");
-          });
+        when(() => transactionResponse.waitConfirmation()).thenAnswer((_) async {
+          try {
+            await sut.close();
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+          return TransactionReceipt(hash: "");
+        });
 
-          await sut.deposit(
-            deadline: const Duration(minutes: 30),
-            slippage: Slippage.halfPercent,
-            token0Amount: BigInt.one,
-            token1Amount: BigInt.one,
-            minPrice: 1200,
-            maxPrice: 3000.50,
-            isMinPriceInfinity: false,
-            isMaxPriceInfinity: false,
-            isReversed: false,
-          );
+        await sut.deposit(
+          deadline: const Duration(minutes: 30),
+          slippage: Slippage.halfPercent,
+          token0Amount: BigInt.one,
+          token1Amount: BigInt.one,
+          minPrice: 1200,
+          maxPrice: 3000.50,
+          isMinPriceInfinity: false,
+          isMaxPriceInfinity: false,
+          isReversed: false,
+        );
 
-          await tester.pumpAndSettle();
-          await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-          expect(sut.isClosed, true);
-        },
-      );
-    },
-  );
+        expect(sut.isClosed, true);
+      },
+    );
+  });
 
   test(
     """When calling `deposit` and an error with `slippage` text in its body occur while depositing,
     it should emit the slippage check error state and the initial state""",
     () async {
+      const slippage = Slippage.halfPercent;
       when(
         () => poolService.sendV3PoolDepositTransaction(
           any(),
           any(),
           amount0Desired: any(named: "amount0Desired"),
           amount1Desired: any(named: "amount1Desired"),
-          amount0Min: any(named: "amount0Min"),
-          amount1Min: any(named: "amount1Min"),
+          slippage: any(named: "slippage"),
           deadline: any(named: "deadline"),
           recipient: any(named: "recipient"),
           tickLower: any(named: "tickLower"),
@@ -1662,14 +1711,14 @@ void main() {
         sut.stream,
         emitsInOrder([
           anything,
-          const PreviewDepositModalState.slippageCheckError(),
+          PreviewDepositModalState.slippageCheckError(slippage.isAutomatic),
           PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero),
         ]),
       );
 
       await sut.deposit(
         deadline: const Duration(minutes: 30),
-        slippage: Slippage.halfPercent,
+        slippage: slippage,
         token0Amount: BigInt.one,
         token1Amount: BigInt.one,
         minPrice: 1200,
@@ -1700,60 +1749,63 @@ void main() {
         isReversed: false,
       );
 
-      verify(() => zupAnalytics.logDeposit(
-            depositedYield: currentYield,
-            amount0Formatted: token0amount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
-            amount1Formatted: token1amount.parseTokenAmount(decimals: currentYield.token1NetworkDecimals),
-            walletAddress: userAddress,
-          )).called(1);
+      verify(
+        () => zupAnalytics.logDeposit(
+          depositedYield: currentYield,
+          amount0Formatted: token0amount.parseTokenAmount(decimals: currentYield.token0NetworkDecimals),
+          amount1Formatted: token1amount.parseTokenAmount(decimals: currentYield.token1NetworkDecimals),
+          walletAddress: userAddress,
+        ),
+      ).called(1);
     },
   );
 
-  test(
-    "When calling `deposit` and it don't succeed, it should not log the any deposit event ",
-    () async {
-      when(() => transactionResponse.waitConfirmation()).thenThrow(Exception());
+  test("When calling `deposit` and it don't succeed, it should not log the any deposit event ", () async {
+    when(() => transactionResponse.waitConfirmation()).thenThrow(Exception());
 
-      await sut.deposit(
-        deadline: const Duration(minutes: 30),
-        slippage: Slippage.halfPercent,
-        token0Amount: BigInt.one,
-        token1Amount: BigInt.one,
-        minPrice: 1200,
-        maxPrice: 3000.50,
-        isMinPriceInfinity: false,
-        isMaxPriceInfinity: false,
-        isReversed: false,
-      );
+    await sut.deposit(
+      deadline: const Duration(minutes: 30),
+      slippage: Slippage.halfPercent,
+      token0Amount: BigInt.one,
+      token1Amount: BigInt.one,
+      minPrice: 1200,
+      maxPrice: 3000.50,
+      isMinPriceInfinity: false,
+      isMaxPriceInfinity: false,
+      isReversed: false,
+    );
 
-      verifyNever(() => zupAnalytics.logDeposit(
-            depositedYield: any(named: "depositedYield"),
-            amount0Formatted: any(named: "amount0Formatted"),
-            amount1Formatted: any(named: "amount1Formatted"),
-            walletAddress: any(named: "walletAddress"),
-          ));
-    },
-  );
+    verifyNever(
+      () => zupAnalytics.logDeposit(
+        depositedYield: any(named: "depositedYield"),
+        amount0Formatted: any(named: "amount0Formatted"),
+        amount1Formatted: any(named: "amount1Formatted"),
+        walletAddress: any(named: "walletAddress"),
+      ),
+    );
+  });
 
   test(
     "When calling `approveToken` and the pool type is v4, it should approve the permit2 contract as well ",
     () async {
-      when(() => permit2Impl.allowance(any(), any(), any()))
-          .thenAnswer((_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero));
+      when(
+        () => permit2Impl.allowance(any(), any(), any()),
+      ).thenAnswer((_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero));
 
       when(
         () => permit2Impl.approve(
-            token: any(named: "token"),
-            spender: any(named: "spender"),
-            amount: any(named: "amount"),
-            expiration: any(named: "expiration")),
+          token: any(named: "token"),
+          spender: any(named: "spender"),
+          amount: any(named: "amount"),
+          expiration: any(named: "expiration"),
+        ),
       ).thenAnswer((_) async => transactionResponse);
 
       const permit2Address = "0x1234";
       final currentYield0 = currentYield.copyWith(poolType: PoolType.v4, permit2: permit2Address);
 
       sut = PreviewDepositModalCubit(
-        initialPoolTick: initialPoolTick,
+        currentPriceX96: initialPoolSqrtPriceX96,
         poolService: poolService,
         currentYield: currentYield0,
         erc20: erc20,
@@ -1785,23 +1837,24 @@ void main() {
     () async {
       final allowedAmount = BigInt.from(1275);
 
-      when(() => permit2Impl.allowance(any(), any(), any())).thenAnswer(
-        (_) async => (amount: allowedAmount, expiration: EthereumConstants.uint48Max, nonce: BigInt.zero),
-      );
+      when(
+        () => permit2Impl.allowance(any(), any(), any()),
+      ).thenAnswer((_) async => (amount: allowedAmount, expiration: EthereumConstants.uint48Max, nonce: BigInt.zero));
 
       when(
         () => permit2Impl.approve(
-            token: any(named: "token"),
-            spender: any(named: "spender"),
-            amount: any(named: "amount"),
-            expiration: any(named: "expiration")),
+          token: any(named: "token"),
+          spender: any(named: "spender"),
+          amount: any(named: "amount"),
+          expiration: any(named: "expiration"),
+        ),
       ).thenAnswer((_) async => transactionResponse);
 
       const permit2Address = "0x1234";
       final currentYield0 = currentYield.copyWith(poolType: PoolType.v4, permit2: permit2Address);
 
       sut = PreviewDepositModalCubit(
-        initialPoolTick: initialPoolTick,
+        currentPriceX96: initialPoolSqrtPriceX96,
         poolService: poolService,
         currentYield: currentYield0,
         erc20: erc20,
@@ -1838,23 +1891,24 @@ void main() {
         (_) async => (
           amount: allowedAmount,
           expiration: BigInt.from((DateTime.now().millisecondsSinceEpoch / 1000) - 1),
-          nonce: BigInt.zero
+          nonce: BigInt.zero,
         ),
       );
 
       when(
         () => permit2Impl.approve(
-            token: any(named: "token"),
-            spender: any(named: "spender"),
-            amount: any(named: "amount"),
-            expiration: any(named: "expiration")),
+          token: any(named: "token"),
+          spender: any(named: "spender"),
+          amount: any(named: "amount"),
+          expiration: any(named: "expiration"),
+        ),
       ).thenAnswer((_) async => transactionResponse);
 
       const permit2Address = "0x1234";
       final currentYield0 = currentYield.copyWith(poolType: PoolType.v4, permit2: permit2Address);
 
       sut = PreviewDepositModalCubit(
-        initialPoolTick: initialPoolTick,
+        currentPriceX96: initialPoolSqrtPriceX96,
         poolService: poolService,
         currentYield: currentYield0,
         erc20: erc20,
@@ -1886,12 +1940,12 @@ void main() {
     () async {
       const permit2Address = "0x1234";
       final currentYield0 = currentYield.copyWith(poolType: PoolType.v4, permit2: permit2Address);
-      when(() => permit2Impl.allowance(any(), any(), any())).thenAnswer(
-        (_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero),
-      );
+      when(
+        () => permit2Impl.allowance(any(), any(), any()),
+      ).thenAnswer((_) async => (amount: BigInt.zero, expiration: BigInt.zero, nonce: BigInt.zero));
 
       sut = PreviewDepositModalCubit(
-        initialPoolTick: initialPoolTick,
+        currentPriceX96: initialPoolSqrtPriceX96,
         poolService: poolService,
         currentYield: currentYield0,
         erc20: erc20,
@@ -1907,85 +1961,79 @@ void main() {
 
       await sut.approveToken(token, value);
 
-      verify(
-        () => erc20Impl.approve(
-          spender: permit2Address,
-          value: value,
-        ),
-      ).called(1);
+      verify(() => erc20Impl.approve(spender: permit2Address, value: value)).called(1);
     },
   );
 
   test(
-      "when calling `deposit` and the pool type is v4, it should call the pool service to deposit on v4 with the correct parameters",
-      () async {
-    final currentYield0 = currentYield.copyWith(
-      poolType: PoolType.v4,
-      permit2: "0x1234",
-    );
-    final token0Amount = BigInt.one;
-    final token1Amount = BigInt.two;
-    const minPrice = 1200.43;
-    const maxPrice = 4000.12;
-    const isMinPriceInfinity = false;
-    const isMaxPriceInfinity = false;
-    const isReversed = false;
-    final slippage = Slippage.fromValue(32);
-    const deadline = Duration(minutes: 30);
-    final recipient = await signer.address;
-    final tickLower = V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-        tick: V3PoolConversorsMixinWrapper().priceToTick(
+    "when calling `deposit` and the pool type is v4, it should call the pool service to deposit on v4 with the correct parameters",
+    () async {
+      final currentYield0 = currentYield.copyWith(poolType: PoolType.v4, permit2: "0x1234");
+      final token0Amount = BigInt.one;
+      final token1Amount = BigInt.two;
+      const minPrice = 1200.43;
+      const maxPrice = 4000.12;
+      const isMinPriceInfinity = false;
+      const isMaxPriceInfinity = false;
+      const isReversed = false;
+      final slippage = Slippage.fromValue(32);
+      const deadline = Duration(minutes: 30);
+      final recipient = await signer.address;
+      final tickLower = CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+        tick: CLPoolConversorsMixinWrapper().priceToTick(
           price: minPrice,
           poolToken0Decimals: currentYield0.token0NetworkDecimals,
           poolToken1Decimals: currentYield0.token1NetworkDecimals,
         ),
-        tickSpacing: currentYield0.tickSpacing);
+        tickSpacing: currentYield0.tickSpacing,
+      );
 
-    final tickUpper = V3PoolConversorsMixinWrapper().tickToClosestValidTick(
-        tick: V3PoolConversorsMixinWrapper().priceToTick(
+      final tickUpper = CLPoolConversorsMixinWrapper().tickToClosestValidTick(
+        tick: CLPoolConversorsMixinWrapper().priceToTick(
           price: maxPrice,
           poolToken0Decimals: currentYield0.token0NetworkDecimals,
           poolToken1Decimals: currentYield0.token1NetworkDecimals,
         ),
-        tickSpacing: currentYield0.tickSpacing);
+        tickSpacing: currentYield0.tickSpacing,
+      );
 
-    sut = PreviewDepositModalCubit(
-      initialPoolTick: initialPoolTick,
-      poolService: poolService,
-      currentYield: currentYield0,
-      erc20: erc20,
-      wallet: wallet,
-      uniswapPositionManager: uniswapPositionManager,
-      permit2: permit2,
-      navigatorKey: GlobalKey(),
-      zupAnalytics: zupAnalytics,
-    );
+      sut = PreviewDepositModalCubit(
+        currentPriceX96: initialPoolSqrtPriceX96,
+        poolService: poolService,
+        currentYield: currentYield0,
+        erc20: erc20,
+        wallet: wallet,
+        uniswapPositionManager: uniswapPositionManager,
+        permit2: permit2,
+        navigatorKey: GlobalKey(),
+        zupAnalytics: zupAnalytics,
+      );
 
-    await sut.deposit(
-      token0Amount: token0Amount,
-      token1Amount: token1Amount,
-      minPrice: minPrice,
-      maxPrice: maxPrice,
-      isMinPriceInfinity: isMinPriceInfinity,
-      isMaxPriceInfinity: isMaxPriceInfinity,
-      isReversed: isReversed,
-      slippage: slippage,
-      deadline: deadline,
-    );
-
-    verify(
-      () => poolService.sendV4PoolDepositTransaction(
-        currentYield0,
-        signer,
-        amount0toDeposit: token0Amount,
-        amount1ToDeposit: token1Amount,
-        maxAmount0ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(token0Amount),
-        maxAmount1ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(token1Amount),
+      await sut.deposit(
+        token0Amount: token0Amount,
+        token1Amount: token1Amount,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        isMinPriceInfinity: isMinPriceInfinity,
+        isMaxPriceInfinity: isMaxPriceInfinity,
+        isReversed: isReversed,
+        slippage: slippage,
         deadline: deadline,
-        tickLower: tickLower,
-        tickUpper: tickUpper,
-        recipient: recipient,
-      ),
-    ).called(1);
-  });
+      );
+
+      verify(
+        () => poolService.sendV4PoolDepositTransaction(
+          currentYield0,
+          signer,
+          amount0toDeposit: token0Amount,
+          amount1ToDeposit: token1Amount,
+          slippage: slippage,
+          deadline: deadline,
+          tickLower: tickLower,
+          tickUpper: tickUpper,
+          recipient: recipient,
+        ),
+      ).called(1);
+    },
+  );
 }

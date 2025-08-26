@@ -14,6 +14,7 @@ import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_constants.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
@@ -21,7 +22,6 @@ import 'package:zup_app/core/enums/yield_timeframe.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
@@ -79,8 +79,8 @@ void main() {
     inject.registerFactory<GlobalKey<NavigatorState>>(() => GlobalKey());
 
     when(() => cubit.setup()).thenAnswer((_) async {});
-    when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(V3V4PoolConstants.maxTick));
-    when(() => cubit.latestPoolTick).thenReturn(BigInt.from(3247));
+    when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(CLPoolConstants.maxTick));
+    when(() => cubit.latestPriceX96).thenReturn(BigInt.from(3247));
     when(() => cubit.stream).thenAnswer(
       (_) => Stream.value(PreviewDepositModalState.initial(token0Allowance: BigInt.zero, token1Allowance: BigInt.zero)),
     );
@@ -301,13 +301,13 @@ void main() {
       const currentPrice = 3200.0;
       const minPrice = 4000.0;
 
-      final currentPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
+      final currentPriceAsTick = CLPoolConversorsMixinWrapper().priceToTick(
         price: currentPrice,
         poolToken0Decimals: currentYield.token0NetworkDecimals,
         poolToken1Decimals: currentYield.token1NetworkDecimals,
       );
 
-      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+      when(() => cubit.latestPriceX96).thenReturn(currentPriceAsTick);
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(minPrice: (price: minPrice, isInfinity: false), maxPrice: (price: 0, isInfinity: true)),
@@ -325,13 +325,15 @@ void main() {
       const currentPrice = 3200.0;
       const maxPrice = 2000.0;
 
-      final currentPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
-        price: currentPrice,
-        poolToken0Decimals: currentYield.token0NetworkDecimals,
-        poolToken1Decimals: currentYield.token1NetworkDecimals,
+      final currentPriceAsSqrtPrice = CLPoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(
+        CLPoolConversorsMixinWrapper().priceToTick(
+          price: currentPrice,
+          poolToken0Decimals: currentYield.token0NetworkDecimals,
+          poolToken1Decimals: currentYield.token1NetworkDecimals,
+        ),
       );
 
-      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+      when(() => cubit.latestPriceX96).thenReturn(currentPriceAsSqrtPrice);
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(minPrice: (price: 0, isInfinity: true), maxPrice: (price: maxPrice, isInfinity: false)),
@@ -352,13 +354,15 @@ void main() {
       const minPrice = 2000.0;
       const maxPrice = 4000.0;
 
-      final currentPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
-        price: currentPrice,
-        poolToken0Decimals: currentYield.token0NetworkDecimals,
-        poolToken1Decimals: currentYield.token1NetworkDecimals,
+      final currentPriceAsSqrtPriceX96 = CLPoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(
+        CLPoolConversorsMixinWrapper().priceToTick(
+          price: currentPrice,
+          poolToken0Decimals: currentYield.token0NetworkDecimals,
+          poolToken1Decimals: currentYield.token1NetworkDecimals,
+        ),
       );
 
-      when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+      when(() => cubit.latestPriceX96).thenReturn(currentPriceAsSqrtPriceX96);
 
       await tester.pumpDeviceBuilder(
         await goldenBuilder(
@@ -723,8 +727,8 @@ void main() {
     "Current price card should show the correct price based on the current tick",
     goldenFileName: "preview_deposit_modal_current_price",
     (tester) async {
-      when(() => cubit.latestPoolTick).thenReturn(
-        V3PoolConversorsMixinWrapper().priceToTick(
+      when(() => cubit.latestPriceX96).thenReturn(
+        CLPoolConversorsMixinWrapper().priceToTick(
           price: 0.01, // It should be shown in the card (or very close to it)
           poolToken0Decimals: currentYield.token0NetworkDecimals,
           poolToken1Decimals: currentYield.token1NetworkDecimals,
@@ -741,8 +745,8 @@ void main() {
     "When it's reversed, the Current price card should show the correct price based on the current tick",
     goldenFileName: "preview_deposit_modal_current_price_reversed",
     (tester) async {
-      when(() => cubit.latestPoolTick).thenReturn(
-        V3PoolConversorsMixinWrapper().priceToTick(
+      when(() => cubit.latestPriceX96).thenReturn(
+        CLPoolConversorsMixinWrapper().priceToTick(
           price: 1200, // It should be shown in the card (or very close to it)
           poolToken0Decimals: currentYield.token0NetworkDecimals,
           poolToken1Decimals: currentYield.token1NetworkDecimals,
@@ -762,21 +766,21 @@ void main() {
     goldenFileName: "preview_deposit_modal_current_price_stream",
     (tester) async {
       const newPrice = 0.02632; // It should be shown in the card (or very close to it)
-      final newPriceAsTick = V3PoolConversorsMixinWrapper().priceToTick(
+      final newPriceAsTick = CLPoolConversorsMixinWrapper().priceToTick(
         price: newPrice,
         poolToken0Decimals: currentYield.token0NetworkDecimals,
         poolToken1Decimals: currentYield.token1NetworkDecimals,
         isReversed: false,
       );
 
-      final poolTickStreamController = StreamController<BigInt>.broadcast();
-      when(() => cubit.poolTickStream).thenAnswer((_) => poolTickStreamController.stream);
+      final poolSqrtPriceX96StreamController = StreamController<BigInt>.broadcast();
+      when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => poolSqrtPriceX96StreamController.stream);
 
       await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
       await tester.pumpAndSettle();
 
-      when(() => cubit.latestPoolTick).thenReturn(newPriceAsTick);
-      poolTickStreamController.add(newPriceAsTick);
+      when(() => cubit.latestPriceX96).thenReturn(newPriceAsTick);
+      poolSqrtPriceX96StreamController.add(newPriceAsTick);
 
       await tester.pumpAndSettle();
     },
@@ -915,7 +919,7 @@ void main() {
                     token1DepositAmountController: TextEditingController(text: "4300"),
                     deadline: const Duration(minutes: 30),
                     maxSlippage: Slippage.halfPercent,
-                  ).show(context, currentPoolTick: BigInt.from(121475));
+                  ).show(context, currentPriceX96: BigInt.from(121475));
                 });
 
                 return const SizedBox();
@@ -950,7 +954,7 @@ void main() {
                     token1DepositAmountController: TextEditingController(text: "4300"),
                     deadline: const Duration(minutes: 30),
                     maxSlippage: Slippage.halfPercent,
-                  ).show(context, currentPoolTick: BigInt.from(121475));
+                  ).show(context, currentPriceX96: BigInt.from(121475));
                 });
 
                 return const SizedBox();
@@ -991,9 +995,27 @@ void main() {
     "When the state is slippage check error, it should show an error snack bar saying to change the slippage",
     goldenFileName: "preview_deposit_modal_slippage_check_error",
     (tester) async {
-      when(() => cubit.state).thenReturn(const PreviewDepositModalState.slippageCheckError());
+      when(() => cubit.state).thenReturn(const PreviewDepositModalState.slippageCheckError(false));
       when(() => cubit.stream).thenAnswer((_) {
-        return Stream.value(const PreviewDepositModalState.slippageCheckError());
+        return Stream.value(const PreviewDepositModalState.slippageCheckError(false));
+      });
+
+      await tester.pumpDeviceBuilder(
+        await goldenBuilder(),
+        wrapper: GoldenConfig.localizationsWrapper(scaffoldMessengerKey: scaffoldMessengerKey),
+      );
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  zGoldenTest(
+    "When the state is slippage check error with automatic slippage one, it should show an error snack bar saying to try again or change the slippage",
+    goldenFileName: "preview_deposit_modal_slippage_check_error_auto_slippage",
+    (tester) async {
+      when(() => cubit.state).thenReturn(const PreviewDepositModalState.slippageCheckError(true));
+      when(() => cubit.stream).thenAnswer((_) {
+        return Stream.value(const PreviewDepositModalState.slippageCheckError(true));
       });
 
       await tester.pumpDeviceBuilder(

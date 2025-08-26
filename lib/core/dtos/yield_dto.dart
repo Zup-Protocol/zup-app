@@ -29,6 +29,7 @@ sealed class YieldDto with _$YieldDto {
     @Default(0) num yield90d,
     @Default(PoolType.unknown) @JsonKey(unknownEnumValue: PoolType.unknown) PoolType poolType,
     @Default("0") String latestTick,
+    @Default("0") String latestSqrtPriceX96,
     @Default(0) num totalValueLockedUSD,
     @Default(EthereumConstants.zeroAddress) @JsonKey(name: "hooksAddress") String v4Hooks,
     @Default(EthereumConstants.zeroAddress) @JsonKey(name: "deployerAddress") String deployerAddress,

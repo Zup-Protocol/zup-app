@@ -654,6 +654,10 @@ class SEn extends S {
       'Slippage Check! Please try increasing your slippage for this transaction';
 
   @override
+  String get previewDepositModalAutoSlippageCheckErrorMessage =>
+      'Strong market movement! Slippage exceeded. Try again or adjust tolerance.';
+
+  @override
   String get createPageTitle => 'New Position';
 
   @override

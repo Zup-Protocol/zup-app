@@ -1,3 +1,6 @@
-import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_conversors_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_liquidity_calculations_mixin.dart';
 
-class V3PoolConversorsMixinWrapper with V3PoolConversorsMixin {}
+class CLPoolConversorsMixinWrapper with CLPoolConversorsMixin {}
+
+class CLPoolLiquidityCalculationsMixinWrapper with CLPoolLiquidityCalculationsMixin {}

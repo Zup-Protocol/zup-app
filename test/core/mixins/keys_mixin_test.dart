@@ -21,26 +21,20 @@ void main() {
     expect(key, 'userTokenBalance-$userAddress-$tokenAddress-native=$isNative-${network.name}');
   });
 
-  test("`poolTickCacheKey` should return correct key", () {
+  test("`poolSqrtPriceCacheKey` should return correct key", () {
     const network = AppNetworks.sepolia;
     const poolAddress = '0xPoolAddress';
 
-    final key = _KeysMixinWrapper().poolTickCacheKey(
-      network: network,
-      poolAddress: poolAddress,
-    );
+    final key = _KeysMixinWrapper().poolSqrtPriceCacheKey(network: network, poolAddress: poolAddress);
 
-    expect(key, 'poolTick-$poolAddress-${network.name}');
+    expect(key, 'sqrtPrice-$poolAddress-${network.name}');
   });
 
   test("`tokenPriceCacheKey` should return correct key", () {
     const tokenAddress = '0xTokenAddress';
     const network = AppNetworks.sepolia;
 
-    final key = _KeysMixinWrapper().tokenPriceCacheKey(
-      tokenAddress: tokenAddress,
-      network: network,
-    );
+    final key = _KeysMixinWrapper().tokenPriceCacheKey(tokenAddress: tokenAddress, network: network);
 
     expect(key, 'tokenPrice-$tokenAddress-${network.name}');
   });

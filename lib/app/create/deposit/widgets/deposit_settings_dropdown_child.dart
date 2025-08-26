@@ -67,26 +67,26 @@ class _DepositSettingsDropdownChildState extends State<DepositSettingsDropdownCh
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ZupTooltip.text(
-              key: const Key("slippage-tooltip"),
-              message: S.of(context).slippageExplanation,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IgnorePointer(
-                    child: Text(
-                      S.of(context).depositSettingsDropdownChildMaxSlippage,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IgnorePointer(
+                  child: Text(
+                    S.of(context).depositSettingsDropdownChildMaxSlippage,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  const SizedBox(width: 5),
-                  Assets.icons.infoCircle.svg(
+                ),
+                const SizedBox(width: 5),
+                ZupTooltip.text(
+                  key: const Key("slippage-tooltip"),
+                  message: S.of(context).slippageExplanation,
+                  child: Assets.icons.infoCircle.svg(
                     width: 16,
                     height: 16,
                     colorFilter: const ColorFilter.mode(ZupColors.gray, BlendMode.srcIn),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             Row(
@@ -94,6 +94,13 @@ class _DepositSettingsDropdownChildState extends State<DepositSettingsDropdownCh
                 CupertinoSlidingSegmentedControl(
                   groupValue: selectedSlippage.isCustom ? null : selectedSlippage,
                   children: {
+                    Slippage.automatic: const MouseRegion(
+                      key: Key("automatic-slippage"),
+                      cursor: SystemMouseCursors.click,
+                      child: IgnorePointer(
+                        child: Text("Auto", style: TextStyle(fontWeight: FontWeight.w600)),
+                      ),
+                    ),
                     Slippage.zeroPointOnePercent: const MouseRegion(
                       key: Key("zero-point-one-percent-slippage"),
                       cursor: SystemMouseCursors.click,
@@ -232,26 +239,26 @@ class _DepositSettingsDropdownChildState extends State<DepositSettingsDropdownCh
             const SizedBox(height: 10),
             Row(
               children: [
-                ZupTooltip.text(
-                  message: S.of(context).depositSettingsDropdownChildTransactionDeadlineExplanation,
-                  key: const Key("deadline-tooltip"),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IgnorePointer(
-                        child: Text(
-                          S.of(context).depositSettingsDropdownTransactionDeadline,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IgnorePointer(
+                      child: Text(
+                        S.of(context).depositSettingsDropdownTransactionDeadline,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(width: 6),
-                      Assets.icons.infoCircle.svg(
+                    ),
+                    const SizedBox(width: 6),
+                    ZupTooltip.text(
+                      key: const Key("deadline-tooltip"),
+                      message: S.of(context).depositSettingsDropdownChildTransactionDeadlineExplanation,
+                      child: Assets.icons.infoCircle.svg(
                         width: 16,
                         height: 16,
                         colorFilter: const ColorFilter.mode(ZupColors.gray, BlendMode.srcIn),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 const SizedBox(width: 10),
                 Expanded(

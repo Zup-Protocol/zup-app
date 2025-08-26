@@ -8,7 +8,7 @@ part 'deposit_settings_dto.g.dart';
 sealed class DepositSettingsDto with _$DepositSettingsDto {
   const DepositSettingsDto._();
 
-  static const defaultMaxSlippage = 0.5;
+  static const double defaultMaxSlippage = 0.0; // should be auto
   static const defaultDeadlineMinutes = 10;
 
   @JsonSerializable(explicitToJson: true)

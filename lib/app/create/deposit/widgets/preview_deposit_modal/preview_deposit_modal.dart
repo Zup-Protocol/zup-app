@@ -9,15 +9,16 @@ import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_constants.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_conversors_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_sqrt_price_math_mixin.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/yield_timeframe.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/injections.dart';
-import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/core/zup_navigator.dart';
@@ -55,7 +56,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
 
   final double paddingSize = 20;
 
-  show(BuildContext context, {required BigInt currentPoolTick}) {
+  show(BuildContext context, {required BigInt currentPriceX96}) {
     return ZupModal.show(
       context,
       showAsBottomSheet: isMobileSize(context),
@@ -71,7 +72,7 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
           wallet: inject<Wallet>(),
           poolService: inject<PoolService>(),
           permit2: inject<UniswapPermit2>(),
-          initialPoolTick: currentPoolTick,
+          currentPriceX96: currentPriceX96,
           navigatorKey: inject<GlobalKey<NavigatorState>>(),
         ),
         child: PreviewDepositModal(
@@ -93,7 +94,8 @@ class PreviewDepositModal extends StatefulWidget with DeviceInfoMixin {
   State<PreviewDepositModal> createState() => _PreviewDepositModalState();
 }
 
-class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolConversorsMixin, DeviceInfoMixin {
+class _PreviewDepositModalState extends State<PreviewDepositModal>
+    with CLPoolConversorsMixin, CLSqrtPriceMath, DeviceInfoMixin {
   final zupCachedImage = inject<ZupCachedImage>();
   final navigator = inject<ZupNavigator>();
   final zupLinks = inject<ZupLinks>();
@@ -125,36 +127,34 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
   PreviewDepositModalCubit get cubit => context.read<PreviewDepositModalCubit>();
 
   double get baseTokenAmount => isReversedLocal
-      ? widget.token1DepositAmountController.parseTextToDouble
-      : widget.token0DepositAmountController.parseTextToDouble;
+      ? widget.token1DepositAmountController.parseTextToDoubleOrZero
+      : widget.token0DepositAmountController.parseTextToDoubleOrZero;
 
   double get quoteTokenAmount => isReversedLocal
-      ? widget.token0DepositAmountController.parseTextToDouble
-      : widget.token1DepositAmountController.parseTextToDouble;
+      ? widget.token0DepositAmountController.parseTextToDoubleOrZero
+      : widget.token1DepositAmountController.parseTextToDoubleOrZero;
 
-  BigInt get token0DepositAmount => widget.token0DepositAmountController.parseTextToDouble.parseTokenAmount(
+  BigInt get token0DepositAmount => widget.token0DepositAmountController.parseTextToDoubleOrZero.parseTokenAmount(
     decimals: widget.currentYield.token0NetworkDecimals,
   );
 
-  BigInt get token1DepositAmount => widget.token1DepositAmountController.parseTextToDouble.parseTokenAmount(
+  BigInt get token1DepositAmount => widget.token1DepositAmountController.parseTextToDoubleOrZero.parseTokenAmount(
     decimals: widget.currentYield.token1NetworkDecimals,
   );
 
   double get currentPrice {
-    final currentTick = cubit.latestPoolTick;
-
-    final price = tickToPrice(
-      tick: currentTick,
+    final price = sqrtPriceX96ToPrice(
+      sqrtPriceX96: cubit.latestPriceX96,
       poolToken0Decimals: widget.currentYield.token0NetworkDecimals,
       poolToken1Decimals: widget.currentYield.token1NetworkDecimals,
     );
 
-    return isReversedLocal ? price.priceAsQuoteToken : price.priceAsBaseToken;
+    return isReversedLocal ? price.token1PerToken0 : price.token0PerToken1;
   }
 
   double get minPrice {
     BigInt tick() {
-      if (widget.isReversed != isReversedLocal && widget.maxPrice.isInfinity) return V3V4PoolConstants.minTick;
+      if (widget.isReversed != isReversedLocal && widget.maxPrice.isInfinity) return CLPoolConstants.minTick;
 
       return priceToTick(
         price: (widget.isReversed == !isReversedLocal) ? widget.maxPrice.price : widget.minPrice.price,
@@ -175,7 +175,7 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
 
   double get maxPrice {
     BigInt tick() {
-      if (widget.isReversed != isReversedLocal && widget.minPrice.isInfinity) return V3V4PoolConstants.minTick;
+      if (widget.isReversed != isReversedLocal && widget.minPrice.isInfinity) return CLPoolConstants.minTick;
 
       return priceToTick(
         price: (widget.isReversed == !isReversedLocal) ? widget.minPrice.price : widget.maxPrice.price,
@@ -359,13 +359,15 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
               showAsBottomSheet: isMobileSize(context),
             );
           },
-          slippageCheckError: () {
+          slippageCheckError: (isAutoSlippage) {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
             return ScaffoldMessenger.of(context).showSnackBar(
               ZupSnackBar(
                 context,
-                message: S.of(context).previewDepositModalSlippageCheckErrorMessage,
+                message: isAutoSlippage
+                    ? S.of(context).previewDepositModalAutoSlippageCheckErrorMessage
+                    : S.of(context).previewDepositModalSlippageCheckErrorMessage,
                 type: ZupSnackBarType.error,
               ),
             );
@@ -413,8 +415,8 @@ class _PreviewDepositModalState extends State<PreviewDepositModal> with V3PoolCo
                         ),
                         const SizedBox(width: 10),
                         StreamBuilder(
-                          stream: cubit.poolTickStream,
-                          builder: (context, tickSnapshot) {
+                          stream: cubit.poolSqrtPriceX96Stream,
+                          builder: (context, _) {
                             return ZupTag(
                               title: isOutOfRange.any
                                   ? S.of(context).previewDepositModalOutOfRange

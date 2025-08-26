@@ -141,8 +141,8 @@ void main() {
     when(() => cache.getPoolSearchSettings()).thenReturn(PoolSearchSettingsDto.fixture());
     when(() => cubit.selectedYieldStream).thenAnswer((_) => const Stream.empty());
     when(() => appCubit.selectedNetwork).thenReturn(AppNetworks.sepolia);
-    when(() => cubit.poolTickStream).thenAnswer((_) => const Stream.empty());
-    when(() => cubit.latestPoolTick).thenAnswer((_) => BigInt.from(32523672));
+    when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => const Stream.empty());
+    when(() => cubit.latestPoolSqrtPriceX96).thenAnswer((_) => BigInt.parse("79121973566864535878904"));
     when(() => wallet.signerStream).thenAnswer((_) => const Stream.empty());
     when(() => wallet.signer).thenReturn(null);
     when(() => cubit.saveDepositSettings(any(), any())).thenAnswer((_) async => ());
@@ -712,7 +712,7 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(BigInt.from(174072)));
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(BigInt.from(174072)));
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -731,7 +731,9 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(BigInt.from(174072)));
+        when(
+          () => cubit.poolSqrtPriceX96Stream,
+        ).thenAnswer((_) => Stream.value(BigInt.parse("79121973566864535878904")));
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -748,13 +750,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -776,18 +778,18 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsSqrtPriceX96 = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsSqrtPriceX96));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsSqrtPriceX96);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("min-price-selector")), "1000");
+        await tester.enterText(find.byKey(const Key("min-price-selector")), "1");
         FocusManager.instance.primaryFocus?.unfocus();
 
         await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
@@ -805,13 +807,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -831,13 +833,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -863,13 +865,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -891,13 +893,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -926,13 +928,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -952,13 +954,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -980,13 +982,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1010,13 +1012,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1036,13 +1038,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1063,13 +1065,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1089,13 +1091,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1116,13 +1118,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1142,13 +1144,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1168,13 +1170,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1196,13 +1198,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1227,13 +1229,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1241,7 +1243,7 @@ void main() {
         await tester.tap(find.byKey(const Key("50-percent-range-button")));
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("min-price-selector")), "1216");
+        await tester.enterText(find.byKey(const Key("min-price-selector")), "0.96");
         FocusManager.instance.primaryFocus?.unfocus();
 
         await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
@@ -1257,13 +1259,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1286,13 +1288,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1320,13 +1322,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsSqrtPriceX96 = BigInt.parse("5239001873626858491699987");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsSqrtPriceX96));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsSqrtPriceX96);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1345,13 +1347,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1372,13 +1374,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1402,13 +1404,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1430,13 +1432,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1458,13 +1460,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1488,13 +1490,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1521,13 +1523,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1552,13 +1554,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1589,13 +1591,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1626,13 +1628,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1645,13 +1647,13 @@ void main() {
         await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("min-price-selector")), "1200");
+        await tester.enterText(find.byKey(const Key("min-price-selector")), "0.5");
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("max-price-selector")), "0");
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("max-price-selector")), "90000");
+        await tester.enterText(find.byKey(const Key("max-price-selector")), "2");
         await tester.pumpAndSettle();
 
         FocusManager.instance.primaryFocus?.unfocus();
@@ -1666,13 +1668,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1685,13 +1687,13 @@ void main() {
         await tester.tap(find.byKey(const Key("reverse-tokens-reversed")));
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("min-price-selector")), "1200");
+        await tester.enterText(find.byKey(const Key("min-price-selector")), "0.8");
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("max-price-selector")), "0");
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("max-price-selector")), "90000");
+        await tester.enterText(find.byKey(const Key("max-price-selector")), "2");
         await tester.pumpAndSettle();
 
         FocusManager.instance.primaryFocus?.unfocus();
@@ -1706,13 +1708,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1743,13 +1745,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1774,31 +1776,31 @@ void main() {
   );
 
   zGoldenTest(
-    "When inputing a range,reversing the tokens, then inputing the base token amount, the quote token amount should be automatically calculated",
+    "When inputing a range, reversing the tokens, then inputing the base token amount, the quote token amount should be automatically calculated",
     goldenFileName: "deposit_page_input_range_then_reverse_tokens_then_input_base_token_amount",
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("min-price-selector")), "1200");
+        await tester.enterText(find.byKey(const Key("min-price-selector")), "0.5");
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("max-price-selector")), "0");
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("max-price-selector")), "90000");
+        await tester.enterText(find.byKey(const Key("max-price-selector")), "1.2");
         await tester.pumpAndSettle();
 
         FocusManager.instance.primaryFocus?.unfocus(); // unfocus the fields to calculate the valid price
@@ -1822,26 +1824,26 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
         await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("min-price-selector")), "1200");
+        await tester.enterText(find.byKey(const Key("min-price-selector")), "0.9");
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byKey(const Key("max-price-selector")), "0");
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("max-price-selector")), "90000");
+        await tester.enterText(find.byKey(const Key("max-price-selector")), "1.3");
         await tester.pumpAndSettle();
 
         FocusManager.instance.primaryFocus?.unfocus(); // unfocus the fields to calculate the valid price
@@ -1865,13 +1867,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1900,13 +1902,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1932,13 +1934,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -1954,7 +1956,7 @@ void main() {
         await tester.enterText(find.byKey(const Key("max-price-selector")), "0");
         await tester.pumpAndSettle();
 
-        await tester.enterText(find.byKey(const Key("max-price-selector")), "3");
+        await tester.enterText(find.byKey(const Key("max-price-selector")), "0.5");
         await tester.pumpAndSettle();
 
         FocusManager.instance.primaryFocus?.unfocus();
@@ -1970,13 +1972,13 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2004,15 +2006,15 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => wallet.signer).thenReturn(null);
         when(() => wallet.signerStream).thenAnswer((_) => Stream.value(null));
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2031,15 +2033,15 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         when(() => wallet.signer).thenReturn(null);
         when(() => wallet.signerStream).thenAnswer((_) => Stream.value(null));
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
         await tester.drag(find.byKey(const Key("deposit-settings-button")), const Offset(0, -500));
@@ -2058,7 +2060,7 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
         final signer = SignerMock();
 
         when(() => wallet.signer).thenReturn(signer);
@@ -2069,8 +2071,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2088,7 +2090,7 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
         final signer = SignerMock();
 
         when(() => wallet.signer).thenReturn(signer);
@@ -2099,8 +2101,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2121,7 +2123,7 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
         final signer = SignerMock();
 
         when(() => wallet.signer).thenReturn(signer);
@@ -2142,8 +2144,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2163,7 +2165,7 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
         final signerStreamController = StreamController<Signer?>.broadcast();
         final signer = SignerMock();
 
@@ -2184,8 +2186,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2208,7 +2210,7 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
         final signerStreamController = StreamController<Signer?>.broadcast();
         final signer = SignerMock();
 
@@ -2229,8 +2231,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2253,7 +2255,7 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         final signer = SignerMock();
 
@@ -2264,7 +2266,7 @@ void main() {
             selectedYield.token0.addresses[selectedYield.network.chainId]!,
             network: any(named: "network"),
           ),
-        ).thenAnswer((_) => Future.value(347537253));
+        ).thenAnswer((_) => Future.value(EthereumConstants.uint256Max.toDouble()));
         when(
           () => cubit.getWalletTokenAmount(
             selectedYield.token1.addresses[selectedYield.network.chainId]!,
@@ -2274,8 +2276,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2295,7 +2297,7 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         final signer = SignerMock();
 
@@ -2316,8 +2318,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2340,7 +2342,7 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         final signer = SignerMock();
 
@@ -2361,8 +2363,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2390,7 +2392,7 @@ void main() {
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsTick = BigInt.parse("79121973566864535878904");
 
         final signer = SignerMock();
 
@@ -2412,8 +2414,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsTick));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsTick);
 
         await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
         await tester.tap(find.byKey(Key("yield-card-${selectedYield.poolAddress}")));
@@ -2441,8 +2443,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => const Stream.empty());
-        when(() => cubit.latestPoolTick).thenReturn(null);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(null);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2466,8 +2468,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => const Stream.empty());
-        when(() => cubit.latestPoolTick).thenReturn(null);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => const Stream.empty());
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(null);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2492,8 +2494,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(BigInt.from(2131)));
-        when(() => cubit.latestPoolTick).thenReturn(null);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(BigInt.from(2131)));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(null);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2518,8 +2520,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(BigInt.from(2131)));
-        when(() => cubit.latestPoolTick).thenReturn(null);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(BigInt.from(2131)));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(null);
 
         await tester.pumpDeviceBuilder(await goldenBuilder());
         await tester.pumpAndSettle();
@@ -2706,7 +2708,6 @@ void main() {
       await tester.pumpAndSettle();
     },
   );
-
   zGoldenTest(
     """When selecting a slippage and a deadline in the deposit settings dropdown,
   and then clicking to preview the deposit, it should pass the correct slippage and deadline
@@ -2717,29 +2718,21 @@ void main() {
 
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
+        final currentPriceAsSqrtPriceX96 = BigInt.parse("5240418162556390792557189");
 
         final signer = SignerMock();
 
         when(() => wallet.signer).thenReturn(signer);
         when(() => wallet.signerStream).thenAnswer((_) => Stream.value(signer));
         when(
-          () => cubit.getWalletTokenAmount(
-            selectedYield.token0.addresses[selectedYield.network.chainId]!,
-            network: any(named: "network"),
-          ),
-        ).thenAnswer((_) => Future.value(347537253));
-        when(
-          () => cubit.getWalletTokenAmount(
-            selectedYield.token1.addresses[selectedYield.network.chainId]!,
-            network: any(named: "network"),
-          ),
-        ).thenAnswer((_) => Future.value(32576352673));
+          () => cubit.getWalletTokenAmount(any(), network: any(named: "network")),
+        ).thenAnswer((_) => Future.value(EthereumConstants.uint256Max.toDouble()));
+
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => Stream.value(currentPriceAsTick));
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => Stream.value(currentPriceAsSqrtPriceX96));
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsSqrtPriceX96);
         when(() => cubit.selectYield(any())).thenAnswer((_) async => () {});
 
         await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
@@ -2799,17 +2792,16 @@ void main() {
       verifyNever(() => appCubit.updateAppNetwork(any()));
     },
   );
-
   zGoldenTest(
-    """When emitting a new pool tick, and the deposit amounts are already typed,
+    """When emitting a new pool sqrtPriceX96, and the deposit amounts are already typed,
   it should update the amount that have been calculated by the typed amount""",
     goldenFileName: "deposit_page_pool_tick_update_deposit_amount",
     (tester) async {
       await tester.runAsync(() async {
         final selectedYield = YieldsDto.fixture().poolsSortedBy24hYield.first;
-        final currentPriceAsTick = BigInt.from(174072);
-        final nextPriceAsTick = BigInt.from(261892);
-        final poolTickStreamController = StreamController<BigInt>.broadcast();
+        final currentPriceAsSqrtPriceX96 = BigInt.parse("79121973566864535878904");
+        final nextPriceAsSqrtPriceX96 = BigInt.parse("5240418162556390792557189");
+        final poolSqrtPriceX96StreamController = StreamController<BigInt>.broadcast();
 
         final signer = SignerMock();
 
@@ -2831,8 +2823,8 @@ void main() {
         when(() => cubit.selectedYieldStream).thenAnswer((_) => Stream.value(selectedYield));
         when(() => cubit.selectedYield).thenReturn(selectedYield);
         when(() => cubit.state).thenReturn(DepositState.success(YieldsDto.fixture()));
-        when(() => cubit.poolTickStream).thenAnswer((_) => poolTickStreamController.stream);
-        when(() => cubit.latestPoolTick).thenReturn(currentPriceAsTick);
+        when(() => cubit.poolSqrtPriceX96Stream).thenAnswer((_) => poolSqrtPriceX96StreamController.stream);
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(currentPriceAsSqrtPriceX96);
 
         await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
         await tester.tap(find.byKey(Key("yield-card-${selectedYield.poolAddress}")));
@@ -2843,8 +2835,8 @@ void main() {
         await tester.enterText(find.byKey(const Key("quote-token-input-card")), "1");
         await tester.pumpAndSettle();
 
-        poolTickStreamController.add(nextPriceAsTick);
-        when(() => cubit.latestPoolTick).thenReturn(nextPriceAsTick);
+        poolSqrtPriceX96StreamController.add(nextPriceAsSqrtPriceX96);
+        when(() => cubit.latestPoolSqrtPriceX96).thenReturn(nextPriceAsSqrtPriceX96);
         await tester.pumpAndSettle();
       });
     },

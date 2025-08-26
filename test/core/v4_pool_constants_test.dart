@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:zup_app/core/v4_pool_constants.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/v4_pool_constants.dart';
 
 void main() {
   test('mintPositionActionValue should return the correct value', () {

@@ -380,6 +380,7 @@
     "createPageSettingsDropdownMiniumLiquidityLowWarning": "Low minimum TVL can lead to misleading yields.",
     "appSettingsDropdownTestnetMode": "Testnet Mode",
     "previewDepositModalSlippageCheckErrorMessage": "Slippage Check! Please try increasing your slippage for this transaction",
+    "previewDepositModalAutoSlippageCheckErrorMessage": "Strong market movement! Slippage exceeded. Try again or adjust tolerance.",
     "createPageTitle": "New Position",
     "tvl": "TVL",
     "createPageShowMeTheMoney": "Show me the money!",

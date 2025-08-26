@@ -8,12 +8,14 @@ class Slippage extends Equatable {
 
   final num value;
 
+  static const Slippage automatic = Slippage._(0);
   static const Slippage zeroPointOnePercent = Slippage._(0.1);
   static const Slippage halfPercent = Slippage._(0.5);
   static const Slippage onePercent = Slippage._(1.0);
   static Slippage custom(num value) => Slippage._(value);
 
   factory Slippage.fromValue(num value) {
+    if (value == automatic.value) return automatic;
     if (value == zeroPointOnePercent.value) return zeroPointOnePercent;
     if (value == halfPercent.value) return halfPercent;
     if (value == onePercent.value) return onePercent;
@@ -45,7 +47,8 @@ class Slippage extends Equatable {
     return amount * (BigInt.from(10000) + BigInt.from(valueBasisPoints)) ~/ BigInt.from(10000);
   }
 
-  bool get isCustom => this != zeroPointOnePercent && this != halfPercent && this != onePercent;
+  bool get isAutomatic => this == automatic;
+  bool get isCustom => this != zeroPointOnePercent && this != halfPercent && this != onePercent && this != automatic;
 
   int get valueBasisPoints => (value * 100).toInt();
 

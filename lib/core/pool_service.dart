@@ -11,11 +11,14 @@ import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_state_view.abi.g.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_conversors_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_liquidity_calculations_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_sqrt_price_math_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/v4_pool_constants.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
-import 'package:zup_app/core/mixins/v4_pool_liquidity_calculations_mixin.dart';
-import 'package:zup_app/core/v4_pool_constants.dart';
+import 'package:zup_app/core/slippage.dart';
 
-class PoolService with V4PoolLiquidityCalculationsMixin {
+class PoolService with CLPoolLiquidityCalculationsMixin, CLPoolConversorsMixin, CLSqrtPriceMath {
   final UniswapV4StateView _uniswapV4StateView;
   final UniswapV3Pool _uniswapV3Pool;
   final UniswapV3PositionManager _uniswapV3PositionManager;
@@ -142,12 +145,35 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
     required BigInt amount0Desired,
     required BigInt amount1Desired,
     required Duration deadline,
-    required BigInt amount0Min,
-    required BigInt amount1Min,
     required String recipient,
     required BigInt tickLower,
     required BigInt tickUpper,
+    required Slippage slippage,
   }) async {
+    final sqrtPriceX96 = await getSqrtPriceX96(depositOnYield);
+    final sqrtPriceAX96 = getSqrtPriceAtTick(tickLower);
+    final sqrtPriceBX96 = getSqrtPriceAtTick(tickUpper);
+    final liquidity = getLiquidityForAmounts(
+      sqrtPriceX96,
+      sqrtPriceAX96,
+      sqrtPriceBX96,
+      amount0Desired,
+      amount1Desired,
+    );
+
+    BigInt amount0Min = BigInt.zero;
+    BigInt amount1Min = BigInt.zero;
+
+    if (slippage.isAutomatic) {
+      final deltas = getAmountsDeltas(sqrtPriceX96, sqrtPriceAX96, sqrtPriceBX96, liquidity);
+
+      amount0Min = Slippage.halfPercent.calculateMinTokenAmountFromSlippage(deltas.amount0Delta);
+      amount1Min = Slippage.halfPercent.calculateMinTokenAmountFromSlippage(deltas.amount1Delta);
+    } else {
+      amount0Min = slippage.calculateMinTokenAmountFromSlippage(amount0Desired);
+      amount1Min = slippage.calculateMinTokenAmountFromSlippage(amount1Desired);
+    }
+
     if (depositOnYield.protocol.id.isAerodromeOrVelodromeSlipstream) {
       return _sendV3DepositTransactionForSlipstream(
         depositOnYield,
@@ -241,10 +267,34 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
     required BigInt tickUpper,
     required BigInt amount0toDeposit,
     required BigInt amount1ToDeposit,
-    required BigInt maxAmount0ToDeposit,
-    required BigInt maxAmount1ToDeposit,
     required String recipient,
+    required Slippage slippage,
   }) async {
+    final isNativeDeposit = depositOnYield.isToken0Native || depositOnYield.isToken1Native;
+    final sqrtPriceX96 = await getSqrtPriceX96(depositOnYield);
+    final sqrtPriceAX96 = getSqrtPriceAtTick(tickLower);
+    final sqrtPriceBX96 = getSqrtPriceAtTick(tickUpper);
+    final liquidity = getLiquidityForAmounts(
+      sqrtPriceX96,
+      sqrtPriceAX96,
+      sqrtPriceBX96,
+      amount0toDeposit,
+      amount1ToDeposit,
+    );
+
+    BigInt maxAmount0ToDeposit;
+    BigInt maxAmount1ToDeposit;
+
+    if (slippage.isAutomatic) {
+      final deltas = getAmountsDeltas(sqrtPriceX96, sqrtPriceAX96, sqrtPriceBX96, liquidity);
+
+      maxAmount0ToDeposit = Slippage.halfPercent.calculateMaxTokenAmountFromSlippage(deltas.amount0Delta);
+      maxAmount1ToDeposit = Slippage.halfPercent.calculateMaxTokenAmountFromSlippage(deltas.amount1Delta);
+    } else {
+      maxAmount0ToDeposit = slippage.calculateMaxTokenAmountFromSlippage(amount0toDeposit);
+      maxAmount1ToDeposit = slippage.calculateMaxTokenAmountFromSlippage(amount1ToDeposit);
+    }
+
     if (depositOnYield.protocol.id.isPancakeSwapInfinityCL) {
       return _sendV4PoolDepositTransactionForPancakeSwap(
         depositOnYield,
@@ -257,20 +307,13 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
         maxAmount0ToDeposit: maxAmount0ToDeposit,
         maxAmount1ToDeposit: maxAmount1ToDeposit,
         recipient: recipient,
+        isNativeDeposit: isNativeDeposit,
+        sqrtPriceX96: sqrtPriceX96,
+        sqrtPriceAX96: sqrtPriceAX96,
+        sqrtPriceBX96: sqrtPriceBX96,
+        liquidity: liquidity,
       );
     }
-
-    final isNativeDeposit = depositOnYield.isToken0Native || depositOnYield.isToken1Native;
-    final sqrtPriceX96 = await getSqrtPriceX96(depositOnYield);
-    final sqrtPriceAX96 = getSqrtPriceAtTick(tickLower);
-    final sqrtPriceBX96 = getSqrtPriceAtTick(tickUpper);
-    final liquidity = getLiquidityForAmounts(
-      sqrtPriceX96,
-      sqrtPriceAX96,
-      sqrtPriceBX96,
-      amount0toDeposit,
-      amount1ToDeposit,
-    );
 
     final actions = _ethereumAbiCoder.encodePacked(
       ["uint8", "uint8", if (isNativeDeposit) "uint8"],
@@ -354,19 +397,12 @@ class PoolService with V4PoolLiquidityCalculationsMixin {
     required BigInt maxAmount0ToDeposit,
     required BigInt maxAmount1ToDeposit,
     required String recipient,
+    required bool isNativeDeposit,
+    required BigInt sqrtPriceX96,
+    required BigInt sqrtPriceAX96,
+    required BigInt sqrtPriceBX96,
+    required BigInt liquidity,
   }) async {
-    final isNativeDeposit = depositOnYield.isToken0Native || depositOnYield.isToken1Native;
-    final sqrtPriceX96 = await getSqrtPriceX96(depositOnYield);
-    final sqrtPriceAX96 = getSqrtPriceAtTick(tickLower);
-    final sqrtPriceBX96 = getSqrtPriceAtTick(tickUpper);
-    final liquidity = getLiquidityForAmounts(
-      sqrtPriceX96,
-      sqrtPriceAX96,
-      sqrtPriceBX96,
-      amount0toDeposit,
-      amount1ToDeposit,
-    );
-
     final actions = _ethereumAbiCoder.encodePacked(
       ["uint8", "uint8", "uint8"],
       [

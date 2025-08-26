@@ -10,12 +10,12 @@ import 'package:zup_app/abis/erc_20.abi.g.dart';
 import 'package:zup_app/abis/uniswap_permit2.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/app/create/deposit/widgets/deposit_success_modal.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_constants.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_conversors_mixin.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
-import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
 import 'package:zup_core/mixins/device_info_mixin.dart';
@@ -24,9 +24,9 @@ import 'package:zup_ui_kit/zup_ui_kit.dart';
 part "preview_deposit_modal_cubit.freezed.dart";
 part "preview_deposit_modal_state.dart";
 
-class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3PoolConversorsMixin, DeviceInfoMixin {
+class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with CLPoolConversorsMixin, DeviceInfoMixin {
   PreviewDepositModalCubit({
-    required BigInt initialPoolTick,
+    required BigInt currentPriceX96,
     required PoolService poolService,
     required YieldDto currentYield,
     required Erc20 erc20,
@@ -39,7 +39,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
        _poolRepository = poolService,
        _erc20 = erc20,
        _wallet = wallet,
-       _latestPoolTick = initialPoolTick,
+       _latestPriceX96 = currentPriceX96,
        _navigatorKey = navigatorKey,
        _zupAnalytics = zupAnalytics,
        _permit2 = permit2,
@@ -54,24 +54,24 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
   final ZupAnalytics _zupAnalytics;
   final UniswapPermit2 _permit2;
 
-  final StreamController<BigInt> _poolTickStreamController = StreamController<BigInt>.broadcast();
+  final StreamController<BigInt> _poolSqrtPriceX96StreamController = StreamController<BigInt>.broadcast();
 
-  BigInt _latestPoolTick = BigInt.zero;
+  BigInt _latestPriceX96 = BigInt.zero;
   BigInt _token0Allowance = BigInt.zero;
   BigInt _token1Allowance = BigInt.zero;
 
-  Stream<BigInt> get poolTickStream => _poolTickStreamController.stream;
-  BigInt get latestPoolTick => _latestPoolTick;
+  Stream<BigInt> get poolSqrtPriceX96Stream => _poolSqrtPriceX96StreamController.stream;
+  BigInt get latestPriceX96 => _latestPriceX96;
   BigInt get token0Allowance => _token0Allowance;
   BigInt get token1Allowance => _token1Allowance;
 
   Future<void> setup() async {
-    _poolTickStreamController.add(_latestPoolTick);
+    _poolSqrtPriceX96StreamController.add(_latestPriceX96);
 
     Timer.periodic(const Duration(minutes: 1), (timer) {
-      if (_poolTickStreamController.isClosed) return timer.cancel();
+      if (_poolSqrtPriceX96StreamController.isClosed) return timer.cancel();
 
-      _updateTick();
+      _updateSqrtPriceX96();
     });
 
     await _getTokensAllowance();
@@ -161,8 +161,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       BigInt tickLower() {
         BigInt convertPriceToTickLower() {
-          if (isMinPriceInfinity && !isReversed) return V3V4PoolConstants.minTick;
-          if (isReversed && isMaxPriceInfinity) return V3V4PoolConstants.minTick;
+          if (isMinPriceInfinity && !isReversed) return CLPoolConstants.minTick;
+          if (isReversed && isMaxPriceInfinity) return CLPoolConstants.minTick;
 
           return priceToTick(
             price: isReversed ? maxPrice : minPrice,
@@ -177,8 +177,8 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       BigInt tickUpper() {
         BigInt convertPriceToTickUpper() {
-          if (isMaxPriceInfinity && !isReversed) return V3V4PoolConstants.maxTick;
-          if (isReversed && isMinPriceInfinity) return V3V4PoolConstants.maxTick;
+          if (isMaxPriceInfinity && !isReversed) return CLPoolConstants.maxTick;
+          if (isReversed && isMinPriceInfinity) return CLPoolConstants.maxTick;
 
           return priceToTick(
             price: isReversed ? minPrice : maxPrice,
@@ -193,8 +193,6 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
 
       final amount0Desired = token0Amount;
       final amount1Desired = token1Amount;
-      final amount0Min = slippage.calculateMinTokenAmountFromSlippage(amount0Desired);
-      final amount1Min = slippage.calculateMinTokenAmountFromSlippage(amount1Desired);
       final recipient = await _wallet.signer!.address;
 
       final TransactionResponse tx = await () async {
@@ -205,11 +203,10 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
             recipient: recipient,
             tickLower: tickLower(),
             tickUpper: tickUpper(),
+            slippage: slippage,
           );
         }
 
@@ -224,8 +221,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
           tickUpper: tickUpper(),
           amount0toDeposit: amount0Desired,
           amount1ToDeposit: amount1Desired,
-          maxAmount0ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(amount0Desired),
-          maxAmount1ToDeposit: slippage.calculateMaxTokenAmountFromSlippage(amount1Desired),
+          slippage: slippage,
           recipient: recipient,
         );
       }.call();
@@ -243,7 +239,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       );
     } catch (e) {
       if (e.toString().toLowerCase().contains("slippage")) {
-        emit(const PreviewDepositModalState.slippageCheckError());
+        emit(PreviewDepositModalState.slippageCheckError(slippage.isAutomatic));
         emit(PreviewDepositModalState.initial(token0Allowance: _token0Allowance, token1Allowance: _token1Allowance));
 
         return;
@@ -297,15 +293,15 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
     }
   }
 
-  Future<BigInt> _updateTick() async {
+  Future<BigInt> _updateSqrtPriceX96() async {
     try {
-      _latestPoolTick = await _poolRepository.getPoolTick(_yield);
-      _poolTickStreamController.add(_latestPoolTick);
+      _latestPriceX96 = await _poolRepository.getSqrtPriceX96(_yield);
+      _poolSqrtPriceX96StreamController.add(_latestPriceX96);
     } catch (_) {
       // DO NOTHING
     }
 
-    return _latestPoolTick;
+    return _latestPriceX96;
   }
 
   void _waitTransactionFinishBeforeClosing() {
@@ -384,7 +380,7 @@ class PreviewDepositModalCubit extends Cubit<PreviewDepositModalState> with V3Po
       return _waitTransactionFinishBeforeClosing();
     }
 
-    await _poolTickStreamController.close();
+    await _poolSqrtPriceX96StreamController.close();
     super.close();
   }
 }
