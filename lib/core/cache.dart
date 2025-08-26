@@ -8,7 +8,7 @@ import 'package:zup_app/core/enums/app_theme_mode.dart';
 
 enum CacheKey {
   hidingClosedPositions,
-  depositSettings,
+  depositSettingsV2,
   poolSearchSettings,
   areCookiesConsented,
   blockedProtocolsIds,
@@ -44,11 +44,11 @@ class Cache {
   }
 
   Future<void> saveDepositSettings(DepositSettingsDto settings) async {
-    await _cache.setString(CacheKey.depositSettings.key, jsonEncode(settings.toJson()));
+    await _cache.setString(CacheKey.depositSettingsV2.key, jsonEncode(settings.toJson()));
   }
 
   DepositSettingsDto getDepositSettings() {
-    final cache = _cache.getString(CacheKey.depositSettings.key) ?? "{}";
+    final cache = _cache.getString(CacheKey.depositSettingsV2.key) ?? "{}";
 
     return DepositSettingsDto.fromJson(jsonDecode(cache));
   }

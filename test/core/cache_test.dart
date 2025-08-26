@@ -64,7 +64,7 @@ void main() {
     when(() => sharedPreferencesWithCache.setString(any(), any())).thenAnswer((_) async => true);
     await sut.saveDepositSettings(settings);
 
-    verify(() => sharedPreferencesWithCache.setString(CacheKey.depositSettings.key, any())).called(1);
+    verify(() => sharedPreferencesWithCache.setString(CacheKey.depositSettingsV2.key, any())).called(1);
   });
 
   test(
@@ -84,7 +84,7 @@ void main() {
 
     sut.getDepositSettings();
 
-    verify(() => sharedPreferencesWithCache.getString(CacheKey.depositSettings.key)).called(1);
+    verify(() => sharedPreferencesWithCache.getString(CacheKey.depositSettingsV2.key)).called(1);
   });
 
   test("When calling `getDepositSettings` it should convert the returned saved json to a deposit settings dto", () {
