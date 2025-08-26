@@ -14,6 +14,10 @@ import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview
 import 'package:zup_app/app/create/deposit/widgets/range_selector.dart';
 import 'package:zup_app/app/create/deposit/widgets/token_amount_input_card/token_amount_input_card.dart';
 import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_constants.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_conversors_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_liquidity_calculations_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_sqrt_price_math_mixin.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
@@ -26,12 +30,9 @@ import 'package:zup_app/core/extensions/num_extension.dart';
 import 'package:zup_app/core/extensions/string_extension.dart';
 import 'package:zup_app/core/extensions/widget_extension.dart';
 import 'package:zup_app/core/injections.dart';
-import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
-import 'package:zup_app/core/mixins/v3_pool_liquidity_calculations_mixin.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/yield_repository.dart';
 import 'package:zup_app/core/slippage.dart';
-import 'package:zup_app/core/v3_v4_pool_constants.dart';
 import 'package:zup_app/core/zup_analytics.dart';
 import 'package:zup_app/core/zup_navigator.dart';
 import 'package:zup_app/core/zup_route_params_names.dart';
@@ -73,7 +74,12 @@ class DepositPage extends StatefulWidget {
 }
 
 class _DepositPageState extends State<DepositPage>
-    with V3PoolConversorsMixin, V3PoolLiquidityCalculationsMixin, DeviceInfoMixin {
+    with
+        CLPoolConversorsMixin,
+        CLPoolLiquidityCalculationsMixin,
+        DeviceInfoMixin,
+        CLPoolLiquidityCalculationsMixin,
+        CLSqrtPriceMath {
   final lottieClick = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieClick);
   final lottieEmpty = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieEmpty);
   final lottieRadar = inject<LottieBuilder>(instanceName: InjectInstanceNames.lottieRadar);
@@ -125,7 +131,7 @@ class _DepositPageState extends State<DepositPage>
   double maxPrice = 0;
   RangeController minRangeController = RangeController();
   RangeController maxRangeController = RangeController();
-  StreamSubscription<BigInt?>? _poolTickStreamSubscription;
+  StreamSubscription<BigInt?>? _poolSqrtPriceX96StreamSubscription;
   YieldTimeFrame selectedYieldTimeFrame = YieldTimeFrame.day;
 
   late Slippage selectedSlippage = _cubit.depositSettings.slippage;
@@ -142,19 +148,19 @@ class _DepositPageState extends State<DepositPage>
   bool get isQuoteTokenNeeded => !isOutOfRange.minPrice;
 
   double get currentPrice {
-    if (_cubit.latestPoolTick == null || _cubit.selectedYield == null) return 0;
+    if (_cubit.latestPoolSqrtPriceX96 == null || _cubit.selectedYield == null) return 0;
 
-    final price = tickToPrice(
-      tick: _cubit.latestPoolTick!,
+    final price = sqrtPriceX96ToPrice(
+      sqrtPriceX96: _cubit.latestPoolSqrtPriceX96!,
       poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
       poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
     );
 
-    return areTokensReversed ? price.priceAsQuoteToken : price.priceAsBaseToken;
+    return areTokensReversed ? price.token1PerToken0 : price.token0PerToken1;
   }
 
   ({bool minPrice, bool maxPrice, bool any}) get isOutOfRange {
-    if (_cubit.latestPoolTick == null) return (minPrice: false, maxPrice: false, any: false);
+    if (_cubit.latestPoolSqrtPriceX96 == null) return (minPrice: false, maxPrice: false, any: false);
 
     final isMinPriceOutOfRange = !isMinRangeInfinity && (minPrice) > currentPrice;
     final isMaxPriceOutOfRange = !isMaxRangeInfinity && (maxPrice) < currentPrice;
@@ -231,19 +237,19 @@ class _DepositPageState extends State<DepositPage>
   }
 
   void calculateDepositTokensAmount() {
-    if (_cubit.latestPoolTick == null || _cubit.selectedYield == null) return;
+    if (_cubit.latestPoolSqrtPriceX96 == null || _cubit.selectedYield == null) return;
 
     if (isOutOfRange.minPrice) return quoteTokenAmountController.clear();
     if (isOutOfRange.maxPrice) return baseTokenAmountController.clear();
 
     final maxTickPrice = tickToPrice(
-      tick: V3V4PoolConstants.maxTick,
+      tick: CLPoolConstants.maxTick,
       poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
       poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
     );
 
     final minTickPrice = tickToPrice(
-      tick: V3V4PoolConstants.minTick,
+      tick: CLPoolConstants.minTick,
       poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals,
       poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals,
     );
@@ -262,19 +268,19 @@ class _DepositPageState extends State<DepositPage>
 
     final newQuoteTokenAmount = Decimal.tryParse(
       calculateToken1AmountFromToken0(
-        double.tryParse(baseTokenAmountController.text) ?? 0,
-        currentPrice,
-        getMinPrice(),
-        getMaxPrice(),
+        currentPrice: currentPrice,
+        priceLower: getMinPrice(),
+        priceUpper: getMaxPrice(),
+        tokenXAmount: double.tryParse(baseTokenAmountController.text) ?? 0,
       ).toString(),
     )?.toStringAsFixed(quoteToken.decimals[_cubit.selectedYield!.network.chainId]!);
 
     final newBaseTokenAmount = Decimal.tryParse(
       calculateToken0AmountFromToken1(
-        double.tryParse(quoteTokenAmountController.text) ?? 0,
-        currentPrice,
-        getMinPrice(),
-        getMaxPrice(),
+        currentPrice: currentPrice,
+        priceLower: getMinPrice(),
+        priceUpper: getMaxPrice(),
+        tokenYAmount: double.tryParse(quoteTokenAmountController.text) ?? 0,
       ).toString(),
     )?.toStringAsFixed(baseToken.decimals[_cubit.selectedYield!.network.chainId]!);
 
@@ -349,7 +355,7 @@ class _DepositPageState extends State<DepositPage>
           token1DepositAmountController: areTokensReversed ? baseTokenAmountController : quoteTokenAmountController,
           maxPrice: (isInfinity: isMaxRangeInfinity, price: maxPrice),
           minPrice: (isInfinity: isMinRangeInfinity, price: minPrice),
-        ).show(context, currentPoolTick: _cubit.latestPoolTick ?? BigInt.zero);
+        ).show(context, currentPriceX96: _cubit.latestPoolSqrtPriceX96 ?? BigInt.zero);
       },
     );
   }
@@ -386,8 +392,8 @@ class _DepositPageState extends State<DepositPage>
       );
     });
 
-    _poolTickStreamSubscription = _cubit.poolTickStream.listen((poolTick) {
-      if (poolTick != null) {
+    _poolSqrtPriceX96StreamSubscription = _cubit.poolSqrtPriceX96Stream.listen((sqrtPriceX96) {
+      if (sqrtPriceX96 != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           setState(() => calculateDepositTokensAmount());
         });
@@ -401,7 +407,7 @@ class _DepositPageState extends State<DepositPage>
   void dispose() {
     minRangeController.dispose();
     maxRangeController.dispose();
-    _poolTickStreamSubscription?.cancel();
+    _poolSqrtPriceX96StreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -949,21 +955,21 @@ class _DepositPageState extends State<DepositPage>
         if (isMobileSize(context)) ...[const SizedBox(height: 5), tokenSwitcher, const SizedBox(height: 5)],
         const SizedBox(height: 10),
         StreamBuilder(
-          stream: _cubit.poolTickStream,
-          initialData: _cubit.latestPoolTick,
-          builder: (context, poolTickSnapshot) {
+          stream: _cubit.poolSqrtPriceX96Stream,
+          initialData: _cubit.latestPoolSqrtPriceX96,
+          builder: (context, poolSqrtPriceX96Snaphot) {
             return Text(
               "1 ${baseToken.symbol} ≈ ${() {
-                final currentPrice = tickToPrice(tick: poolTickSnapshot.data ?? BigInt.zero, poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals, poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals);
+                final currentPrice = sqrtPriceX96ToPrice(sqrtPriceX96: poolSqrtPriceX96Snaphot.data ?? BigInt.zero, poolToken0Decimals: _cubit.selectedYield!.token0NetworkDecimals, poolToken1Decimals: _cubit.selectedYield!.token1NetworkDecimals);
 
-                return areTokensReversed ? currentPrice.priceAsQuoteToken : currentPrice.priceAsBaseToken;
+                return areTokensReversed ? currentPrice.token1PerToken0 : currentPrice.token0PerToken1;
               }.call().formatCurrency(useLessThan: true, maxDecimals: 4, isUSD: false)} ${quoteToken.symbol}",
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w500,
                 color: ZupThemeColors.primaryText.themed(context.brightness),
               ),
-            ).redacted(enabled: poolTickSnapshot.data == null);
+            ).redacted(enabled: poolSqrtPriceX96Snaphot.data == null);
           },
         ),
         const SizedBox(height: 10),
@@ -1006,8 +1012,8 @@ class _DepositPageState extends State<DepositPage>
         ),
         const SizedBox(height: 10),
         StreamBuilder(
-          stream: _cubit.poolTickStream,
-          builder: (context, snapshot) {
+          stream: _cubit.poolSqrtPriceX96Stream,
+          builder: (context, _) {
             return RangeSelector(
               key: const Key("min-price-selector"),
               onUserType: () => percentRange = null,
@@ -1049,8 +1055,8 @@ class _DepositPageState extends State<DepositPage>
         ),
         const SizedBox(height: 6),
         StreamBuilder(
-          stream: _cubit.poolTickStream,
-          builder: (context, snapshot) {
+          stream: _cubit.poolSqrtPriceX96Stream,
+          builder: (context, _) {
             return RangeSelector(
               key: const Key("max-price-selector"),
               displayBaseTokenSymbol: baseToken.symbol,
@@ -1109,9 +1115,9 @@ class _DepositPageState extends State<DepositPage>
       duration: const Duration(milliseconds: 300),
       opacity: isRangeInvalid ? 0.2 : 1,
       child: StreamBuilder(
-        stream: _cubit.poolTickStream,
-        initialData: _cubit.latestPoolTick,
-        builder: (context, poolTickSnapshot) {
+        stream: _cubit.poolSqrtPriceX96Stream,
+        initialData: _cubit.latestPoolSqrtPriceX96,
+        builder: (context, sqrtPriceX96Snapshot) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1130,7 +1136,7 @@ class _DepositPageState extends State<DepositPage>
                   }
 
                   if (!isBaseTokenAmountUserInput &&
-                      !poolTickSnapshot.hasData &&
+                      !sqrtPriceX96Snapshot.hasData &&
                       quoteTokenAmountController.text.isNotEmpty) {
                     return S.of(context).loading;
                   }
@@ -1159,7 +1165,7 @@ class _DepositPageState extends State<DepositPage>
                   }
 
                   if (isBaseTokenAmountUserInput &&
-                      !poolTickSnapshot.hasData &&
+                      !sqrtPriceX96Snapshot.hasData &&
                       baseTokenAmountController.text.isNotEmpty) {
                     return S.of(context).loading;
                   }

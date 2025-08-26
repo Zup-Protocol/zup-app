@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:zup_app/core/v3_v4_pool_constants.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_constants.dart';
 
-mixin V3PoolConversorsMixin {
+mixin CLPoolConversorsMixin {
   ({double priceAsQuoteToken, double priceAsBaseToken}) tickToPrice({
     required BigInt tick,
     required int poolToken0Decimals,
@@ -22,11 +22,11 @@ mixin V3PoolConversorsMixin {
     final highestValidTickDistanceFromTick = (highestValidTick - tick).abs();
 
     if (lowestValidTickDistanceFromTick < highestValidTickDistanceFromTick &&
-        lowestValidTick >= V3V4PoolConstants.minTick) {
+        lowestValidTick >= CLPoolConstants.minTick) {
       return lowestValidTick;
     }
 
-    return highestValidTick > V3V4PoolConstants.maxTick ? lowestValidTick : highestValidTick;
+    return highestValidTick > CLPoolConstants.maxTick ? lowestValidTick : highestValidTick;
   }
 
   BigInt priceToTick({
@@ -43,12 +43,13 @@ mixin V3PoolConversorsMixin {
     return BigInt.from(tickForPrice);
   }
 
-  ({double price, BigInt priceAsTick}) priceToClosestValidPrice(
-      {required double price,
-      required int poolToken0Decimals,
-      required int poolToken1Decimals,
-      required int tickSpacing,
-      required bool isReversed}) {
+  ({double price, BigInt priceAsTick}) priceToClosestValidPrice({
+    required double price,
+    required int poolToken0Decimals,
+    required int poolToken1Decimals,
+    required int tickSpacing,
+    required bool isReversed,
+  }) {
     final priceAsTick = priceToTick(
       price: price,
       poolToken0Decimals: poolToken0Decimals,
@@ -56,10 +57,7 @@ mixin V3PoolConversorsMixin {
       isReversed: isReversed,
     );
 
-    final closestValidTick = tickToClosestValidTick(
-      tick: priceAsTick,
-      tickSpacing: tickSpacing,
-    );
+    final closestValidTick = tickToClosestValidTick(tick: priceAsTick, tickSpacing: tickSpacing);
 
     final closestValidPrice = tickToPrice(
       tick: closestValidTick,
@@ -69,7 +67,7 @@ mixin V3PoolConversorsMixin {
 
     return (
       price: isReversed ? closestValidPrice.priceAsQuoteToken : closestValidPrice.priceAsBaseToken,
-      priceAsTick: closestValidTick
+      priceAsTick: closestValidTick,
     );
   }
 }

@@ -5,6 +5,10 @@ import 'package:zup_app/core/slippage.dart';
 import 'package:zup_ui_kit/zup_ui_kit.dart';
 
 void main() {
+  test("When using `automatic` method, it should create the slippage object with 0 value", () {
+    expect(Slippage.automatic.value, 0);
+  });
+
   test("When using `zeroPointOnePercent` method it should create the slippage object with 0.1 value", () {
     expect(Slippage.zeroPointOnePercent.value, 0.1);
   });
@@ -25,6 +29,10 @@ void main() {
     expect(Slippage.fromValue(0.1), Slippage.zeroPointOnePercent);
   });
 
+  test("When passing '0' to `fromValue` factory, it should create a 'automatic' slippage object", () {
+    expect(Slippage.fromValue(0), Slippage.automatic);
+  });
+
   test("When passing '0.5' to `fromValue` factory, it should create a 'halfPercent' slippage object", () {
     expect(Slippage.fromValue(0.5), Slippage.halfPercent);
   });
@@ -35,6 +43,14 @@ void main() {
 
   test("When passing a non-mapped value to `fromValue` factory, it should create a 'custom' slippage object", () {
     expect(Slippage.fromValue(542), Slippage.custom(542));
+  });
+
+  test("When calling `isAutomatic` and the slippage type is automatic, it should return true", () {
+    expect(Slippage.automatic.isAutomatic, true);
+  });
+
+  test("When calling `isAutomatic` and the slippage type is not automatic, it should return false", () {
+    expect(Slippage.zeroPointOnePercent.isAutomatic, false);
   });
 
   test(
@@ -96,18 +112,19 @@ void main() {
   });
 
   test(
-    "When using `isCustom` method it should return true if the slippage is not `zeroPointOnePercent`, `halfPercent` or `onePercent`",
+    "When using `isCustom` method it should return true if the slippage is not `zeroPointOnePercent`, `halfPercent`, `onePercent` or `automatic`",
     () {
       expect(Slippage.custom(43672).isCustom, true);
     },
   );
 
   test(
-    "When using `isCustom` method it should return false if the slippage is one of `zeroPointOnePercent`, `halfPercent` or `onePercent`",
+    "When using `isCustom` method it should return false if the slippage is one of `zeroPointOnePercent`, `halfPercent`, `onePercent` or `automatic`",
     () {
       expect(Slippage.zeroPointOnePercent.isCustom, false, reason: "zeroPointOnePercent is not custom");
       expect(Slippage.halfPercent.isCustom, false, reason: "halfPercent is not custom");
       expect(Slippage.onePercent.isCustom, false, reason: "onePercent is not custom");
+      expect(Slippage.automatic.isCustom, false, reason: "automatic is not custom");
     },
   );
 

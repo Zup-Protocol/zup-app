@@ -1,7 +1,7 @@
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_conversors_mixin.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
-import 'package:zup_app/core/mixins/v3_pool_conversors_mixin.dart';
 import 'package:zup_app/core/token_amount_input_formatter.dart';
 import 'package:zup_app/gen/assets.gen.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
@@ -103,7 +103,7 @@ class RangeSelector extends StatefulWidget {
   State<RangeSelector> createState() => _RangeSelectorState();
 }
 
-class _RangeSelectorState extends State<RangeSelector> with V3PoolConversorsMixin {
+class _RangeSelectorState extends State<RangeSelector> with CLPoolConversorsMixin {
   final padding = 20.0;
   final TextEditingController controller = TextEditingController();
 

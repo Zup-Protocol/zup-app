@@ -1330,7 +1330,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "09478e486c087bc87714fe7e0ab554bc34eb07a2"
+      resolved-ref: "91d77f97bb4581db2fbeca62aa78916c0249493c"
       url: "https://github.com/Zup-Protocol/zup-core.git"
     source: git
     version: "0.0.1"

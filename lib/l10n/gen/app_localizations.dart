@@ -1147,6 +1147,12 @@ abstract class S {
   /// **'Slippage Check! Please try increasing your slippage for this transaction'**
   String get previewDepositModalSlippageCheckErrorMessage;
 
+  /// No description provided for @previewDepositModalAutoSlippageCheckErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong market movement! Slippage exceeded. Try again or adjust tolerance.'**
+  String get previewDepositModalAutoSlippageCheckErrorMessage;
+
   /// No description provided for @createPageTitle.
   ///
   /// In en, this message translates to:

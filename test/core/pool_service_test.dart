@@ -14,20 +14,22 @@ import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v3_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_position_manager.abi.g.dart';
 import 'package:zup_app/abis/uniswap_v4_state_view.abi.g.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_constants.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_liquidity_calculations_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/v4_pool_constants.dart';
 import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/dtos/yield_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/core/enums/protocol_id.dart';
-import 'package:zup_app/core/mixins/v4_pool_liquidity_calculations_mixin.dart';
 import 'package:zup_app/core/pool_service.dart';
-import 'package:zup_app/core/v4_pool_constants.dart';
+import 'package:zup_app/core/slippage.dart';
 
 import '../matchers.dart';
 import '../mocks.dart';
 
-class _V4PoolLiquidityCalculationsMixinWrapper with V4PoolLiquidityCalculationsMixin {}
+class _V4PoolLiquidityCalculationsMixinWrapper with CLPoolLiquidityCalculationsMixin {}
 
 void main() {
   late PoolService sut;
@@ -273,11 +275,10 @@ void main() {
       final amount0Desired = BigInt.from(100);
       final amount1Desired = BigInt.from(100);
       const deadline = Duration.zero;
-      final amount0Min = BigInt.from(12);
-      final amount1Min = BigInt.from(12);
+      const slippage = Slippage.zeroPointOnePercent;
       final recipient = await signer.address;
-      final tickLower = BigInt.from(0);
-      final tickUpper = BigInt.from(0);
+      final tickLower = CLPoolConstants.minTick;
+      final tickUpper = CLPoolConstants.maxTick;
 
       await sut.sendV3PoolDepositTransaction(
         currentYield0,
@@ -285,8 +286,7 @@ void main() {
         amount0Desired: amount0Desired,
         amount1Desired: amount1Desired,
         deadline: deadline,
-        amount0Min: amount0Min,
-        amount1Min: amount1Min,
+        slippage: slippage,
         recipient: recipient,
         tickLower: tickLower,
         tickUpper: tickUpper,
@@ -331,8 +331,7 @@ void main() {
         final amount0Desired = BigInt.from(4311);
         final amount1Desired = BigInt.from(1031900);
         const deadline = Duration(days: 1);
-        final amount0Min = BigInt.from(1390);
-        final amount1Min = BigInt.from(432);
+        const slippage = Slippage.halfPercent;
         final recipient = await signer.address;
         final tickLower = BigInt.from(321);
         final tickUpper = BigInt.from(1222);
@@ -343,8 +342,7 @@ void main() {
           amount0Desired: amount0Desired,
           amount1Desired: amount1Desired,
           deadline: deadline,
-          amount0Min: amount0Min,
-          amount1Min: amount1Min,
+          slippage: slippage,
           recipient: recipient,
           tickLower: tickLower,
           tickUpper: tickUpper,
@@ -354,9 +352,9 @@ void main() {
           () => positionManagerV3.getMintCalldata(
             params: (
               amount0Desired: amount0Desired,
-              amount0Min: amount0Min,
+              amount0Min: slippage.calculateMinTokenAmountFromSlippage(amount0Desired),
+              amount1Min: slippage.calculateMinTokenAmountFromSlippage(amount1Desired),
               amount1Desired: amount1Desired,
-              amount1Min: amount1Min,
               deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
               fee: BigInt.from(currentYield0.initialFeeTier),
               recipient: recipient,
@@ -401,8 +399,7 @@ void main() {
         final amount0Desired = BigInt.from(100);
         final amount1Desired = BigInt.from(31);
         const deadline = Duration.zero;
-        final amount0Min = BigInt.from(320);
-        final amount1Min = BigInt.from(12);
+        const slippage = Slippage.halfPercent;
         final recipient = await signer.address;
         final tickLower = BigInt.from(32);
         final tickUpper = BigInt.from(14489);
@@ -413,8 +410,7 @@ void main() {
           amount0Desired: amount0Desired,
           amount1Desired: amount1Desired,
           deadline: deadline,
-          amount0Min: amount0Min,
-          amount1Min: amount1Min,
+          slippage: slippage,
           recipient: recipient,
           tickLower: tickLower,
           tickUpper: tickUpper,
@@ -424,9 +420,9 @@ void main() {
           () => positionManagerV3.getMintCalldata(
             params: (
               amount0Desired: amount0Desired,
-              amount0Min: amount0Min,
+              amount0Min: slippage.calculateMinTokenAmountFromSlippage(amount0Desired),
+              amount1Min: slippage.calculateMinTokenAmountFromSlippage(amount1Desired),
               amount1Desired: amount1Desired,
-              amount1Min: amount1Min,
               deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
               fee: BigInt.from(currentYield0.initialFeeTier),
               recipient: recipient,
@@ -471,8 +467,6 @@ void main() {
         final amount0Desired = BigInt.from(4311);
         final amount1Desired = BigInt.from(1031900);
         const deadline = Duration(days: 1);
-        final amount0Min = BigInt.from(1390);
-        final amount1Min = BigInt.from(432);
         final recipient = await signer.address;
         final tickLower = BigInt.from(321);
         final tickUpper = BigInt.from(1222);
@@ -483,8 +477,7 @@ void main() {
           amount0Desired: amount0Desired,
           amount1Desired: amount1Desired,
           deadline: deadline,
-          amount0Min: amount0Min,
-          amount1Min: amount1Min,
+          slippage: Slippage.halfPercent,
           recipient: recipient,
           tickLower: tickLower,
           tickUpper: tickUpper,
@@ -530,8 +523,6 @@ void main() {
         final amount0Desired = BigInt.from(4311);
         final amount1Desired = BigInt.from(1031900);
         const deadline = Duration(days: 1);
-        final amount0Min = BigInt.from(1390);
-        final amount1Min = BigInt.from(432);
         final recipient = await signer.address;
         final tickLower = BigInt.from(321);
         final tickUpper = BigInt.from(1222);
@@ -542,8 +533,7 @@ void main() {
           amount0Desired: amount0Desired,
           amount1Desired: amount1Desired,
           deadline: deadline,
-          amount0Min: amount0Min,
-          amount1Min: amount1Min,
+          slippage: Slippage.halfPercent,
           recipient: recipient,
           tickLower: tickLower,
           tickUpper: tickUpper,
@@ -586,11 +576,10 @@ void main() {
         final amount0Desired = BigInt.from(4311);
         final amount1Desired = BigInt.from(1031900);
         const deadline = Duration(days: 1);
-        final amount0Min = BigInt.from(1390);
-        final amount1Min = BigInt.from(432);
         final recipient = await signer.address;
         final tickLower = BigInt.from(321);
         final tickUpper = BigInt.from(1222);
+        const slippage = Slippage.halfPercent;
 
         await sut.sendV3PoolDepositTransaction(
           currentYield0,
@@ -598,8 +587,7 @@ void main() {
           amount0Desired: amount0Desired,
           amount1Desired: amount1Desired,
           deadline: deadline,
-          amount0Min: amount0Min,
-          amount1Min: amount1Min,
+          slippage: slippage,
           recipient: recipient,
           tickLower: tickLower,
           tickUpper: tickUpper,
@@ -615,8 +603,8 @@ void main() {
               tickUpper: tickUpper,
               amount0Desired: amount0Desired,
               amount1Desired: amount1Desired,
-              amount0Min: amount0Min,
-              amount1Min: amount1Min,
+              amount0Min: slippage.calculateMinTokenAmountFromSlippage(amount0Desired),
+              amount1Min: slippage.calculateMinTokenAmountFromSlippage(amount1Desired),
               recipient: recipient,
               deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
             ),
@@ -644,8 +632,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -666,8 +652,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -701,8 +686,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -723,8 +706,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -758,8 +740,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -780,8 +760,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -801,8 +780,7 @@ void main() {
     final amount0Desired = BigInt.from(4311);
     final amount1Desired = BigInt.from(1031900);
     const deadline = Duration(days: 1);
-    final amount0Max = BigInt.from(4312);
-    final amount1Max = BigInt.from(1031901);
+    const slippage = Slippage.halfPercent;
     final recipient = await signer.address;
     final tickLower = BigInt.from(321);
     final tickUpper = BigInt.from(1222);
@@ -839,8 +817,7 @@ void main() {
       tickUpper: tickUpper,
       amount0toDeposit: amount0Desired,
       amount1ToDeposit: amount1Desired,
-      maxAmount0ToDeposit: amount0Max,
-      maxAmount1ToDeposit: amount1Max,
+      slippage: slippage,
       recipient: recipient,
     );
 
@@ -873,8 +850,8 @@ void main() {
             amount0Desired,
             amount1Desired,
           ),
-          amount0Max,
-          amount1Max,
+          slippage.calculateMaxTokenAmountFromSlippage(amount0Desired),
+          slippage.calculateMaxTokenAmountFromSlippage(amount1Desired),
           recipient,
           EthereumConstants.emptyBytes,
         ],
@@ -892,8 +869,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -901,6 +876,7 @@ void main() {
       const parameters = "0x2186271217625167f2ffff";
       const hooks = "0x2111";
       const poolManager = "0xAAABbbaaa";
+      const slippage = Slippage.halfPercent;
 
       when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
       when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
@@ -946,8 +922,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -974,8 +949,8 @@ void main() {
               amount0Desired,
               amount1Desired,
             ),
-            amount0Max,
-            amount1Max,
+            slippage.calculateMaxTokenAmountFromSlippage(amount0Desired),
+            slippage.calculateMaxTokenAmountFromSlippage(amount1Desired),
             recipient,
             EthereumConstants.emptyBytes,
           ],
@@ -995,8 +970,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1049,8 +1022,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1079,8 +1051,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1133,8 +1103,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1161,8 +1130,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1215,8 +1182,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1244,8 +1210,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1266,8 +1230,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1294,8 +1257,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1316,8 +1277,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1346,8 +1306,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1368,8 +1326,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1395,8 +1352,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1456,8 +1411,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1488,8 +1442,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1566,8 +1518,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1598,8 +1549,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1676,8 +1625,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1707,8 +1655,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1768,8 +1714,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1798,8 +1743,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1855,8 +1798,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1881,8 +1823,6 @@ void main() {
         final amount0Desired = BigInt.from(4311);
         final amount1Desired = BigInt.from(1031900);
         const deadline = Duration(days: 1);
-        final amount0Max = BigInt.from(4312);
-        final amount1Max = BigInt.from(1031901);
         final recipient = await signer.address;
         final tickLower = BigInt.from(321);
         final tickUpper = BigInt.from(1222);
@@ -1914,8 +1854,7 @@ void main() {
           tickUpper: tickUpper,
           amount0toDeposit: amount0Desired,
           amount1ToDeposit: amount1Desired,
-          maxAmount0ToDeposit: amount0Max,
-          maxAmount1ToDeposit: amount1Max,
+          slippage: Slippage.halfPercent,
           recipient: recipient,
         );
 
@@ -1939,8 +1878,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -1972,8 +1909,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -1997,8 +1933,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -2030,8 +1964,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -2055,8 +1988,6 @@ void main() {
       final amount0Desired = BigInt.from(4311);
       final amount1Desired = BigInt.from(1031900);
       const deadline = Duration(days: 1);
-      final amount0Max = BigInt.from(4312);
-      final amount1Max = BigInt.from(1031901);
       final recipient = await signer.address;
       final tickLower = BigInt.from(321);
       final tickUpper = BigInt.from(1222);
@@ -2088,8 +2019,7 @@ void main() {
         tickUpper: tickUpper,
         amount0toDeposit: amount0Desired,
         amount1ToDeposit: amount1Desired,
-        maxAmount0ToDeposit: amount0Max,
-        maxAmount1ToDeposit: amount1Max,
+        slippage: Slippage.halfPercent,
         recipient: recipient,
       );
 
@@ -2277,6 +2207,17 @@ void main() {
           ),
         ).thenReturn(aerodromeV3PoolImpl);
 
+        when(() => aerodromeV3PoolImpl.slot0()).thenAnswer(
+          (_) async => (
+            observationCardinality: BigInt.from(0),
+            observationCardinalityNext: BigInt.from(0),
+            observationIndex: BigInt.from(0),
+            sqrtPriceX96: BigInt.from(12861721),
+            tick: BigInt.from(128618721),
+            unlocked: true,
+          ),
+        );
+
         when(
           () => aerodromePositionManagerV3.getMintCalldata(params: any(named: "params")),
         ).thenReturn("0x0000000000000000000000000000000000000000000000000000000000000000");
@@ -2291,6 +2232,120 @@ void main() {
           ),
         ).thenAnswer((_) => Future.value(transactionResponse));
       });
+
+      test(
+        """When calling 'sendV3PoolDepositTransaction' with yield protocol being
+    aerodrome, and passing an automatic slippage, it should calculate
+    the amounts to deposit from tick lower, tick upper, and the current price,
+    passing 0.5% slippage to the calculated amount, to not fail during
+    normal market movements""",
+        () async {
+          final poolSqrtPriceX96 = BigInt.parse("5298378196876347059858795");
+          final tickLower = BigInt.from(-193920);
+          final tickUpper = BigInt.from(-190740);
+          const slippage = Slippage.automatic;
+          final amount0Desired = BigInt.parse("1773078246741921660");
+          final amount1Desired = BigInt.parse("8296557142");
+          const deadline = Duration(days: 1);
+          final recipient = await signer.address;
+
+          when(() => aerodromeV3PoolImpl.slot0()).thenAnswer(
+            (_) async => (
+              sqrtPriceX96: poolSqrtPriceX96,
+              tick: BigInt.from(1),
+              observationIndex: BigInt.from(1),
+              observationCardinality: BigInt.from(1),
+              observationCardinalityNext: BigInt.from(1),
+              unlocked: false,
+            ),
+          );
+
+          when(
+            () => aerodromePositionManagerV3Impl.mint(params: any(named: "params")),
+          ).thenAnswer((_) async => transactionResponse);
+
+          await sut.sendV3PoolDepositTransaction(
+            currentYield.copyWith(protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.aerodromeSlipstream)),
+            signer,
+            amount0Desired: amount0Desired,
+            amount1Desired: amount1Desired,
+            deadline: deadline,
+            recipient: recipient,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+            slippage: slippage,
+          );
+
+          verify(
+            () => aerodromePositionManagerV3Impl.mint(
+              params: any(
+                named: "params",
+                that: ObjectParamMatcher((object) {
+                  return object.amount0Min == BigInt.parse("1702885666110151159") &&
+                      object.amount1Min == BigInt.parse("8255074356");
+                }),
+              ),
+            ),
+          ).called(1);
+        },
+      );
+
+      test(
+        """When calling 'sendV3PoolDepositTransaction' with yield protocol being
+    velodrome, and passing an automatic slippage, it should calculate
+    the amounts to deposit from tick lower, tick upper, and the current price,
+    passing 0.5% slippage to the calculated amount, to not fail during
+    normal market movements""",
+        () async {
+          final poolSqrtPriceX96 = BigInt.parse("5298378196876347059858795");
+          final tickLower = BigInt.from(-193920);
+          final tickUpper = BigInt.from(-190740);
+          const slippage = Slippage.automatic;
+          final amount0Desired = BigInt.parse("1773078246741921660");
+          final amount1Desired = BigInt.parse("8296557142");
+          const deadline = Duration(days: 1);
+          final recipient = await signer.address;
+
+          when(() => aerodromeV3PoolImpl.slot0()).thenAnswer(
+            (_) async => (
+              sqrtPriceX96: poolSqrtPriceX96,
+              tick: BigInt.from(1),
+              observationIndex: BigInt.from(1),
+              observationCardinality: BigInt.from(1),
+              observationCardinalityNext: BigInt.from(1),
+              unlocked: false,
+            ),
+          );
+
+          when(
+            () => aerodromePositionManagerV3Impl.mint(params: any(named: "params")),
+          ).thenAnswer((_) async => transactionResponse);
+
+          await sut.sendV3PoolDepositTransaction(
+            currentYield.copyWith(protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.velodromeSlipstream)),
+            signer,
+            amount0Desired: amount0Desired,
+            amount1Desired: amount1Desired,
+            deadline: deadline,
+            recipient: recipient,
+            tickLower: tickLower,
+            tickUpper: tickUpper,
+            slippage: slippage,
+          );
+
+          verify(
+            () => aerodromePositionManagerV3Impl.mint(
+              params: any(
+                named: "params",
+                that: ObjectParamMatcher((object) {
+                  return object.amount0Min == BigInt.parse("1702885666110151159") &&
+                      object.amount1Min == BigInt.parse("8255074356");
+                }),
+              ),
+            ),
+          ).called(1);
+        },
+      );
 
       test("When the protocol is aerodrome v3 it should use aerodrome v3 pool to get the pool tick", () async {
         final expectedTick = BigInt.from(1271897);
@@ -2373,11 +2428,9 @@ void main() {
           final amount0Desired = BigInt.from(100);
           final amount1Desired = BigInt.from(100);
           const deadline = Duration.zero;
-          final amount0Min = BigInt.from(12);
-          final amount1Min = BigInt.from(12);
           final recipient = await signer.address;
-          final tickLower = BigInt.from(0);
-          final tickUpper = BigInt.from(0);
+          final tickLower = CLPoolConstants.minTick;
+          final tickUpper = CLPoolConstants.maxTick;
 
           await sut.sendV3PoolDepositTransaction(
             currentYield0,
@@ -2385,8 +2438,7 @@ void main() {
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
+            slippage: Slippage.halfPercent,
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
@@ -2433,11 +2485,10 @@ void main() {
             final amount0Desired = BigInt.from(4311);
             final amount1Desired = BigInt.from(1031900);
             const deadline = Duration(days: 1);
-            final amount0Min = BigInt.from(1390);
-            final amount1Min = BigInt.from(432);
             final recipient = await signer.address;
             final tickLower = BigInt.from(321);
             final tickUpper = BigInt.from(1222);
+            const slippage = Slippage.halfPercent;
 
             await sut.sendV3PoolDepositTransaction(
               currentYield0,
@@ -2445,8 +2496,7 @@ void main() {
               amount0Desired: amount0Desired,
               amount1Desired: amount1Desired,
               deadline: deadline,
-              amount0Min: amount0Min,
-              amount1Min: amount1Min,
+              slippage: slippage,
               recipient: recipient,
               tickLower: tickLower,
               tickUpper: tickUpper,
@@ -2456,9 +2506,9 @@ void main() {
               () => aerodromePositionManagerV3.getMintCalldata(
                 params: (
                   amount0Desired: amount0Desired,
-                  amount0Min: amount0Min,
                   amount1Desired: amount1Desired,
-                  amount1Min: amount1Min,
+                  amount0Min: slippage.calculateMinTokenAmountFromSlippage(amount0Desired),
+                  amount1Min: slippage.calculateMinTokenAmountFromSlippage(amount1Desired),
                   deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
                   recipient: recipient,
                   tickLower: tickLower,
@@ -2506,8 +2556,7 @@ void main() {
             final amount0Desired = BigInt.from(100);
             final amount1Desired = BigInt.from(31);
             const deadline = Duration.zero;
-            final amount0Min = BigInt.from(320);
-            final amount1Min = BigInt.from(12);
+            const slippage = Slippage.onePercent;
             final recipient = await signer.address;
             final tickLower = BigInt.from(32);
             final tickUpper = BigInt.from(14489);
@@ -2518,8 +2567,7 @@ void main() {
               amount0Desired: amount0Desired,
               amount1Desired: amount1Desired,
               deadline: deadline,
-              amount0Min: amount0Min,
-              amount1Min: amount1Min,
+              slippage: slippage,
               recipient: recipient,
               tickLower: tickLower,
               tickUpper: tickUpper,
@@ -2529,9 +2577,9 @@ void main() {
               () => aerodromePositionManagerV3.getMintCalldata(
                 params: (
                   amount0Desired: amount0Desired,
-                  amount0Min: amount0Min,
+                  amount0Min: slippage.calculateMinTokenAmountFromSlippage(amount0Desired),
                   amount1Desired: amount1Desired,
-                  amount1Min: amount1Min,
+                  amount1Min: slippage.calculateMinTokenAmountFromSlippage(amount1Desired),
                   deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
                   recipient: recipient,
                   tickLower: tickLower,
@@ -2575,8 +2623,7 @@ void main() {
           final amount0Desired = BigInt.from(4311);
           final amount1Desired = BigInt.from(1031900);
           const deadline = Duration(days: 1);
-          final amount0Min = BigInt.from(1390);
-          final amount1Min = BigInt.from(432);
+
           final recipient = await signer.address;
           final tickLower = BigInt.from(321);
           final tickUpper = BigInt.from(1222);
@@ -2587,8 +2634,7 @@ void main() {
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
+            slippage: Slippage.halfPercent,
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
@@ -2631,8 +2677,7 @@ void main() {
           final amount0Desired = BigInt.from(4311);
           final amount1Desired = BigInt.from(1031900);
           const deadline = Duration(days: 1);
-          final amount0Min = BigInt.from(1390);
-          final amount1Min = BigInt.from(432);
+
           final recipient = await signer.address;
           final tickLower = BigInt.from(321);
           final tickUpper = BigInt.from(1222);
@@ -2643,8 +2688,7 @@ void main() {
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
+            slippage: Slippage.halfPercent,
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
@@ -2686,11 +2730,10 @@ void main() {
             final amount0Desired = BigInt.from(4311);
             final amount1Desired = BigInt.from(1031900);
             const deadline = Duration(days: 1);
-            final amount0Min = BigInt.from(1390);
-            final amount1Min = BigInt.from(432);
             final recipient = await signer.address;
             final tickLower = BigInt.from(321);
             final tickUpper = BigInt.from(1222);
+            const slipagge = Slippage.halfPercent;
 
             await sut.sendV3PoolDepositTransaction(
               currentYield0,
@@ -2698,8 +2741,7 @@ void main() {
               amount0Desired: amount0Desired,
               amount1Desired: amount1Desired,
               deadline: deadline,
-              amount0Min: amount0Min,
-              amount1Min: amount1Min,
+              slippage: slipagge,
               recipient: recipient,
               tickLower: tickLower,
               tickUpper: tickUpper,
@@ -2715,8 +2757,8 @@ void main() {
                   tickUpper: tickUpper,
                   amount0Desired: amount0Desired,
                   amount1Desired: amount1Desired,
-                  amount0Min: amount0Min,
-                  amount1Min: amount1Min,
+                  amount0Min: slipagge.calculateMinTokenAmountFromSlippage(amount0Desired),
+                  amount1Min: slipagge.calculateMinTokenAmountFromSlippage(amount1Desired),
                   recipient: recipient,
                   deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
                   sqrtPriceX96: BigInt.from(0),
@@ -2768,8 +2810,6 @@ void main() {
             final amount0Desired = BigInt.from(4311);
             final amount1Desired = BigInt.from(1031900);
             const deadline = Duration(days: 1);
-            final amount0Min = BigInt.from(1390);
-            final amount1Min = BigInt.from(432);
             final recipient = await signer.address;
             final tickLower = BigInt.from(321);
             final tickUpper = BigInt.from(1222);
@@ -2780,8 +2820,7 @@ void main() {
               amount0Desired: amount0Desired,
               amount1Desired: amount1Desired,
               deadline: deadline,
-              amount0Min: amount0Min,
-              amount1Min: amount1Min,
+              slippage: Slippage.halfPercent,
               recipient: recipient,
               tickLower: tickLower,
               tickUpper: tickUpper,
@@ -2840,8 +2879,6 @@ void main() {
             final amount0Desired = BigInt.from(4311);
             final amount1Desired = BigInt.from(1031900);
             const deadline = Duration(days: 1);
-            final amount0Min = BigInt.from(1390);
-            final amount1Min = BigInt.from(432);
             final recipient = await signer.address;
             final tickLower = BigInt.from(321);
             final tickUpper = BigInt.from(1222);
@@ -2852,8 +2889,7 @@ void main() {
               amount0Desired: amount0Desired,
               amount1Desired: amount1Desired,
               deadline: deadline,
-              amount0Min: amount0Min,
-              amount1Min: amount1Min,
+              slippage: Slippage.halfPercent,
               recipient: recipient,
               tickLower: tickLower,
               tickUpper: tickUpper,
@@ -2942,8 +2978,8 @@ void main() {
         amount0Min: BigInt.from(0),
         amount1Min: BigInt.from(0),
         recipient: "",
-        tickLower: BigInt.from(0),
-        tickUpper: BigInt.from(0),
+        tickLower: CLPoolConstants.minTick,
+        tickUpper: CLPoolConstants.maxTick,
         deployer: "",
         token0: "",
         token1: "",
@@ -2957,6 +2993,17 @@ void main() {
         ),
       ).thenReturn(algebra121PoolImpl);
 
+      when(() => algebra121PoolImpl.globalState()).thenAnswer(
+        (_) async => (
+          price: BigInt.from(8261872678162871),
+          tick: BigInt.from(16278156721),
+          lastFee: BigInt.from(0),
+          pluginConfig: BigInt.from(0),
+          communityFee: BigInt.from(0),
+          unlocked: false,
+        ),
+      );
+
       when(
         () => algebra121PositionManager.fromSigner(
           contractAddress: any(named: "contractAddress"),
@@ -2964,6 +3011,63 @@ void main() {
         ),
       ).thenReturn(algebra121PositionManagerImpl);
     });
+
+    test(
+      """When calling 'sendV3PoolDepositTransaction' with yield protocol being
+    gliquid, and passing an automatic slippage, it should calculate
+    the amounts to deposit from tick lower, tick upper, and the current price,
+    passing 0.5% slippage to the calculated amount, to not fail during
+    normal market movements""",
+      () async {
+        final poolSqrtPriceX96 = BigInt.parse("5298378196876347059858795");
+        final tickLower = BigInt.from(-193920);
+        final tickUpper = BigInt.from(-190740);
+        const slippage = Slippage.automatic;
+        final amount0Desired = BigInt.parse("1773078246741921660");
+        final amount1Desired = BigInt.parse("8296557142");
+        const deadline = Duration(days: 1);
+        final recipient = await signer.address;
+
+        when(() => algebra121PoolImpl.globalState()).thenAnswer(
+          (_) async => (
+            price: poolSqrtPriceX96,
+            tick: BigInt.from(0),
+            lastFee: BigInt.from(0),
+            pluginConfig: BigInt.from(0),
+            communityFee: BigInt.from(0),
+            unlocked: false,
+          ),
+        );
+
+        when(
+          () => algebra121PositionManagerImpl.mint(params: any(named: "params")),
+        ).thenAnswer((_) async => transactionResponse);
+
+        await sut.sendV3PoolDepositTransaction(
+          currentYield.copyWith(protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.gliquidV3)),
+          signer,
+          amount0Desired: amount0Desired,
+          amount1Desired: amount1Desired,
+          deadline: deadline,
+          recipient: recipient,
+          tickLower: tickLower,
+          tickUpper: tickUpper,
+          slippage: slippage,
+        );
+
+        verify(
+          () => algebra121PositionManagerImpl.mint(
+            params: any(
+              named: "params",
+              that: ObjectParamMatcher((object) {
+                return object.amount0Min == BigInt.parse("1702885666110151159") &&
+                    object.amount1Min == BigInt.parse("8255074356");
+              }),
+            ),
+          ),
+        ).called(1);
+      },
+    );
 
     test("When calling 'getPoolTick' it should return the pool tick got from algebra pool 1.2.1", () async {
       final expectedTick = BigInt.from(12871);
@@ -3033,11 +3137,9 @@ void main() {
         final amount0Desired = BigInt.from(100);
         final amount1Desired = BigInt.from(100);
         const deadline = Duration.zero;
-        final amount0Min = BigInt.from(12);
-        final amount1Min = BigInt.from(12);
         final recipient = await signer.address;
-        final tickLower = BigInt.from(0);
-        final tickUpper = BigInt.from(0);
+        final tickLower = CLPoolConstants.minTick;
+        final tickUpper = CLPoolConstants.maxTick;
 
         await sut.sendV3PoolDepositTransaction(
           currentYield0,
@@ -3045,8 +3147,7 @@ void main() {
           amount0Desired: amount0Desired,
           amount1Desired: amount1Desired,
           deadline: deadline,
-          amount0Min: amount0Min,
-          amount1Min: amount1Min,
+          slippage: Slippage.halfPercent,
           recipient: recipient,
           tickLower: tickLower,
           tickUpper: tickUpper,
@@ -3091,11 +3192,11 @@ void main() {
           final amount0Desired = BigInt.from(4311);
           final amount1Desired = BigInt.from(1031900);
           const deadline = Duration(days: 1);
-          final amount0Min = BigInt.from(1390);
-          final amount1Min = BigInt.from(432);
+
           final recipient = await signer.address;
           final tickLower = BigInt.from(321);
           final tickUpper = BigInt.from(1222);
+          const slippage = Slippage.halfPercent;
 
           await sut.sendV3PoolDepositTransaction(
             currentYield0,
@@ -3103,8 +3204,7 @@ void main() {
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
+            slippage: slippage,
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
@@ -3114,9 +3214,9 @@ void main() {
             () => algebra121PositionManager.getMintCalldata(
               params: (
                 amount0Desired: amount0Desired,
-                amount0Min: amount0Min,
+                amount0Min: slippage.calculateMinTokenAmountFromSlippage(amount0Desired),
+                amount1Min: slippage.calculateMinTokenAmountFromSlippage(amount1Desired),
                 amount1Desired: amount1Desired,
-                amount1Min: amount1Min,
                 deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
                 recipient: recipient,
                 tickLower: tickLower,
@@ -3161,8 +3261,7 @@ void main() {
           final amount0Desired = BigInt.from(100);
           final amount1Desired = BigInt.from(31);
           const deadline = Duration.zero;
-          final amount0Min = BigInt.from(320);
-          final amount1Min = BigInt.from(12);
+          const slippage = Slippage.halfPercent;
           final recipient = await signer.address;
           final tickLower = BigInt.from(32);
           final tickUpper = BigInt.from(14489);
@@ -3173,8 +3272,7 @@ void main() {
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
+            slippage: slippage,
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
@@ -3184,9 +3282,9 @@ void main() {
             () => algebra121PositionManager.getMintCalldata(
               params: (
                 amount0Desired: amount0Desired,
-                amount0Min: amount0Min,
+                amount0Min: slippage.calculateMinTokenAmountFromSlippage(amount0Desired),
+                amount1Min: slippage.calculateMinTokenAmountFromSlippage(amount1Desired),
                 amount1Desired: amount1Desired,
-                amount1Min: amount1Min,
                 deadline: BigInt.from(clock.now().add(deadline).millisecondsSinceEpoch),
                 recipient: recipient,
                 tickLower: tickLower,
@@ -3229,8 +3327,6 @@ void main() {
         final amount0Desired = BigInt.from(4311);
         final amount1Desired = BigInt.from(1031900);
         const deadline = Duration(days: 1);
-        final amount0Min = BigInt.from(1390);
-        final amount1Min = BigInt.from(432);
         final recipient = await signer.address;
         final tickLower = BigInt.from(321);
         final tickUpper = BigInt.from(1222);
@@ -3241,8 +3337,7 @@ void main() {
           amount0Desired: amount0Desired,
           amount1Desired: amount1Desired,
           deadline: deadline,
-          amount0Min: amount0Min,
-          amount1Min: amount1Min,
+          slippage: Slippage.halfPercent,
           recipient: recipient,
           tickLower: tickLower,
           tickUpper: tickUpper,
@@ -3289,8 +3384,7 @@ void main() {
           final amount0Desired = BigInt.from(4311);
           final amount1Desired = BigInt.from(1031900);
           const deadline = Duration(days: 1);
-          final amount0Min = BigInt.from(1390);
-          final amount1Min = BigInt.from(432);
+
           final recipient = await signer.address;
           final tickLower = BigInt.from(321);
           final tickUpper = BigInt.from(1222);
@@ -3301,8 +3395,7 @@ void main() {
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
+            slippage: Slippage.halfPercent,
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
@@ -3342,8 +3435,7 @@ void main() {
           final amount0Desired = BigInt.from(4311);
           final amount1Desired = BigInt.from(1031900);
           const deadline = Duration(days: 1);
-          final amount0Min = BigInt.from(1390);
-          final amount1Min = BigInt.from(432);
+
           final recipient = await signer.address;
           final tickLower = BigInt.from(321);
           final tickUpper = BigInt.from(1222);
@@ -3354,8 +3446,7 @@ void main() {
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
+            slippage: Slippage.halfPercent,
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
@@ -3395,8 +3486,7 @@ void main() {
           final amount0Desired = BigInt.from(4311);
           final amount1Desired = BigInt.from(1031900);
           const deadline = Duration(days: 1);
-          final amount0Min = BigInt.from(1390);
-          final amount1Min = BigInt.from(432);
+
           final recipient = await signer.address;
           final tickLower = BigInt.from(321);
           final tickUpper = BigInt.from(1222);
@@ -3407,8 +3497,7 @@ void main() {
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
+            slippage: Slippage.halfPercent,
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
@@ -3457,8 +3546,7 @@ void main() {
           final amount0Desired = BigInt.from(4311);
           final amount1Desired = BigInt.from(1031900);
           const deadline = Duration(days: 1);
-          final amount0Min = BigInt.from(1390);
-          final amount1Min = BigInt.from(432);
+
           final recipient = await signer.address;
           final tickLower = BigInt.from(321);
           final tickUpper = BigInt.from(1222);
@@ -3469,8 +3557,7 @@ void main() {
             amount0Desired: amount0Desired,
             amount1Desired: amount1Desired,
             deadline: deadline,
-            amount0Min: amount0Min,
-            amount1Min: amount1Min,
+            slippage: Slippage.halfPercent,
             recipient: recipient,
             tickLower: tickLower,
             tickUpper: tickUpper,
@@ -3488,4 +3575,244 @@ void main() {
       },
     );
   });
+
+  test(
+    """When calling 'sendV3PoolDepositTransaction' passing an automatic slippage,
+    it should calculate the amounts to deposit from tick lower, tick upper,
+    and the current price, passing 0.5% slippage to the calculated amount,
+    to not fail during normal market movements""",
+    () async {
+      final poolSqrtPriceX96 = BigInt.parse("5298378196876347059858795");
+      final tickLower = BigInt.from(-193920);
+      final tickUpper = BigInt.from(-190740);
+      const slippage = Slippage.automatic;
+      final amount0Desired = BigInt.parse("1773078246741921660");
+      final amount1Desired = BigInt.parse("8296557142");
+      const deadline = Duration(days: 1);
+      final recipient = await signer.address;
+
+      when(() => uniswapV3PoolImpl.slot0()).thenAnswer(
+        (_) async => (
+          sqrtPriceX96: poolSqrtPriceX96,
+          tick: BigInt.from(1),
+          observationIndex: BigInt.from(1),
+          observationCardinality: BigInt.from(1),
+          observationCardinalityNext: BigInt.from(1),
+          feeProtocol: BigInt.from(1),
+          unlocked: false,
+        ),
+      );
+
+      when(() => positionManagerV3Impl.mint(params: any(named: "params"))).thenAnswer((_) async => transactionResponse);
+
+      await sut.sendV3PoolDepositTransaction(
+        currentYield,
+        signer,
+        amount0Desired: amount0Desired,
+        amount1Desired: amount1Desired,
+        deadline: deadline,
+        recipient: recipient,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        slippage: slippage,
+      );
+
+      verify(
+        () => positionManagerV3Impl.mint(
+          params: any(
+            named: "params",
+            that: ObjectParamMatcher((object) {
+              return object.amount0Min == BigInt.parse("1702885666110151159") &&
+                  object.amount1Min == BigInt.parse("8255074356");
+            }),
+          ),
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    """When calling 'sendV4PoolDepositTransaction' passing an automatic slippage,
+    it should calculate the amounts to deposit from tick lower, tick upper,
+    and the current price, passing 0.5% slippage to the calculated amount,
+    to not fail during normal market movements""",
+    () async {
+      final poolSqrtPriceX96 = BigInt.parse("5324028620041997063966665");
+      final tickLower = BigInt.from(-887220);
+      final tickUpper = BigInt.from(887220);
+      const slippage = Slippage.automatic;
+      final amount0Desired = BigInt.parse("14999999952321436");
+      final amount1Desired = BigInt.parse("67734956");
+      const deadline = Duration(days: 1);
+      final recipient = await signer.address;
+      final liquidity = _V4PoolLiquidityCalculationsMixinWrapper().getLiquidityForAmounts(
+        poolSqrtPriceX96,
+        _V4PoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(tickLower),
+        _V4PoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(tickUpper),
+        amount0Desired,
+        amount1Desired,
+      );
+
+      when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
+      when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
+
+      when(() => uniswapV4StateViewImpl.getSlot0(poolId: any(named: "poolId"))).thenAnswer(
+        (_) async =>
+            (sqrtPriceX96: poolSqrtPriceX96, tick: BigInt.from(1), protocolFee: BigInt.from(1), lpFee: BigInt.from(1)),
+      );
+
+      when(
+        () => uniswapPositionManagerV4Impl.modifyLiquidities(
+          unlockData: any(named: "unlockData"),
+          deadline: any(named: "deadline"),
+        ),
+      ).thenAnswer((_) async => transactionResponse);
+
+      await sut.sendV4PoolDepositTransaction(
+        currentYield.copyWith(poolType: PoolType.v4, v4StateView: "0x"),
+        signer,
+        amount0toDeposit: amount0Desired,
+        amount1ToDeposit: amount1Desired,
+        deadline: deadline,
+        recipient: recipient,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        slippage: slippage,
+      );
+
+      verify(
+        () => ethereumAbiCoder.encode(
+          [
+            "tuple(address,address,int32,int24,address)",
+            "int24",
+            "int24",
+            "uint256",
+            "uint128",
+            "uint128",
+            "address",
+            "bytes",
+          ],
+          [
+            [
+              currentYield.token0.addresses[currentYield.network.chainId]!,
+              currentYield.token1.addresses[currentYield.network.chainId]!,
+              BigInt.from(currentYield.initialFeeTier),
+              BigInt.from(currentYield.tickSpacing),
+              currentYield.v4Hooks,
+            ],
+            tickLower,
+            tickUpper,
+            liquidity,
+            BigInt.from(15074999952083043),
+            BigInt.from(68073630),
+            recipient,
+            EthereumConstants.emptyBytes,
+          ],
+        ),
+      ).called(1);
+    },
+  );
+
+  test(
+    """When calling 'sendV4PoolDepositTransaction' passing an automatic slippage,
+    and the protocol be pancakeSwapInfinityCL it should calculate the amounts to deposit from tick lower, tick upper,
+    and the current price, passing 0.5% slippage to the calculated amount,
+    to not fail during normal market movements""",
+    () async {
+      final poolSqrtPriceX96 = BigInt.parse("5324028620041997063966665");
+      final tickLower = BigInt.from(-887220);
+      final tickUpper = BigInt.from(887220);
+      const slippage = Slippage.automatic;
+      final amount0Desired = BigInt.parse("14999999952321436");
+      final amount1Desired = BigInt.parse("67734956");
+      const deadline = Duration(days: 1);
+      final recipient = await signer.address;
+      final liquidity = _V4PoolLiquidityCalculationsMixinWrapper().getLiquidityForAmounts(
+        poolSqrtPriceX96,
+        _V4PoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(tickLower),
+        _V4PoolLiquidityCalculationsMixinWrapper().getSqrtPriceAtTick(tickUpper),
+        amount0Desired,
+        amount1Desired,
+      );
+      const hooks = "0x";
+      const parameters = "0x";
+      const poolManager = "0x";
+
+      when(() => ethereumAbiCoder.encodePacked(any(), any())).thenReturn("0x");
+      when(() => ethereumAbiCoder.encode(any(), any())).thenReturn("0x");
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.getSlot0(id: any(named: "id"))).thenAnswer(
+        (_) async =>
+            (sqrtPriceX96: poolSqrtPriceX96, tick: BigInt.from(1), protocolFee: BigInt.from(1), lpFee: BigInt.from(1)),
+      );
+
+      when(
+        () => pancakeSwapInfinityCLPositionManagerImpl.modifyLiquidities(
+          payload: any(named: "payload"),
+          deadline: any(named: "deadline"),
+        ),
+      ).thenAnswer((_) async => transactionResponse);
+
+      when(() => pancakeSwapInfinityCLPoolManagerImpl.poolIdToPoolKey(id: any(named: "id"))).thenAnswer(
+        (_) async => (
+          currency0: "0x",
+          currency1: "0x",
+          fee: BigInt.from(1),
+          hooks: hooks,
+          parameters: parameters,
+          poolManager: poolManager,
+        ),
+      );
+
+      await sut.sendV4PoolDepositTransaction(
+        currentYield.copyWith(
+          protocol: ProtocolDto.fixture().copyWith(id: ProtocolId.pancakeSwapInfinityCL),
+          poolType: PoolType.v4,
+          v4Hooks: hooks,
+          v4PoolManager: "0x",
+          v4StateView: "0x",
+        ),
+        signer,
+        amount0toDeposit: amount0Desired,
+        amount1ToDeposit: amount1Desired,
+        deadline: deadline,
+        recipient: recipient,
+        tickLower: tickLower,
+        tickUpper: tickUpper,
+        slippage: slippage,
+      );
+
+      verify(
+        () => ethereumAbiCoder.encode(
+          [
+            "tuple(address,address,address,address,uint24,bytes32)",
+            "int24",
+            "int24",
+            "uint256",
+            "uint128",
+            "uint128",
+            "address",
+            "bytes",
+          ],
+          [
+            [
+              currentYield.token0.addresses[currentYield.network.chainId]!,
+              currentYield.token1.addresses[currentYield.network.chainId]!,
+              hooks,
+              poolManager,
+              currentYield.initialFeeTier,
+              parameters,
+            ],
+            tickLower,
+            tickUpper,
+            liquidity,
+            BigInt.from(15074999952083043),
+            BigInt.from(68073630),
+            recipient,
+            EthereumConstants.emptyBytes,
+          ],
+        ),
+      ).called(1);
+    },
+  );
 }

@@ -1,36 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:zup_app/core/mixins/v4_pool_liquidity_calculations_mixin.dart';
+import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_liquidity_calculations_mixin.dart';
 
-class _V4PoolLiquidityCalculationsMixinTest with V4PoolLiquidityCalculationsMixin {}
+class _V4PoolLiquidityCalculationsMixinTest with CLPoolLiquidityCalculationsMixin {}
 
 void main() {
-  test(
-    "When calling `getLiquidityForAmount0` it should return the correct value based on the v4 pool math",
-    () {
-      BigInt sqrtPriceAX96 = BigInt.parse("4242269098745952767280720");
-      BigInt sqrtPriceBX96 = BigInt.parse("4242269098745952767280721");
-      BigInt amount0 = BigInt.from(1241555);
+  test("When calling `getLiquidityForAmount0` it should return the correct value based on the v4 pool math", () {
+    BigInt sqrtPriceAX96 = BigInt.parse("4242269098745952767280720");
+    BigInt sqrtPriceBX96 = BigInt.parse("4242269098745952767280721");
+    BigInt amount0 = BigInt.from(1241555);
 
-      expect(
-        _V4PoolLiquidityCalculationsMixinTest().getLiquidityForAmount0(sqrtPriceAX96, sqrtPriceBX96, amount0),
-        BigInt.parse("282021882116526385820841971"),
-      );
-    },
-  );
+    expect(
+      _V4PoolLiquidityCalculationsMixinTest().getLiquidityForAmount0(sqrtPriceAX96, sqrtPriceBX96, amount0),
+      BigInt.parse("282021882116526385820841971"),
+    );
+  });
 
-  test(
-    "When calling `getLiquidityForAmount1` it should return the correct value based on the v4 pool math",
-    () {
-      BigInt sqrtPriceAX96 = BigInt.parse("4242269098745952767280720");
-      BigInt sqrtPriceBX96 = BigInt.parse("4242269098745952767280721");
-      BigInt amount0 = BigInt.from(1241555);
+  test("When calling `getLiquidityForAmount1` it should return the correct value based on the v4 pool math", () {
+    BigInt sqrtPriceAX96 = BigInt.parse("4242269098745952767280720");
+    BigInt sqrtPriceBX96 = BigInt.parse("4242269098745952767280721");
+    BigInt amount0 = BigInt.from(1241555);
 
-      expect(
-        _V4PoolLiquidityCalculationsMixinTest().getLiquidityForAmount1(sqrtPriceAX96, sqrtPriceBX96, amount0),
-        BigInt.parse("98366121310397459660952459259412480"),
-      );
-    },
-  );
+    expect(
+      _V4PoolLiquidityCalculationsMixinTest().getLiquidityForAmount1(sqrtPriceAX96, sqrtPriceBX96, amount0),
+      BigInt.parse("98366121310397459660952459259412480"),
+    );
+  });
 
   test(
     "When calling `getLiquidityForAmounts` and the sqrtpricea is bigger, it should return the token0 liquidity calculated",
@@ -42,8 +36,13 @@ void main() {
       BigInt amount1 = BigInt.from(1241555);
 
       expect(
-        _V4PoolLiquidityCalculationsMixinTest()
-            .getLiquidityForAmounts(sqrtPriceX96, sqrtPriceAX96, sqrtPriceBX96, amount0, amount1),
+        _V4PoolLiquidityCalculationsMixinTest().getLiquidityForAmounts(
+          sqrtPriceX96,
+          sqrtPriceAX96,
+          sqrtPriceBX96,
+          amount0,
+          amount1,
+        ),
         BigInt.parse("282021882116526385820841971"),
       );
     },
@@ -59,8 +58,13 @@ void main() {
       BigInt amount1 = BigInt.from(1241555);
 
       expect(
-        _V4PoolLiquidityCalculationsMixinTest()
-            .getLiquidityForAmounts(sqrtPriceX96, sqrtPriceAX96, sqrtPriceBX96, amount0, amount1),
+        _V4PoolLiquidityCalculationsMixinTest().getLiquidityForAmounts(
+          sqrtPriceX96,
+          sqrtPriceAX96,
+          sqrtPriceBX96,
+          amount0,
+          amount1,
+        ),
         BigInt.parse("94007294038842128606947412"),
       );
     },
@@ -82,14 +86,8 @@ void main() {
   });
 
   test('getSqrtPriceAtTick should throw for tick out of range', () {
-    expect(
-      () => _V4PoolLiquidityCalculationsMixinTest().getSqrtPriceAtTick(BigInt.from(887273)),
-      throwsException,
-    );
+    expect(() => _V4PoolLiquidityCalculationsMixinTest().getSqrtPriceAtTick(BigInt.from(887273)), throwsException);
 
-    expect(
-      () => _V4PoolLiquidityCalculationsMixinTest().getSqrtPriceAtTick(BigInt.from(-887273)),
-      throwsException,
-    );
+    expect(() => _V4PoolLiquidityCalculationsMixinTest().getSqrtPriceAtTick(BigInt.from(-887273)), throwsException);
   });
 }
