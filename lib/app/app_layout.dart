@@ -48,25 +48,25 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
 
       if (cache.getCookiesConsentStatus() == null) Overlay.of(context).insert(overlayEntry);
 
-      // ScaffoldMessenger.of(context).showMaterialBanner(
-      //   MaterialBanner(
-      //     backgroundColor: ZupColors.orange6,
-      //     padding: const EdgeInsets.only(left: 20, right: 10, bottom: 5, top: 5),
-      //     dividerColor: Colors.transparent,
-      //     content: const Text(
-      //       "⚠️ 24h Yields on Base Network are temporarily unavailable, we’re on it! 🚧 7d, 30d, and 90d Yields are still running fine.",
-      //       style: TextStyle(color: ZupColors.orange),
-      //     ),
-      //     actions: [
-      //       ZupIconButton(
-      //         iconColor: ZupColors.orange,
-      //         backgroundColor: ZupColors.orange5,
-      //         icon: const Icon(Icons.close),
-      //         onPressed: (context) => ScaffoldMessenger.of(context).clearMaterialBanners(),
-      //       ),
-      //     ],
-      //   ),
-      // );
+      ScaffoldMessenger.of(context).showMaterialBanner(
+        MaterialBanner(
+          backgroundColor: ZupColors.orange6,
+          padding: const EdgeInsets.only(left: 20, right: 10, bottom: 5, top: 5),
+          dividerColor: Colors.transparent,
+          content: const Text(
+            "⚠️ 24h Yields on Base Network are temporarily unavailable, we’re on it! 🚧 7d, 30d, and 90d Yields are still running fine.",
+            style: TextStyle(color: ZupColors.orange),
+          ),
+          actions: [
+            ZupIconButton(
+              iconColor: ZupColors.orange,
+              backgroundColor: ZupColors.orange5,
+              icon: const Icon(Icons.close),
+              onPressed: (context) => ScaffoldMessenger.of(context).clearMaterialBanners(),
+            ),
+          ],
+        ),
+      );
     });
   }
 
