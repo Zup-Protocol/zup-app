@@ -93,12 +93,9 @@ class _AppHeaderState extends State<AppHeader> with DeviceInfoMixin {
                 child: GestureDetector(
                   key: const Key("logo-button"),
                   onTap: () => navigator.navigateToInitial(),
-                  child: Assets.logos.zup.svg(
-                    height: 30,
-                    colorFilter: context.brightness.isLight
-                        ? null
-                        : const ColorFilter.mode(ZupColors.brand, BlendMode.srcIn),
-                  ),
+                  child: context.brightness.isDark
+                      ? Assets.logos.zupOnBlack.svg(height: 21)
+                      : Assets.logos.zupOnWhite.svg(height: 21),
                 ),
               ),
               const SizedBox(width: 26),

@@ -1,32 +1,32 @@
 {
-    "name": "Zup Protocol App",
-    "short_name": "Zup App",
+    "name": "Zup Protocol",
+    "short_name": "Zup",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#7357FF",
     "theme_color": "#7357FF",
-    "description": "Finding the most profitable pool is just a few clicks away.",
+    "description": "Find & Deposit into the best pool in a minute.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
         {
-            "src": "icons/Icon-192.png",
+            "src": "icons/icon-192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "icons/Icon-512.png",
+            "src": "icons/icon-512.png",
             "sizes": "512x512",
             "type": "image/png"
         },
         {
-            "src": "icons/Icon-maskable-192.png",
+            "src": "icons/icon-192-maskable.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "maskable"
         },
         {
-            "src": "icons/Icon-maskable-512.png",
+            "src": "icons/icon-512-maskable.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"

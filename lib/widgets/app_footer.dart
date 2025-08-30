@@ -188,7 +188,7 @@ class _AppFooterState extends State<AppFooter> with DeviceInfoMixin {
 
   Widget _buildDesktopFooter() => Row(
     children: [
-      Assets.logos.zupGray.svg(height: 25),
+      Opacity(opacity: 0.5, child: Assets.logos.zupGray.svg(height: 18)),
       const SizedBox(width: 40),
       ZupLightButton(
         key: _AppFooterButton.termsOfUse.key,

@@ -26,7 +26,7 @@ class ZupApp extends StatelessWidget {
       bloc: appCubit,
       builder: (context, state) {
         return MaterialApp.router(
-          title: "Zup | Liquidity Pools Aggregator",
+          title: "Zup | Liquidity Pools Made easy",
           debugShowCheckedModeBanner: false,
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
