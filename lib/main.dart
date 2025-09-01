@@ -12,9 +12,7 @@ Future<void> main() async {
   await Web3Kit.initialize();
   await setupInjections();
 
-  if (kIsWeb) {
-    usePathUrlStrategy();
-  }
+  if (kIsWeb) usePathUrlStrategy();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.web);
   runApp(ZupApp());
