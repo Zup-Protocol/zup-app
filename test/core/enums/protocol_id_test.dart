@@ -36,4 +36,23 @@ void main() {
       expect(ProtocolId.unknown.isPancakeSwapInfinityCL, false);
     },
   );
+
+  test("when calling `isKittenswapV3` and the protocol is indeed kittenswapV3, it should return true", () {
+    expect(ProtocolId.kittenswapV3.isKittenswapV3, true);
+  });
+
+  test("when calling `isKittenswapV3` and the protocol is not kittenswapV3, it should return false", () {
+    expect(ProtocolId.unknown.isKittenswapV3, false);
+  });
+
+  test("When calling `isAlgebra1_2` and the protocol is kittenSwap, it should return true", () {
+    expect(ProtocolId.kittenswapV3.isAlgebra1_2, true);
+  });
+
+  test("When calling `isAlgebra1_2` and the protocol is gliquid, it should return true", () {
+    expect(ProtocolId.gliquidV3.isAlgebra1_2, true);
+  });
+  test("When calling `isAlgebra1_2` and the protocol is not gliquid or kittenSwap, it should return false", () {
+    expect(ProtocolId.pancakeSwapInfinityCL.isAlgebra1_2, false);
+  });
 }

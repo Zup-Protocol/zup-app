@@ -46,7 +46,7 @@ class PoolService with CLPoolLiquidityCalculationsMixin, CLPoolConversorsMixin, 
   );
 
   Future<BigInt> getPoolTick(YieldDto forYield) async {
-    if (forYield.protocol.id.isGLiquidV3) {
+    if (forYield.protocol.id.isAlgebra1_2) {
       final algebraPool = _algebra121Pool.fromRpcProvider(
         contractAddress: forYield.poolAddress,
         rpcUrl: forYield.network.rpcUrl,
@@ -100,7 +100,7 @@ class PoolService with CLPoolLiquidityCalculationsMixin, CLPoolConversorsMixin, 
       return (await pancakeSwapInfinityCLPoolManagerContract.getSlot0(id: forYield.poolAddress)).sqrtPriceX96;
     }
 
-    if (forYield.protocol.id.isGLiquidV3) {
+    if (forYield.protocol.id.isAlgebra1_2) {
       final algebraPool = _algebra121Pool.fromRpcProvider(
         contractAddress: forYield.poolAddress,
         rpcUrl: forYield.network.rpcUrl,
@@ -189,7 +189,7 @@ class PoolService with CLPoolLiquidityCalculationsMixin, CLPoolConversorsMixin, 
       );
     }
 
-    if (depositOnYield.protocol.id.isGLiquidV3) {
+    if (depositOnYield.protocol.id.isAlgebra1_2) {
       return _sendV3DepositTransactionForAlgebra121(
         depositOnYield,
         signer,
