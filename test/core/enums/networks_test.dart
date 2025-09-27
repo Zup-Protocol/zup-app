@@ -11,11 +11,9 @@ import '../../mocks.dart';
 
 void main() {
   late UrlLauncherPlatform urlLauncherPlatform;
-  late BuildContext buildContext;
 
   setUp(() {
     urlLauncherPlatform = UrlLauncherPlatformCustomMock();
-    buildContext = BuildContextMock();
 
     UrlLauncherPlatform.instance = urlLauncherPlatform;
   });
