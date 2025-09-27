@@ -556,7 +556,11 @@ class _PreviewDepositModalState extends State<PreviewDepositModal>
                           fit: FlexFit.loose,
                           child: _fieldColumn(
                             title: S.of(context).previewDepositModalNetwork,
-                            image: SizedBox(width: 30, height: 30, child: widget.currentYield.network.icon),
+                            image: SizedBox(
+                              width: 30,
+                              height: 30,
+                              child: widget.currentYield.network.icon(context.brightness),
+                            ),
                             value: widget.currentYield.network.label,
                           ),
                         ),

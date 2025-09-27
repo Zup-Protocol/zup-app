@@ -67,7 +67,7 @@ class _YieldCardState extends State<YieldCard> {
               top: 2,
               child: ZupTooltip.text(
                 message: S.of(context).yieldCardThisPoolIsAtNetwork(network: widget.currentYield.network.label),
-                trailingIcon: widget.currentYield.network.icon,
+                trailingIcon: widget.currentYield.network.icon(context.brightness),
                 child: Container(
                   height: 40,
                   padding: const EdgeInsets.all(6),
@@ -78,7 +78,7 @@ class _YieldCardState extends State<YieldCard> {
                         : (context.brightness.isDark ? ZupColors.black2 : ZupColors.gray6),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: widget.currentYield.network.icon,
+                  child: widget.currentYield.network.icon(context.brightness),
                 ),
               ),
             ),

@@ -1,4 +1,4 @@
-import 'package:flutter/src/widgets/basic.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -10,10 +10,13 @@ import '../../golden_config.dart';
 import '../../mocks.dart';
 
 void main() {
-  UrlLauncherPlatform urlLauncherPlatform;
+  late UrlLauncherPlatform urlLauncherPlatform;
+  late BuildContext buildContext;
 
   setUp(() {
     urlLauncherPlatform = UrlLauncherPlatformCustomMock();
+    buildContext = BuildContextMock();
+
     UrlLauncherPlatform.instance = urlLauncherPlatform;
   });
 
@@ -25,6 +28,7 @@ void main() {
     expect(AppNetworks.fromValue("base"), AppNetworks.base, reason: "Base should match");
     expect(AppNetworks.fromValue("hyperEvm"), AppNetworks.hyperEvm, reason: "HyperEVM should match");
     expect(AppNetworks.fromValue("unichain"), AppNetworks.unichain, reason: "Unichain should match");
+    expect(AppNetworks.fromValue("plasma"), AppNetworks.plasma, reason: "Plasma should match");
     // expect(AppNetworks.fromValue("bnb"), AppNetworks.bnb, reason: "BNB should match");
   });
 
@@ -36,6 +40,7 @@ void main() {
     expect(AppNetworks.base.label, "Base", reason: "Base Label should match");
     expect(AppNetworks.hyperEvm.label, "HyperEVM", reason: "HyperEVM Label should match");
     expect(AppNetworks.unichain.label, "Unichain", reason: "Unichain Label should match");
+    expect(AppNetworks.plasma.label, "Plasma", reason: "Plasma Label should match");
     // expect(AppNetworks.bnb.label, "BNB Chain", reason: "BNB Chain Label should match");
   });
 
@@ -53,6 +58,7 @@ void main() {
         AppNetworks.base,
         AppNetworks.hyperEvm,
         AppNetworks.unichain,
+        AppNetworks.plasma,
         // AppNetworks.bnb
       ]),
     );
@@ -80,6 +86,10 @@ void main() {
 
   test("`isTestnet` method should return false for unichain", () {
     expect(AppNetworks.unichain.isTestnet, false);
+  });
+
+  test("`isTestnet` method should return false for plasma", () {
+    expect(AppNetworks.plasma.isTestnet, false);
   });
 
   test("`isTestnet` method should return false for bnb", () {
@@ -158,6 +168,18 @@ void main() {
       reason: "HyperEVM ChainInfo should match",
     );
 
+    expect(
+      AppNetworks.plasma.chainInfo,
+      ChainInfo(
+        hexChainId: "0x2611",
+        chainName: "Plasma",
+        blockExplorerUrls: const ["https://plasmascan.to"],
+        nativeCurrency: NativeCurrencies.xpl.currencyInfo,
+        rpcUrls: const ["https://rpc.plasma.to"],
+      ),
+      reason: "Plasma ChainInfo should match",
+    );
+
     // expect(
     //   AppNetworks.bnb.chainInfo,
     //   ChainInfo(
@@ -190,16 +212,28 @@ void main() {
       reason: "Scroll wrapped native token address should match",
     );
 
-    // expect(
-    //   AppNetworks.base.wrappedNativeTokenAddress,
-    //   "0x4200000000000000000000000000000000000006",
-    //   reason: "Base wrapped native token address should match",
-    // );
+    expect(
+      AppNetworks.base.wrappedNativeTokenAddress,
+      "0x4200000000000000000000000000000000000006",
+      reason: "Base wrapped native token address should match",
+    );
 
     expect(
       AppNetworks.unichain.wrappedNativeTokenAddress,
       "0x4200000000000000000000000000000000000006",
       reason: "Unichain wrapped native token address should match",
+    );
+
+    expect(
+      AppNetworks.plasma.wrappedNativeTokenAddress,
+      "0x6100E367285b01F48D07953803A2d8dCA5D19873",
+      reason: "Plasma wrapped native token address should match",
+    );
+
+    expect(
+      AppNetworks.hyperEvm.wrappedNativeTokenAddress,
+      "0x5555555555555555555555555555555555555555",
+      reason: "HyperEVM wrapped native token address should match",
     );
   });
 
@@ -214,13 +248,13 @@ void main() {
 
     expect(AppNetworks.scroll.rpcUrl, "https://scroll-rpc.publicnode.com", reason: "Scroll rpc url should match");
 
-    // expect(
-    //   AppNetworks.base.rpcUrl,
-    //   "https://base-rpc.publicnode.com",
-    //   reason: "Base rpc url should match",
-    // );
+    expect(AppNetworks.base.rpcUrl, "https://base-rpc.publicnode.com", reason: "Base rpc url should match");
 
     expect(AppNetworks.unichain.rpcUrl, "https://unichain-rpc.publicnode.com", reason: "Unichain rpc url should match");
+
+    expect(AppNetworks.hyperEvm.rpcUrl, "https://rpc.hyperliquid.xyz/evm", reason: "HyperEVM rpc url should match");
+
+    expect(AppNetworks.plasma.rpcUrl, "https://rpc.plasma.to", reason: "Plasma rpc url should match");
 
     // expect(
     //   AppNetworks.bnb.rpcUrl,
@@ -275,33 +309,86 @@ void main() {
   });
 
   zGoldenTest("Sepolia network icon should match", goldenFileName: "sepolia_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.sepolia.icon, device: GoldenDevice.square));
+    await tester.pumpDeviceBuilder(
+      await goldenDeviceBuilder(
+        SizedBox(height: 100, width: 100, child: AppNetworks.sepolia.icon(Brightness.light)),
+        device: GoldenDevice.square,
+      ),
+    );
   });
 
   zGoldenTest("hyperEVM network icon should match", goldenFileName: "hyperEVM_network_icon", (tester) async {
     await tester.pumpDeviceBuilder(
       await goldenDeviceBuilder(
-        SizedBox(height: 100, child: Center(child: AppNetworks.hyperEvm.icon)),
+        SizedBox(height: 100, child: Center(child: AppNetworks.hyperEvm.icon(Brightness.light))),
         device: GoldenDevice.square,
       ),
     );
   });
 
   zGoldenTest("Ethereum network icon should match", goldenFileName: "ethereum_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.mainnet.icon, device: GoldenDevice.square));
+    await tester.pumpDeviceBuilder(
+      await goldenDeviceBuilder(
+        SizedBox(width: 100, height: 100, child: AppNetworks.mainnet.icon(Brightness.light)),
+        device: GoldenDevice.square,
+      ),
+    );
   });
 
   zGoldenTest("Base network icon should match", goldenFileName: "base_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.base.icon, device: GoldenDevice.square));
+    await tester.pumpDeviceBuilder(
+      await goldenDeviceBuilder(
+        SizedBox(height: 100, width: 100, child: AppNetworks.base.icon(Brightness.light)),
+        device: GoldenDevice.square,
+      ),
+    );
   });
 
   zGoldenTest("Scroll network icon should match", goldenFileName: "scroll_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.scroll.icon, device: GoldenDevice.square));
+    await tester.pumpDeviceBuilder(
+      await goldenDeviceBuilder(
+        SizedBox(height: 100, width: 100, child: AppNetworks.scroll.icon(Brightness.light)),
+        device: GoldenDevice.square,
+      ),
+    );
   });
 
   zGoldenTest("Unichain network icon should match", goldenFileName: "unichain_network_icon", (tester) async {
-    await tester.pumpDeviceBuilder(await goldenDeviceBuilder(AppNetworks.unichain.icon, device: GoldenDevice.square));
+    await tester.pumpDeviceBuilder(
+      await goldenDeviceBuilder(
+        SizedBox(width: 100, height: 100, child: AppNetworks.unichain.icon(Brightness.light)),
+        device: GoldenDevice.square,
+      ),
+    );
   });
+
+  zGoldenTest(
+    "Plasma network icon should be correct for light mode (Dark icon)",
+    goldenFileName: "plasma_network_icon_light_mode",
+    (tester) async {
+      await tester.pumpDeviceBuilder(
+        await goldenDeviceBuilder(
+          SizedBox(height: 100, width: 100, child: AppNetworks.plasma.icon(Brightness.light)),
+          device: GoldenDevice.square,
+          darkMode: false,
+        ),
+      );
+    },
+  );
+  autoUpdateGoldenFiles = true;
+  zGoldenTest(
+    "Plasma network icon should be correct for dark mode (light icon)",
+    goldenFileName: "plasma_network_icon_dark_mode",
+    (tester) async {
+      await tester.pumpDeviceBuilder(
+        await goldenDeviceBuilder(
+          Container(height: 100, width: 100, color: Colors.black, child: AppNetworks.plasma.icon(Brightness.dark)),
+          device: GoldenDevice.square,
+          darkMode: false,
+        ),
+      );
+    },
+  );
 
   // zGoldenTest("BNB network icon should match", goldenFileName: "bnb_network_icon", (tester) async {
   //   await tester.pumpDeviceBuilder(await goldenDeviceBuilder(
@@ -309,4 +396,16 @@ void main() {
   //     device: GoldenDevice.square,
   //   ));
   // });
+
+  test("The block explorer url of any network, should not end with a slash", () {
+    for (final network in AppNetworks.values) {
+      if (network.isAllNetworks) continue;
+
+      expect(
+        network.chainInfo.blockExplorerUrls?.first.endsWith("/"),
+        false,
+        reason: "The ${network.label} block explorer url should not end with a slash",
+      );
+    }
+  });
 }

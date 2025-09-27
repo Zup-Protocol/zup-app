@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/gen/assets.gen.dart';
+import 'package:zup_core/zup_core.dart';
 
 enum AppNetworks {
   allNetworks,
@@ -12,6 +13,7 @@ enum AppNetworks {
   // bnb,
   unichain,
   scroll,
+  plasma,
   sepolia;
 
   static List<AppNetworks> get testnets =>
@@ -41,6 +43,7 @@ enum AppNetworks {
     base => false,
     unichain => false,
     hyperEvm => false,
+    plasma => false,
     // bnb => false
   };
 
@@ -52,10 +55,11 @@ enum AppNetworks {
     base => "Base",
     unichain => "Unichain",
     hyperEvm => "HyperEVM",
+    plasma => "Plasma",
     // bnb => "BNB Chain",
   };
 
-  Widget get icon => switch (this) {
+  Widget icon(Brightness brightness) => switch (this) {
     sepolia => Assets.logos.ethereum.svg(),
     mainnet => Assets.logos.ethereum.svg(),
     scroll => Assets.logos.scroll.svg(),
@@ -63,6 +67,7 @@ enum AppNetworks {
     unichain => Assets.logos.unichain.svg(),
     allNetworks => Assets.icons.all.svg(),
     hyperEvm => Assets.logos.hyperliquid.svg(),
+    plasma => brightness.isDark ? Assets.logos.plasmaOnBlack.svg() : Assets.logos.plasmaOnWhite.svg(),
     // bnb => Assets.logos.bnbChain.svg()
   };
 
@@ -110,6 +115,13 @@ enum AppNetworks {
       nativeCurrency: NativeCurrencies.hype.currencyInfo,
       rpcUrls: [rpcUrl],
     ),
+    plasma => ChainInfo(
+      hexChainId: "0x2611",
+      chainName: label,
+      blockExplorerUrls: const ["https://plasmascan.to"],
+      nativeCurrency: NativeCurrencies.xpl.currencyInfo,
+      rpcUrls: [rpcUrl],
+    ),
     // bnb => ChainInfo(
     //   hexChainId => "0x38",
     //   chainName => label,
@@ -127,6 +139,7 @@ enum AppNetworks {
     base => "0x4200000000000000000000000000000000000006",
     unichain => "0x4200000000000000000000000000000000000006",
     hyperEvm => "0x5555555555555555555555555555555555555555",
+    plasma => "0x6100E367285b01F48D07953803A2d8dCA5D19873",
     // bnb => "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
   };
 
@@ -138,6 +151,7 @@ enum AppNetworks {
     base => "https://base-rpc.publicnode.com",
     unichain => "https://unichain-rpc.publicnode.com",
     hyperEvm => "https://rpc.hyperliquid.xyz/evm",
+    plasma => "https://rpc.plasma.to",
     // bnb => "https://bsc-rpc.publicnode.com"
   };
 
