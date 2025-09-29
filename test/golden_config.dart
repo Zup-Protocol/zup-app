@@ -39,7 +39,7 @@ class GoldenConfig {
   static final scrollController = ScrollController();
   static final navigatorKey = GlobalKey<NavigatorState>();
 
-  static Future<Widget> builder(Widget child) async {
+  static Future<Widget> builder(Widget child, {bool darkMode = false}) async {
     await loadAppFonts();
 
     return MaterialApp(
@@ -57,7 +57,7 @@ class GoldenConfig {
           slivers: [SliverFillRemaining(hasScrollBody: false, child: child)],
         ),
       ),
-      theme: AppTheme.lightTheme,
+      theme: darkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
     );
   }
 
@@ -81,10 +81,13 @@ class GoldenConfig {
   }
 }
 
-Future<DeviceBuilder> goldenDeviceBuilder(Widget child, {GoldenDevice device = GoldenDevice.pc}) async =>
-    DeviceBuilder()
-      ..overrideDevicesForAllScenarios(devices: device.devices)
-      ..addScenario(widget: await GoldenConfig.builder(child));
+Future<DeviceBuilder> goldenDeviceBuilder(
+  Widget child, {
+  GoldenDevice device = GoldenDevice.pc,
+  bool darkMode = false,
+}) async => DeviceBuilder()
+  ..overrideDevicesForAllScenarios(devices: device.devices)
+  ..addScenario(widget: await GoldenConfig.builder(child, darkMode: darkMode));
 
 @isTest
 void zGoldenTest(

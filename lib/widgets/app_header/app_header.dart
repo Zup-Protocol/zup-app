@@ -135,7 +135,7 @@ class _AppHeaderState extends State<AppHeader> with DeviceInfoMixin {
                   currentModeNetworks.length,
                   (index) => NetworkSwitcherItem(
                     title: currentModeNetworks[index].label,
-                    icon: currentModeNetworks[index].icon,
+                    icon: currentModeNetworks[index].icon(context.brightness),
                     chainInfo: currentModeNetworks[index].isAllNetworks ? null : currentModeNetworks[index].chainInfo,
                   ),
                 ),
