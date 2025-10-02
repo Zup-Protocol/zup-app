@@ -151,7 +151,7 @@ class _YieldsPageState extends State<YieldsPage> with DeviceInfoMixin, SingleTic
     final yieldsPagesCount = (yields.pools.length / getYieldDisplayCountPerPage()).ceil();
 
     return Padding(
-      padding: EdgeInsets.only(top: isMobileSize(context) ? 20 : 70),
+      padding: EdgeInsets.only(top: isMobileSize(context) ? 20 : 30),
       child: Align(
         alignment: Alignment.topCenter,
         child: Container(
