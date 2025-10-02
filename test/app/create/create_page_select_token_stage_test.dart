@@ -7,7 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/create_page_select_tokens_stage.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
@@ -30,7 +30,7 @@ void main() {
   late AppCubit appCubit;
   late TokensRepository tokensRepository;
   late Wallet wallet;
-  late Cache cache;
+  late AppCache cache;
   late ZupNavigator zupNavigator;
   late ProtocolRepository protocolRepository;
   late ZupSingletonCache zupSingletonCache;
@@ -45,12 +45,12 @@ void main() {
 
     registerFallbackValue(AppNetworks.sepolia);
 
-    cache = CacheMock();
+    cache = AppCacheMock();
     inject.registerFactory<AppCubit>(() => appCubit);
     inject.registerFactory<ZupCachedImage>(() => mockZupCachedImage());
     inject.registerFactory<Debouncer>(() => Debouncer(milliseconds: 0));
     inject.registerFactory<ZupNavigator>(() => zupNavigator);
-    inject.registerFactory<Cache>(() => cache);
+    inject.registerFactory<AppCache>(() => cache);
     inject.registerFactory<ZupSingletonCache>(() => zupSingletonCache);
     inject.registerFactory<ProtocolRepository>(() => protocolRepository);
 
@@ -313,7 +313,7 @@ void main() {
       when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.allNetworks);
       when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto(popularTokens: tokens));
       when(
-        () => zupNavigator.navigateToDeposit(
+        () => zupNavigator.navigateToYields(
           group0: any(named: "group0"),
           group1: any(named: "group1"),
           network: any(named: "network"),
@@ -338,7 +338,7 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(
-        () => zupNavigator.navigateToDeposit(
+        () => zupNavigator.navigateToYields(
           token0: token0Id,
           token1: token1Id,
           network: AppNetworks.allNetworks,
@@ -357,14 +357,16 @@ void main() {
       when(() => appCubit.selectedNetwork).thenAnswer((_) => AppNetworks.allNetworks);
       when(() => tokensRepository.getTokenList(any())).thenAnswer((_) async => TokenListDto(tokenGroups: tokenGroups));
       when(
-        () => zupNavigator.navigateToDeposit(
+        () => zupNavigator.navigateToYields(
           group0: any(named: "group0"),
           group1: any(named: "group1"),
           network: any(named: "network"),
           token0: any(named: "token0"),
           token1: any(named: "token1"),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async {
+        return;
+      });
 
       await tester.pumpDeviceBuilder(await goldenBuilder(), wrapper: GoldenConfig.localizationsWrapper());
 
@@ -382,7 +384,7 @@ void main() {
       await tester.pumpAndSettle();
 
       verify(
-        () => zupNavigator.navigateToDeposit(
+        () => zupNavigator.navigateToYields(
           token0: null,
           token1: null,
           network: AppNetworks.allNetworks,

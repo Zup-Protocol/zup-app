@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import "package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart";
 import "package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart";
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/injections.dart';
 
 void main() {
@@ -19,7 +19,7 @@ void main() {
   test("When registering shared preferences, the allow list should include all the Cache keys", () {
     final cache = inject<SharedPreferencesWithCache>();
 
-    for (final key in CacheKey.keys) {
+    for (final key in AppCacheKey.keys) {
       expect(cache.getString(key), null); // if the key is not in the allow list, it will throw and test will fail
     }
 

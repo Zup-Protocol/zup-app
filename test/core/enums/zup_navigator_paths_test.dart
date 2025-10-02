@@ -16,15 +16,15 @@ void main() {
     );
   });
 
-  test("The route params names type for deposit should be correct", () {
-    expect(ZupNavigatorPaths.deposit.routeParamsNames().runtimeType, ZupDepositRouteParamsNames);
+  test("The route params names type for yields should be correct", () {
+    expect(ZupNavigatorPaths.yields.routeParamsNames().runtimeType, YieldsRouteParamsNames);
   });
 
   test("The route params names type for new position should be correct", () {
-    expect(ZupNavigatorPaths.newPosition.routeParamsNames().runtimeType, ZupNewPositionRouteParamsNames);
+    expect(ZupNavigatorPaths.newPosition.routeParamsNames().runtimeType, NewPositionRouteParamsNames);
   });
 
   test("The route params names type for initial should be correct", () {
-    expect(ZupNavigatorPaths.initial.routeParamsNames().runtimeType, ZupInitialRouteParamsNames);
+    expect(ZupNavigatorPaths.initial.routeParamsNames().runtimeType, InitialRouteParamsNames);
   });
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_links.dart';
 import 'package:zup_app/l10n/gen/app_localizations.dart';
@@ -12,7 +12,7 @@ class AppCookieConsentWidget extends StatelessWidget {
   final void Function() onAccept;
 
   final zupLinks = inject<ZupLinks>();
-  final cache = inject<Cache>();
+  final cache = inject<AppCache>();
 
   @override
   Widget build(BuildContext context) {

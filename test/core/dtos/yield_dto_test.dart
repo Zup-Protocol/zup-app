@@ -120,4 +120,80 @@ void main() {
       EthereumConstants.zeroAddress,
     );
   });
+
+  test(
+    """When using 'timeframedYieldFormatted' passing day timeframe,
+    and the 24h yield is not zero it should return me the formatted
+    24h yield with percent sign""",
+    () {
+      final yieldDto = YieldDto.fixture().copyWith(yield24h: 2.3213);
+      expect(yieldDto.timeframedYieldFormatted(YieldTimeFrame.day), "2.3%");
+    },
+  );
+
+  test(
+    """When using 'timeframedYieldFormatted' passing week timeframe,
+    and the 7d yield is not zero it should return me the formatted
+    7d yield with percent sign""",
+    () {
+      final yieldDto = YieldDto.fixture().copyWith(yield7d: 121.335);
+      expect(yieldDto.timeframedYieldFormatted(YieldTimeFrame.week), "121.3%");
+    },
+  );
+
+  test(
+    """When using 'timeframedYieldFormatted' passing month timeframe,
+    and the 30d yield is not zero it should return me the formatted
+    30d yield with percent sign""",
+    () {
+      final yieldDto = YieldDto.fixture().copyWith(yield30d: 11.335);
+      expect(yieldDto.timeframedYieldFormatted(YieldTimeFrame.month), "11.3%");
+    },
+  );
+
+  test(
+    """When using 'timeframedYieldFormatted' passing a three month timeframe,
+    and the 90d yield is not zero it should return me the formatted
+    90d yield with percent sign""",
+    () {
+      final yieldDto = YieldDto.fixture().copyWith(yield90d: 99.87);
+      expect(yieldDto.timeframedYieldFormatted(YieldTimeFrame.threeMonth), "99.9%");
+    },
+  );
+
+  test(
+    """When using 'timeframedYieldFormatted' passing day timeframe,
+    and the 24h yield is zero it should return me just a hyphen""",
+    () {
+      final yieldDto = YieldDto.fixture().copyWith(yield24h: 0);
+      expect(yieldDto.timeframedYieldFormatted(YieldTimeFrame.day), "-");
+    },
+  );
+
+  test(
+    """When using 'timeframedYieldFormatted' passing week timeframe,
+    and the 7d yield is zero it should return me just a hyphen""",
+    () {
+      final yieldDto = YieldDto.fixture().copyWith(yield7d: 0);
+      expect(yieldDto.timeframedYieldFormatted(YieldTimeFrame.week), "-");
+    },
+  );
+
+  test(
+    """When using 'timeframedYieldFormatted' passing month timeframe,
+    and the 30d yield is zero it should return me just a hyphen""",
+    () {
+      final yieldDto = YieldDto.fixture().copyWith(yield30d: 0);
+      expect(yieldDto.timeframedYieldFormatted(YieldTimeFrame.month), "-");
+    },
+  );
+
+  test(
+    """When using 'timeframedYieldFormatted' passing three months
+    timeframe, and the 90d yield is zero it should return me just a hyphen""",
+    () {
+      final yieldDto = YieldDto.fixture().copyWith(yield90d: 0);
+      expect(yieldDto.timeframedYieldFormatted(YieldTimeFrame.threeMonth), "-");
+    },
+  );
 }

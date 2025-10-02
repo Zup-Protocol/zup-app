@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/enums/app_theme_mode.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
@@ -13,7 +13,7 @@ import '../mocks.dart';
 void main() {
   late AppCubit sut;
   late Wallet wallet;
-  late Cache cache;
+  late AppCache cache;
 
   setUp(() async {
     registerFallbackValue(const ChainInfo(hexChainId: ""));
@@ -21,7 +21,7 @@ void main() {
     await Web3Kit.initializeForTest();
 
     wallet = WalletMock();
-    cache = CacheMock();
+    cache = AppCacheMock();
     when(() => wallet.signerStream).thenAnswer((_) => const Stream.empty());
     when(() => cache.getTestnetMode()).thenReturn(false);
     when(() => cache.themeMode).thenReturn(AppThemeMode.system);

@@ -14,24 +14,24 @@ class ZupNavigator {
 
   Future<void> navigateToNewPosition() async => await Routefly.navigate(ZupNavigatorPaths.newPosition.path);
 
-  Future<void> navigateToDeposit({
+  Future<void> navigateToYields({
     required String? token0,
     required String? token1,
     required String? group0,
     required String? group1,
     required AppNetworks network,
   }) async {
-    const depositPath = ZupNavigatorPaths.deposit;
-    final depositPathParams = depositPath.routeParamsNames<ZupDepositRouteParamsNames>();
+    const yieldsPath = ZupNavigatorPaths.yields;
+    final yieldsPathParamNames = yieldsPath.routeParamsNames<YieldsRouteParamsNames>();
 
-    final token0UrlParam = token0 != null ? "${depositPathParams.token0}=$token0" : "";
-    final token1UrlParam = token1 != null ? "${depositPathParams.token1}=$token1" : "";
-    final group0UrlParam = group0 != null ? "${depositPathParams.group0}=$group0" : "";
-    final group1UrlParam = group1 != null ? "${depositPathParams.group1}=$group1" : "";
-    final networkUrlParam = "${depositPathParams.network}=${network.name}";
+    final token0UrlParam = token0 != null ? "${yieldsPathParamNames.token0}=$token0" : "";
+    final token1UrlParam = token1 != null ? "${yieldsPathParamNames.token1}=$token1" : "";
+    final group0UrlParam = group0 != null ? "${yieldsPathParamNames.group0}=$group0" : "";
+    final group1UrlParam = group1 != null ? "${yieldsPathParamNames.group1}=$group1" : "";
+    final networkUrlParam = "${yieldsPathParamNames.network}=${network.name}";
 
-    await Routefly.pushNavigate(
-      "${depositPath.path}?$token0UrlParam&$token1UrlParam&$group0UrlParam&$group1UrlParam&$networkUrlParam",
+    return await Routefly.pushNavigate(
+      "${yieldsPath.path}?$token0UrlParam&$token1UrlParam&$group0UrlParam&$group1UrlParam&$networkUrlParam",
     );
   }
 

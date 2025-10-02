@@ -5,6 +5,7 @@ import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/enums/networks.dart';
 import 'package:zup_app/core/enums/pool_type.dart';
 import 'package:zup_app/core/enums/yield_timeframe.dart';
+import 'package:zup_app/core/extensions/num_extension.dart';
 
 part 'yield_dto.freezed.dart';
 part 'yield_dto.g.dart';
@@ -45,6 +46,19 @@ sealed class YieldDto with _$YieldDto {
 
   int get token0NetworkDecimals => token0.decimals[network.chainId]!;
   int get token1NetworkDecimals => token1.decimals[network.chainId]!;
+
+  String timeframedYieldFormatted(YieldTimeFrame yieldTimeFrame) {
+    switch (yieldTimeFrame) {
+      case YieldTimeFrame.day:
+        return yield24h == 0 ? "-" : yield24h.formatPercent;
+      case YieldTimeFrame.week:
+        return yield7d == 0 ? "-" : yield7d.formatPercent;
+      case YieldTimeFrame.month:
+        return yield30d == 0 ? "-" : yield30d.formatPercent;
+      case YieldTimeFrame.threeMonth:
+        return yield90d == 0 ? "-" : yield90d.formatPercent;
+    }
+  }
 
   num yieldTimeframed(YieldTimeFrame yieldTimeFrame) {
     switch (yieldTimeFrame) {

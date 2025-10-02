@@ -1,189 +1,53 @@
 {
     "@@locale": "en",
-    "yieldCardNetworkTooltipDescription": "This pool is at {network}",
-    "@yieldCardNetworkTooltipDescription": {
-        "placeholders": {
-            "network": {
-                "type": "String"
-            }
-        }
-    },
-    "twentyFourHours": "24h",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System",
-    "week": "Week",
-    "weekCompact": "7d",
-    "appFooterTermsOfUse": "Terms of Use",
-    "privacyPolicy": "Privacy Policy",
-    "appFooterContactUs": "Contact Us",
+    "appBottomNavigationBarMyPositions": "My Positions (Soon)",
+    "appBottomNavigationBarNewPosition": "New Position",
     "appCookiesConsentWidgetDescription": "We use cookies to ensure that we give you the best experience on our app. By continuing to use Zup Protocol, you agree to our",
+    "appFooterContactUs": "Contact Us",
     "appFooterDocs": "Docs",
     "appFooterFAQ": "FAQ",
-    "understood": "Understood",
-    "depositPageShowingOnlyPoolsWithMoreThan": "Showing only liquidity pools with more than {minLiquidity}.",
-    "@depositPageShowingOnlyPoolsWithMoreThan": {
-        "placeholders": {
-            "minLiquidity": {
-                "type": "String"
-            }
-        }
-    },
-    "depositPageShowingAllPools": "Showing all liquidity pools.",
-    "depositPageSearchAllPools": "Search all pools?",
-    "depositPageSearchOnlyForPoolsWithMorethan": "Search only for pools with more than {minLiquidity}?",
-    "@depositPageSearchOnlyForPoolsWithMorethan": {
-        "placeholders": {
-            "minLiquidity": {
-                "type": "String"
-            }
-        }
-    },
-    "depositPageTrySearchAllPools": "Try search all pools?",
-    "depositPageMinLiquiditySearchAlert": "You’ve set the search to only show pools with more than {minLiquidity}.",
-    "@depositPageMinLiquiditySearchAlert": {
-        "placeholders": {
-            "minLiquidity": {
-                "type": "String"
-            }
-        }
-    },
-    "slippageExplanation": "Slippage protects you by reverting the transaction if the price changes unfavorably beyond the percentage. This is necessary to prevent losses while adding liquidity",
-    "month": "Month",
-    "minutes": "Minutes",
+    "appFooterTermsOfUse": "Terms of Use",
+    "appHeaderMyPositions": "My Positions (Soon)",
+    "appHeaderNewPosition": "New Position",
+    "appSettingsDropdownTestnetMode": "Testnet Mode",
+    "close": "Close",
+    "connectMyWallet": "Connect My Wallet",
+    "connectWallet": "Connect Wallet",
+    "connectYourWallet": "Connect your wallet",
+    "createNewPosition": "Create new position",
+    "createPageDescription": "Ready to dive in? First, pick the dynamic duo of tokens you want to team up in the pool. Just choose your pair right below and you’re set to make some magic!",
+    "createPageSelectTokensStageSearchSettings": "Search Settings",
+    "createPageSelectTokensStageTokenA": "Token A",
+    "createPageSelectTokensStageTokenB": "Token B",
+    "createPageSettingsDropdownAllowedPoolTypes": "Allowed Pool Types",
+    "createPageSettingsDropdownAllowedPoolTypesDescription": "Filter the types of liquidity pools to include in your search",
+    "createPageSettingsDropdownMinimumLiquidity": "Minimum Pool Liquidity",
+    "createPageSettingsDropdownMinimumLiquidityExplanation": "Filter pools by minimum liquidity. We’ll exclude pools with less liquidity than specified, as low Liquidity can lead to misleading yields. This helps you find more reliable opportunities",
+    "createPageSettingsDropdownMiniumLiquidityLowWarning": "Low minimum TVL can lead to misleading yields.",
+    "createPageShowMeTheMoney": "Show me the money!",
+    "createPageTitle": "New Position",
+    "dark": "Dark",
     "depositSettingsDropdownChildHighSlippageWarningText": "High slippage can lead to Front Running and losses. Be careful! ",
-    "whatsThisQuestionText": "What's this?",
+    "depositSettingsDropdownChildMaxSlippage": "Max Slippage",
     "depositSettingsDropdownChildTransactionDeadlineExplanation": "Your transaction will be reverted if it is pending for more than this amount of time",
     "depositSettingsDropdownTransactionDeadline": "Transaction Deadline",
-    "depositPagePercentSlippage": "{valuePercent} Slippage",
-    "@depositPagePercentSlippage": {
+    "depositSuccessModalDescriptionPart1": "You have successfully deposited into",
+    "depositSuccessModalDescriptionPart2": "Pool at",
+    "depositSuccessModalDescriptionPart3": "on",
+    "depositSuccessModalTitle": "Deposit Successful!",
+    "depositSuccessModalViewPositionOnDEX": "View Position on {dexName}",
+    "@depositSuccessModalViewPositionOnDEX": {
         "placeholders": {
-            "valuePercent": {
+            "dexName": {
                 "type": "String"
             }
         }
     },
-    "threeMonths": "3 Months",
-    "twentyFourHoursCompact": "24h",
-    "monthCompact": "30d",
-    "threeMonthsCompact": "90d",
-    "depositSettingsDropdownChildMaxSlippage": "Max Slippage",
-    "depositPageDepositSectionTitle": "Deposit",
-    "previewDepositModalWaitingTransaction": "Waiting Transaction",
-    "previewDepositModalApprovingToken": "Approving {tokenSymbol}",
-    "@previewDepositModalApprovingToken": {
-        "placeholders": {
-            "tokenSymbol": {
-                "type": "String"
-            }
-        }
-    },
-    "previewDepositModalDepositingIntoPool": "Depositing into {baseTokenSymbol}/{quoteTokenSymbol} pool",
-    "@previewDepositModalDepositingIntoPool": {
-        "placeholders": {
-            "baseTokenSymbol": {
-                "type": "String"
-            },
-            "quoteTokenSymbol": {
-                "type": "String"
-            }
-        }
-    },
-    "previewDepositModalApproveToken": "Approve {tokenSymbol}",
-    "@previewDepositModalApproveToken": {
-        "placeholders": {
-            "tokenSymbol": {
-                "type": "String"
-            }
-        }
-    },
-    "previewDepositModalDeposit": "Deposit",
-    "previewDepositModalError": "Error",
-    "previewDepositModalCurrentPrice": "Current Price",
-    "depositPageDepositSectionTokenNotNeeded": "{tokenSymbol} is not necessary for your selected range",
-    "@depositPageDepositSectionTokenNotNeeded": {
-        "placeholders": {
-            "tokenSymbol": {
-                "type": "String"
-            }
-        }
-    },
-    "preview": "Preview",
-    "previewDepositModalTitle": "Preview Deposit",
-    "previewDepositModalWaitingTransactionSnackBarMessage": "Waiting transaction to be confirmed. ",
-    "previewDepositModalApproveSuccessSnackBarMessage": "{tokenSymbol} approved successfully. ",
-    "@previewDepositModalApproveSuccessSnackBarMessage": {
-        "placeholders": {
-            "tokenSymbol": {
-                "type": "String"
-            }
-        }
-    },
-    "previewDepositModalMyPosition": "My Position",
-    "previewDepositModalOutOfRange": "Out of Range",
-    "previewDepositModalInRange": "In Range",
-    "previewDepositModalProtocol": "Protocol",
-    "previewDepositModalNetwork": "Network",
-    "previewDepositModalYearlyYield": "Yearly Yield",
-    "previewDepositModalTransactionErrorSnackBarMessage": "Transaction Failed. Please try again, if the problem persists, ",
-    "previewDepositModalTransactionErrorSnackBarHelperButtonTitle": "Contact us",
-    "previewDepositModalDepositSuccessSnackBarMessage": "Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool at {protocol}. ",
-    "@previewDepositModalDepositSuccessSnackBarMessage": {
-        "placeholders": {
-            "baseTokenSymbol": {
-                "type": "String"
-            },
-            "quoteTokenSymbol": {
-                "type": "String"
-            },
-            "protocol": {
-                "type": "String"
-            }
-        }
-    },
-    "yieldCardTimeFrameBest": "{timeFrame} best",
-    "@yieldCardTimeFrameBest": {
-        "placeholders": {
-            "timeFrame": {
-                "type": "String"
-            }
-        }
-    },
-    "yieldCardThisPoolIsAtNetwork": "This pool is at {network}",
-    "@yieldCardThisPoolIsAtNetwork": {
-        "placeholders": {
-            "network": {
-                "type": "String"
-            }
-        }
-    },
-    "yieldCardYearlyYield": "Yearly Yield",
-    "yieldCardVisitProtocol": "Visit {protocolName}",
-    "@yieldCardVisitProtocol": {
-        "placeholders": {
-            "protocolName": {
-                "type": "String"
-            }
-        }
-    },
-    "yieldCardAverageYieldYearly": "Average Yearly Yield",
-    "previewDepositModalDepositSuccessSnackBarHelperButtonTitle": "View Transaction",
-    "previewDepositModalApproveSuccessSnackBarHelperButtonTitle": "View Transaction",
-    "previewDepositModalWaitingTransactionSnackBarHelperButtonTitle": "View on Explorer",
-    "depositPageInvalidRange": "Invalid range",
-    "depositPageMinRangeOutOfRangeWarningText": "You will not earn fees until the market price move up into your range",
-    "depositPageMaxRangeOutOfRangeWarningText": "You will not earn fees until the market price move down into your range",
-    "depositPageInvalidRangeErrorText": "Max range should be greater than min range",
-    "previewDepositModalMinPrice": "Min Price",
-    "previewDepositModalMaxPrice": "Max Price",
-    "rangeSelectorMinRange": "Min Range",
-    "rangeSelectorMaxRange": "Max Range",
-    "loading": "Loading...",
     "exchangesFilterDropdownButtonDropdownClearAll": "Clear All",
-    "exchangesFilterDropdownButtonDropdownSelectAll": "Select All",
-    "exchangesFilterDropdownButtonDropdownSearchHint": "Search by name",
-    "exchangesFilterDropdownButtonDropdownNotFoundStateTitle": "Not found",
     "exchangesFilterDropdownButtonDropdownNotFoundStateDescription": "No supported exchanges found with this name",
+    "exchangesFilterDropdownButtonDropdownNotFoundStateTitle": "Not found",
+    "exchangesFilterDropdownButtonDropdownSearchHint": "Search by name",
+    "exchangesFilterDropdownButtonDropdownSelectAll": "Select All",
     "exchangesFilterDropdownButtonErrorSnackBarMessage": "Uh-oh! Something went wrong loading the exchanges. Please try refreshing the page.",
     "exchangesFilterDropdownButtonTitle": "Exchanges",
     "exchangesFilterDropdownButtonTitleNumered": "Exchanges ({exchangesCount})",
@@ -194,100 +58,45 @@
             }
         }
     },
-    "createPageSelectTokensStageTokenA": "Token A",
-    "createPageSelectTokensStageTokenB": "Token B",
-    "createPageSelectTokensStageSearchSettings": "Search Settings",
-    "depositPageLoadingStep1Title": "Matching Tokens...",
-    "depositPageLoadingStep1Description": "Pairing Token A and Token B to kick off the search for top yields!",
-    "depositPageLoadingStep2Title": "Pair hunting…",
-    "depositPageLoadingStep2Description": "Searching through more than a thousand pool combos… so you don't have to",
-    "depositPageLoadingStep3Title": "Yield optimizer at work…",
-    "depositPageLoadingStep3Description": "Scanning pools, calculating returns, and filtering the noise",
-    "depositPageBestYieldsIn": "Best Yields in",
-    "depositPageLoadingStep4Title": "Organizing the best pools for you…",
-    "depositPageLoadingStep4Description": "Hang tight, we're filtering and organizing the best pools for you",
-    "depositPageErrorStateTitle": "Oops! Something went wrong!",
-    "depositPageErrorStateDescription": "We ran into a issue while trying to find the best pool. Give it another shot, and if it keeps happening, don’t hesitate to reach out to us!",
-    "depositPageEmptyStateTitle": "No Pools Found",
-    "depositPageEmptyStateDescription": "Seems like that there are no pools matching your defined settings at the moment. Would you like to either change your settings or try another combination?",
-    "depositPageEmptyStateHelpButtonTitle": "Go Back to New Position",
-    "depositPageBackButtonTitle": "Select Pair",
-    "depositPageTitle": "Add liquidity",
-    "depositPageTimeFrameTooltipMessage": "Each time frame shows yields based on past performance. Shorter terms (24h, 7d) reflect recent trends and may suit short-term strategies. Longer terms (30d, 90d) offer a broader performance view for long-term decisions.",
-    "depositPageTimeFrameTooltipHelperButtonTitle": " Learn more",
-    "depositPageTimeFrameTitle": "Preferred time frame",
-    "depositPageNoYieldSelectedTitle": "Pick a yield to deposit",
-    "depositPageNoYieldSelectedDescription": "Pick any yield card above and dive into depositing your liquidity!",
-    "depositPageRangeSectionTitle": "Select Range",
-    "depositPageRangeSectionFullRange": "Full Range",
-    "depositPageInvalidTokenAmount": "Enter a valid amount for {tokenSymbol}",
-    "@depositPageInvalidTokenAmount": {
-        "placeholders": {
-            "tokenSymbol": {
-                "type": "String"
-            }
-        }
+    "letsGiveItAnotherShot": "Let's give it another shot",
+    "@letsGiveItAnotherShot": {
+        "description": "Used to try something again, like when an error happens and the user wants to try again"
     },
-    "depositPageInsufficientTokenBalance": "Insufficient {tokenSymbol} balance",
-    "@depositPageInsufficientTokenBalance": {
-        "placeholders": {
-            "tokenSymbol": {
-                "type": "String"
-            }
-        }
-    },
-    "depositPagePleaseEnterAmountForToken": "Please enter an amount for {tokenSymbol}",
-    "@depositPagePleaseEnterAmountForToken": {
-        "placeholders": {
-            "tokenSymbol": {
-                "type": "String"
-            }
-        }
-    },
-    "depositPageDeposit": "Deposit",
-    "connectYourWallet": "Connect your wallet",
-    "tokenSelectorModalTitle": "Select a token",
-    "tokenSelectorModalTokenGroups": "Token Groups",
-    "tokenSelectorModalTokenGroupsTooltipMessage": "Token groups let you search pools using multiple tokens in one go. Think of them like batch queries, want all USD stablecoins? Pick the group and we'll surface every relevant pool. You can also match groups against single tokens or other groups to discover deep liquidity.",
-    "tokenSelectorModalDescription": "Pick a token from our list or search by symbol or address to build your ideal liquidity pool!",
-    "tokenSelectorModalSearchTitle": "Search token or paste address",
-    "tokenSelectorModalSearchTitleAllNetworks": "Search token by symbol or name",
-    "tokenSelectorModalSearchAlertForAllNetworks": "When ‘All Networks’ is selected, you can only search by name or symbol. To search by address as well, please select a specific network",
-    "tokenSelectorModalErrorDescription": "We hit a snag loading your token list. Give it another go, and if it keeps happening, feel free to reach us",
-    "tokenSelectorModalSearchErrorDescription": "We hit a snag while searching for a token matching {searchedTerm}. Give it another go, and if it keeps happening, feel free to reach us",
-    "noResultsFor": "No results for",
-    "searchResults": "Search results",
-    "popularTokens": "Popular Tokens",
-    "@tokenSelectorModalSearchErrorDescription": {
-        "placeholders": {
-            "searchedTerm": {
-                "type": "String"
-            }
-        }
-    },
-    "connectMyWallet": "Connect My Wallet",
-    "connectWallet": "Connect Wallet",
-    "positionsPageNotConnectedDescription": "Wallet not connected. Please connect your\nwallet to view your positions",
-    "positionsPageNoPositionsTitle": "You don’t have any positions yet",
-    "positionsPageNoPositionsDescription": "Hm… It looks like you don’t have any positions yet.\nWant to create one?",
+    "light": "Light",
+    "loading": "Loading...",
+    "minutes": "Minutes",
+    "month": "Month",
+    "monthCompact": "30d",
     "newPosition": "New Position",
-    "createNewPosition": "Create new position",
-    "positionCardMin": "Min: ",
-    "positionCardMax": "Max: ",
+    "noResultsFor": "No results for",
+    "popularTokens": "Popular Tokens",
     "positionCardLiquidity": "Liquidity: ",
+    "positionCardMax": "Max: ",
+    "positionCardMin": "Min: ",
+    "positionCardTokenPerToken": "{token0Qtd} {token0Symbol} per {token1Symbol}",
+    "@positionCardTokenPerToken": {
+        "placeholders": {
+            "token0Qtd": {
+                "type": "String"
+            },
+            "token0Symbol": {
+                "type": "String"
+            },
+            "token1Symbol": {
+                "type": "String"
+            }
+        }
+    },
     "positionCardUnclaimedFees": "Unclaimed fees: ",
     "positionCardViewMore": "View more",
+    "positionStatusClosed": "Closed",
+    "positionStatusInRange": "In Range",
+    "positionStatusOutOfRange": "Out of Range",
+    "positionsPageCantFindAPosition": "Can’t find a position? Try switching the app’s network to \"All Networks\" or reload the page",
+    "positionsPageErrorStateDescription": "An error occurred while loading your positions.\nPlease try again. If the issue persists, feel free to contact us",
+    "positionsPageMyPositions": "My Positions",
+    "positionsPageNoPositionsDescription": "Hm… It looks like you don’t have any positions yet.\nWant to create one?",
     "positionsPageNoPositionsInNetwork": "No positions in {network}",
-    "positionsPageShowHideClosedPositions": "{isHidden, select, true {Show} false {Hide} other {Show/Hide}} closed positions",
-    "@positionsPageShowHideClosedPositions": {
-        "description": "Dynamically shows 'Hide' or 'Show' based on the isHidden boolean.",
-        "placeholders": {
-            "isHidden": {
-                "type": "String",
-                "example": "true"
-            }
-        }
-    },
     "@positionsPageNoPositionsInNetwork": {
         "placeholders": {
             "network": {
@@ -303,39 +112,54 @@
             }
         }
     },
-    "positionCardTokenPerToken": "{token0Qtd} {token0Symbol} per {token1Symbol}",
-    "@positionCardTokenPerToken": {
+    "positionsPageNoPositionsTitle": "You don’t have any positions yet",
+    "positionsPageNotConnectedDescription": "Wallet not connected. Please connect your\nwallet to view your positions",
+    "positionsPageShowHideClosedPositions": "{isHidden, select, true {Show} false {Hide} other {Show/Hide}} closed positions",
+    "@positionsPageShowHideClosedPositions": {
+        "description": "Dynamically shows 'Hide' or 'Show' based on the isHidden boolean.",
         "placeholders": {
-            "token0Qtd": {
-                "type": "String"
-            },
-            "token0Symbol": {
-                "type": "String"
-            },
-            "token1Symbol": {
+            "isHidden": {
+                "type": "String",
+                "example": "true"
+            }
+        }
+    },
+    "preview": "Preview",
+    "previewDepositModalApproveSuccessSnackBarHelperButtonTitle": "View Transaction",
+    "previewDepositModalApproveSuccessSnackBarMessage": "{tokenSymbol} approved successfully. ",
+    "@previewDepositModalApproveSuccessSnackBarMessage": {
+        "placeholders": {
+            "tokenSymbol": {
                 "type": "String"
             }
         }
     },
-    "positionsPageMyPositions": "My Positions",
-    "appHeaderMyPositions": "My Positions (Soon)",
-    "appHeaderNewPosition": "New Position",
-    "appBottomNavigationBarMyPositions": "My Positions (Soon)",
-    "appBottomNavigationBarNewPosition": "New Position",
-    "positionsPageCantFindAPosition": "Can’t find a position? Try switching the app’s network to \"All Networks\" or reload the page",
-    "somethingWhenWrong": "Something went wrong",
-    "positionsPageErrorStateDescription": "An error occurred while loading your positions.\nPlease try again. If the issue persists, feel free to contact us",
-    "positionStatusInRange": "In Range",
-    "positionStatusOutOfRange": "Out of Range",
-    "positionStatusClosed": "Closed",
-    "unknown": "Unknown",
-    "selectToken": "Select Token",
-    "token0": "Token A",
-    "token1": "Token B",
-    "depositSuccessModalTitle": "Deposit Successful!",
-    "depositSuccessModalDescriptionPart1": "You have successfully deposited into",
-    "depositSuccessModalDescriptionPart2": "Pool at",
-    "depositSuccessModalDescriptionPart3": "on",
+    "previewDepositModalApproveToken": "Approve {tokenSymbol}",
+    "@previewDepositModalApproveToken": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "previewDepositModalApprovingToken": "Approving {tokenSymbol}",
+    "@previewDepositModalApprovingToken": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "previewDepositModalAutoSlippageCheckErrorMessage": "Strong market movement! Slippage exceeded. Try again or adjust tolerance.",
+    "previewDepositModalCubitApprovedSnackBarMessage": "Successfully approved {tokenSymbol}",
+    "@previewDepositModalCubitApprovedSnackBarMessage": {
+        "placeholders": {
+            "tokenSymbol": {
+                "type": "String"
+            }
+        }
+    },
+    "previewDepositModalCubitApprovingSnackBarMessage": "Approving...",
     "previewDepositModalCubitDepositingSnackBarMessage": "Depositing into {token0Symbol}/{token1Symbol} Pool...",
     "@previewDepositModalCubitDepositingSnackBarMessage": {
         "placeholders": {
@@ -347,44 +171,243 @@
             }
         }
     },
-    "previewDepositModalCubitApprovingSnackBarMessage": "Approving...",
-    "previewDepositModalCubitApprovedSnackBarMessage": "Successfully approved {tokenSymbol}",
-    "@previewDepositModalCubitApprovedSnackBarMessage": {
+    "previewDepositModalCurrentPrice": "Current Price",
+    "previewDepositModalDeposit": "Deposit",
+    "previewDepositModalDepositSuccessSnackBarHelperButtonTitle": "View Transaction",
+    "previewDepositModalDepositSuccessSnackBarMessage": "Successfully Deposited into the {baseTokenSymbol}/{quoteTokenSymbol} Pool at {protocol}. ",
+    "@previewDepositModalDepositSuccessSnackBarMessage": {
         "placeholders": {
-            "tokenSymbol": {
+            "baseTokenSymbol": {
+                "type": "String"
+            },
+            "quoteTokenSymbol": {
+                "type": "String"
+            },
+            "protocol": {
                 "type": "String"
             }
         }
     },
-    "depositSuccessModalViewPositionOnDEX": "View Position on {dexName}",
-    "@depositSuccessModalViewPositionOnDEX": {
+    "previewDepositModalDepositingIntoPool": "Depositing into {baseTokenSymbol}/{quoteTokenSymbol} pool",
+    "@previewDepositModalDepositingIntoPool": {
         "placeholders": {
-            "dexName": {
+            "baseTokenSymbol": {
+                "type": "String"
+            },
+            "quoteTokenSymbol": {
                 "type": "String"
             }
         }
     },
-    "close": "Close",
-    "depositPageDepositWithNativeToken": "Deposit with Native {tokenSymbol}",
-    "@depositPageDepositWithNativeToken": {
-        "placeholders": {
-            "tokenSymbol": {
-                "type": "String"
-            }
-        }
-    },
-    "createPageSettingsDropdownMinimumLiquidity": "Minimum Pool Liquidity",
-    "createPageSettingsDropdownAllowedPoolTypes": "Allowed Pool Types",
-    "createPageSettingsDropdownAllowedPoolTypesDescription": "Filter the types of liquidity pools to include in your search",
-    "createPageSettingsDropdownMinimumLiquidityExplanation": "Filter pools by minimum liquidity. We’ll exclude pools with less liquidity than specified, as low Liquidity can lead to misleading yields. This helps you find more reliable opportunities",
-    "createPageSettingsDropdownMiniumLiquidityLowWarning": "Low minimum TVL can lead to misleading yields.",
-    "appSettingsDropdownTestnetMode": "Testnet Mode",
+    "previewDepositModalError": "Error",
+    "previewDepositModalInRange": "In Range",
+    "previewDepositModalMaxPrice": "Max Price",
+    "previewDepositModalMinPrice": "Min Price",
+    "previewDepositModalMyPosition": "My Position",
+    "previewDepositModalNetwork": "Network",
+    "previewDepositModalOutOfRange": "Out of Range",
+    "previewDepositModalProtocol": "Protocol",
     "previewDepositModalSlippageCheckErrorMessage": "Slippage Check! Please try increasing your slippage for this transaction",
-    "previewDepositModalAutoSlippageCheckErrorMessage": "Strong market movement! Slippage exceeded. Try again or adjust tolerance.",
-    "createPageTitle": "New Position",
+    "previewDepositModalTitle": "Preview Deposit",
+    "previewDepositModalTransactionErrorSnackBarHelperButtonTitle": "Contact us",
+    "previewDepositModalTransactionErrorSnackBarMessage": "Transaction Failed. Please try again, if the problem persists, ",
+    "previewDepositModalWaitingTransaction": "Waiting Transaction",
+    "previewDepositModalWaitingTransactionSnackBarHelperButtonTitle": "View on Explorer",
+    "previewDepositModalWaitingTransactionSnackBarMessage": "Waiting transaction to be confirmed. ",
+    "previewDepositModalYearlyYield": "Yearly Yield",
+    "privacyPolicy": "Privacy Policy",
+    "rangeSelectorMaxRange": "Max Range",
+    "rangeSelectorMinRange": "Min Range",
+    "searchResults": "Search results",
+    "selectToken": "Select Token",
+    "slippageExplanation": "Slippage protects you by reverting the transaction if the price changes unfavorably beyond the percentage. This is necessary to prevent losses while adding liquidity",
+    "somethingWhenWrong": "Something went wrong",
+    "system": "System",
+    "threeMonths": "3 Months",
+    "threeMonthsCompact": "90d",
+    "token0": "Token A",
+    "token1": "Token B",
+    "tokenSelectorModalDescription": "Pick a token from our list or search by symbol or address to build your ideal liquidity pool!",
+    "tokenSelectorModalErrorDescription": "We hit a snag loading your token list. Give it another go, and if it keeps happening, feel free to reach us",
+    "tokenSelectorModalSearchAlertForAllNetworks": "When ‘All Networks’ is selected, you can only search by name or symbol. To search by address as well, please select a specific network",
+    "tokenSelectorModalSearchErrorDescription": "We hit a snag while searching for a token matching {searchedTerm}. Give it another go, and if it keeps happening, feel free to reach us",
+    "@tokenSelectorModalSearchErrorDescription": {
+        "placeholders": {
+            "searchedTerm": {
+                "type": "String"
+            }
+        }
+    },
+    "tokenSelectorModalSearchTitle": "Search token or paste address",
+    "tokenSelectorModalSearchTitleAllNetworks": "Search token by symbol or name",
+    "tokenSelectorModalTitle": "Select a token",
+    "tokenSelectorModalTokenGroups": "Token Groups",
+    "tokenSelectorModalTokenGroupsTooltipMessage": "Token groups let you search pools using multiple tokens in one go. Think of them like batch queries, want all USD stablecoins? Pick the group and we'll surface every relevant pool. You can also match groups against single tokens or other groups to discover deep liquidity.",
     "tvl": "TVL",
-    "createPageShowMeTheMoney": "Show me the money!",
-    "createPageDescription": "Ready to dive in? First, pick the dynamic duo of tokens you want to team up in the pool. Just choose your pair right below and you’re set to make some magic!",
-    "letsGiveItAnotherGo": "Let’s give it another go, because why not?",
-    "letsGiveItAnotherShot": "Let’s give it another shot"
+    "twentyFourHours": "24h",
+    "twentyFourHoursCompact": "24h",
+    "understood": "Understood",
+    "unknown": "Unknown",
+    "week": "Week",
+    "weekCompact": "7d",
+    "whatsThisQuestionText": "What's this?",
+    "yieldCardAverageYieldYearly": "Average Yearly Yield",
+    "yieldCardDeposit": "Deposit",
+    "@yieldCardDeposit": {
+        "description": "Used by the yield card to proceed to the deposit page with the selected yield card",
+        "type": "text"
+    },
+    "yieldCardThisPoolIsAtNetwork": "This pool is at {network}",
+    "@yieldCardThisPoolIsAtNetwork": {
+        "description": "Used by the yield card to explain to the user that the pool is at the {network}, in form of a tooltip",
+        "placeholders": {
+            "network": {
+                "type": "String"
+            }
+        }
+    },
+    "yieldCardTimeFrameBest": "{timeFrame} best",
+    "@yieldCardTimeFrameBest": {
+        "placeholders": {
+            "timeFrame": {
+                "type": "String"
+            }
+        }
+    },
+    "yieldCardVisitProtocol": "Visit {protocolName}",
+    "@yieldCardVisitProtocol": {
+        "placeholders": {
+            "protocolName": {
+                "type": "String"
+            }
+        }
+    },
+    "yieldCardYearlyYield": "Yearly Yield",
+    "@yieldCardYearlyYield": {
+        "description": "Used by the yield card as title for the percentage of yearly yield"
+    },
+    "yieldsPageEmptyStateDescription": "Seems like that there are no pools matching your defined settings at the moment. Would you like to either change your settings or try another combination?",
+    "@yieldsPageEmptyStateDescription": {
+        "description": "Used by the yields page as description for the empty state when no pools are found for the selected pair"
+    },
+    "yieldsPageEmptyStateHelperButtonTitle": "Go Back to New Position",
+    "@yieldsPageEmptyStateHelperButtonTitle": {
+        "description": "Used by the yields page as title for the helper button in the empty state when no pools are found for the selected pair, useful for going back or doing something else"
+    },
+    "yieldsPageEmptyStateMinTVLAlert": "Searched only for liquidity pools with more than {tvlUSD} TVL",
+    "@yieldsPageEmptyStateMinTVLAlert": {
+        "description": "Used in the empty state on the Yields page to alert the user that their search was limited to pools with more than the specified TVL. This may explain why no pools were found",
+        "placeholders": {
+            "tvlUSD": {
+                "description": "The min total value locked USD set for the search formatted as USD",
+                "type": "String"
+            }
+        }
+    },
+    "yieldCardYieldExplanation": "Estimated yearly yield derived from the fees distributed to the liquidity providers.",
+    "@yieldCardYieldExplanation": {
+        "description": "Used by the yield card to explain to the user how the yield is calculated in form of a tooltip"
+    },
+    "yieldCardTimeframeYield": "{timeframe} Yield",
+    "@yieldCardTimeframeYield": {
+        "description": "Used by the yield card to show a title for the yield based on the time frame selected",
+        "placeholders": {
+            "timeframe": {
+                "description": "The timeframe for which the yield is calculated (24h, 7d, etc.)",
+                "type": "String"
+            }
+        }
+    },
+    "yieldsPageDisplayingPoolsWithMinTvlAlert": "Displaying only liquidity pools with more than {tvlUSD} TVL.",
+    "@yieldsPageDisplayingPoolsWithMinTvlAlert": {
+        "description": "Used by the yields page to alert the user that their search was limited to pools with more than the specified TVL",
+        "placeholders": {
+            "tvlUSD": {
+                "description": "The min tvl USD set for the search formatted as USD",
+                "type": "String"
+            }
+        }
+    },
+    "yieldsPageApplyTvlFilterButtonTitle": "Show only pools with more than {tvlUSD} TVL.",
+    "@yieldsPageApplyTvlFilterButtonTitle": {
+        "description": "Used by the yields page as title for the button to search only for pools with more than the specified TVL",
+        "placeholders": {
+            "tvlUSD": {
+                "description": "The min tvl USD set for the search formatted as USD",
+                "type": "String"
+            }
+        }
+    },
+    "yieldsPageDisplayingAllPoolsAlert": "Displaying all liquidity pools.",
+    "@yieldsPageDisplayingAllPoolsAlert": {
+        "description": "Used by the yields page to alert the user that their search was made to find any pool, ignoring user-set filters"
+    },
+    "yieldsPageTimeframeExplanation": "Each time frame shows yields based on past performance. Shorter windows (24h, 7d) highlight recent trends for quick moves. Longer windows (30d, 90d) provide a broader view for mid to long-term decisions",
+    "@yieldsPageTimeframeExplanation": {
+        "description": "Used by by the yields page to explain what are the time frames and how they differ from each other"
+    },
+    "yieldsPageTimeframeSelectorTitle": "Best yields in",
+    "@yieldsPageTimeframeSelectorTitle": {
+        "description": "Used by the yields page as a title for the timeframe selector, to show yields based in the selected timeframe"
+    },
+    "yieldsPageTitle": "Choose a pool for you",
+    "@yieldsPageTitle": {
+        "description": "The main title of the yield page"
+    },
+    "yieldsPageDescription": "Select the yield that most suits your needs and deposit to start earning",
+    "@yieldsPageDescription": {
+        "description": "The description of the yield page"
+    },
+    "yieldsPageBackButtonTitle": "Select Pair",
+    "@yieldsPageBackButtonTitle": {
+        "description": "Used by the yields page as title for the back button, to go back to the previous step"
+    },
+    "yieldsPageEmptyStateTitle": "No Pools Found",
+    "@yieldsPageEmptyStateTitle": {
+        "description": "Used by the yields page as title for the empty state when no pools are found for the selected pair"
+    },
+    "yieldsPageErrorStateDescription": "We ran into a issue while trying to find the best pool. Give it another shot, and if it keeps happening, don’t hesitate to reach out to us!",
+    "@yieldsPageErrorStateDescription": {
+        "description": "Used by the yields page as description for the error state when something went wrong while trying to find the yields for the selected pair"
+    },
+    "yieldsPageErrorStateTitle": "Oops! Something went wrong!",
+    "@yieldsPageErrorStateTitle": {
+        "description": "Used by the yields page as title for the error state when something went wrong while trying to find the yields for the selected pair"
+    },
+    "yieldsPageLoadingStep1Description": "Pairing Token A and Token B to kick off the search for top yields!",
+    "@yieldsPageLoadingStep1Description": {
+        "description": "Used by the yields page as description for the first loading step when searching for the best yield for the selected pair"
+    },
+    "yieldsPageLoadingStep1Title": "Matching Tokens...",
+    "@yieldsPageLoadingStep1Title": {
+        "description": "Used by the yields page as title for the first loading step when searching for the best yield for the selected pair"
+    },
+    "yieldsPageLoadingStep2Description": "Searching through more than a thousand pool combos… so you don't have to",
+    "@yieldsPageLoadingStep2Description": {
+        "description": "Used by the yields page as description for the second loading step when searching for the best yield for the selected pair"
+    },
+    "yieldsPageLoadingStep3Description": "Scanning pools, calculating returns, and filtering the noise",
+    "@yieldsPageLoadingStep3Description": {
+        "description": "Used by the yields page as description for the third loading step when searching for the best yield for the selected pair"
+    },
+    "yieldsPageLoadingStep3Title": "Yield optimizer at work…",
+    "@yieldsPageLoadingStep3Title": {
+        "description": "Used by the yields page as title for the third loading step when searching for the best yield for the selected pair"
+    },
+    "yieldsPageLoadingStep4Description": "Hang tight, we're filtering and organizing the best pools for you",
+    "@yieldsPageLoadingStep4Description": {
+        "description": "Used by the yields page as description for the fourth loading step when searching for the best yield for the selected pair"
+    },
+    "yieldsPageLoadingStep4Title": "Organizing the best pools for you…",
+    "@yieldsPageLoadingStep4Title": {
+        "description": "Used by the yields page as title for the fourth loading step when searching for the best yield for the selected pair"
+    },
+    "yieldsPageSearchAllPools": "Search all pools",
+    "@yieldsPageSearchAllPools": {
+        "description": "Used by the yields page as a button to search all pools, ignoring user-set filters"
+    },
+    "yieldsPageLoadingStep2Title": "Pair hunting…",
+    "@yieldsPageLoadingStep2Title": {
+        "description": "Used by the yields page as title for the second loading step when searching for the best yield for the selected pair"
+    }
 }

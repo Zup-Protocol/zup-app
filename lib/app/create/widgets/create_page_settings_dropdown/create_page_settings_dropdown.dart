@@ -1,6 +1,6 @@
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
 import 'package:zup_app/core/extensions/num_extension.dart';
@@ -27,7 +27,7 @@ class CreatePageSettingsDropdown extends StatefulWidget {
 
 class _CreatePageSettingsDropdownState extends State<CreatePageSettingsDropdown> {
   final minTVLController = TextEditingController();
-  final cache = inject<Cache>();
+  final cache = inject<AppCache>();
   final debouncer = inject<Debouncer>();
 
   bool showLowTVLAlert = false;

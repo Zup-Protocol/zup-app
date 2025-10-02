@@ -26,7 +26,8 @@ import 'package:zup_app/abis/uniswap_v4_state_view.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
 import 'package:zup_app/app/create/deposit/widgets/preview_deposit_modal/preview_deposit_modal_cubit.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/app/create/yields/yields_cubit.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/debouncer.dart';
 import 'package:zup_app/core/pool_service.dart';
 import 'package:zup_app/core/repositories/positions_repository.dart';
@@ -47,7 +48,7 @@ class AppCubitMock extends Mock implements AppCubit {}
 
 class BuildContextMock extends Mock implements BuildContext {}
 
-class CacheMock extends Mock implements Cache {}
+class AppCacheMock extends Mock implements AppCache {}
 
 class DebouncerMock extends Mock implements Debouncer {}
 
@@ -144,6 +145,8 @@ class AerodromeV3PoolMock extends Mock implements AerodromeV3Pool {}
 class AerodromeV3PoolImplMock extends Mock implements AerodromeV3PoolImpl {}
 
 class AerodromeV3PositionManagerImplMock extends Mock implements AerodromeV3PositionManagerImpl {}
+
+class YieldsCubitMock extends Mock implements YieldsCubit {}
 
 class ChangeNotifierMock extends Mock with ChangeNotifier {
   void notify() => notifyListeners();

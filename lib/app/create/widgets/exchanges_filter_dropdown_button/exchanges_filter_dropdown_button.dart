@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:zup_app/app/create/widgets/exchanges_filter_dropdown_button/exchanges_filter_dropdown_button_cubit.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/repositories/protocol_repository.dart';
 import 'package:zup_app/gen/assets.gen.dart';
@@ -22,7 +22,7 @@ class _ExchangesFilterDropdownButtonState extends State<ExchangesFilterDropdownB
   final zupSingletonCache = inject<ZupSingletonCache>();
   final protocolRepository = inject<ProtocolRepository>();
   final zupCachedImage = inject<ZupCachedImage>();
-  final cache = inject<Cache>();
+  final cache = inject<AppCache>();
 
   ExchangesFilterDropdownButtonCubit? cubit;
 

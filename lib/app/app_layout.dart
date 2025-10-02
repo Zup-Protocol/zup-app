@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:routefly/routefly.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/widgets/app_bottom_navigation_bar.dart';
 import 'package:zup_app/widgets/app_cookies_consent_widget.dart';
@@ -21,7 +21,7 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
   bool get shouldShowBottomNavigationBar => isTabletSize(context);
 
   final double appBarHeight = 85;
-  final cache = inject<Cache>();
+  final cache = inject<AppCache>();
   final appCubit = inject<AppCubit>();
 
   final ScrollController appScrollController = inject<ScrollController>(

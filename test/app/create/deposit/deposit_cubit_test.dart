@@ -6,7 +6,7 @@ import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/abis/uniswap_v3_pool.abi.g.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/deposit/deposit_cubit.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_settings_dto.dart';
@@ -28,7 +28,7 @@ void main() {
   late UniswapV3Pool uniswapV3Pool;
   late UniswapV3PoolImpl uniswapV3PoolImpl;
   late DepositCubit sut;
-  late Cache cache;
+  late AppCache cache;
   late AppCubit appCubit;
   late ZupAnalytics zupAnalytics;
   late PoolService poolService;
@@ -46,7 +46,7 @@ void main() {
     wallet = WalletMock();
     uniswapV3Pool = UniswapV3PoolMock();
     uniswapV3PoolImpl = UniswapV3PoolImplMock();
-    cache = CacheMock();
+    cache = AppCacheMock();
     appCubit = AppCubitMock();
     zupAnalytics = ZupAnalyticsMock();
 

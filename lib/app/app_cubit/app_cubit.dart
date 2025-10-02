@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/core/core.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/enums/app_theme_mode.dart';
 import 'package:zup_app/core/enums/networks.dart';
 
@@ -23,7 +23,7 @@ class AppCubit extends Cubit<AppState> {
   }
 
   final Wallet _wallet;
-  final Cache _cache;
+  final AppCache _cache;
 
   AppNetworks _selectedNetwork = AppNetworks.allNetworks;
   bool _isTestnetMode = false;

@@ -62,7 +62,7 @@ void main() {
     expect(listenerCalled, true);
   });
 
-  testWidgets("When calling `navigateToDeposit` it should pass the params to the query", (tester) async {
+  testWidgets("When calling `navigateToYields` it should pass the params to the query", (tester) async {
     runApp(material);
     const group0 = "0x123";
     const group1 = "0x456";
@@ -70,7 +70,7 @@ void main() {
     const token1 = "0xabc";
     const network = AppNetworks.mainnet;
 
-    await ZupNavigator().navigateToDeposit(
+    await ZupNavigator().navigateToYields(
       group0: group0,
       group1: group1,
       token0: token0,
@@ -79,15 +79,15 @@ void main() {
     );
 
     expect(Routefly.query.params, {
-      ZupDepositRouteParamsNames().group0: group0,
-      ZupDepositRouteParamsNames().group1: group1,
-      ZupDepositRouteParamsNames().token0: token0,
-      ZupDepositRouteParamsNames().token1: token1,
-      ZupDepositRouteParamsNames().network: network.name,
+      YieldsRouteParamsNames().group0: group0,
+      YieldsRouteParamsNames().group1: group1,
+      YieldsRouteParamsNames().token0: token0,
+      YieldsRouteParamsNames().token1: token1,
+      YieldsRouteParamsNames().network: network.name,
     });
   });
 
-  testWidgets("When calling `navigateToDeposit` without group0, it should not pass it to the query", (tester) async {
+  testWidgets("When calling `navigateToYields` without group0, it should not pass it to the query", (tester) async {
     runApp(material);
 
     const group1 = "0x456";
@@ -95,7 +95,7 @@ void main() {
     const token1 = "0xabc";
     const network = AppNetworks.mainnet;
 
-    await ZupNavigator().navigateToDeposit(
+    await ZupNavigator().navigateToYields(
       group0: null,
       group1: group1,
       token0: token0,
@@ -104,14 +104,14 @@ void main() {
     );
 
     expect(Routefly.query.params, {
-      ZupDepositRouteParamsNames().group1: group1,
-      ZupDepositRouteParamsNames().token0: token0,
-      ZupDepositRouteParamsNames().token1: token1,
-      ZupDepositRouteParamsNames().network: network.name,
+      YieldsRouteParamsNames().group1: group1,
+      YieldsRouteParamsNames().token0: token0,
+      YieldsRouteParamsNames().token1: token1,
+      YieldsRouteParamsNames().network: network.name,
     });
   });
 
-  testWidgets("When calling `navigateToDeposit` without group1, it should not pass it to the query", (tester) async {
+  testWidgets("When calling `navigateToYields` without group1, it should not pass it to the query", (tester) async {
     runApp(material);
 
     const group0 = "0x456";
@@ -119,7 +119,7 @@ void main() {
     const token1 = "0xabc";
     const network = AppNetworks.mainnet;
 
-    await ZupNavigator().navigateToDeposit(
+    await ZupNavigator().navigateToYields(
       group0: group0,
       group1: null,
       token0: token0,
@@ -128,43 +128,37 @@ void main() {
     );
 
     expect(Routefly.query.params, {
-      ZupDepositRouteParamsNames().group0: group0,
-      ZupDepositRouteParamsNames().token0: token0,
-      ZupDepositRouteParamsNames().token1: token1,
-      ZupDepositRouteParamsNames().network: network.name,
+      YieldsRouteParamsNames().group0: group0,
+      YieldsRouteParamsNames().token0: token0,
+      YieldsRouteParamsNames().token1: token1,
+      YieldsRouteParamsNames().network: network.name,
     });
   });
 
-  testWidgets("When calling `navigateToDeposit` without groups, it should not pass it to the query", (tester) async {
+  testWidgets("When calling `navigateToYields` without groups, it should not pass it to the query", (tester) async {
     runApp(material);
 
     const token0 = "0x789";
     const token1 = "0xabc";
     const network = AppNetworks.mainnet;
 
-    await ZupNavigator().navigateToDeposit(
-      group0: null,
-      group1: null,
-      token0: token0,
-      token1: token1,
-      network: network,
-    );
+    await ZupNavigator().navigateToYields(group0: null, group1: null, token0: token0, token1: token1, network: network);
 
     expect(Routefly.query.params, {
-      ZupDepositRouteParamsNames().token0: token0,
-      ZupDepositRouteParamsNames().token1: token1,
-      ZupDepositRouteParamsNames().network: network.name,
+      YieldsRouteParamsNames().token0: token0,
+      YieldsRouteParamsNames().token1: token1,
+      YieldsRouteParamsNames().network: network.name,
     });
   });
 
-  testWidgets("When calling `navigateToDeposit` without token0, it should not pass it to the query", (tester) async {
+  testWidgets("When calling `navigateToYields` without token0, it should not pass it to the query", (tester) async {
     runApp(material);
     const group0 = "0x123";
     const group1 = "0x456";
     const token1 = "0xabc";
     const network = AppNetworks.mainnet;
 
-    await ZupNavigator().navigateToDeposit(
+    await ZupNavigator().navigateToYields(
       group0: group0,
       group1: group1,
       token0: null,
@@ -173,21 +167,21 @@ void main() {
     );
 
     expect(Routefly.query.params, {
-      ZupDepositRouteParamsNames().group0: group0,
-      ZupDepositRouteParamsNames().group1: group1,
-      ZupDepositRouteParamsNames().token1: token1,
-      ZupDepositRouteParamsNames().network: network.name,
+      YieldsRouteParamsNames().group0: group0,
+      YieldsRouteParamsNames().group1: group1,
+      YieldsRouteParamsNames().token1: token1,
+      YieldsRouteParamsNames().network: network.name,
     });
   });
 
-  testWidgets("When calling `navigateToDeposit` without token1, it should not pass it to the query", (tester) async {
+  testWidgets("When calling `navigateToYields` without token1, it should not pass it to the query", (tester) async {
     runApp(material);
     const group0 = "0x123";
     const group1 = "0x456";
     const token0 = "0xabc";
     const network = AppNetworks.mainnet;
 
-    await ZupNavigator().navigateToDeposit(
+    await ZupNavigator().navigateToYields(
       group0: group0,
       group1: group1,
       token0: token0,
@@ -196,31 +190,25 @@ void main() {
     );
 
     expect(Routefly.query.params, {
-      ZupDepositRouteParamsNames().group0: group0,
-      ZupDepositRouteParamsNames().group1: group1,
-      ZupDepositRouteParamsNames().token0: token0,
-      ZupDepositRouteParamsNames().network: network.name,
+      YieldsRouteParamsNames().group0: group0,
+      YieldsRouteParamsNames().group1: group1,
+      YieldsRouteParamsNames().token0: token0,
+      YieldsRouteParamsNames().network: network.name,
     });
   });
 
-  testWidgets("When calling `navigateToDeposit` without tokens, it should not pass it to the query", (tester) async {
+  testWidgets("When calling `navigateToYields` without tokens, it should not pass it to the query", (tester) async {
     runApp(material);
     const group0 = "0x123";
     const group1 = "0x456";
     const network = AppNetworks.mainnet;
 
-    await ZupNavigator().navigateToDeposit(
-      group0: group0,
-      group1: group1,
-      token0: null,
-      token1: null,
-      network: network,
-    );
+    await ZupNavigator().navigateToYields(group0: group0, group1: group1, token0: null, token1: null, network: network);
 
     expect(Routefly.query.params, {
-      ZupDepositRouteParamsNames().group0: group0,
-      ZupDepositRouteParamsNames().group1: group1,
-      ZupDepositRouteParamsNames().network: network.name,
+      YieldsRouteParamsNames().group0: group0,
+      YieldsRouteParamsNames().group1: group1,
+      YieldsRouteParamsNames().network: network.name,
     });
   });
 }

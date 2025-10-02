@@ -51,7 +51,6 @@ class GoldenConfig {
         Web3KitLocalizations.delegate,
       ],
       home: Scaffold(
-        backgroundColor: Colors.white,
         body: CustomScrollView(
           controller: scrollController,
           slivers: [SliverFillRemaining(hasScrollBody: false, child: child)],
@@ -99,7 +98,7 @@ void zGoldenTest(
   return testGoldens(description, (tester) async {
     await mockHttpImage(() async => await test(tester), overrideImage: overrideMockedNetworkImage);
 
-    await tester.pumpAndSettle();
+    // await tester.pumpAndSettle();
 
     if (goldenFileName != null) {
       try {

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:zup_app/app/create/widgets/exchanges_filter_dropdown_button/exchanges_filter_dropdown_button.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/dtos/protocol_dto.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/repositories/protocol_repository.dart';
@@ -17,13 +17,13 @@ void main() {
   late ZupSingletonCache zupSingletonCache;
   late ProtocolRepository protocolRepository;
   late ZupCachedImage zupCachedImage;
-  late Cache cache;
+  late AppCache cache;
 
   setUp(() {
     zupSingletonCache = ZupSingletonCache.shared;
     protocolRepository = ProtocolRepositoryMock();
     zupCachedImage = mockZupCachedImage();
-    cache = CacheMock();
+    cache = AppCacheMock();
 
     when(() => protocolRepository.getAllSupportedProtocols()).thenAnswer((_) => Future.value([]));
     when(() => cache.blockedProtocolsIds).thenReturn([]);
@@ -31,7 +31,7 @@ void main() {
     inject.registerFactory<ZupSingletonCache>(() => zupSingletonCache);
     inject.registerFactory<ProtocolRepository>(() => protocolRepository);
     inject.registerFactory<ZupCachedImage>(() => zupCachedImage);
-    inject.registerFactory<Cache>(() => cache);
+    inject.registerFactory<AppCache>(() => cache);
   });
 
   tearDown(() {

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
 import 'package:zup_app/app/create/widgets/create_page_settings_dropdown/create_page_settings_dropdown.dart';
 import 'package:zup_app/app/create/widgets/exchanges_filter_dropdown_button/exchanges_filter_dropdown_button.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/dtos/token_dto.dart';
 import 'package:zup_app/core/injections.dart';
 import 'package:zup_app/core/zup_navigator.dart';
@@ -27,7 +27,7 @@ class CreatePageSelectTokensStage extends StatefulWidget {
 class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInfoMixin {
   final appCubit = inject<AppCubit>();
   final navigator = inject<ZupNavigator>();
-  final cache = inject<Cache>();
+  final cache = inject<AppCache>();
 
   late final token0SelectorController = TokenSelectorButtonController();
   final token1SelectorController = TokenSelectorButtonController();
@@ -103,114 +103,111 @@ class _CreatePageState extends State<CreatePageSelectTokensStage> with DeviceInf
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 490),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ZupPageTitle(S.of(context).createPageTitle),
-                SizedBox(
-                  height: 58,
-                  child: Text(
-                    S.of(context).createPageDescription,
-                    maxLines: 3,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ZupPageTitle(S.of(context).createPageTitle),
+              SizedBox(
+                height: 58,
+                child: Text(
+                  S.of(context).createPageDescription,
+                  maxLines: 3,
 
-                    style: const TextStyle(fontSize: 14, color: ZupColors.gray),
-                  ),
+                  style: const TextStyle(fontSize: 14, color: ZupColors.gray),
                 ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: Wrap(
-                    runSpacing: 10,
-                    verticalDirection: VerticalDirection.up,
-                    alignment: WrapAlignment.spaceBetween,
-                    children: [
-                      Transform.translate(
-                        offset: const Offset(0, 8),
-                        child: Text(
-                          S.of(context).token0,
-                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: ZupColors.gray),
-                        ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: Wrap(
+                  runSpacing: 10,
+                  verticalDirection: VerticalDirection.up,
+                  alignment: WrapAlignment.spaceBetween,
+                  children: [
+                    Transform.translate(
+                      offset: const Offset(0, 8),
+                      child: Text(
+                        S.of(context).token0,
+                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: ZupColors.gray),
                       ),
-                      StatefulBuilder(
-                        builder: (context, localSetState) {
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const ExchangesFilterDropdownButton(),
-                              const SizedBox(width: 10),
-                              Badge(
-                                alignment: const Alignment(1.05, -1.05),
-                                smallSize: cache.getPoolSearchSettings().isDefault ? 0 : 6,
-                                backgroundColor: ZupThemeColors.alert.themed(context.brightness),
-                                child: ZupMiniButton(
-                                  key: const Key("pool-search-settings-button"),
-                                  onPressed: (buttonContext) => CreatePageSettingsDropdown.show(
-                                    buttonContext,
-                                    onClose: () {
-                                      if (mounted) {
-                                        WidgetsBinding.instance.addPostFrameCallback((_) => localSetState(() {}));
-                                      }
-                                    },
-                                  ),
-                                  title: S.of(context).createPageSelectTokensStageSearchSettings,
-                                  icon: Assets.icons.gear.svg(height: 18),
+                    ),
+                    StatefulBuilder(
+                      builder: (context, localSetState) {
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const ExchangesFilterDropdownButton(),
+                            const SizedBox(width: 10),
+                            Badge(
+                              alignment: const Alignment(1.05, -1.05),
+                              smallSize: cache.getPoolSearchSettings().isDefault ? 0 : 6,
+                              backgroundColor: ZupThemeColors.alert.themed(context.brightness),
+                              child: ZupMiniButton(
+                                key: const Key("pool-search-settings-button"),
+                                onPressed: (buttonContext) => CreatePageSettingsDropdown.show(
+                                  buttonContext,
+                                  onClose: () {
+                                    if (mounted) {
+                                      WidgetsBinding.instance.addPostFrameCallback((_) => localSetState(() {}));
+                                    }
+                                  },
                                 ),
+                                title: S.of(context).createPageSelectTokensStageSearchSettings,
+                                icon: Assets.icons.gear.svg(height: 18),
                               ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                TokenSelectorButton(key: const Key("token-a-selector"), controller: token0SelectorController),
-                const SizedBox(height: 10),
-                Text(
-                  S.of(context).token1,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: ZupColors.gray),
-                ),
-                const SizedBox(height: 5),
-                TokenSelectorButton(key: const Key("token-b-selector"), controller: token1SelectorController),
-                const SizedBox(height: 20),
-                StreamBuilder(
-                  stream: StreamGroup.mergeBroadcast([
-                    token0SelectorController.selectionStream,
-                    token1SelectorController.selectionStream,
-                  ]),
-                  builder: (context, _) {
-                    return ZupPrimaryButton(
-                      key: const Key("search-button"),
-                      height: 50,
-                      fixedIcon: true,
-                      alignCenter: true,
-                      title: S.of(context).createPageShowMeTheMoney,
-                      foregroundColor: ZupColors.white,
-                      icon: Assets.icons.sparkleMagnifyingglass.svg(),
-                      onPressed: token0SelectorController.hasSelection && token1SelectorController.hasSelection
-                          ? (buttonContext) {
-                              return navigator.navigateToDeposit(
-                                network: appCubit.selectedNetwork,
-                                group0: token0SelectorController.selectedTokenGroup?.id,
-                                group1: token1SelectorController.selectedTokenGroup?.id,
-                                token0: (appCubit.selectedNetwork.isAllNetworks)
-                                    ? token0SelectorController.selectedToken?.internalId
-                                    : token0SelectorController.selectedToken?.addresses[appCubit.currentChainId],
-                                token1: (appCubit.selectedNetwork.isAllNetworks)
-                                    ? token1SelectorController.selectedToken?.internalId
-                                    : token1SelectorController.selectedToken?.addresses[appCubit.currentChainId]!,
-                              );
-                            }
-                          : null,
-                      mainAxisSize: MainAxisSize.max,
-                    );
-                  },
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 12),
+              TokenSelectorButton(key: const Key("token-a-selector"), controller: token0SelectorController),
+              const SizedBox(height: 10),
+              Text(
+                S.of(context).token1,
+                style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: ZupColors.gray),
+              ),
+              const SizedBox(height: 5),
+              TokenSelectorButton(key: const Key("token-b-selector"), controller: token1SelectorController),
+              const SizedBox(height: 20),
+              StreamBuilder(
+                stream: StreamGroup.mergeBroadcast([
+                  token0SelectorController.selectionStream,
+                  token1SelectorController.selectionStream,
+                ]),
+                builder: (context, _) {
+                  return ZupPrimaryButton(
+                    key: const Key("search-button"),
+                    height: 50,
+                    fixedIcon: true,
+                    alignCenter: true,
+                    title: S.of(context).createPageShowMeTheMoney,
+                    foregroundColor: ZupColors.white,
+                    icon: Assets.icons.sparkleMagnifyingglass.svg(),
+                    onPressed: token0SelectorController.hasSelection && token1SelectorController.hasSelection
+                        ? (buttonContext) {
+                            return navigator.navigateToYields(
+                              network: appCubit.selectedNetwork,
+                              group0: token0SelectorController.selectedTokenGroup?.id,
+                              group1: token1SelectorController.selectedTokenGroup?.id,
+                              token0: (appCubit.selectedNetwork.isAllNetworks)
+                                  ? token0SelectorController.selectedToken?.internalId
+                                  : token0SelectorController.selectedToken?.addresses[appCubit.currentChainId],
+                              token1: (appCubit.selectedNetwork.isAllNetworks)
+                                  ? token1SelectorController.selectedToken?.internalId
+                                  : token1SelectorController.selectedToken?.addresses[appCubit.currentChainId]!,
+                            );
+                          }
+                        : null,
+                    mainAxisSize: MainAxisSize.max,
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ),

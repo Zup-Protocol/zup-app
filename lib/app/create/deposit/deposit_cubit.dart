@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:web3kit/web3kit.dart';
 import 'package:zup_app/app/app_cubit/app_cubit.dart';
-import 'package:zup_app/core/cache.dart';
+import 'package:zup_app/core/app_cache.dart';
 import 'package:zup_app/core/concentrated_liquidity_utils/cl_pool_conversors_mixin.dart';
 import 'package:zup_app/core/dtos/deposit_settings_dto.dart';
 import 'package:zup_app/core/dtos/pool_search_filters_dto.dart';
@@ -37,7 +37,7 @@ class DepositCubit extends Cubit<DepositState> with KeysMixin, CLPoolConversorsM
   final ZupSingletonCache _zupSingletonCache;
   final Wallet _wallet;
   final PoolService _poolService;
-  final Cache _cache;
+  final AppCache _cache;
   final AppCubit _appCubit;
   final ZupAnalytics _zupAnalytics;
 
