@@ -41,6 +41,9 @@ class YieldRepository {
     required String? group1Id,
     required PoolSearchSettingsDto searchSettings,
     required List<String> blockedProtocolIds,
+    // required int limit,
+    // required int offset,
+    // required PoolDataTimeframe timeframe,
     bool testnetMode = false,
   }) async {
     final response = await _zupAPIDio.post(
@@ -53,7 +56,13 @@ class YieldRepository {
       },
       data: {
         "filters": {"minimumTvlUsd": searchSettings.minLiquidityUSD, "blockedProtocols": blockedProtocolIds},
-        "config": {"testnetMode": testnetMode},
+        "config": {
+          "testnetMode": testnetMode,
+          // "limit": limit,
+          // "offset": offset,
+          "orderBy": "yield_24h",
+          "orderDirection": "desc_nulls_first",
+        },
       },
     );
 
