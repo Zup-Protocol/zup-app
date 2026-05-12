@@ -54,7 +54,7 @@ class _AppPageState extends State<AppPage> with DeviceInfoMixin {
           padding: const EdgeInsets.only(left: 20, right: 10, bottom: 5, top: 5),
           dividerColor: Colors.transparent,
           content: const Text(
-            "⚠️ We're having issues with pools on Base Network (Yields are delayed). Team is working on it.",
+            "We have stopped operations. Thank you for your support.",
             style: TextStyle(color: ZupColors.orange),
           ),
           actions: [
